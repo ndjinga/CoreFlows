@@ -1,0 +1,23 @@
+
+INCLUDE_DIRECTORIES(
+  ${PETSC_INCLUDES} 
+  ${CDMATH_INCLUDES} 
+  ${CoreFlows_SRC}/inc      
+  )
+
+SET(src_models_CXX
+    DriftModel.cxx
+    IsothermalTwoFluid.cxx
+    SinglePhase.cxx
+    FiveEqsTwoFluid.cxx
+    ProblemCoreFlows.cxx
+    TransportEquation.cxx
+    DiffusionEquation.cxx
+    Fluide.cxx
+    ProblemFluid.cxx
+    utilitaire_algebre.cxx
+  )
+
+ADD_LIBRARY(CoreFlows SHARED ${src_models_CXX} ${CDMATH_LIBRARIES} ${PETSC_LIBRARIES})
+
+INSTALL(TARGETS CoreFlows DESTINATION lib)

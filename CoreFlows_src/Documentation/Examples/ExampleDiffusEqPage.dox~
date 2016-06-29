@@ -1,0 +1,193 @@
+/*!
+\page ExampleDiffusionEqPage  Example cases for : \a The \a diffusion \a equation 
+[TOC]
+
+
+\section Diffus1 Problem Diffusion 1D Heated Rod (C)
+\code
+#include "ProblemDiffusion.hxx"
+
+using namespace std;
+
+#define PI 3.14159265
+
+void power_field(Field & Phi){
+	double L=4.2;
+	double lambda=0.2;
+	double phi=1e5;
+	double x;
+	Mesh M = Phi.getMesh();
+	int nbCells = M.getNumberOfCells();
+	for (int j = 0; j < nbCells; j++) {
+		x=M.getCell(j).x();
+		Phi(j) = phi*cos(PI*(x-L/2)/(L+lambda));
+	}
+}
+
+int DiffusionEquation_1DHeatedRod()
+{
+	//Preprocessing: mesh and group creation
+	double xinf=0.0;
+	double xsup=4.2;
+	int nx=10;
+	cout << "Building of a 1D mesh with "<<nx<<" cells" << endl;
+	Mesh M(xinf,xsup,nx);
+	double eps=1.E-6;
+	M.setGroupAtPlan(xsup,0,eps,"Neumann");
+	M.setGroupAtPlan(xinf,0,eps,"Neumann");
+	int spaceDim = M.getSpaceDimension();
+
+	// Boundary conditions 
+	map<string, LimitField> boundaryFields;
+	LimitField limitNeumann;
+	limitNeumann.bcType=Neumann;
+	boundaryFields["Neumann"] = limitNeumann;
+
+	//Solid parameters
+	double cp_ur=300;//Uranium specific heat
+	double rho_ur=10000;//Uranium density
+	double lambda_ur=5;
+
+	DiffusionEquation  myProblem(spaceDim,rho_ur,cp_ur,lambda_ur);
+	Field VV("Solid temperature", CELLS, M, 1);
+
+	//Set fluid temperature (temperature du fluide)
+	double fluidTemp=573;//fluid mean temperature
+	double heatTransfertCoeff=1000;//fluid/solid exchange coefficient
+	myProblem.setFluidTemperature(fluidTemp);
+	myProblem.setHeatTransfertCoeff(heatTransfertCoeff);
+	//Set heat source
+	Field Phi("Heat power field", CELLS, M, 1);
+	power_field_diffusionTest(Phi);
+	myProblem.setHeatPowerField(Phi);
+	Phi.writeVTK("1DheatPowerField");
+
+	//Initial field creation
+	Vector VV_Constant(1);
+	VV_Constant(0) = 623;//Rod clad temperature
+
+	cout << "Construction de la condition initiale " << endl;
+	myProblem.setInitialFieldConstant(M,VV_Constant);
+
+	//set the boundary conditions
+	myProblem.setBoundaryFields(boundaryFields);
+
+	// set the numerical method
+	myProblem.setNumericalMethod(upwind, Explicit);
+
+	// name result file
+	string fileName = "1DFluidTemperatureConstant";
+
+	// parameters calculation
+	unsigned MaxNbOfTimeStep =3;
+	int freqSave = 1;
+	double cfl = 0.95;
+	double maxTime = 1000000;
+	double precision = 1e-6;
+
+	myProblem.setCFL(cfl);
+	myProblem.setPrecision(precision);
+	myProblem.setMaxNbOfTimeStep(MaxNbOfTimeStep);
+	myProblem.setTimeMax(maxTime);
+	myProblem.setFreqSave(freqSave);
+	myProblem.setFileName(fileName);
+	bool ok;
+
+	// set display option to monitor the calculation 
+	bool computation=true;
+	bool assembling=true;
+	bool system=true;
+	bool minimal=true;
+	myProblem.setDISPLAY( computation, assembling, system, minimal);
+
+	// evolution
+	myProblem.initialize();
+	ok = myProblem.run();
+	if (ok)
+		cout << "Simulation "<<fileName<<" is successful !" << endl;
+	else
+		cout << "Simulation "<<fileName<<"  failed ! " << endl;
+
+	cout << "------------ End of calculation -----------" << endl;
+	myProblem.terminate();
+
+	return ok;
+}
+\endcode
+
+\section Diffus1py Problem Diffusion 1D Heated Rod (Python)
+
+\code
+import CoreFlows
+
+def main():
+	spaceDim = 1;
+    # Prepare for the mesh
+	xinf = 0 ;
+	xsup=4.2;
+	nx=10;
+	
+	print ("Building of a 1D mesh with ", nx ," cells")
+
+    # set the limit field for each boundary
+	Temperature=623;
+	cp_ur=300
+	rho_ur=10000
+	lambda_ur=5
+    
+	myProblem = CoreFlows.DiffusionEquation(spaceDim,rho_ur,cp_ur,lambda_ur);
+	nVar = myProblem.getNumberOfVariables();
+
+ 	# constant vector
+	VV_Constant = [Temperature];
+	
+    #Initial field creation
+	print("Building initial data" );
+	myProblem.setConstantInitialField(spaceDim,VV_Constant,xinf,xsup,nx,"Neumann","Neumann");
+
+    # the boundary conditions
+	myProblem.setNeumannBoundaryCondition("Neumann");
+
+    # set the numerical method
+	myProblem.setNumericalMethod(upwind, Explicit);
+	# myProblem.setLinearSolver(GMRES,ILU,True);
+
+    # name of result file
+	fileName = "1DFluidTemperatureConstant";
+
+    # computation parameters
+	MaxNbOfTimeStep = 3 ;
+	freqSave = 1;
+	cfl = 0.95;
+	maxTime = 100000000;
+	precision = 1e-6;
+
+	myProblem.setCFL(cfl);
+	myProblem.setPrecision(precision);
+	myProblem.setMaxNbOfTimeStep(MaxNbOfTimeStep);
+	myProblem.setTimeMax(maxTime);
+	myProblem.setFreqSave(freqSave);
+	myProblem.setFileName(fileName);
+
+    # evolution
+	myProblem.initialize();
+	print("Running python "+ fileName );
+
+	ok = myProblem.run();
+	if (ok):
+		print( "Simulation python " + fileName + " is successful !" );
+		pass
+	else:
+		print( "Simulation python " + fileName + "  failed ! " );
+		pass
+
+	print( "------------ End of calculation !!! -----------" );
+
+	myProblem.terminate();
+	return
+
+if __name__ == """__main__""":
+    main()
+\endcode
+*/
+
