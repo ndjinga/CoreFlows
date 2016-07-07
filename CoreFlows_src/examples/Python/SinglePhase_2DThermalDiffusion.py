@@ -104,7 +104,6 @@ def SinglePhase_2DThermalDiffusion():
 
 	# evolution
 	myProblem.initialize();
-	print("Running python "+ fileName );
 
 	ok = myProblem.run();
 	if (ok):

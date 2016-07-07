@@ -200,6 +200,8 @@ protected :
 	void addDiffusionToSecondMember(const int &i,const int &j,bool isBoundary);
 	//!Computes the interfacial flux for the VFFC formulation of the staggered upwinding
 	Vector staggeredVFFCFlux();
+	//!Computes the matrices A^+ and A^- for the VFFC formulation of the staggered upwinding
+	void staggeredVFFCMatrices(double u_mn);
 	//!Compute the corrected interfacial state for lowMach, pressureCorrection and staggered versions of the VFRoe formulation
 	void applyVFRoeLowMachCorrections();
 	//!Calcule les saut de valeurs propres pour la correction entropique

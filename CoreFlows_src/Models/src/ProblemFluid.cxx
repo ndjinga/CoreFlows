@@ -685,11 +685,11 @@ void ProblemFluid::computeNewtonVariation()
 		VecAXPY(_b, -1/_dt, _courant);
 		MatShift(_A, 1/_dt);
 
-		#if PETSC_VERSION_GREATER_3_5
-			KSPSetOperators(_ksp, _A, _A);
-		#else
-			KSPSetOperators(_ksp, _A, _A,SAME_NONZERO_PATTERN);
-		#endif
+#if PETSC_VERSION_GREATER_3_5
+		KSPSetOperators(_ksp, _A, _A);
+#else
+		KSPSetOperators(_ksp, _A, _A,SAME_NONZERO_PATTERN);
+#endif
 
 		KSPSetInitialGuessNonzero(_ksp,PETSC_FALSE);
 
@@ -908,6 +908,17 @@ void ProblemFluid::addConvectionToSecondMember
 	_idm[0] = i;
 	_idn[0] = j;
 
+	if(_verbose && _nbTimeStep%_freqSave ==0)
+	{
+		cout << "addConvectionToSecondMember : état i= " << i << ", _Ui=" << endl;
+		for(int q=0; q<_nVar; q++)
+			cout << _Ui[q] << endl;
+		cout << endl;
+		cout << "addConvectionToSecondMember : état j= " << j << ", _Uj=" << endl;
+		for(int q=0; q<_nVar; q++)
+			cout << _Uj[q] << endl;
+		cout << endl;
+	}
 	if(_nonLinearFormulation!=reducedRoe){//VFRoe, Roe or VFFC
 		Vector Ui(_nVar), Uj(_nVar), Vi(_nVar), Vj(_nVar), Fi(_nVar), Fj(_nVar),Fij(_nVar);
 		for(int i1=0;i1<_nVar;i1++)
@@ -963,7 +974,12 @@ void ProblemFluid::addConvectionToSecondMember
 		else //Roe or VFFC
 		{
 			if(_spaceScheme==staggered && _nonLinearFormulation==VFFC)//special case
-				Fij=staggeredVFFCFlux();
+				{
+				//Fij=staggeredVFFCFlux();
+				Fi=convectionFlux(Ui,Vi,normale,_porosityi);
+				Fj=convectionFlux(Uj,Vj,normale,_porosityj);
+				Fij=(Fi+Fj)/2+signAroe*(Fi-Fj)/2;
+				}
 			else
 			{
 				Fi=convectionFlux(Ui,Vi,normale,_porosityi);
@@ -982,20 +998,31 @@ void ProblemFluid::addConvectionToSecondMember
 				}
 			}
 		}
-		if(_verbose && _nbTimeStep%_freqSave ==0)
-		{
-			cout<<"Flux interfacial "<<i<<", "<<j<< endl;
-			cout<<Fij<<endl;
-		}
 		for(int i1=0;i1<_nVar;i1++)
 			_phi[i1]=-Fij(i1)*_inv_dxi;
 		VecSetValuesBlocked(_b, 1, _idm, _phi, ADD_VALUES);
+		if(_verbose && _nbTimeStep%_freqSave ==0)
+		{
+			cout << "Ajout convection au 2nd membre pour les etats " << i << "," << j << endl;
+			cout<<"Flux interfacial "<<i<<", "<<j<< endl;
+			cout<<Fij<<endl;
+			cout << "Contribution convection à " << i << ", -Fij(i1)*_inv_dxi= "<<endl;
+			for(int q=0; q<_nVar; q++)
+				cout << _phi[q] << endl;
+			cout << endl;
+		}
 		if(!isBord){
 			for(int i1=0;i1<_nVar;i1++)
 				_phi[i1]*=-_inv_dxj/_inv_dxi;
 			VecSetValuesBlocked(_b, 1, _idn, _phi, ADD_VALUES);
+			if(_verbose && _nbTimeStep%_freqSave ==0)
+			{
+				cout << "Contribution convection à " << j << ", Fij(i1)*_inv_dxj= "<<endl;
+				for(int q=0; q<_nVar; q++)
+					cout << _phi[q] << endl;
+				cout << endl;
+			}
 		}
-
 	}else //_nonLinearFormulation==reducedRoe)
 	{
 		for(int k=0; k<_nVar; k++)
@@ -1007,11 +1034,11 @@ void ProblemFluid::addConvectionToSecondMember
 		if(_verbose && _nbTimeStep%_freqSave ==0)
 		{
 			cout << "Ajout convection au 2nd membre pour les etats " << i << "," << j << endl;
-			cout << "(Ui - Uj)*_inv_dxi= ";
+			cout << "(Ui - Uj)*_inv_dxi= "<<endl;;
 			for(int q=0; q<_nVar; q++)
 				cout << _temp[q] << endl;
 			cout << endl;
-			cout << "Contribution convection à " << i << ": "<<endl;
+			cout << "Contribution convection à " << i << ", A^-*(Ui - Uj)*_inv_dxi= "<<endl;
 			for(int q=0; q<_nVar; q++)
 				cout << _phi[q] << endl;
 			cout << endl;
@@ -1026,7 +1053,7 @@ void ProblemFluid::addConvectionToSecondMember
 
 			if(_verbose && _nbTimeStep%_freqSave ==0)
 			{
-				cout << "Contribution convection à  " << j << ": "<<endl;
+				cout << "Contribution convection à  " << j << ", A^+*(Ui - Uj)*_inv_dxi= "<<endl;
 				for(int q=0; q<_nVar; q++)
 					cout << _phi[q] << endl;
 				cout << endl;

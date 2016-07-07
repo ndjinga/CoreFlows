@@ -73,7 +73,6 @@ def SinglePhase_1DWaterHammer():
  
     # evolution
 	myProblem.initialize();
-	print("Running python "+ fileName );
 
 	ok = myProblem.run();
 	if (ok):

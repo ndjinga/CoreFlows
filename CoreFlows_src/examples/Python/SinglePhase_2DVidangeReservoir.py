@@ -102,7 +102,6 @@ def SinglePhase_2DVidangeReservoir():
 
 	# evolution
 	myProblem.initialize();
-	print("Running python "+ fileName );
 
 	ok = myProblem.run();
 	if (ok):

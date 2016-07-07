@@ -106,7 +106,6 @@ def SinglePhase_2DWallHeatedChannel_ChangeSect():
 
 	# evolution
 	myProblem.initialize();
-	print("Running python "+ fileName );
 
 	ok = myProblem.run();
 	if (ok):

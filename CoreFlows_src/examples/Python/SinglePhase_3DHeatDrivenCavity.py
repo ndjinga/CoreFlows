@@ -101,7 +101,6 @@ def SinglePhase_3DHeatDrivenCavity():
 
     # evolution
 	myProblem.initialize();
-	print("Running python "+ fileName );
 
 	ok = myProblem.run();
 	if (ok):

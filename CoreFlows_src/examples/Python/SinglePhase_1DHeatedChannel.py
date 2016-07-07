@@ -74,7 +74,6 @@ def SinglePhase_1DHeatedChannel():
  
     # evolution
 	myProblem.initialize();
-	print("Running python "+ fileName );
 
 	ok = myProblem.run();
 	if (ok):

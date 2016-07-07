@@ -81,7 +81,6 @@ def SinglePhase_2DLidDrivenCavity_unstructured():
 
     # evolution
 	myProblem.initialize();
-	print("Running python "+ fileName );
 
 	ok = myProblem.run();
 	if (ok):

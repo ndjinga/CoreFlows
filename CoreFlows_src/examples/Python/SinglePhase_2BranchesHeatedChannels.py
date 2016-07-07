@@ -82,7 +82,6 @@ def SinglePhase_2BranchesHeatedChannels():
  
     # evolution
 	myProblem.initialize();
-	print("Running python "+ fileName );
 
 	ok = myProblem.run();
 	if (ok):
