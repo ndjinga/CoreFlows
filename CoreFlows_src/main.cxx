@@ -11,66 +11,64 @@ using namespace std;
 
 int main()
 {
-	//setting mesh and groups
-	cout << "Building a regular grid " << endl;
+	//Preprocessing: mesh and group creation
+	cout << "Building Cartesian mesh " << endl;
 	double xinf=0.0;
-	double xsup=4.2;
-	int nx=2;//50;
+	double xsup=1.0;
+	int nx=2;
 	Mesh M(xinf,xsup,nx);
 	double eps=1.E-8;
-	M.setGroupAtPlan(xsup,0,eps,"Outlet");
-	M.setGroupAtPlan(xinf,0,eps,"Inlet");
+	M.setGroupAtPlan(xsup,0,eps,"LeftBoundary");
+	M.setGroupAtPlan(xinf,0,eps,"RightBoundary");
 	int spaceDim = M.getSpaceDimension();
 
-	// setting boundary conditions
-	double inletConc=0;
-	double inletVelocityX=1;
-	double inletTemperature=565;
-	double outletPressure=155e5;
+	//initial data
+	double initialVelocity_Left=1;
+	double initialTemperature_Left=565;
+	double initialPressure_Left=155e5;
 
-	// setting physical parameters
-	double heatPower=1e8;
+	//boundary data
+	double initialVelocity_Right=1;
+	double initialTemperature_Right=565;
+	double initialPressure_Right=155e5;
 
-	DriftModel  myProblem(around155bars600K,spaceDim);
-	int nbPhase = myProblem.getNumberOfPhases();
-	int nVar = myProblem.getNumberOfVariables();
-
+	SinglePhase  myProblem(Liquid,around155bars600K,spaceDim);
 	// Prepare for the initial condition
-	Vector VV_Constant(nVar);
-	// constant vector
-	VV_Constant(0) = 0.;
-	VV_Constant(1) = 155e5;
-	for (int idim=0; idim<spaceDim;idim++)
-		VV_Constant(2+idim) = 1;
-	VV_Constant(nVar-1) = 565;
+	int nVar = myProblem.getNumberOfVariables();
+	Vector VV_Left(nVar),VV_Right(nVar);
+	// left and right constant vectors
+	VV_Left[0] = initialPressure_Left;
+	VV_Left[1] = initialVelocity_Left;
+	VV_Left[2] = initialTemperature_Left ;
+
+	VV_Right[0] = initialPressure_Right;
+	VV_Right[1] = initialVelocity_Right;
+	VV_Right[2] = initialTemperature_Right ;
 
 	//Initial field creation
-	cout << "Setting initial data " << endl;
-	myProblem.setInitialFieldConstant(M,VV_Constant);
+	double discontinuity = (xinf+xsup)/2.;
+
+	cout << "Building initial data " << endl;
+	Field VV("Primitive", CELLS, M, nVar);
+
+	myProblem.setInitialFieldStepFunction(M,VV_Left,VV_Right,discontinuity);
 
 	//set the boundary conditions
-	myProblem.setInletBoundaryCondition("Inlet",inletTemperature,inletConc,inletVelocityX);
-	myProblem.setOutletBoundaryCondition("Outlet", outletPressure);
-
-	// physical parameters
-	myProblem.setHeatSource(heatPower);
-
+	myProblem.setNeumannBoundaryCondition("LeftBoundary");
+	myProblem.setNeumannBoundaryCondition("RightBoundary");
 
 	// set the numerical method
-	myProblem.setNumericalScheme(staggered, Implicit);
-	myProblem.setWellBalancedCorrection(true);
-	myProblem.setNonLinearFormulation(VFFC);
-	myProblem.setLinearSolver(GMRES,LU,true);
+	myProblem.setNumericalScheme(upwind, Explicit);
 
-	// name the result file
-	string fileName = "Driftmodel1DBoilingChannel";
+	// name file save
+	string fileName = "1DRiemannProblem";
 
-	// setting numerical parameters
-	unsigned MaxNbOfTimeStep =1 ;
+	// parameters calculation
+	unsigned MaxNbOfTimeStep = 1;
 	int freqSave = 1;
-	double cfl = 1;
-	double maxTime = 1;
-	double precision = 1e-7;
+	double cfl = 0.95;
+	double maxTime = 5;
+	double precision = 1e-8;
 
 	myProblem.setCFL(cfl);
 	myProblem.setPrecision(precision);
@@ -78,12 +76,15 @@ int main()
 	myProblem.setTimeMax(maxTime);
 	myProblem.setFreqSave(freqSave);
 	myProblem.setFileName(fileName);
-	//myProblem.saveVoidFraction(true);
-	//myProblem.saveEnthalpy(true);
-	//yProblem.displayConditionNumber();
+	myProblem.saveConservativeField(true);
+	myProblem.setSaveFileFormat(CSV);
+
+	// set display option to monitor the calculation
+	myProblem.setVerbose( true);
 
 	// evolution
 	myProblem.initialize();
+	cout<<"Running "+fileName <<endl;
 
 	bool ok = myProblem.run();
 	if (ok)
@@ -91,7 +92,7 @@ int main()
 	else
 		cout << "Simulation "<<fileName<<"  failed ! " << endl;
 
-	cout << "------------ End of calculation -----------" << endl;
+	cout << "------------ End of calculation !!! -----------" << endl;
 	myProblem.terminate();
 
 	return ok;

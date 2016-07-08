@@ -956,17 +956,13 @@ void FiveEqsTwoFluid::convectionMatrices()
 
 	//Calcul de la matrice signe pour VFFC, VFRoe et décentrement des termes source
 
-	if(_entropicCorrection || _spaceScheme ==pressureCorrection ){
+	if(_entropicCorrection || _spaceScheme ==pressureCorrection || _spaceScheme ==lowMach){
 		InvMatriceRoe( valeurs_propres_dist);
 		Poly.matrixProduct(_absAroe, _nVar, _nVar, _invAroe, _nVar, _nVar, _signAroe);
 	}
-	else if (_spaceScheme==upwind || _spaceScheme ==lowMach)//upwind sans entropic
-			SigneMatriceRoe( valeurs_propres_dist);
+	else if (_spaceScheme==upwind)//upwind sans entropic
+		SigneMatriceRoe( valeurs_propres_dist);
 	else if (_spaceScheme==centered)//centre  sans entropic
-			for(int i=0; i<_nVar*_nVar;i++)
-				_signAroe[i] = 0;
-
-	if (_spaceScheme==centered)//centre  sans entropic
 	{
 		for(int i=0; i<_nVar*_nVar;i++)
 			_signAroe[i] = 0;
@@ -1187,7 +1183,7 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 			}
 		}
 		_externalStates[_nVar-1] = _externalStates[0]*(_fluides[0]->getInternalEnergy(_limitField[nameOfGroup].T,rho_v) + v1_2/2)
-																																					+_externalStates[1+_Ndim]*(_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + v2_2/2);
+																																							+_externalStates[1+_Ndim]*(_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + v2_2/2);
 		VecAssemblyBegin(_Uextdiff);
 		VecSetValues(_Uextdiff, _nVar, _idm, _externalStates, INSERT_VALUES);
 		VecAssemblyEnd(_Uextdiff);
@@ -1248,7 +1244,7 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 			_Vj[2+_Ndim+idim] = v2[idim];
 		}
 		_externalStates[_nVar-1] = _externalStates[0]      *(_fluides[0]->getInternalEnergy(T,rho_v) + v1_2/2)
-    																																	+_externalStates[1+_Ndim]*(_fluides[1]->getInternalEnergy(T,rho_l) + v2_2/2);
+    																																			+_externalStates[1+_Ndim]*(_fluides[1]->getInternalEnergy(T,rho_l) + v2_2/2);
 
 		// _Vj external primitives
 		_Vj[0] = alpha;
@@ -1289,7 +1285,7 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 			v2_2+=_Vj[2+_Ndim+idim]*_Vj[2+_Ndim+idim];
 		}
 		_externalStates[_nVar-1]=    alpha *rho_v*(_fluides[0]->getInternalEnergy(T,rho_v)+v1_2/2)
-				                																												+(1-alpha)*rho_l*(_fluides[1]->getInternalEnergy(T,rho_l)+v2_2/2);
+				                																														+(1-alpha)*rho_l*(_fluides[1]->getInternalEnergy(T,rho_l)+v2_2/2);
 
 		// _Vj external primitives
 		_Vj[0] = alpha;
@@ -1460,12 +1456,10 @@ void FiveEqsTwoFluid::addDiffusionToSecondMember
 		if(_timeScheme==Implicit)
 		{
 			cout << "Matrice de diffusion D, pour le couple (" << i << "," << j<< "):" << endl;
-			for(int p=0; p<_nVar; p++)
+			for(int i=0; i<_nVar; i++)
 			{
-				for(int q=0; q<_nVar; q++)
-				{
-					PetscPrintf(PETSC_COMM_WORLD, "%.2F\t", _Diffusion[p*_nVar+q]);
-				}
+				for(int j=0; j<_nVar; j++)
+					cout << _Diffusion[i*_nVar+j]<<", ";
 				cout << endl;
 			}
 			cout << endl;

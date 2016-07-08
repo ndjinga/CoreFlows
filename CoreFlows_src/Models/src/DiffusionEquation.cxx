@@ -251,11 +251,11 @@ bool DiffusionEquation::iterateTimeStep(bool &converged)
 		MatAssemblyBegin(_A, MAT_FINAL_ASSEMBLY);
 		MatAssemblyEnd(_A, MAT_FINAL_ASSEMBLY);
 
-		#if PETSC_VERSION_GREATER_3_5
-			KSPSetOperators(_ksp, _A, _A);
-		#else
-			KSPSetOperators(_ksp, _A, _A,SAME_NONZERO_PATTERN);
-		#endif
+#if PETSC_VERSION_GREATER_3_5
+		KSPSetOperators(_ksp, _A, _A);
+#else
+		KSPSetOperators(_ksp, _A, _A,SAME_NONZERO_PATTERN);
+#endif
 
 		if(_conditionNumber)
 			KSPSetComputeEigenvalues(_ksp,PETSC_TRUE);

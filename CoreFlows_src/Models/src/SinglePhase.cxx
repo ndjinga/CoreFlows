@@ -685,10 +685,10 @@ void SinglePhase::addDiffusionToSecondMember
 	if(_verbose && _nbTimeStep%_freqSave ==0 && _timeScheme==Implicit)
 	{
 		cout << "Matrice de diffusion D, pour le couple (" << i << "," << j<< "):" << endl;
-		for(int p=0; p<_nVar; p++)
+		for(int i=0; i<_nVar; i++)
 		{
-			for(int q=0; q<_nVar; q++)
-				PetscPrintf(PETSC_COMM_WORLD, "%.2F\t", _Diffusion[p*_nVar+q]);
+			for(int j=0; j<_nVar; j++)
+				cout << _Diffusion[i*_nVar+j]<<", ";
 			cout << endl;
 		}
 		cout << endl;

@@ -483,18 +483,13 @@ void IsothermalTwoFluid::convectionMatrices()
 	for( int i=0 ; i<taille_vp ; i++)
 		valeurs_propres_dist[i] = valeurs_propres[i];
 
-
-	if(_entropicCorrection || _spaceScheme ==pressureCorrection ){
+	if(_entropicCorrection || _spaceScheme ==pressureCorrection || _spaceScheme ==lowMach){
 		InvMatriceRoe( valeurs_propres_dist);
 		Poly.matrixProduct(_absAroe, _nVar, _nVar, _invAroe, _nVar, _nVar, _signAroe);
 	}
-	else if (_spaceScheme==upwind || _spaceScheme ==lowMach)//upwind sans entropic
-			SigneMatriceRoe( valeurs_propres_dist);
+	else if (_spaceScheme==upwind)//upwind sans entropic
+		SigneMatriceRoe( valeurs_propres_dist);
 	else if (_spaceScheme==centered)//centre  sans entropic
-			for(int i=0; i<_nVar*_nVar;i++)
-				_signAroe[i] = 0;
-
-	if (_spaceScheme==centered)//centre  sans entropic
 	{
 		for(int i=0; i<_nVar*_nVar;i++)
 			_signAroe[i] = 0;
@@ -833,12 +828,10 @@ void IsothermalTwoFluid::addDiffusionToSecondMember
 		if(_timeScheme==Implicit)
 		{
 			cout << "Matrice de diffusion D, pour le couple (" << i << "," << j<< "):" << endl;
-			for(int p=0; p<_nVar; p++)
+			for(int i=0; i<_nVar; i++)
 			{
-				for(int q=0; q<_nVar; q++)
-				{
-					PetscPrintf(PETSC_COMM_WORLD, "%.2F\t", _Diffusion[p*_nVar+q]);
-				}
+				for(int j=0; j<_nVar; j++)
+					cout << _Diffusion[i*_nVar+j]<<", ";
 				cout << endl;
 			}
 			cout << endl;
@@ -1017,7 +1010,7 @@ double IsothermalTwoFluid::ecartPressionDerivee(double m1,double m2, double alph
 double IsothermalTwoFluid::intPressDef(double alpha, double u_r2, double rho1, double rho2)
 {
 	return  _intPressCoeff*alpha*(1-alpha)*rho1*rho2*u_r2/( alpha*rho2+(1-alpha)*rho1)
-	+alpha*(1-alpha)*rho1*rho2*u_r2/((alpha*rho2+(1-alpha)*rho1)*(alpha*rho2+(1-alpha)*rho1)*(alpha*rho2+(1-alpha)*rho1)*(alpha*rho2+(1-alpha)*rho1))*u_r2
+			+alpha*(1-alpha)*rho1*rho2*u_r2/((alpha*rho2+(1-alpha)*rho1)*(alpha*rho2+(1-alpha)*rho1)*(alpha*rho2+(1-alpha)*rho1)*(alpha*rho2+(1-alpha)*rho1))*u_r2
 			*(alpha*alpha*rho2-(1-alpha)*(1-alpha)*rho1)
 			*(alpha*alpha*rho2*rho2/(_fluides[0]->vitesseSonTemperature(_Temperature,rho1)*_fluides[0]->vitesseSonTemperature(_Temperature,rho1))
 					-(1-alpha)*(1-alpha)*rho1*rho1/(_fluides[1]->vitesseSonTemperature(_Temperature,rho2)*_fluides[1]->vitesseSonTemperature(_Temperature,rho2)));

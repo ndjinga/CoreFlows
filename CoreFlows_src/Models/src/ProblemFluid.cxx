@@ -685,11 +685,11 @@ void ProblemFluid::computeNewtonVariation()
 		VecAXPY(_b, -1/_dt, _courant);
 		MatShift(_A, 1/_dt);
 
-#if PETSC_VERSION_GREATER_3_5
-		KSPSetOperators(_ksp, _A, _A);
-#else
-		KSPSetOperators(_ksp, _A, _A,SAME_NONZERO_PATTERN);
-#endif
+		#if PETSC_VERSION_GREATER_3_5
+			KSPSetOperators(_ksp, _A, _A);
+		#else
+			KSPSetOperators(_ksp, _A, _A,SAME_NONZERO_PATTERN);
+		#endif
 
 		KSPSetInitialGuessNonzero(_ksp,PETSC_FALSE);
 
@@ -1062,34 +1062,34 @@ void ProblemFluid::addConvectionToSecondMember
 	}
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
-		cout << "A-, (" << i << "," << j<< "):" << endl;
-		for(int p=0; p<_nVar; p++)
+		cout << "A^-, (" << i << "," << j<< "):" << endl;
+		for(int i=0; i<_nVar; i++)
 		{
-			for(int q=0; q<_nVar; q++)
-				PetscPrintf(PETSC_COMM_WORLD, "%.2F\t", _AroeMinus[p*_nVar+q]);
+			for(int j=0; j<_nVar; j++)
+				cout<< _AroeMinus[i*_nVar+j]<<", ";
 			cout << endl;
 		}
 		cout << endl;
-		cout << "A+, (" << i << "," << j<< "):" << endl;
-		for(int p=0; p<_nVar; p++)
+		cout << "A^+, (" << i << "," << j<< "):" << endl;
+		for(int i=0; i<_nVar; i++)
 		{
-			for(int q=0; q<_nVar; q++)
-				PetscPrintf(PETSC_COMM_WORLD, "%.2F\t", _AroePlus[p*_nVar+q]);
+			for(int j=0; j<_nVar; j++)
+				cout<<  _AroePlus[i*_nVar+j]<<", ";
 			cout << endl;
 		}
 		cout << endl;
 		cout << "|A|,(" << i << "," << j<< "):" << endl;
-		for(int p=0; p<_nVar; p++)
+		for(int i=0; i<_nVar; i++)
 		{
-			for(int q=0; q<_nVar; q++)
-				PetscPrintf(PETSC_COMM_WORLD, "%.2F\t", _absAroe[p*_nVar+q]);
+			for(int j=0; j<_nVar; j++)
+				cout<<  _absAroe[i*_nVar+j]<<", ";
 			cout << endl;
 		}
 		cout << "sign(A),(" << i << "," << j<< "):" << endl;
-		for(int p=0; p<_nVar; p++)
+		for(int i=0; i<_nVar; i++)
 		{
-			for(int q=0; q<_nVar; q++)
-				PetscPrintf(PETSC_COMM_WORLD, "%.2F\t", _signAroe[p*_nVar+q]);
+			for(int j=0; j<_nVar; j++)
+				cout<<  _signAroe[i*_nVar+j]<<", ";
 			cout << endl;
 		}
 	}

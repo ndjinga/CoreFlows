@@ -271,12 +271,10 @@ void DriftModel::diffusionStateAndMatrices(const long &i,const long &j, const bo
 		if(_verbose && _nbTimeStep%_freqSave ==0)
 		{
 			cout << "Matrice de diffusion D, pour le couple (" << i << "," << j<< "):" << endl;
-			for(int p=0; p<_nVar; p++)
+			for(int i=0; i<_nVar; i++)
 			{
-				for(int q=0; q<_nVar; q++)
-				{
-					PetscPrintf(PETSC_COMM_WORLD, "%.2F\t", _Diffusion[p*_nVar+q]);
-				}
+				for(int j=0; j<_nVar; j++)
+					cout << _Diffusion[i*_nVar+j]<<", ";
 				cout << endl;
 			}
 			cout << endl;
@@ -349,7 +347,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 			}
 		}
 		_externalStates[_nVar-1] = _externalStates[1]*_fluides[0]->getInternalEnergy(_limitField[nameOfGroup].T,rho_v)
-																																											 +(_externalStates[0]-_externalStates[1])*_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + _externalStates[0]*v2/2;
+																																													 +(_externalStates[0]-_externalStates[1])*_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + _externalStates[0]*v2/2;
 		_idm[0] = 0;
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
@@ -520,11 +518,11 @@ void DriftModel::convectionMatrices()
 
 	vector<complex<double> > vp_dist(3);
 
-/*
+	/*
 	if(_spaceScheme==staggered && _nonLinearFormulation==VFFC)//special case
 		staggeredVFFCMatrices(umn);
 	else
-*/
+	 */
 	{
 		double rhom=_Uroe[0];
 		double cm=_Uroe[1];
@@ -1426,7 +1424,7 @@ void DriftModel::getMixturePressureAndTemperature(double c_v, double rhom, doubl
 		StiffenedGas* fluide1=dynamic_cast<StiffenedGas*>(_fluides[1]);
 
 		temperature= (rhom_em-m_v*fluide0->getInternalEnergy(0)-m_l*fluide1->getInternalEnergy(0))
-																																									/(m_v*fluide0->constante("cv")+m_l*fluide1->constante("cv"));
+																																											/(m_v*fluide0->constante("cv")+m_l*fluide1->constante("cv"));
 
 		double e_v=fluide0->getInternalEnergy(temperature);
 		double e_l=fluide1->getInternalEnergy(temperature);
@@ -1876,7 +1874,7 @@ void DriftModel::staggeredVFFCMatrices(double u_mn)
 			if(_verbose && _nbTimeStep%_freqSave ==0)
 				cout<<"_khi= "<<_khi<<", _kappa= "<< _kappa << ", _ksi= "<<_ksi <<", ami= "<<ami<<endl;
 
-				//On remplit les valeurs propres
+			//On remplit les valeurs propres
 			vp_dist[0]=uj_n+ami;
 			vp_dist[1]=uj_n-ami;
 			vp_dist[2]=uj_n;
