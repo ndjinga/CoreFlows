@@ -29,7 +29,7 @@
    <string notr="true"/>
   </property>
   <property name="currentIndex">
-   <number>0</number>
+   <number>1</number>
   </property>
   <widget class="QWidget" name="tabModel">
    <attribute name="title">
@@ -572,7 +572,7 @@
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
-          <widget class="QRadioButton" name="Import_RadioButton">
+          <widget class="QRadioButton" name="InputFileName_RadioButton">
            <property name="minimumSize">
             <size>
              <width>90</width>
@@ -586,13 +586,13 @@
             </size>
            </property>
            <property name="text">
-            <string>Import</string>
+            <string>Mesh file</string>
            </property>
            <property name="autoExclusive">
             <bool>true</bool>
            </property>
           </widget>
-          <widget class="QLineEdit" name="Import_lineEdit">
+          <widget class="QLineEdit" name="InputFileName_lineEdit">
            <property name="minimumSize">
             <size>
              <width>350</width>
@@ -606,7 +606,7 @@
             </size>
            </property>
           </widget>
-          <widget class="QToolButton" name="Import_toolButton">
+          <widget class="QToolButton" name="InputFileName_toolButton">
            <property name="minimumSize">
             <size>
              <width>30</width>
@@ -652,7 +652,7 @@
            <property name="orientation">
             <enum>Qt::Horizontal</enum>
            </property>
-           <widget class="QRadioButton" name="Creation_radioButton">
+           <widget class="QRadioButton" name="MeshCreation_RadioButton">
             <property name="minimumSize">
              <size>
               <width>90</width>
@@ -819,7 +819,7 @@
                      <string>Xinf (m) </string>
                     </property>
                    </widget>
-                   <widget class="QDoubleSpinBox" name="Xin_Nb">
+                   <widget class="QDoubleSpinBox" name="Xinf_doubleSpinBox">
                     <property name="minimumSize">
                      <size>
                       <width>110</width>
@@ -882,7 +882,7 @@
                      <string>Xsup (m) </string>
                     </property>
                    </widget>
-                   <widget class="QDoubleSpinBox" name="XsupNb">
+                   <widget class="QDoubleSpinBox" name="Xsup_doubleSpinBox">
                     <property name="minimumSize">
                      <size>
                       <width>110</width>
@@ -945,7 +945,7 @@
                      <string>Nx</string>
                     </property>
                    </widget>
-                   <widget class="QSpinBox" name="NxNb">
+                   <widget class="QSpinBox" name="Nx_spinBox">
                     <property name="minimumSize">
                      <size>
                       <width>110</width>
@@ -1030,7 +1030,7 @@
                      <string>Yinf (m) </string>
                     </property>
                    </widget>
-                   <widget class="QDoubleSpinBox" name="YinfNb">
+                   <widget class="QDoubleSpinBox" name="Yinf_doubleSpinBox">
                     <property name="minimumSize">
                      <size>
                       <width>110</width>
@@ -1093,7 +1093,7 @@
                      <string>Ysup (m) </string>
                     </property>
                    </widget>
-                   <widget class="QDoubleSpinBox" name="YsupNb_3">
+                   <widget class="QDoubleSpinBox" name="Ysup_doubleSpinBox">
                     <property name="minimumSize">
                      <size>
                       <width>110</width>
@@ -1156,7 +1156,7 @@
                      <string>Ny</string>
                     </property>
                    </widget>
-                   <widget class="QSpinBox" name="NyNb">
+                   <widget class="QSpinBox" name="Ny_spinBox">
                     <property name="minimumSize">
                      <size>
                       <width>110</width>
@@ -1241,7 +1241,7 @@
                      <string>Zinf (m) </string>
                     </property>
                    </widget>
-                   <widget class="QDoubleSpinBox" name="ZinNb">
+                   <widget class="QDoubleSpinBox" name="Zinf_doubleSpinBox">
                     <property name="minimumSize">
                      <size>
                       <width>110</width>
@@ -1304,7 +1304,7 @@
                      <string>Zsup (m) </string>
                     </property>
                    </widget>
-                   <widget class="QDoubleSpinBox" name="ZsupNb">
+                   <widget class="QDoubleSpinBox" name="Zsup_doubleSpinBox">
                     <property name="minimumSize">
                      <size>
                       <width>110</width>
@@ -1367,7 +1367,7 @@
                      <string>Nz</string>
                     </property>
                    </widget>
-                   <widget class="QSpinBox" name="NzNb">
+                   <widget class="QSpinBox" name="Nz_spinBox">
                     <property name="minimumSize">
                      <size>
                       <width>110</width>
@@ -1592,7 +1592,7 @@
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QDoubleSpinBox" name="SP_ViscositydoubleSpinBox">
+            <widget class="QDoubleSpinBox" name="SP_Viscosity_doubleSpinBox">
              <property name="minimumSize">
               <size>
                <width>200</width>
@@ -1857,7 +1857,7 @@
          <item row="0" column="0">
           <layout class="QGridLayout" name="gridLayout_39">
            <item row="0" column="0">
-            <widget class="QLabel" name="SP_pressure">
+            <widget class="QLabel" name="SP_Pressure_IC">
              <property name="minimumSize">
               <size>
                <width>120</width>
@@ -1881,7 +1881,7 @@
             </widget>
            </item>
            <item row="0" column="1">
-            <widget class="QDoubleSpinBox" name="SP_pressure_doubleSpinBox">
+            <widget class="QDoubleSpinBox" name="SP_Pressure_IC_doubleSpinBox">
              <property name="minimumSize">
               <size>
                <width>220</width>
@@ -1911,7 +1911,7 @@
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QLabel" name="SP_velocity">
+            <widget class="QLabel" name="SP_Velocity_IC">
              <property name="minimumSize">
               <size>
                <width>120</width>
@@ -1937,7 +1937,7 @@
            <item row="1" column="1">
             <layout class="QHBoxLayout" name="horizontalLayout_17">
              <item>
-              <widget class="QDoubleSpinBox" name="SP_Velocity_1d_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="SP_Velocity_1d_IC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>66</width>
@@ -1964,7 +1964,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QDoubleSpinBox" name="SP_Velocity_2d_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="SP_Velocity_2d_IC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>66</width>
@@ -1991,7 +1991,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QDoubleSpinBox" name="SP_Velocity_3d_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="SP_Velocity_3d_IC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>66</width>
@@ -2020,7 +2020,7 @@
             </layout>
            </item>
            <item row="2" column="0">
-            <widget class="QLabel" name="SP_Temperature">
+            <widget class="QLabel" name="SP_Temperature_IC">
              <property name="minimumSize">
               <size>
                <width>120</width>
@@ -2044,7 +2044,7 @@
             </widget>
            </item>
            <item row="2" column="1">
-            <widget class="QDoubleSpinBox" name="SP_Temperature_doubleSpinBox">
+            <widget class="QDoubleSpinBox" name="SP_Temperature_IC_doubleSpinBox">
              <property name="minimumSize">
               <size>
                <width>220</width>
@@ -2131,7 +2131,7 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QComboBox" name="SP_FluidOrLiquid">
+          <widget class="QComboBox" name="SP_GasOrLiquid">
            <property name="minimumSize">
             <size>
              <width>190</width>
@@ -2288,7 +2288,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="SP_BC_Temperature_Left">
+              <widget class="QLabel" name="SP_Temperature_Left_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -2305,7 +2305,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Temperature (K)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QDoubleSpinBox" name="SP_BC_Left_Temperature_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="SP_Temperature_Left_BC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -2349,7 +2349,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="SP_BC_Pressure_Left">
+              <widget class="QLabel" name="SP_Pressure_Left_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -2366,7 +2366,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Pressure (Pa)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QDoubleSpinBox" name="SP_BC_Pressure_Left_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="SP_Pressure_Left_BC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -2398,7 +2398,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="SP_BC_Velocity_Left">
+              <widget class="QLabel" name="SP_Velocity_Left_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -2431,7 +2431,7 @@
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
-               <widget class="QDoubleSpinBox" name="SP_BC_Left_Velocity_1d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="SP_Velocity_1d_Left_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -2456,7 +2456,7 @@
                  <double>1000000000.000000000000000</double>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="SP_BC_Leftl_Velocity_2d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="SP_Velocity_2d_Left_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -2481,7 +2481,7 @@
                  <double>1000000000.000000000000000</double>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="SP_BC_Left_Velocity_3d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="SP_Velocity_3d_Left_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -2526,7 +2526,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="SP_BC_Type_Left">
+              <widget class="QLabel" name="SP_Type_Left_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -2543,7 +2543,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Type&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QComboBox" name="SP_BC_Type_Left_ComboBox">
+              <widget class="QComboBox" name="SP_Type_Left_BC_ComboBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -2613,7 +2613,245 @@
             <string>Top</string>
            </property>
            <layout class="QGridLayout" name="gridLayout_61">
-            <item row="0" column="0">
+            <item row="2" column="0">
+             <widget class="QSplitter" name="splitter_47">
+              <property name="minimumSize">
+               <size>
+                <width>338</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>336</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <widget class="QLabel" name="SP_Temperature_Top_BC">
+               <property name="minimumSize">
+                <size>
+                 <width>110</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>110</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Temperature (K)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
+              <widget class="QDoubleSpinBox" name="SP_Temperature_Top_BC_doubleSpinBox">
+               <property name="minimumSize">
+                <size>
+                 <width>220</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>220</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="maximum">
+                <double>1000000000.000000000000000</double>
+               </property>
+               <property name="value">
+                <double>300.000000000000000</double>
+               </property>
+              </widget>
+             </widget>
+            </item>
+            <item row="3" column="0">
+             <widget class="QSplitter" name="splitter_40">
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <widget class="QLabel" name="SP_Velocity_Top_BC">
+               <property name="minimumSize">
+                <size>
+                 <width>110</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>110</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Velocity (m/s)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
+              <widget class="QSplitter" name="splitter_70">
+               <property name="minimumSize">
+                <size>
+                 <width>220</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>222</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="orientation">
+                <enum>Qt::Horizontal</enum>
+               </property>
+               <widget class="QDoubleSpinBox" name="SP_Velocity_1d_Top_BC_doubleSpinBox">
+                <property name="minimumSize">
+                 <size>
+                  <width>68</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>70</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>11</pointsize>
+                 </font>
+                </property>
+                <property name="minimum">
+                 <double>-1000000000.000000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>1000000000.000000000000000</double>
+                </property>
+               </widget>
+               <widget class="QDoubleSpinBox" name="SP_Velocity_2d_Top_BC_doubleSpinBox">
+                <property name="minimumSize">
+                 <size>
+                  <width>68</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>70</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>11</pointsize>
+                 </font>
+                </property>
+                <property name="minimum">
+                 <double>-1000000000.000000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>1000000000.000000000000000</double>
+                </property>
+               </widget>
+               <widget class="QDoubleSpinBox" name="SP_Velocity_3d_Top_BC_doubleSpinBox">
+                <property name="minimumSize">
+                 <size>
+                  <width>68</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="maximumSize">
+                 <size>
+                  <width>70</width>
+                  <height>30</height>
+                 </size>
+                </property>
+                <property name="font">
+                 <font>
+                  <pointsize>11</pointsize>
+                 </font>
+                </property>
+                <property name="minimum">
+                 <double>-1000000000.000000000000000</double>
+                </property>
+                <property name="maximum">
+                 <double>1000000000.000000000000000</double>
+                </property>
+               </widget>
+              </widget>
+             </widget>
+            </item>
+            <item row="4" column="0">
+             <widget class="QSplitter" name="splitter_71">
+              <property name="minimumSize">
+               <size>
+                <width>338</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>336</width>
+                <height>30</height>
+               </size>
+              </property>
+              <property name="orientation">
+               <enum>Qt::Horizontal</enum>
+              </property>
+              <widget class="QLabel" name="SP_Pressure_Top_BC">
+               <property name="minimumSize">
+                <size>
+                 <width>110</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>110</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="text">
+                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Pressure (Pa)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+               </property>
+              </widget>
+              <widget class="QDoubleSpinBox" name="SP_Pressure_Top_BC_doubleSpinBox">
+               <property name="minimumSize">
+                <size>
+                 <width>220</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="maximumSize">
+                <size>
+                 <width>220</width>
+                 <height>30</height>
+                </size>
+               </property>
+               <property name="font">
+                <font>
+                 <pointsize>11</pointsize>
+                </font>
+               </property>
+               <property name="maximum">
+                <double>1000000000.000000000000000</double>
+               </property>
+               <property name="value">
+                <double>100000.000000000000000</double>
+               </property>
+              </widget>
+             </widget>
+            </item>
+            <item row="1" column="0">
              <widget class="QSplitter" name="splitter_46">
               <property name="minimumSize">
                <size>
@@ -2630,7 +2868,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="SP_BC_Type_Top">
+              <widget class="QLabel" name="SP_Type_Top_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -2647,7 +2885,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Type&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QComboBox" name="SP_BC_Type_Top_ComboBox">
+              <widget class="QComboBox" name="SP_Type_Top_BC_ComboBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -2685,244 +2923,6 @@
                  <string>Dirichlet</string>
                 </property>
                </item>
-              </widget>
-             </widget>
-            </item>
-            <item row="1" column="0">
-             <widget class="QSplitter" name="splitter_47">
-              <property name="minimumSize">
-               <size>
-                <width>338</width>
-                <height>30</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>336</width>
-                <height>30</height>
-               </size>
-              </property>
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <widget class="QLabel" name="SP_BC_Temperature_Top">
-               <property name="minimumSize">
-                <size>
-                 <width>110</width>
-                 <height>30</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>110</width>
-                 <height>30</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Temperature (K)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-              </widget>
-              <widget class="QDoubleSpinBox" name="SP_BC_Top_Temperature_doubleSpinBox">
-               <property name="minimumSize">
-                <size>
-                 <width>220</width>
-                 <height>30</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>220</width>
-                 <height>30</height>
-                </size>
-               </property>
-               <property name="font">
-                <font>
-                 <pointsize>11</pointsize>
-                </font>
-               </property>
-               <property name="maximum">
-                <double>1000000000.000000000000000</double>
-               </property>
-               <property name="value">
-                <double>300.000000000000000</double>
-               </property>
-              </widget>
-             </widget>
-            </item>
-            <item row="2" column="0">
-             <widget class="QSplitter" name="splitter_40">
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <widget class="QLabel" name="SP_BC_Velocity_Top">
-               <property name="minimumSize">
-                <size>
-                 <width>110</width>
-                 <height>30</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>110</width>
-                 <height>30</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Velocity (m/s)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-              </widget>
-              <widget class="QSplitter" name="splitter_70">
-               <property name="minimumSize">
-                <size>
-                 <width>220</width>
-                 <height>30</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>222</width>
-                 <height>30</height>
-                </size>
-               </property>
-               <property name="orientation">
-                <enum>Qt::Horizontal</enum>
-               </property>
-               <widget class="QDoubleSpinBox" name="SP_BC_Top_Velocity_1d_doubleSpinBox">
-                <property name="minimumSize">
-                 <size>
-                  <width>68</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>70</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>11</pointsize>
-                 </font>
-                </property>
-                <property name="minimum">
-                 <double>-1000000000.000000000000000</double>
-                </property>
-                <property name="maximum">
-                 <double>1000000000.000000000000000</double>
-                </property>
-               </widget>
-               <widget class="QDoubleSpinBox" name="SP_BC_Top_Velocity_2d_doubleSpinBox">
-                <property name="minimumSize">
-                 <size>
-                  <width>68</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>70</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>11</pointsize>
-                 </font>
-                </property>
-                <property name="minimum">
-                 <double>-1000000000.000000000000000</double>
-                </property>
-                <property name="maximum">
-                 <double>1000000000.000000000000000</double>
-                </property>
-               </widget>
-               <widget class="QDoubleSpinBox" name="SP_BC_Top_Velocity_3d_doubleSpinBox">
-                <property name="minimumSize">
-                 <size>
-                  <width>68</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="maximumSize">
-                 <size>
-                  <width>70</width>
-                  <height>30</height>
-                 </size>
-                </property>
-                <property name="font">
-                 <font>
-                  <pointsize>11</pointsize>
-                 </font>
-                </property>
-                <property name="minimum">
-                 <double>-1000000000.000000000000000</double>
-                </property>
-                <property name="maximum">
-                 <double>1000000000.000000000000000</double>
-                </property>
-               </widget>
-              </widget>
-             </widget>
-            </item>
-            <item row="3" column="0">
-             <widget class="QSplitter" name="splitter_71">
-              <property name="minimumSize">
-               <size>
-                <width>338</width>
-                <height>30</height>
-               </size>
-              </property>
-              <property name="maximumSize">
-               <size>
-                <width>336</width>
-                <height>30</height>
-               </size>
-              </property>
-              <property name="orientation">
-               <enum>Qt::Horizontal</enum>
-              </property>
-              <widget class="QLabel" name="SP_BC_Pressure_Top">
-               <property name="minimumSize">
-                <size>
-                 <width>110</width>
-                 <height>30</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>110</width>
-                 <height>30</height>
-                </size>
-               </property>
-               <property name="text">
-                <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Pressure (Pa)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-               </property>
-              </widget>
-              <widget class="QDoubleSpinBox" name="SP_BC_Pressure_Top_doubleSpinBox">
-               <property name="minimumSize">
-                <size>
-                 <width>220</width>
-                 <height>30</height>
-                </size>
-               </property>
-               <property name="maximumSize">
-                <size>
-                 <width>220</width>
-                 <height>30</height>
-                </size>
-               </property>
-               <property name="font">
-                <font>
-                 <pointsize>11</pointsize>
-                </font>
-               </property>
-               <property name="maximum">
-                <double>1000000000.000000000000000</double>
-               </property>
-               <property name="value">
-                <double>100000.000000000000000</double>
-               </property>
               </widget>
              </widget>
             </item>
@@ -2972,7 +2972,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="SP_BC_Type_Front">
+              <widget class="QLabel" name="SP_Type_Front_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -2989,7 +2989,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Type&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QComboBox" name="SP_BC_Type_Front_ComboBox">
+              <widget class="QComboBox" name="SP_Type_Front_BC_ComboBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -3047,7 +3047,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="SP_BC_Temperature_Front">
+              <widget class="QLabel" name="SP_Temperature_Front_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -3064,7 +3064,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Temperature (K)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QDoubleSpinBox" name="SP_BC_Front_Temperature_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="SP_Temperature_Front_BC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -3096,7 +3096,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="SP_BC_Velocity_Front">
+              <widget class="QLabel" name="SP_Velocity_Front_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -3129,7 +3129,7 @@
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
-               <widget class="QDoubleSpinBox" name="SP_BC_Front_Velocity_1d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="SP_Velocity_1d_Front_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -3154,7 +3154,7 @@
                  <double>1000000000.000000000000000</double>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="SP_BC_Front_Velocity_2d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="SP_Velocity_2d_Front_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -3179,7 +3179,7 @@
                  <double>1000000000.000000000000000</double>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="SP_BC_Front_Velocity_3d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="SP_Velocity_3d_Front_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -3224,7 +3224,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="SP_BC_Pressure_Front">
+              <widget class="QLabel" name="SP_Pressure_Front_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -3241,7 +3241,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Pressure (Pa)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QDoubleSpinBox" name="SP_BC_Pressure_Front_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="SP_Pressure_Front_BC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -3314,7 +3314,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="SP_BC_Type_Right">
+              <widget class="QLabel" name="SP_Type_Right_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -3331,7 +3331,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Type&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QComboBox" name="SP_BC_Type_Right_ComboBox">
+              <widget class="QComboBox" name="SP_Type_Right_BC_ComboBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -3389,7 +3389,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="SP_BC_Pressure_Right">
+              <widget class="QLabel" name="SP_Pressure_Right_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -3406,7 +3406,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Pressure (Pa)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QDoubleSpinBox" name="SP_BC_Pressure_Right_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="SP_Pressure_Right_BC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -3438,7 +3438,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="SP_BC_Velocity_Right">
+              <widget class="QLabel" name="SP_Velocity_Right_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -3471,7 +3471,7 @@
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
-               <widget class="QDoubleSpinBox" name="SP_BC_Right_Velocity_1d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="SP_Velocity_1d_Right_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -3496,7 +3496,7 @@
                  <double>1000000000.000000000000000</double>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="SP_BC_Right_Velocity_2d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="SP_Velocity_2d_Right_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -3521,7 +3521,7 @@
                  <double>1000000000.000000000000000</double>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="SP_BC_Right_Velocity_3d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="SP_Velocity_3d_Right_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -3566,7 +3566,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="SP_BC_Temperature_Right">
+              <widget class="QLabel" name="SP_Temperature_Right_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -3583,7 +3583,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Temperature (K)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QDoubleSpinBox" name="SP_BC_Right_Temperature_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="SP_Temperature_Right_BC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -3656,7 +3656,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="SP_BC_Type_Bottom">
+              <widget class="QLabel" name="SP_Type_Bottom_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -3673,7 +3673,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Type&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QComboBox" name="SP_BC_Type_Bottom_ComboBox">
+              <widget class="QComboBox" name="SP_Type_Bottom_BC_ComboBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -3731,7 +3731,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="SP_BC_Temperature_Bottom">
+              <widget class="QLabel" name="SP_Temperature_Bottom_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -3748,7 +3748,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Temperature (K)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QDoubleSpinBox" name="SP_BC_Bottom_Temperature_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="SP_Temperature_Bottom_BC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -3780,7 +3780,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="SP_BC_Velocity_Bottom">
+              <widget class="QLabel" name="SP_Velocity_Bottom_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -3813,7 +3813,7 @@
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
-               <widget class="QDoubleSpinBox" name="SP_BC_Bottom_Velocity_1d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="SP_Velocity_1d_Bottom_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -3838,7 +3838,7 @@
                  <double>1000000000.000000000000000</double>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="SP_BC_Bottom_Velocity_2d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="SP_Velocity_2d_Bottom_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -3863,7 +3863,7 @@
                  <double>1000000000.000000000000000</double>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="SP_BC_Bottom_Velocity_3d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="SP_Velocity_3d_Bottom_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -3908,7 +3908,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="SP_BC_Pressure_Bottom">
+              <widget class="QLabel" name="SP_Pressure_Bottom_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -3925,7 +3925,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Pressure (Pa)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QDoubleSpinBox" name="SP_BC_Pressure_Bottom_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="SP_Pressure_Bottom_BC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -3998,7 +3998,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="SP_BC_Type_Back">
+              <widget class="QLabel" name="SP_Type_Back_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -4015,7 +4015,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Type&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QComboBox" name="SP_BC_Type_Back_ComboBox">
+              <widget class="QComboBox" name="SP_Type_Back_BC_ComboBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -4073,7 +4073,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="SP_BC_Temperature_Back">
+              <widget class="QLabel" name="SP_Temperature_Back_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -4090,7 +4090,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Temperature (K)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QDoubleSpinBox" name="SP_BC_Back_Temperature_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="SP_Temperature_Back_BC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -4122,7 +4122,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="SP_BC_Velocity_Back">
+              <widget class="QLabel" name="SP_Velocity_Back_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -4155,7 +4155,7 @@
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
-               <widget class="QDoubleSpinBox" name="SP_BC_Back_Velocity_1d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="SP_Velocity_1d_Back_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -4180,7 +4180,7 @@
                  <double>1000000000.000000000000000</double>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="SP_BC_Back_Velocity_2d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="SP_Velocity_2d_Back_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -4205,7 +4205,7 @@
                  <double>1000000000.000000000000000</double>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="SP_BC_Back_Velocity_3d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="SP_Velocity_3d_Back_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -4250,7 +4250,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="SP_BC_Pressure_Back">
+              <widget class="QLabel" name="SP_Pressure_Back_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -4267,7 +4267,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Pressure (Pa)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QDoubleSpinBox" name="SP_BC_Pressure_Back_doubleSpinBox_11">
+              <widget class="QDoubleSpinBox" name="SP_Pressure_Back_BC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -4546,7 +4546,7 @@
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
-             <widget class="QDoubleSpinBox" name="DM_Conductivity_doubleSpinBox">
+             <widget class="QDoubleSpinBox" name="DM_Conductivity_Phase1_doubleSpinBox">
               <property name="minimumSize">
                <size>
                 <width>120</width>
@@ -4568,7 +4568,7 @@
                <double>1000000000.000000000000000</double>
               </property>
              </widget>
-             <widget class="QDoubleSpinBox" name="DM_Conductivity_doubleSpinBox_2">
+             <widget class="QDoubleSpinBox" name="DM_Conductivity_Phase2_doubleSpinBox_2">
               <property name="minimumSize">
                <size>
                 <width>120</width>
@@ -4745,7 +4745,7 @@
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
-             <widget class="QDoubleSpinBox" name="DM_FrictionCoefficients_doubleSpinBox">
+             <widget class="QDoubleSpinBox" name="DM_FrictionCoefficients_Phase1_doubleSpinBox">
               <property name="minimumSize">
                <size>
                 <width>120</width>
@@ -4773,7 +4773,7 @@
                <double>0.010000000000000</double>
               </property>
              </widget>
-             <widget class="QDoubleSpinBox" name="DM_FrictionCoefficients_Pase2_doubleSpinBox">
+             <widget class="QDoubleSpinBox" name="DM_FrictionCoefficients_Phase2_doubleSpinBox">
               <property name="minimumSize">
                <size>
                 <width>120</width>
@@ -4837,7 +4837,7 @@
          <item row="0" column="0">
           <layout class="QGridLayout" name="gridLayout_66">
            <item row="0" column="0">
-            <widget class="QLabel" name="DM_Alpha">
+            <widget class="QLabel" name="DM_Concentration_IC">
              <property name="minimumSize">
               <size>
                <width>190</width>
@@ -4861,7 +4861,7 @@
             </widget>
            </item>
            <item row="0" column="1">
-            <widget class="QDoubleSpinBox" name="DM_Concentration_doubleSpinBox">
+            <widget class="QDoubleSpinBox" name="DM_Concentration_IC_doubleSpinBox">
              <property name="minimumSize">
               <size>
                <width>222</width>
@@ -4891,7 +4891,7 @@
             </widget>
            </item>
            <item row="1" column="0">
-            <widget class="QLabel" name="DM_pressure">
+            <widget class="QLabel" name="DM_Pressure_IC">
              <property name="minimumSize">
               <size>
                <width>190</width>
@@ -4915,7 +4915,7 @@
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QDoubleSpinBox" name="DM_pressure_doubleSpinBox">
+            <widget class="QDoubleSpinBox" name="DM_Pressure_IC_doubleSpinBox">
              <property name="minimumSize">
               <size>
                <width>222</width>
@@ -4945,7 +4945,7 @@
             </widget>
            </item>
            <item row="2" column="0">
-            <widget class="QLabel" name="DM_velocity1">
+            <widget class="QLabel" name="DM_Velocity_IC">
              <property name="minimumSize">
               <size>
                <width>190</width>
@@ -4964,7 +4964,7 @@
               </font>
              </property>
              <property name="text">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Mean velocity (m/s)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Velocity (m/s)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
            </item>
@@ -4979,7 +4979,7 @@
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
              </property>
-             <widget class="QDoubleSpinBox" name="DM_VelocityP1_1d_doubleSpinBox">
+             <widget class="QDoubleSpinBox" name="DM_Velocity_1d_IC_doubleSpinBox">
               <property name="minimumSize">
                <size>
                 <width>70</width>
@@ -5004,7 +5004,7 @@
                <double>1000000000.000000000000000</double>
               </property>
              </widget>
-             <widget class="QDoubleSpinBox" name="DM_VelocityP1_2d_doubleSpinBox">
+             <widget class="QDoubleSpinBox" name="DM_Velocity_2d_IC_doubleSpinBox">
               <property name="minimumSize">
                <size>
                 <width>70</width>
@@ -5029,7 +5029,7 @@
                <double>1000000000.000000000000000</double>
               </property>
              </widget>
-             <widget class="QDoubleSpinBox" name="DM_VelocityP1_3d_doubleSpinBox">
+             <widget class="QDoubleSpinBox" name="DM_Velocity_3d_IC_doubleSpinBox">
               <property name="minimumSize">
                <size>
                 <width>70</width>
@@ -5057,7 +5057,7 @@
             </widget>
            </item>
            <item row="3" column="0">
-            <widget class="QLabel" name="DM_Commentemperature">
+            <widget class="QLabel" name="DM_Temperature_IC">
              <property name="minimumSize">
               <size>
                <width>190</width>
@@ -5076,12 +5076,12 @@
               </font>
              </property>
              <property name="text">
-              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Mean temperature (K)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#ff0000;&quot;&gt;Temperature (K)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
              </property>
             </widget>
            </item>
            <item row="3" column="1">
-            <widget class="QDoubleSpinBox" name="DM_CommonTemperature_doubleSpinBox">
+            <widget class="QDoubleSpinBox" name="DM_Temperature_IC_doubleSpinBox">
              <property name="minimumSize">
               <size>
                <width>222</width>
@@ -5246,7 +5246,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Type_Left">
+              <widget class="QLabel" name="DM_Type_Left_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -5263,7 +5263,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Type&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QComboBox" name="DM_BC_Type_Left_ComboBox">
+              <widget class="QComboBox" name="DM_Type_Left_BC_ComboBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -5321,7 +5321,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Temperature_Left">
+              <widget class="QLabel" name="DM_Temperature_Left_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -5338,7 +5338,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Temperature (K)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QDoubleSpinBox" name="DM_BC_Left_Temperature_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="DM_Temperature_Left_BC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -5382,7 +5382,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Concentration_Left">
+              <widget class="QLabel" name="DM_Concentration_Left_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -5399,7 +5399,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Concentration&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QDoubleSpinBox" name="DM_BC_Left_Concentration_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="DM_Concentration_Left_BC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -5434,7 +5434,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Velocity_Left">
+              <widget class="QLabel" name="DM_Velocity_Left_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -5467,7 +5467,7 @@
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
-               <widget class="QDoubleSpinBox" name="DM_BC_Left_Velocity_1d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="DM_Velocity_1d_Left_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -5492,7 +5492,7 @@
                  <double>1000000000.000000000000000</double>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="DM_BC_Left_Velocity_2d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="DM_Velocity_2d_Left_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -5517,7 +5517,7 @@
                  <double>1000000000.000000000000000</double>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="DM_BC_Left_Velocity_3d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="DM_Velocity_3d_Left_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -5562,7 +5562,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Pressure_Left">
+              <widget class="QLabel" name="DM_Pressure_Left_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -5579,7 +5579,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Pressure (Pa)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QDoubleSpinBox" name="DM_BC_Pressure_Left_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="DM_Pressure_Left_BC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -5652,7 +5652,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Type_Top">
+              <widget class="QLabel" name="DM_Type_Top_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -5669,7 +5669,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Type&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QComboBox" name="DM_BC_Type_Top_ComboBox">
+              <widget class="QComboBox" name="DM_Type_Top_BC_ComboBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -5727,7 +5727,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Temperature_Top">
+              <widget class="QLabel" name="DM_Temperature_Top_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -5744,7 +5744,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Temperature (K)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QDoubleSpinBox" name="DM_BC_Top_Temperature_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="DM_Temperature_Top_BC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -5788,7 +5788,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Concentration_Top">
+              <widget class="QLabel" name="DM_Concentration_Top_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -5805,7 +5805,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Concentration&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QDoubleSpinBox" name="DM_BC_Top_Concentration_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="DM_Concentration_Top_BC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -5840,7 +5840,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Velocity_Top">
+              <widget class="QLabel" name="DM_Velocity_Top_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -5873,7 +5873,7 @@
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
-               <widget class="QDoubleSpinBox" name="DM_BC_Top_Velocity_1d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="DM_Velocity_1d_Top_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -5898,7 +5898,7 @@
                  <double>1000000000.000000000000000</double>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="DM_BC_Top_Velocity_2d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="DM_Velocity_2d_Top_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -5923,7 +5923,7 @@
                  <double>1000000000.000000000000000</double>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="DM_BC_Top_Velocity_3d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="DM_Velocity_3d_Top_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -5968,7 +5968,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Pressure_Top">
+              <widget class="QLabel" name="DM_Pressure_Top_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -5985,7 +5985,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Pressure (Pa)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QDoubleSpinBox" name="DM_BC_Pressure_Top_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="DM_Pressure_Top_BC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -6058,7 +6058,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Type_Front">
+              <widget class="QLabel" name="DM_Type_Front_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -6075,7 +6075,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Type&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QComboBox" name="DM_BC_Type_Front_ComboBox">
+              <widget class="QComboBox" name="DM_Type_Front_BC_ComboBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -6133,7 +6133,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Temperature_Front">
+              <widget class="QLabel" name="DM_Temperature_Front_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -6150,7 +6150,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Temperature (K)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QDoubleSpinBox" name="DM_BC_Front_Temperature_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="DM_Temperature_Front_BC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -6194,7 +6194,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Concentration_Front">
+              <widget class="QLabel" name="DM_Concentration_Front_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -6211,7 +6211,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Concentration&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QDoubleSpinBox" name="DM_BC_Front_Concentration_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="DM_Concentration_Front_BC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -6246,7 +6246,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Velocity_Front">
+              <widget class="QLabel" name="DM_Velocity_Front_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -6279,7 +6279,7 @@
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
-               <widget class="QDoubleSpinBox" name="DM_BC_Front_Velocity_1d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="DM_Velocity_1d_Front_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -6304,7 +6304,7 @@
                  <double>1000000000.000000000000000</double>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="DM_BC_Front_Velocity_2d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="DM_Velocity_2d_Front_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -6329,7 +6329,7 @@
                  <double>1000000000.000000000000000</double>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="DM_BC_Front_Velocity_3d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="DM_Velocity_3d_Front_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -6374,7 +6374,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Pressure_Front">
+              <widget class="QLabel" name="DM_Pressure_Front_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -6391,7 +6391,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Pressure (Pa)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QDoubleSpinBox" name="DM_BC_Pressure_Front_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="DM_Pressure_Front_BC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -6464,7 +6464,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Type_Right">
+              <widget class="QLabel" name="DM_Type_Right_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -6481,7 +6481,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Type&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QComboBox" name="DM_BC_Type_Right_ComboBox">
+              <widget class="QComboBox" name="DM_Type_Right_BC_ComboBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -6539,7 +6539,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Temperature_Right">
+              <widget class="QLabel" name="DM_Temperature_Right_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -6556,7 +6556,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Temperature (K)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QDoubleSpinBox" name="DM_BC_Right_Temperature_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="DM_Temperature_Right_BC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -6600,7 +6600,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Concentration_Right">
+              <widget class="QLabel" name="DM_Concentration_Right_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -6617,7 +6617,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Concentration&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QDoubleSpinBox" name="DM_BC_Right_Concentration_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="DM_Concentration_Right_BC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -6655,7 +6655,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Velocity_Right">
+              <widget class="QLabel" name="DM_Velocity_Right_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -6688,7 +6688,7 @@
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
-               <widget class="QDoubleSpinBox" name="DM_BC_Right_Velocity_1d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="DM_Velocity_1d_Right_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -6713,7 +6713,7 @@
                  <double>1000000000.000000000000000</double>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="DM_BC_Right_Velocity_2d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="DM_Velocity_2d_Right_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -6738,7 +6738,7 @@
                  <double>1000000000.000000000000000</double>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="DM_BC_Right_Velocity_3d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="DM_Velocity_3d_Right_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -6783,7 +6783,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Pressure_Right">
+              <widget class="QLabel" name="DM_Pressure_Right_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -6800,7 +6800,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Pressure (Pa)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QDoubleSpinBox" name="DM_BC_Pressure_Right_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="DM_Pressure_Right_BC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -6870,7 +6870,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Type_Bottom">
+              <widget class="QLabel" name="DM_Type_Bottom_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -6887,7 +6887,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Type&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QComboBox" name="DM_BC_Type_Bottom_ComboBox">
+              <widget class="QComboBox" name="DM_Type_Bottom_BC_ComboBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -6945,7 +6945,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Temperature_Bottom">
+              <widget class="QLabel" name="DM_Temperature_Bottom_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -6962,7 +6962,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Temperature (K)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QDoubleSpinBox" name="DM_BC_Bottom_Temperature_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="DM_Temperature_Bottom_BC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -7006,7 +7006,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Concentration_Bottom">
+              <widget class="QLabel" name="DM_Concentration_Bottom_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -7023,7 +7023,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Concentration&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QDoubleSpinBox" name="DM_BC_Bottom_Concentration_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="DM_Concentration_Bottom_BC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -7061,7 +7061,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Velocity_Bottom">
+              <widget class="QLabel" name="DM_Velocity_Bottom_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -7094,7 +7094,7 @@
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
-               <widget class="QDoubleSpinBox" name="DM_BC_Bottom_Velocity_1d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="DM_Velocity_1d_Bottom_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -7119,7 +7119,7 @@
                  <double>1000000000.000000000000000</double>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="DM_BC_Bottom_Velocity_2d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="DM_Velocity_2d_Bottom_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -7144,7 +7144,7 @@
                  <double>1000000000.000000000000000</double>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="DM_BC_Bottom_Velocity_3d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="DM_Velocity_3d_Bottom_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -7189,7 +7189,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Pressure_Bottom">
+              <widget class="QLabel" name="DM_Pressure_Bottom_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -7206,7 +7206,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Pressure (Pa)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QDoubleSpinBox" name="DM_BC_Pressure_Bottom_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="DM_Pressure_Bottom_BC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -7276,7 +7276,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Type_Back">
+              <widget class="QLabel" name="DM_Type_Back_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -7293,7 +7293,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Type&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QComboBox" name="DM_BC_Type_Back_ComboBox">
+              <widget class="QComboBox" name="DM_Type_Back_BC_ComboBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -7351,7 +7351,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Temperature_Back">
+              <widget class="QLabel" name="DM_Temperature_Back_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -7368,7 +7368,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Temperature (K)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QDoubleSpinBox" name="DM_BC_Back_Temperature_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="DM_Temperature_Back_BC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -7412,7 +7412,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Concentration_Back">
+              <widget class="QLabel" name="DM_Concentration_Back_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -7429,7 +7429,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Concentration&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QDoubleSpinBox" name="DM_BC_Back_Concentration_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="DM_Concentration_Back_BC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -7467,7 +7467,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Velocity_Back">
+              <widget class="QLabel" name="DM_Velocity_Back_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -7500,7 +7500,7 @@
                <property name="orientation">
                 <enum>Qt::Horizontal</enum>
                </property>
-               <widget class="QDoubleSpinBox" name="DM_BC_Back_Velocity_1d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="DM_Velocity_1d_Back_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -7525,7 +7525,7 @@
                  <double>1000000000.000000000000000</double>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="DM_BC_Back_Velocity_2d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="DM_Velocity_2d_Back_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -7550,7 +7550,7 @@
                  <double>1000000000.000000000000000</double>
                 </property>
                </widget>
-               <widget class="QDoubleSpinBox" name="DM_BC_Back_Velocity_3d_doubleSpinBox">
+               <widget class="QDoubleSpinBox" name="DM_Velocity_3d_Back_BC_doubleSpinBox">
                 <property name="minimumSize">
                  <size>
                   <width>68</width>
@@ -7595,7 +7595,7 @@
               <property name="orientation">
                <enum>Qt::Horizontal</enum>
               </property>
-              <widget class="QLabel" name="DM_BC_Pressure_Back">
+              <widget class="QLabel" name="DM_Pressure_Back_BC">
                <property name="minimumSize">
                 <size>
                  <width>110</width>
@@ -7612,7 +7612,7 @@
                 <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:10pt;&quot;&gt;Pressure (Pa)&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
                </property>
               </widget>
-              <widget class="QDoubleSpinBox" name="DM_BC_Pressure_Back_doubleSpinBox">
+              <widget class="QDoubleSpinBox" name="DM_Pressure_Back_BC_doubleSpinBox">
                <property name="minimumSize">
                 <size>
                  <width>220</width>
@@ -8981,7 +8981,7 @@
                <item>
                 <layout class="QVBoxLayout" name="Iso2F_FEqs_InitialConditionLayoutV">
                  <item>
-                  <widget class="QLabel" name="Iso2F_Alpha">
+                  <widget class="QLabel" name="Iso2F_Alpha_IC">
                    <property name="font">
                     <font>
                      <pointsize>11</pointsize>
@@ -8993,38 +8993,38 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QLabel" name="Iso2F_pressure">
+                  <widget class="QLabel" name="Iso2F_Pressure_IC">
                    <property name="font">
                     <font>
                      <pointsize>11</pointsize>
                     </font>
                    </property>
                    <property name="text">
-                    <string>pressure ( Pa )</string>
+                    <string>Pressure ( Pa )</string>
                    </property>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QLabel" name="Iso2F_velocity1">
+                  <widget class="QLabel" name="Iso2F_Velocity1_IC">
                    <property name="font">
                     <font>
                      <pointsize>11</pointsize>
                     </font>
                    </property>
                    <property name="text">
-                    <string>velocity phase 1 ( m/ s )</string>
+                    <string>Velocity phase 1 ( m/ s )</string>
                    </property>
                   </widget>
                  </item>
                  <item>
-                  <widget class="QLabel" name="Iso2F_velocity2">
+                  <widget class="QLabel" name="Iso2F_Velocity2_IC">
                    <property name="font">
                     <font>
                      <pointsize>11</pointsize>
                     </font>
                    </property>
                    <property name="text">
-                    <string>velocity phase 2 ( m/ s )</string>
+                    <string>Velocity phase 2 ( m/ s )</string>
                    </property>
                   </widget>
                  </item>
@@ -9033,7 +9033,7 @@
                <item>
                 <layout class="QVBoxLayout" name="Iso2F_InitialConditionLayoutV">
                  <item>
-                  <widget class="QDoubleSpinBox" name="Iso2F_Alpha_doubleSpinBox">
+                  <widget class="QDoubleSpinBox" name="Iso2F_Alpha_IC_doubleSpinBox">
                    <property name="font">
                     <font>
                      <pointsize>11</pointsize>
@@ -9045,7 +9045,7 @@
                   </widget>
                  </item>
                  <item>
-                  <widget class="QDoubleSpinBox" name="Iso2F_pressure_doubleSpinBox">
+                  <widget class="QDoubleSpinBox" name="Iso2F_Pressure_IC_doubleSpinBox">
                    <property name="font">
                     <font>
                      <pointsize>11</pointsize>
@@ -9057,9 +9057,9 @@
                   </widget>
                  </item>
                  <item>
-                  <layout class="QHBoxLayout" name="Iso2F_VelocityP1">
+                  <layout class="QHBoxLayout" name="Iso2F_VelocityPhase1_IC">
                    <item>
-                    <widget class="QDoubleSpinBox" name="Iso2F_VelocityP1_1d_doubleSpinBox">
+                    <widget class="QDoubleSpinBox" name="Iso2F_VelocityPhase1_1d_IC_doubleSpinBox">
                      <property name="font">
                       <font>
                        <pointsize>11</pointsize>
@@ -9074,7 +9074,7 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QDoubleSpinBox" name="Iso2F_VelocityP1_2d_doubleSpinBox">
+                    <widget class="QDoubleSpinBox" name="Iso2F_VelocityPhase1_2d_IC_doubleSpinBox">
                      <property name="font">
                       <font>
                        <pointsize>11</pointsize>
@@ -9089,7 +9089,7 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QDoubleSpinBox" name="Iso2F_VelocityP1_3d_doubleSpinBox">
+                    <widget class="QDoubleSpinBox" name="Iso2F_VelocityPhase1_3d_IC_doubleSpinBox">
                      <property name="font">
                       <font>
                        <pointsize>11</pointsize>
@@ -9106,9 +9106,9 @@
                   </layout>
                  </item>
                  <item>
-                  <layout class="QHBoxLayout" name="Iso2F_VelocityP2">
+                  <layout class="QHBoxLayout" name="Iso2F_VelocityPhase2_IC">
                    <item>
-                    <widget class="QDoubleSpinBox" name="Iso2F_VelocityP2_1d_doubleSpinBox">
+                    <widget class="QDoubleSpinBox" name="Iso2F_VelocityPhase2_1d_IC_doubleSpinBox">
                      <property name="font">
                       <font>
                        <pointsize>11</pointsize>
@@ -9123,7 +9123,7 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QDoubleSpinBox" name="Iso2F_VelocityP2_2d_doubleSpinBox">
+                    <widget class="QDoubleSpinBox" name="Iso2F_VelocityPhase2_2d_IC_doubleSpinBox">
                      <property name="font">
                       <font>
                        <pointsize>11</pointsize>
@@ -9138,7 +9138,7 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QDoubleSpinBox" name="Iso2F_VelocityP2_3d_doubleSpinBox">
+                    <widget class="QDoubleSpinBox" name="Iso2F_VelocityPhase2_3d_IC_doubleSpinBox">
                      <property name="font">
                       <font>
                        <pointsize>11</pointsize>
@@ -11983,7 +11983,7 @@
       </property>
       <layout class="QGridLayout" name="gridLayout_6">
        <item row="0" column="0">
-        <widget class="QLabel" name="NO_MaxNbrOfTimeStep">
+        <widget class="QLabel" name="NO_MaxNbOfTimeStep">
          <property name="minimumSize">
           <size>
            <width>175</width>
@@ -12002,7 +12002,7 @@
         </widget>
        </item>
        <item row="0" column="1">
-        <widget class="QSpinBox" name="NO_MaxNbrOfTimeStep_spinBox">
+        <widget class="QSpinBox" name="NO_MaxNbOfTimeStep_spinBox">
          <property name="minimumSize">
           <size>
            <width>210</width>
@@ -12065,7 +12065,7 @@
         </widget>
        </item>
        <item row="2" column="0">
-        <widget class="QLabel" name="NO_maxTime">
+        <widget class="QLabel" name="NO_TimeMax">
          <property name="minimumSize">
           <size>
            <width>175</width>
@@ -12084,7 +12084,7 @@
         </widget>
        </item>
        <item row="2" column="1">
-        <widget class="QDoubleSpinBox" name="NO_MaxTime_doubleSpinBox">
+        <widget class="QDoubleSpinBox" name="NO_TimeMax_doubleSpinBox">
          <property name="minimumSize">
           <size>
            <width>210</width>
@@ -12293,11 +12293,6 @@
          </property>
          <item>
           <property name="text">
-           <string>--</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
            <string>GMRES</string>
           </property>
          </item>
@@ -12436,17 +12431,12 @@
          </property>
          <item>
           <property name="text">
-           <string>--</string>
+           <string>LU</string>
           </property>
          </item>
          <item>
           <property name="text">
            <string>ILU</string>
-          </property>
-         </item>
-         <item>
-          <property name="text">
-           <string>LU</string>
           </property>
          </item>
          <item>
@@ -12523,129 +12513,129 @@
   <tabstop>DriftModel_RadioButton</tabstop>
   <tabstop>IsothermalTwoFluid_RadioButton</tabstop>
   <tabstop>FiveEqsTwoFluid_RadioButton</tabstop>
-  <tabstop>Import_RadioButton</tabstop>
-  <tabstop>Creation_radioButton</tabstop>
-  <tabstop>Import_toolButton</tabstop>
-  <tabstop>Xin_Nb</tabstop>
-  <tabstop>XsupNb</tabstop>
-  <tabstop>NxNb</tabstop>
-  <tabstop>YinfNb</tabstop>
-  <tabstop>YsupNb_3</tabstop>
-  <tabstop>NyNb</tabstop>
-  <tabstop>ZinNb</tabstop>
-  <tabstop>ZsupNb</tabstop>
-  <tabstop>NzNb</tabstop>
+  <tabstop>InputFileName_RadioButton</tabstop>
+  <tabstop>MeshCreation_RadioButton</tabstop>
+  <tabstop>InputFileName_toolButton</tabstop>
+  <tabstop>Xinf_doubleSpinBox</tabstop>
+  <tabstop>Xsup_doubleSpinBox</tabstop>
+  <tabstop>Nx_spinBox</tabstop>
+  <tabstop>Yinf_doubleSpinBox</tabstop>
+  <tabstop>Ysup_doubleSpinBox</tabstop>
+  <tabstop>Ny_spinBox</tabstop>
+  <tabstop>Zinf_doubleSpinBox</tabstop>
+  <tabstop>Zsup_doubleSpinBox</tabstop>
+  <tabstop>Nz_spinBox</tabstop>
   <tabstop>SP_HeatSource_doubleSpinBox</tabstop>
-  <tabstop>SP_ViscositydoubleSpinBox</tabstop>
+  <tabstop>SP_Viscosity_doubleSpinBox</tabstop>
   <tabstop>SP_Conductivity_doubleSpinBox</tabstop>
   <tabstop>SP_Gravity_1d_doubleSpinBox</tabstop>
   <tabstop>SP_Gravity_2d_doubleSpinBox</tabstop>
   <tabstop>SP_Gravity_3d_doubleSpinBox</tabstop>
   <tabstop>SP_FrictionCoefficients_doubleSpinBox</tabstop>
-  <tabstop>SP_pressure_doubleSpinBox</tabstop>
-  <tabstop>SP_Velocity_1d_doubleSpinBox</tabstop>
-  <tabstop>SP_Velocity_2d_doubleSpinBox</tabstop>
-  <tabstop>SP_Velocity_3d_doubleSpinBox</tabstop>
-  <tabstop>SP_Temperature_doubleSpinBox</tabstop>
-  <tabstop>SP_FluidOrLiquid</tabstop>
+  <tabstop>SP_Pressure_IC_doubleSpinBox</tabstop>
+  <tabstop>SP_Velocity_1d_IC_doubleSpinBox</tabstop>
+  <tabstop>SP_Velocity_2d_IC_doubleSpinBox</tabstop>
+  <tabstop>SP_Velocity_3d_IC_doubleSpinBox</tabstop>
+  <tabstop>SP_Temperature_IC_doubleSpinBox</tabstop>
+  <tabstop>SP_GasOrLiquid</tabstop>
   <tabstop>SP_1barOr155bar</tabstop>
-  <tabstop>SP_BC_Type_Left_ComboBox</tabstop>
-  <tabstop>SP_BC_Left_Temperature_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Left_Velocity_1d_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Leftl_Velocity_2d_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Left_Velocity_3d_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Pressure_Left_doubleSpinBox</tabstop>
+  <tabstop>SP_Type_Left_BC_ComboBox</tabstop>
+  <tabstop>SP_Temperature_Left_BC_doubleSpinBox</tabstop>
+  <tabstop>SP_Velocity_1d_Left_BC_doubleSpinBox</tabstop>
+  <tabstop>SP_Velocity_2d_Left_BC_doubleSpinBox</tabstop>
+  <tabstop>SP_Velocity_3d_Left_BC_doubleSpinBox</tabstop>
+  <tabstop>SP_Pressure_Left_BC_doubleSpinBox</tabstop>
   <tabstop>FEqs_pressure_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Type_Right_ComboBox</tabstop>
-  <tabstop>SP_BC_Right_Temperature_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Right_Velocity_1d_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Right_Velocity_2d_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Right_Velocity_3d_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Pressure_Right_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Type_Top_ComboBox</tabstop>
-  <tabstop>SP_BC_Top_Temperature_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Top_Velocity_1d_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Top_Velocity_2d_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Top_Velocity_3d_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Pressure_Top_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Type_Bottom_ComboBox</tabstop>
-  <tabstop>SP_BC_Bottom_Temperature_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Bottom_Velocity_1d_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Bottom_Velocity_2d_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Bottom_Velocity_3d_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Pressure_Bottom_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Type_Front_ComboBox</tabstop>
-  <tabstop>SP_BC_Front_Temperature_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Front_Velocity_1d_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Front_Velocity_2d_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Front_Velocity_3d_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Pressure_Front_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Type_Back_ComboBox</tabstop>
-  <tabstop>SP_BC_Back_Temperature_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Back_Velocity_1d_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Back_Velocity_2d_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Back_Velocity_3d_doubleSpinBox</tabstop>
-  <tabstop>SP_BC_Pressure_Back_doubleSpinBox_11</tabstop>
+  <tabstop>SP_Type_Right_BC_ComboBox</tabstop>
+  <tabstop>SP_Temperature_Right_BC_doubleSpinBox</tabstop>
+  <tabstop>SP_Velocity_1d_Right_BC_doubleSpinBox</tabstop>
+  <tabstop>SP_Velocity_2d_Right_BC_doubleSpinBox</tabstop>
+  <tabstop>SP_Velocity_3d_Right_BC_doubleSpinBox</tabstop>
+  <tabstop>SP_Pressure_Right_BC_doubleSpinBox</tabstop>
+  <tabstop>SP_Type_Top_BC_ComboBox</tabstop>
+  <tabstop>SP_Temperature_Top_BC_doubleSpinBox</tabstop>
+  <tabstop>SP_Velocity_1d_Top_BC_doubleSpinBox</tabstop>
+  <tabstop>SP_Velocity_2d_Top_BC_doubleSpinBox</tabstop>
+  <tabstop>SP_Velocity_3d_Top_BC_doubleSpinBox</tabstop>
+  <tabstop>SP_Pressure_Top_BC_doubleSpinBox</tabstop>
+  <tabstop>SP_Type_Bottom_BC_ComboBox</tabstop>
+  <tabstop>SP_Temperature_Bottom_BC_doubleSpinBox</tabstop>
+  <tabstop>SP_Velocity_1d_Bottom_BC_doubleSpinBox</tabstop>
+  <tabstop>SP_Velocity_2d_Bottom_BC_doubleSpinBox</tabstop>
+  <tabstop>SP_Velocity_3d_Bottom_BC_doubleSpinBox</tabstop>
+  <tabstop>SP_Pressure_Bottom_BC_doubleSpinBox</tabstop>
+  <tabstop>SP_Type_Front_BC_ComboBox</tabstop>
+  <tabstop>SP_Temperature_Front_BC_doubleSpinBox</tabstop>
+  <tabstop>SP_Velocity_1d_Front_BC_doubleSpinBox</tabstop>
+  <tabstop>SP_Velocity_2d_Front_BC_doubleSpinBox</tabstop>
+  <tabstop>SP_Velocity_3d_Front_BC_doubleSpinBox</tabstop>
+  <tabstop>SP_Pressure_Front_BC_doubleSpinBox</tabstop>
+  <tabstop>SP_Type_Back_BC_ComboBox</tabstop>
+  <tabstop>SP_Temperature_Back_BC_doubleSpinBox</tabstop>
+  <tabstop>SP_Velocity_1d_Back_BC_doubleSpinBox</tabstop>
+  <tabstop>SP_Velocity_2d_Back_BC_doubleSpinBox</tabstop>
+  <tabstop>SP_Velocity_3d_Back_BC_doubleSpinBox</tabstop>
+  <tabstop>SP_Pressure_Back_BC_doubleSpinBox</tabstop>
   <tabstop>DM_HeatSource_doubleSpinBox</tabstop>
   <tabstop>DM_Viscosity_Phase1_doubleSpinBox</tabstop>
   <tabstop>DM_Viscosity_Phase2_doubleSpinBox</tabstop>
-  <tabstop>DM_Conductivity_doubleSpinBox</tabstop>
-  <tabstop>DM_Conductivity_doubleSpinBox_2</tabstop>
+  <tabstop>DM_Conductivity_Phase1_doubleSpinBox</tabstop>
+  <tabstop>DM_Conductivity_Phase2_doubleSpinBox_2</tabstop>
   <tabstop>DM_Gravity_1d_doubleSpinBox</tabstop>
   <tabstop>DM_Gravity_2d_doubleSpinBox</tabstop>
   <tabstop>DM_Gravity_3d_doubleSpinBox</tabstop>
-  <tabstop>DM_FrictionCoefficients_doubleSpinBox</tabstop>
-  <tabstop>DM_FrictionCoefficients_Pase2_doubleSpinBox</tabstop>
-  <tabstop>DM_Concentration_doubleSpinBox</tabstop>
-  <tabstop>DM_pressure_doubleSpinBox</tabstop>
-  <tabstop>DM_VelocityP1_1d_doubleSpinBox</tabstop>
-  <tabstop>DM_VelocityP1_2d_doubleSpinBox</tabstop>
-  <tabstop>DM_VelocityP1_3d_doubleSpinBox</tabstop>
-  <tabstop>DM_CommonTemperature_doubleSpinBox</tabstop>
+  <tabstop>DM_FrictionCoefficients_Phase1_doubleSpinBox</tabstop>
+  <tabstop>DM_FrictionCoefficients_Phase2_doubleSpinBox</tabstop>
+  <tabstop>DM_Concentration_IC_doubleSpinBox</tabstop>
+  <tabstop>DM_Pressure_IC_doubleSpinBox</tabstop>
+  <tabstop>DM_Velocity_1d_IC_doubleSpinBox</tabstop>
+  <tabstop>DM_Velocity_2d_IC_doubleSpinBox</tabstop>
+  <tabstop>DM_Velocity_3d_IC_doubleSpinBox</tabstop>
+  <tabstop>DM_Temperature_IC_doubleSpinBox</tabstop>
   <tabstop>DM_1barOr155bar</tabstop>
-  <tabstop>DM_BC_Type_Left_ComboBox</tabstop>
-  <tabstop>DM_BC_Left_Temperature_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Left_Concentration_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Left_Velocity_1d_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Left_Velocity_2d_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Left_Velocity_3d_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Pressure_Left_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Type_Right_ComboBox</tabstop>
-  <tabstop>DM_BC_Right_Temperature_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Right_Concentration_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Right_Velocity_1d_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Right_Velocity_2d_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Right_Velocity_3d_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Pressure_Right_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Type_Top_ComboBox</tabstop>
+  <tabstop>DM_Type_Left_BC_ComboBox</tabstop>
+  <tabstop>DM_Temperature_Left_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Concentration_Left_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Velocity_1d_Left_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Velocity_2d_Left_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Velocity_3d_Left_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Pressure_Left_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Type_Right_BC_ComboBox</tabstop>
+  <tabstop>DM_Temperature_Right_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Concentration_Right_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Velocity_1d_Right_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Velocity_2d_Right_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Velocity_3d_Right_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Pressure_Right_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Type_Top_BC_ComboBox</tabstop>
   <tabstop>Iso2F_BC_Inlet_VelocityP2_1d_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Top_Temperature_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Top_Concentration_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Top_Velocity_1d_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Top_Velocity_2d_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Top_Velocity_3d_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Pressure_Top_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Type_Bottom_ComboBox</tabstop>
-  <tabstop>DM_BC_Bottom_Temperature_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Bottom_Concentration_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Bottom_Velocity_1d_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Bottom_Velocity_2d_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Bottom_Velocity_3d_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Pressure_Bottom_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Type_Front_ComboBox</tabstop>
-  <tabstop>DM_BC_Front_Temperature_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Front_Concentration_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Front_Velocity_1d_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Front_Velocity_2d_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Front_Velocity_3d_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Pressure_Front_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Type_Back_ComboBox</tabstop>
-  <tabstop>DM_BC_Back_Temperature_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Back_Concentration_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Back_Velocity_1d_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Back_Velocity_2d_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Back_Velocity_3d_doubleSpinBox</tabstop>
-  <tabstop>DM_BC_Pressure_Back_doubleSpinBox</tabstop>
+  <tabstop>DM_Temperature_Top_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Concentration_Top_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Velocity_1d_Top_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Velocity_2d_Top_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Velocity_3d_Top_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Pressure_Top_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Type_Bottom_BC_ComboBox</tabstop>
+  <tabstop>DM_Temperature_Bottom_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Concentration_Bottom_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Velocity_1d_Bottom_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Velocity_2d_Bottom_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Velocity_3d_Bottom_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Pressure_Bottom_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Type_Front_BC_ComboBox</tabstop>
+  <tabstop>DM_Temperature_Front_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Concentration_Front_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Velocity_1d_Front_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Velocity_2d_Front_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Velocity_3d_Front_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Pressure_Front_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Type_Back_BC_ComboBox</tabstop>
+  <tabstop>DM_Temperature_Back_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Concentration_Back_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Velocity_1d_Back_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Velocity_2d_Back_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Velocity_3d_Back_BC_doubleSpinBox</tabstop>
+  <tabstop>DM_Pressure_Back_BC_doubleSpinBox</tabstop>
   <tabstop>FEqs_HeatSource_doubleSpinBox</tabstop>
   <tabstop>FEqs_Viscosity_Phase1_doubleSpinBox</tabstop>
   <tabstop>FEqs_Viscosity_Phase2_doubleSpinBox</tabstop>
@@ -12685,14 +12675,14 @@
   <tabstop>Iso2F_Gravity_2d_doubleSpinBox</tabstop>
   <tabstop>Iso2F_Gravity_3d_doubleSpinBox</tabstop>
   <tabstop>Iso2F_FrictionCoefficients_doubleSpinBox</tabstop>
-  <tabstop>Iso2F_Alpha_doubleSpinBox</tabstop>
-  <tabstop>Iso2F_pressure_doubleSpinBox</tabstop>
-  <tabstop>Iso2F_VelocityP1_1d_doubleSpinBox</tabstop>
-  <tabstop>Iso2F_VelocityP1_2d_doubleSpinBox</tabstop>
-  <tabstop>Iso2F_VelocityP1_3d_doubleSpinBox</tabstop>
-  <tabstop>Iso2F_VelocityP2_1d_doubleSpinBox</tabstop>
-  <tabstop>Iso2F_VelocityP2_2d_doubleSpinBox</tabstop>
-  <tabstop>Iso2F_VelocityP2_3d_doubleSpinBox</tabstop>
+  <tabstop>Iso2F_Alpha_IC_doubleSpinBox</tabstop>
+  <tabstop>Iso2F_Pressure_IC_doubleSpinBox</tabstop>
+  <tabstop>Iso2F_VelocityPhase1_1d_IC_doubleSpinBox</tabstop>
+  <tabstop>Iso2F_VelocityPhase1_2d_IC_doubleSpinBox</tabstop>
+  <tabstop>Iso2F_VelocityPhase1_3d_IC_doubleSpinBox</tabstop>
+  <tabstop>Iso2F_VelocityPhase2_1d_IC_doubleSpinBox</tabstop>
+  <tabstop>Iso2F_VelocityPhase2_2d_IC_doubleSpinBox</tabstop>
+  <tabstop>Iso2F_VelocityPhase2_3d_IC_doubleSpinBox</tabstop>
   <tabstop>Iso2f_1barOr155bar</tabstop>
   <tabstop>Iso2F_BC_Wall_GroupName_lineEdit</tabstop>
   <tabstop>Iso2F_BC_Wall_VelocityP1_1d_doubleSpinBox</tabstop>
@@ -12728,9 +12718,9 @@
   <tabstop>TEq_BC_Front_Temperature_doubleSpinBox</tabstop>
   <tabstop>TEq_BC_Back_comboBox</tabstop>
   <tabstop>TEq_BC_Back_Temperature_doubleSpinBox</tabstop>
-  <tabstop>NO_MaxNbrOfTimeStep_spinBox</tabstop>
+  <tabstop>NO_MaxNbOfTimeStep_spinBox</tabstop>
   <tabstop>NO_FreqSave_spinBox</tabstop>
-  <tabstop>NO_MaxTime_doubleSpinBox</tabstop>
+  <tabstop>NO_TimeMax_doubleSpinBox</tabstop>
   <tabstop>NO_Precision_doubleSpinBox</tabstop>
   <tabstop>NO_CFL_doubleSpinBox</tabstop>
   <tabstop>NO_Method_comboBox</tabstop>
@@ -12758,7 +12748,7 @@
   <tabstop>Iso2F_BC_Inlet_GroupName_lineEdit</tabstop>
   <tabstop>Iso2F_BC_Inlet_VelocityP2_2d_doubleSpinBox</tabstop>
   <tabstop>Iso2F_BC_Wall_VelocityP2_2d_doubleSpinBox</tabstop>
-  <tabstop>Import_lineEdit</tabstop>
+  <tabstop>InputFileName_lineEdit</tabstop>
   <tabstop>Iso2F_BC_Wall_VelocityP2_3d_doubleSpinBox</tabstop>
   <tabstop>FEqs_VelocityP1_1d_doubleSpinBox</tabstop>
   <tabstop>FEqs_Alpha_doubleSpinBox</tabstop>
@@ -12772,8 +12762,8 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>550</x>
-     <y>232</y>
+     <x>618</x>
+     <y>212</y>
     </hint>
     <hint type="destinationlabel">
      <x>858</x>
@@ -12788,8 +12778,8 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>550</x>
-     <y>232</y>
+     <x>618</x>
+     <y>212</y>
     </hint>
     <hint type="destinationlabel">
      <x>608</x>
@@ -12804,8 +12794,8 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>550</x>
-     <y>232</y>
+     <x>618</x>
+     <y>212</y>
     </hint>
     <hint type="destinationlabel">
      <x>358</x>
@@ -12820,8 +12810,8 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>414</x>
-     <y>232</y>
+     <x>482</x>
+     <y>212</y>
     </hint>
     <hint type="destinationlabel">
      <x>608</x>
@@ -12836,8 +12826,8 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>414</x>
-     <y>232</y>
+     <x>482</x>
+     <y>212</y>
     </hint>
     <hint type="destinationlabel">
      <x>358</x>
@@ -12852,8 +12842,8 @@
    <slot>setEnabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>278</x>
-     <y>232</y>
+     <x>346</x>
+     <y>212</y>
     </hint>
     <hint type="destinationlabel">
      <x>358</x>
@@ -12862,7 +12852,7 @@
    </hints>
   </connection>
   <connection>
-   <sender>Creation_radioButton</sender>
+   <sender>MeshCreation_RadioButton</sender>
    <signal>toggled(bool)</signal>
    <receiver>Mesh_Creation</receiver>
    <slot>setEnabled(bool)</slot>
@@ -12877,6 +12867,22 @@
     </hint>
    </hints>
   </connection>
+  <connection>
+   <sender>pushButton</sender>
+   <signal>clicked()</signal>
+   <receiver>TabWidget</receiver>
+   <slot>onLaunchSimu()</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>989</x>
+     <y>753</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>918</x>
+     <y>551</y>
+    </hint>
+   </hints>
+  </connection>
  </connections>
  <slots>
   <slot>onTransportSelected(bool)</slot>
@@ -12888,5 +12894,6 @@
   <slot>Dim_1(bool)</slot>
   <slot>Dim_2(bool)</slot>
   <slot>Dim_3(bool)</slot>
+  <slot>onLaunchSimu()</slot>
  </slots>
 </ui>

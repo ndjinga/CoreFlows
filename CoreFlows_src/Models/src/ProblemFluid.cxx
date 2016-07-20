@@ -1063,33 +1063,33 @@ void ProblemFluid::addConvectionToSecondMember
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
 		cout << "A^-, (" << i << "," << j<< "):" << endl;
-		for(int i=0; i<_nVar; i++)
+		for(int i1=0; i1<_nVar; i1++)
 		{
-			for(int j=0; j<_nVar; j++)
-				cout<< _AroeMinus[i*_nVar+j]<<", ";
+			for(int j1=0; j1<_nVar; j1++)
+				cout<< _AroeMinus[i1*_nVar+j1]<<", ";
 			cout << endl;
 		}
 		cout << endl;
 		cout << "A^+, (" << i << "," << j<< "):" << endl;
-		for(int i=0; i<_nVar; i++)
+		for(int i1=0; i1<_nVar; i1++)
 		{
-			for(int j=0; j<_nVar; j++)
-				cout<<  _AroePlus[i*_nVar+j]<<", ";
+			for(int j1=0; j1<_nVar; j1++)
+				cout<<  _AroePlus[i1*_nVar+j1]<<", ";
 			cout << endl;
 		}
 		cout << endl;
 		cout << "|A|,(" << i << "," << j<< "):" << endl;
-		for(int i=0; i<_nVar; i++)
+		for(int i1=0; i1<_nVar; i1++)
 		{
-			for(int j=0; j<_nVar; j++)
-				cout<<  _absAroe[i*_nVar+j]<<", ";
+			for(int j1=0; j1<_nVar; j1++)
+				cout<<  _absAroe[i1*_nVar+j1]<<", ";
 			cout << endl;
 		}
 		cout << "sign(A),(" << i << "," << j<< "):" << endl;
-		for(int i=0; i<_nVar; i++)
+		for(int i1=0; i1<_nVar; i1++)
 		{
-			for(int j=0; j<_nVar; j++)
-				cout<<  _signAroe[i*_nVar+j]<<", ";
+			for(int j1=0; j1<_nVar; j1++)
+				cout<<  _signAroe[i1*_nVar+j1]<<", ";
 			cout << endl;
 		}
 	}

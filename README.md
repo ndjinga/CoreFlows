@@ -73,8 +73,9 @@ In CoreFlows-master, open the file CoreFlows.sh and set the variables :
 - `CDMATH_INSTALL`, the path to your CDMATH installation
 - `CoreFlows_ROOT`, the path to the CoreFlows-master directory
 - `CoreFlows_INSTALL`, the path to the installation directory (default value is CoreFlows_ROOT)
-- `CoreFlows_PYTHON`, set to 'ON' if you intend to use python script, 'OFF' otherwise
-- `CoreFlows_Doc`, set to 'ON' if you want the doxygen documentation to be generated, 'OFF' otherwise
+- `CoreFlows_PYTHON`, set to 'ON' if you intend to use python scripts, 'OFF' otherwise
+- `CoreFlows_DOC`, set to 'ON' if you want the doxygen documentation to be generated, 'OFF' otherwise
+- `CoreFlows_GUI`, set to 'ON' if you want to use CDMATH-CoreFlows as a Salomé module (you will need to use a Salomé shell), 'OFF' otherwise
 
 
 Once the file CoreFlows.sh has been edited, you can open a terminal, go to CoreFlows-master and type

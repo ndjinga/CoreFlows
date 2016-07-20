@@ -12,7 +12,6 @@ def SinglePhase_1DHeatedChannel():
 	xinf = 0 ;
 	xsup=4.2;
 	nx=50;
-	M=cm.Mesh(xinf,xsup,nx)
 
     # set the limit field for each boundary
 
