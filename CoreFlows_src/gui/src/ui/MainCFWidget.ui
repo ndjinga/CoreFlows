@@ -29,7 +29,7 @@
    <string notr="true"/>
   </property>
   <property name="currentIndex">
-   <number>1</number>
+   <number>2</number>
   </property>
   <widget class="QWidget" name="tabModel">
    <attribute name="title">
@@ -79,6 +79,9 @@
           <enum>Qt::Horizontal</enum>
          </property>
          <widget class="QRadioButton" name="Dim1_RadioButton">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
           <property name="minimumSize">
            <size>
             <width>130</width>
@@ -91,8 +94,17 @@
             <height>30</height>
            </size>
           </property>
+          <property name="mouseTracking">
+           <bool>true</bool>
+          </property>
+          <property name="acceptDrops">
+           <bool>false</bool>
+          </property>
           <property name="text">
            <string>1</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
           </property>
          </widget>
          <widget class="QRadioButton" name="Dim2_RadioButton">
@@ -129,10 +141,10 @@
            </size>
           </property>
           <property name="mouseTracking">
-           <bool>false</bool>
+           <bool>true</bool>
           </property>
           <property name="acceptDrops">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
           <property name="text">
            <string>3</string>
@@ -141,7 +153,7 @@
            <bool>true</bool>
           </property>
           <property name="checked">
-           <bool>true</bool>
+           <bool>false</bool>
           </property>
          </widget>
         </widget>
@@ -572,7 +584,7 @@
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
-          <widget class="QRadioButton" name="InputFileName_RadioButton">
+          <widget class="QRadioButton" name="MeshInputFileName_RadioButton">
            <property name="minimumSize">
             <size>
              <width>90</width>
@@ -592,7 +604,7 @@
             <bool>true</bool>
            </property>
           </widget>
-          <widget class="QLineEdit" name="InputFileName_lineEdit">
+          <widget class="QLineEdit" name="MeshInputFileName_lineEdit">
            <property name="minimumSize">
             <size>
              <width>350</width>
@@ -606,7 +618,7 @@
             </size>
            </property>
           </widget>
-          <widget class="QToolButton" name="InputFileName_toolButton">
+          <widget class="QToolButton" name="MeshInputFileName_toolButton">
            <property name="minimumSize">
             <size>
              <width>30</width>
@@ -2105,7 +2117,7 @@
         </property>
         <layout class="QGridLayout" name="gridLayout_56">
          <item row="0" column="0">
-          <widget class="QLabel" name="SP_LiquidOrFluid">
+          <widget class="QLabel" name="SP_GasOrLiquid">
            <property name="minimumSize">
             <size>
              <width>140</width>
@@ -2131,7 +2143,7 @@
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="QComboBox" name="SP_GasOrLiquid">
+          <widget class="QComboBox" name="SP_GasOrLiquid_comboBox">
            <property name="minimumSize">
             <size>
              <width>190</width>
@@ -2167,7 +2179,7 @@
           </widget>
          </item>
          <item row="1" column="0">
-          <widget class="QLabel" name="SP_LiquidOrFluid_2">
+          <widget class="QLabel" name="SP_1barOr155bar">
            <property name="minimumSize">
             <size>
              <width>140</width>
@@ -2193,7 +2205,7 @@
           </widget>
          </item>
          <item row="1" column="1">
-          <widget class="QComboBox" name="SP_1barOr155bar">
+          <widget class="QComboBox" name="SP_1barOr155bar_comboBox">
            <property name="minimumSize">
             <size>
              <width>190</width>
@@ -2213,7 +2225,7 @@
            </property>
            <item>
             <property name="text">
-             <string>Arround 1bar 300K</string>
+             <string>around1bar300K</string>
             </property>
            </item>
            <item>
@@ -2223,7 +2235,7 @@
            </item>
            <item>
             <property name="text">
-             <string>Arround 155bar 600K</string>
+             <string>around155bars600K</string>
             </property>
            </item>
           </widget>
@@ -12513,9 +12525,9 @@
   <tabstop>DriftModel_RadioButton</tabstop>
   <tabstop>IsothermalTwoFluid_RadioButton</tabstop>
   <tabstop>FiveEqsTwoFluid_RadioButton</tabstop>
-  <tabstop>InputFileName_RadioButton</tabstop>
+  <tabstop>MeshInputFileName_RadioButton</tabstop>
   <tabstop>MeshCreation_RadioButton</tabstop>
-  <tabstop>InputFileName_toolButton</tabstop>
+  <tabstop>MeshInputFileName_toolButton</tabstop>
   <tabstop>Xinf_doubleSpinBox</tabstop>
   <tabstop>Xsup_doubleSpinBox</tabstop>
   <tabstop>Nx_spinBox</tabstop>
@@ -12537,8 +12549,8 @@
   <tabstop>SP_Velocity_2d_IC_doubleSpinBox</tabstop>
   <tabstop>SP_Velocity_3d_IC_doubleSpinBox</tabstop>
   <tabstop>SP_Temperature_IC_doubleSpinBox</tabstop>
-  <tabstop>SP_GasOrLiquid</tabstop>
-  <tabstop>SP_1barOr155bar</tabstop>
+  <tabstop>SP_GasOrLiquid_comboBox</tabstop>
+  <tabstop>SP_1barOr155bar_comboBox</tabstop>
   <tabstop>SP_Type_Left_BC_ComboBox</tabstop>
   <tabstop>SP_Temperature_Left_BC_doubleSpinBox</tabstop>
   <tabstop>SP_Velocity_1d_Left_BC_doubleSpinBox</tabstop>
@@ -12748,7 +12760,7 @@
   <tabstop>Iso2F_BC_Inlet_GroupName_lineEdit</tabstop>
   <tabstop>Iso2F_BC_Inlet_VelocityP2_2d_doubleSpinBox</tabstop>
   <tabstop>Iso2F_BC_Wall_VelocityP2_2d_doubleSpinBox</tabstop>
-  <tabstop>InputFileName_lineEdit</tabstop>
+  <tabstop>MeshInputFileName_lineEdit</tabstop>
   <tabstop>Iso2F_BC_Wall_VelocityP2_3d_doubleSpinBox</tabstop>
   <tabstop>FEqs_VelocityP1_1d_doubleSpinBox</tabstop>
   <tabstop>FEqs_Alpha_doubleSpinBox</tabstop>
@@ -12772,38 +12784,6 @@
    </hints>
   </connection>
   <connection>
-   <sender>Dim3_RadioButton</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>WidgetCreation2d</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>618</x>
-     <y>212</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>608</x>
-     <y>377</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>Dim3_RadioButton</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>WidgetCreation1d</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>618</x>
-     <y>212</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>358</x>
-     <y>377</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
    <sender>Dim2_RadioButton</sender>
    <signal>toggled(bool)</signal>
    <receiver>WidgetCreation2d</receiver>
@@ -12815,22 +12795,6 @@
     </hint>
     <hint type="destinationlabel">
      <x>608</x>
-     <y>377</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>Dim2_RadioButton</sender>
-   <signal>toggled(bool)</signal>
-   <receiver>WidgetCreation1d</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>482</x>
-     <y>212</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>358</x>
      <y>377</y>
     </hint>
    </hints>

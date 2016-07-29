@@ -19,19 +19,20 @@ class MainCFWidget(QtGui.QTabWidget):
       if isinstance(att, QtGui.QWidget):
         name = str(att.objectName())
         if name != "":
-          print(name)
+#          print(name)
           if name.endswith("RadioButton"):
             assert(isinstance(att, QtGui.QRadioButton))
-            # parse name
-            name=name[:len(name)-len("_RadioButton")]#On retire le suffixe _Radiobutton
-            if name.startswith("Dim") :
-              dictCF["spaceDim"]=name[len("Dim")]
-            elif name=="DriftModel" or "name==SinglePhase" or name.endswith("Equation") or name.endswith("TwoFluid") :
-              dictCF["ModelName"]=name
-            elif name=="InputFileName" :
-              dictCF["InputFileName"]=True
-            elif name=="MeshCreation" :
-              dictCF["MeshCreation"]=True
+            if att.isChecked() :
+              # parse name
+              name=name[:len(name)-len("_RadioButton")]#On retire le suffixe _Radiobutton
+              if name.startswith("Dim") :
+                dictCF["SpaceDim"]=name[len("Dim")]
+              elif name=="DriftModel" or "name==SinglePhase" or name.endswith("Equation") or name.endswith("TwoFluid") :
+                dictCF["ModelName"]=name
+              elif name=="InputFileName" :
+                dictCF["InputFileName"]=True
+              elif name=="MeshCreation" :
+                dictCF["MeshCreation"]=True
           elif name.endswith("spinBox") :
             assert(isinstance(att, QtGui.QSpinBox))
             val = att.value()

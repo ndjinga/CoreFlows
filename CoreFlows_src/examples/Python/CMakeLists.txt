@@ -34,9 +34,12 @@ INCLUDE(SalomeSetupPlatform)   # From KERNEL
 # =============
 
 # Mandatory products
-#FIND_PACKAGE(SalomePython    REQUIRED)
-FIND_PACKAGE(SalomePythonInterp    REQUIRED)
-FIND_PACKAGE(SalomePythonLibs    REQUIRED)
+IF(  $ENV{PARAVIEW_VERSION} STRLESS "5")
+         FIND_PACKAGE(SalomePython REQUIRED)
+ELSE()
+         FIND_PACKAGE(SalomePythonInterp REQUIRED)
+         FIND_PACKAGE(SalomePythonLibs REQUIRED)
+ENDIF()
 
 SALOME_INSTALL_SCRIPTS("${_all_SCRIPTS}" ${SALOME_INSTALL_SCRIPT_PYTHON}/tests)
 
