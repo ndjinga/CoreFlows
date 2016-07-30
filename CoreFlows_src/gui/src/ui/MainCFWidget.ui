@@ -29,7 +29,7 @@
    <string notr="true"/>
   </property>
   <property name="currentIndex">
-   <number>2</number>
+   <number>8</number>
   </property>
   <widget class="QWidget" name="tabModel">
    <attribute name="title">
@@ -12354,7 +12354,7 @@
           </property>
           <item>
            <property name="text">
-            <string>Upwind </string>
+            <string>upwind </string>
            </property>
           </item>
           <item>
@@ -12364,17 +12364,22 @@
           </item>
           <item>
            <property name="text">
-            <string>Centre</string>
+            <string>centred</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>Staggred</string>
+            <string>staggered</string>
            </property>
           </item>
           <item>
            <property name="text">
-            <string>LowMach</string>
+            <string>lowMach</string>
+           </property>
+          </item>
+          <item>
+           <property name="text">
+            <string>pressureCorrection</string>
            </property>
           </item>
          </widget>
@@ -12408,7 +12413,7 @@
           </item>
           <item>
            <property name="text">
-            <string>Equilibre</string>
+            <string>Well-balanced</string>
            </property>
           </item>
          </widget>
@@ -12459,7 +12464,7 @@
         </widget>
        </item>
        <item row="4" column="0">
-        <widget class="QLabel" name="NO_FileName">
+        <widget class="QLabel" name="NO_ResultFileName">
          <property name="minimumSize">
           <size>
            <width>110</width>
@@ -12467,12 +12472,12 @@
           </size>
          </property>
          <property name="text">
-          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; color:#ff0000;&quot;&gt;File Name&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; color:#ff0000;&quot;&gt;Result file Name&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
          </property>
         </widget>
        </item>
        <item row="4" column="1">
-        <widget class="QLineEdit" name="NO_FileName_lineEdit">
+        <widget class="QLineEdit" name="NO_ResultFileName_lineEdit">
          <property name="minimumSize">
           <size>
            <width>246</width>
@@ -12740,7 +12745,7 @@
   <tabstop>NO_Scheme_comboBox</tabstop>
   <tabstop>NO_Scheme_type_comboBox</tabstop>
   <tabstop>NO_Preconditioner_comboBox</tabstop>
-  <tabstop>NO_FileName_lineEdit</tabstop>
+  <tabstop>NO_ResultFileName_lineEdit</tabstop>
   <tabstop>FEqs_VelocityP1_3d_doubleSpinBox</tabstop>
   <tabstop>Iso2F_BC_Wall_VelocityP1_3d_doubleSpinBox</tabstop>
   <tabstop>Iso2F_BC_Wall_VelocityP2_1d_doubleSpinBox</tabstop>

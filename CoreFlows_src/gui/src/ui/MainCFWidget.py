@@ -26,7 +26,7 @@ class MainCFWidget(QtGui.QTabWidget):
               # parse name
               name=name[:len(name)-len("_RadioButton")]#On retire le suffixe _Radiobutton
               if name.startswith("Dim") :
-                dictCF["SpaceDim"]=name[len("Dim")]
+                dictCF["spaceDim"]=int(name[len("Dim")])
               elif name=="DriftModel" or "name==SinglePhase" or name.endswith("Equation") or name.endswith("TwoFluid") :
                 dictCF["ModelName"]=name
               elif name=="InputFileName" :
@@ -110,7 +110,7 @@ class MainCFWidget(QtGui.QTabWidget):
               elif name.endswith("Velocity_3d") :
                 dictCF["InitialVelocity_3d"]=val
             elif name.endswith("_BC") :#Boundary conditions
-              name=name[4:len(name)-len("_BC")]#On retire le préfixe SP_ ou DM_ au début et le suffixe _BC à la fin
+              name=name[3:len(name)-len("_BC")]#On retire le préfixe SP_ ou DM_ au début et le suffixe _BC à la fin
               dictCF[name]=val
           elif name.endswith('comboBox'):
             assert(isinstance(att, QtGui.QComboBox))
@@ -136,11 +136,12 @@ class MainCFWidget(QtGui.QTabWidget):
               dictCF["Preconditioner"]=val 
           elif name.endswith('lineEdit'):
             assert(isinstance(att, QtGui.QLineEdit))
-            val = att.text()
+            val = str(att.text())
             # parse name
             name=name[:len(name)-len("_lineEdit")]#On retire le suffixe _comboBox
+            #print(name,val)
             if name=="NO_ResultFileName" :
-              dictCF["FileName"]=val
+              dictCF["ResultFileName"]=val
             elif name=="InputFileName" :
               dictCF["InputFileName"]=val
 
@@ -153,27 +154,27 @@ class MainCFWidget(QtGui.QTabWidget):
     print "Setting Model and VV_Constant"
     ######## Setting Model and VV_Constant #########################
     if dictCF["ModelName"]=="SinglePhase" :
-      exec "myproblem = cf.%s(cf.%s,cf.%s,%s)" % (dictCF["ModelName"],dictCF["fluidType"],dictCF["pressureEstimate"],dictCF["SpaceDim"])
+      exec "myProblem = cf.%s(cf.%s,cf.%s,%s)" % (dictCF["ModelName"],dictCF["fluidType"],dictCF["pressureEstimate"],dictCF["spaceDim"])
       nVar =  myProblem.getNumberOfVariables()
       VV_Constant =[0]*nVar
+      VV_Constant[0] = dictCF["InitialPressure"]
+      VV_Constant[1] = dictCF["InitialVelocity_1d"]
+      if dictCF["spaceDim"] >1 :
+        VV_Constant[2] = dictCF["InitialVelocity_2d"]
+        if dictCF["spaceDim"] >2 :
+          VV_Constant[3] = dictCF["InitialVelocity_3d"]
+      VV_Constant[nVar-1] = dictCF["InitialTemperature"]
+    elif dictCF["ModelName"]=="DriftModel" :
+      exec "myProblem = cf.%s(cf.%s,%s)" % (dictCF["ModelName"],dictCF["pressureEstimate"],dictCF["spaceDim"])
+      nVar =  myProblem.getNumberOfVariables()
+      VV_Constant =[0]*nVar
+      VV_Constant[0] = dictCF["InitialConcentration"]
       VV_Constant[1] = dictCF["InitialPressure"]
       VV_Constant[2] = dictCF["InitialVelocity_1d"]
       if dictCF["spaceDim"] >1 :
         VV_Constant[3] = dictCF["InitialVelocity_2d"]
         if dictCF["spaceDim"] >2 :
           VV_Constant[4] = dictCF["InitialVelocity_3d"]
-      VV_Constant[nVar] = dictCF["InitialTemperature"]
-    elif dictCF["ModelName"]=="DriftModel" :
-      exec "myproblem = cf.%s(cf.%s,%s)" % (dictCF["ModelName"],dictCF["pressureEstimate"],dictCF["SpaceDim"])
-      nVar =  myProblem.getNumberOfVariables()
-      VV_Constant =[0]*nVar
-      VV_Constant[1] = dictCF["InitialConcentration"]
-      VV_Constant[2] = dictCF["InitialPressure"]
-      VV_Constant[3] = dictCF["InitialVelocity_1d"]
-      if dictCF["spaceDim"] >1 :
-        VV_Constant[4] = dictCF["InitialVelocity_2d"]
-        if dictCF["spaceDim"] >2 :
-          VV_Constant[5] = dictCF["InitialVelocity_3d"]
       VV_Constant[nVar] = dictCF["InitialTemperature"]
     else :
       raise NameError('Model not yet handled', dictCF["ModelName"])  
@@ -196,8 +197,8 @@ class MainCFWidget(QtGui.QTabWidget):
 
     ######## 1D for the moment ######################
     if dictCF["ModelName"]=="SinglePhase" :
-      myProblem.setInletBoundaryCondition("Left",dictCF["SP_Temperature_Left"],dictCF["SP_Concentration_Left"],dictCF["SP_Velocity_1d_Left"])
-      myProblem.setOutletBoundaryCondition("Right", dictCF["SP_Pressure_Right"]);
+      myProblem.setInletBoundaryCondition("Left",dictCF["Temperature_Left"],dictCF["Concentration_Left"],dictCF["Velocity_1d_Left"])
+      myProblem.setOutletBoundaryCondition("Right", dictCF["Pressure_Right"]);
     elif dictCF["ModelName"]=="DriftModel" :
       myProblem.setInletBoundaryCondition("Left",dictCF["DM_Temperature_Left"],dictCF["DM_Velocity_1d_Left"])
       myProblem.setOutletBoundaryCondition("Right", dictCF["DM_Pressure_Right"]);
@@ -205,11 +206,11 @@ class MainCFWidget(QtGui.QTabWidget):
     ########## Physical forces #################
     myProblem.setHeatSource(dictCF["HeatSource"]);
     gravite=[0]*dictCF["spaceDim"]
-    gravite[1]=dictCF["Gravity_1d"]
+    gravite[0]=dictCF["Gravity_1d"]
     if dictCF["spaceDim"] >1 :
-      gravite[2]=dictCF["Gravity_2d"]
+      gravite[1]=dictCF["Gravity_2d"]
       if dictCF["spaceDim"] >2 :
-        gravite[3]=dictCF["Gravity_3d"]
+        gravite[2]=dictCF["Gravity_3d"]
     myProblem.setGravity(gravite)
 
     ########## Numerical options ###############
@@ -221,25 +222,25 @@ class MainCFWidget(QtGui.QTabWidget):
     myProblem.setMaxNbOfTimeStep(dictCF["MaxNbOfTimeStep"]);
     myProblem.setTimeMax(dictCF["TimeMax"]);
     myProblem.setFreqSave(dictCF["FreqSave"]);
-    myProblem.setFileName(dictCF["FileName"]);
+    myProblem.setFileName(dictCF["ResultFileName"]);
     myProblem.saveConservativeField(True);
-    if(spaceDim>1):
+    if(dictCF["spaceDim"]>1):
       myProblem.saveVelocity();
       pass
 
-    myproblem.initialize()
+    myProblem.initialize()
 
-    ok = myproblem.run()
+    ok = myProblem.run()
 
     if (ok):
-      print( "Simulation " + dict[FileName] + " is successful !" );
+      print( "Simulation " + dictCF["ResultFileName"] + " is successful !" );
       pass
     else:
-      print( "Simulation " + dict[FileName] + "  failed ! " );
+      print( "Simulation " + dictCF["ResultFileName"] + "  failed ! " );
       pass
 
     print( "------------ End of calculation !!! -----------" );
 
-    myproblem.terminate()
+    myProblem.terminate()
     
     # TODO use a helper object here.
