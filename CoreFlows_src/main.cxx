@@ -18,57 +18,58 @@ int main()
 	int nx=2;
 	Mesh M(xinf,xsup,nx);
 	double eps=1.E-8;
-	M.setGroupAtPlan(xsup,0,eps,"LeftBoundary");
-	M.setGroupAtPlan(xinf,0,eps,"RightBoundary");
+	M.setGroupAtPlan(xsup,0,eps,"Neumann");
+	M.setGroupAtPlan(xinf,0,eps,"Neumann");
 	int spaceDim = M.getSpaceDimension();
 
-	//initial data
-	double initialVelocity_Left=1;
-	double initialTemperature_Left=565;
-	double initialPressure_Left=155e5;
+	// set the limit field for each boundary
+	LimitField limitNeumann;
+	limitNeumann.bcType=Neumann;
+	map<string, LimitField> boundaryFields;
 
-	//boundary data
-	double initialVelocity_Right=1;
-	double initialTemperature_Right=565;
-	double initialPressure_Right=155e5;
+	limitNeumann.p = 155e5;
+	limitNeumann.alpha = 0;
+	limitNeumann.v_x = vector<double>(2,0);
+	limitNeumann.v_y = vector<double>(2,0);
+	limitNeumann.v_z = vector<double>(2,0);
+	boundaryFields["Neumann"] = limitNeumann;
 
-	SinglePhase  myProblem(Liquid,around155bars600K,spaceDim);
-	// Prepare for the initial condition
+	IsothermalTwoFluid  myProblem(around155bars600K,spaceDim);
+	int nbPhase = myProblem.getNumberOfPhases();
 	int nVar = myProblem.getNumberOfVariables();
-	Vector VV_Left(nVar),VV_Right(nVar);
-	// left and right constant vectors
-	VV_Left[0] = initialPressure_Left;
-	VV_Left[1] = initialVelocity_Left;
-	VV_Left[2] = initialTemperature_Left ;
+	Field VV("Primitive", CELLS, M, nVar);
 
-	VV_Right[0] = initialPressure_Right;
-	VV_Right[1] = initialVelocity_Right;
-	VV_Right[2] = initialTemperature_Right ;
+	// Prepare for the initial condition
+	Vector VV_Left(nVar),VV_Right(nVar);
+	double discontinuity = (xinf+xsup)/2.;
+	// two vectors
+	VV_Left(0) = 0.5; VV_Right(0) = 0.2;
+	VV_Left(1) = 155e5; VV_Right(1) = 155e5;
+	for (int idim=0; idim<spaceDim;idim++){
+		VV_Left(2+idim) = 1;VV_Right(2+idim) = 1;
+		VV_Left(2+idim +spaceDim) =2;VV_Right(2+idim +spaceDim) = 1;
+	}
 
 	//Initial field creation
-	double discontinuity = (xinf+xsup)/2.;
-
-	cout << "Building initial data " << endl;
-	Field VV("Primitive", CELLS, M, nVar);
+	cout << "Building initial data" << endl;
 
 	myProblem.setInitialFieldStepFunction(M,VV_Left,VV_Right,discontinuity);
 
-	//set the boundary conditions
-	myProblem.setNeumannBoundaryCondition("LeftBoundary");
-	myProblem.setNeumannBoundaryCondition("RightBoundary");
+	//set the boundary fields
+	myProblem.setBoundaryFields(boundaryFields);
 
 	// set the numerical method
 	myProblem.setNumericalScheme(upwind, Explicit);
 
 	// name file save
-	string fileName = "1DRiemannProblem";
+	string fileName = "RiemannProblem";
 
 	// parameters calculation
-	unsigned MaxNbOfTimeStep = 1;
+	unsigned MaxNbOfTimeStep =1 ;
 	int freqSave = 1;
 	double cfl = 0.95;
-	double maxTime = 5;
-	double precision = 1e-8;
+	double maxTime = 1;
+	double precision = 1e-6;
 
 	myProblem.setCFL(cfl);
 	myProblem.setPrecision(precision);
@@ -77,9 +78,9 @@ int main()
 	myProblem.setFreqSave(freqSave);
 	myProblem.setFileName(fileName);
 	myProblem.saveConservativeField(true);
-	myProblem.setSaveFileFormat(CSV);
+	myProblem.setSaveFileFormat(MED);
 
-	// set display option to monitor the calculation
+	/* set display option to monitor the calculation */
 	myProblem.setVerbose( true);
 
 	// evolution
@@ -92,7 +93,7 @@ int main()
 	else
 		cout << "Simulation "<<fileName<<"  failed ! " << endl;
 
-	cout << "------------ End of calculation !!! -----------" << endl;
+	cout << "------------ End of calculation -----------" << endl;
 	myProblem.terminate();
 
 	return ok;

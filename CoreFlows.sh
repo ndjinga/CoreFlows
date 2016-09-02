@@ -1,15 +1,15 @@
 
 # CDMATH_DIR, PETSC_DIR, PETSC_ARCH, CoreFlows_ROOT : Paths to be set by the user 
-export CDMATH_DIR=/export/home/ndjinga/Logiciels/CDMATH/INSTALL
-export PETSC_DIR=/export/home/ndjinga/Logiciels/Petsc/petsc-3.7.2
+export CDMATH_DIR=/home/ndjinga/Logiciels/CDMATH/INSTALL
+export PETSC_DIR=/home/ndjinga/Logiciels/Petsc/petsc-3.7.2
 export PETSC_ARCH=arch-linux2-c-opt # usually for fedora: arch-linux2-c-opt or arch-linux2-c-debug, for ubuntu: linux-gnu-c-opt or linux-gnu-c-debug
-export CoreFlows_ROOT=/export/home/ndjinga/Logiciels/CoreFlows
+export CoreFlows_ROOT=/home/ndjinga/Logiciels/testCoreFlows/CDMATH-CoreFlows
 export CoreFlows_INSTALL=$CoreFlows_ROOT/CoreFlows_install
 
 #Compilation options (PYTHON, Doc, GUI) to be set by the user
 export CoreFlows_PYTHON='ON'   # To generate the SWIG module "Python = ON or OFF "
 export CoreFlows_DOC='ON'      # To generate the Documentation  "Doc = ON or OFF "
-export CoreFlows_GUI='OFF'      # To generate the Graphic user interface  "GUI = ON or OFF "
+export CoreFlows_GUI='ON'      # To generate the Graphic user interface  "GUI = ON or OFF "
 
 #------------------------------------------------------------------------------------------------------------------- 
 export CoreFlows=$CoreFlows_INSTALL/bin/Executable/CoreFlowsMainExe

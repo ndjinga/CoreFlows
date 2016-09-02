@@ -92,8 +92,8 @@ def FiveEqsTwoFluid_2DVidangeReservoir():
 
 	# set the numerical method
 	myProblem.setNumericalScheme(cf.upwind, cf.Explicit);
-	myProblem.setLinearSolver(cf.GMRES,cf.ILU,True);
-       	myProblem.setEntropicCorrection(True);
+	#myProblem.setEntropicCorrection(True);
+	myProblem.setNonLinearFormulation(cf.VFFC) 
 
 	# name file save
 	fileName = "2DVidangeReservoir";
@@ -101,7 +101,7 @@ def FiveEqsTwoFluid_2DVidangeReservoir():
 	# parameters calculation
 	MaxNbOfTimeStep = 3 ;
 	freqSave = 1;
-	cfl = .1;
+	cfl = 0.1;
 	maxTime = 500;
 	precision = 1e-4;
 
@@ -116,7 +116,6 @@ def FiveEqsTwoFluid_2DVidangeReservoir():
 
 	# evolution
 	myProblem.initialize();
-	print("Running python "+ fileName );
 
 	ok = myProblem.run();
 	if (ok):
@@ -129,6 +128,7 @@ def FiveEqsTwoFluid_2DVidangeReservoir():
 	print( "------------ End of calculation !!! -----------" );
 
 	myProblem.terminate();
+	
 	return ok
 
 if __name__ == """__main__""":

@@ -18,6 +18,7 @@ SET(src_models_CXX
     utilitaire_algebre.cxx
   )
 
-ADD_LIBRARY(CoreFlows SHARED ${src_models_CXX} ${CDMATH_LIBRARIES} ${PETSC_LIBRARIES})
+ADD_LIBRARY(CoreFlows SHARED ${src_models_CXX})
+target_link_libraries(CoreFlows ${CDMATH_LIBRARIES} ${PETSC_LIBRARIES})
 
 INSTALL(TARGETS CoreFlows DESTINATION lib)

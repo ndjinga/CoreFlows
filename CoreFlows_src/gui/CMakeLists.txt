@@ -65,12 +65,13 @@ INCLUDE(SalomeSetupPlatform)   # From KERNEL
 # =============
 
 # Mandatory products
-IF(  $ENV{PARAVIEW_VERSION} STRLESS "5")
+IF(  ${SalomeKERNEL_VERSION} STRLESS "7.8.0")
          FIND_PACKAGE(SalomePython REQUIRED)
 ELSE()
          FIND_PACKAGE(SalomePythonInterp REQUIRED)
          FIND_PACKAGE(SalomePythonLibs REQUIRED)
 ENDIF()
+MESSAGE(STATUS "SalomeKERNEL_VERSION is ${SalomeKERNEL_VERSION}")
 
 # Qt4
 FIND_PACKAGE(SalomeQt4 REQUIRED COMPONENTS QtCore QtGui)

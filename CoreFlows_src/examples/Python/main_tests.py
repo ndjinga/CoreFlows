@@ -200,19 +200,18 @@ def main():
 		print( "Simulation python " + "IsothermalTwoFluid_1DSedimentation" + "  failed ! " );
 		return 0
 
-#	if (IsothermalTwoFluid_1DVidangeReservoir.IsothermalTwoFluid_1DVidangeReservoir()):
-#		print( "Simulation python " + "IsothermalTwoFluid_1DVidangeReservoir" + " is successful !" );
-#		pass
-#	else:
-#		print( "Simulation python " + "IsothermalTwoFluid_1DVidangeReservoir" + "  failed ! " );
-#		return 0
-
-#	if (IsothermalTwoFluid_2DVidangeReservoir.IsothermalTwoFluid_2DVidangeReservoir()):
-#		print( "Simulation python " + "IsothermalTwoFluid_2DVidangeReservoir" + " is successful !" );
-#		pass
-#	else:
-#		print( "Simulation python " + "IsothermalTwoFluid_2DVidangeReservoir" + "  failed ! " );
-#		return 0
+	if (IsothermalTwoFluid_1DVidangeReservoir.IsothermalTwoFluid_1DVidangeReservoir()):
+		print( "Simulation python " + "IsothermalTwoFluid_1DVidangeReservoir" + " is successful !" );
+		pass
+	else:
+		print( "Simulation python " + "IsothermalTwoFluid_1DVidangeReservoir" + "  failed ! " );
+		return 0
+	if (IsothermalTwoFluid_2DVidangeReservoir.IsothermalTwoFluid_2DVidangeReservoir()):
+		print( "Simulation python " + "IsothermalTwoFluid_2DVidangeReservoir" + " is successful !" );
+		pass
+	else:
+		print( "Simulation python " + "IsothermalTwoFluid_2DVidangeReservoir" + "  failed ! " );
+		return 0
 
 	if (SinglePhase_1DRiemannProblem.SinglePhase_1DRiemannProblem()):
 		print( "Simulation python " + "SinglePhase_1DRiemannProblem" + " is successful !" );

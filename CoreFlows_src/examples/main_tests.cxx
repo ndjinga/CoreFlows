@@ -87,7 +87,6 @@ int main(int argc,char **argv)
 		throw CdmathException("test IsothermalTwoFluid_2DInclinedSedimentation failed");
 	else if(!IsothermalTwoFluid_2DVidangeReservoir())
 		throw CdmathException("test IsothermalTwoFluid_2DVidangeReservoir failed");
-/*
 	else if(!FiveEqsTwoFluid_1DRiemannProblem())
 		throw CdmathException("test FiveEqsTwoFluid_1DRiemannProblem failed");
 	else if(!FiveEqsTwoFluid_1DBoilingChannel())
@@ -98,7 +97,6 @@ int main(int argc,char **argv)
 		throw CdmathException("test FiveEqsTwoFluid_2DInclinedBoilingChannel failed ");
 	else if(!FiveEqsTwoFluid_2DInclinedSedimentation())
 		throw CdmathException("test FiveEqsTwoFluid_2DInclinedSedimentation failed ");
-*/
 	else if(!TransportEquation_1DHeatedChannel())
 		throw CdmathException("test TransportEquation_1DHeatedChannel() failed");
 	else if(!DiffusionEquation_1DHeatedRod())

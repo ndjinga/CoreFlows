@@ -178,18 +178,18 @@ void IsothermalTwoFluid::convectionState( const long &i, const long &j, const bo
 		xi = _Ui[k+1+_Ndim+1];
 		xj = _Uj[k+1+_Ndim+1];
 		if(ri2>_precision && rj2>_precision)
-			_Uroe[1+k+_Ndim+1] = (xi/ri2 + xj/rj2)/(ri2 + rj2);
+			_Uroe[2+k+_Ndim] = (xi/ri2 + xj/rj2)/(ri2 + rj2);
 		else if(ri2<_precision && rj2>_precision)
-			_Uroe[1+k+_Ndim+1] = xj/_Uj[_Ndim+1];
+			_Uroe[2+k+_Ndim] = xj/_Uj[_Ndim+1];
 		else if(ri2>_precision && rj2<_precision)
-			_Uroe[1+k+_Ndim+1] = xi/_Ui[_Ndim+1];
+			_Uroe[2+k+_Ndim] = xi/_Ui[_Ndim+1];
 		else
-			_Uroe[1+k+_Ndim+1] = (xi/ri1 + xj/rj1)/(ri1 + rj1);
+			_Uroe[2+k+_Ndim] = (xi/ri1 + xj/rj1)/(ri1 + rj1);
 	}
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
 		cout<<"Etat de Roe calcule: "<<endl;
-		for(int k=0;k<_nVar+1; k++)
+		for(int k=0;k<_nVar; k++)//At this point _Uroe[_nVar] is not yet set
 			cout<< _Uroe[k]<<endl;
 	}
 }
@@ -247,9 +247,9 @@ void IsothermalTwoFluid::convectionMatrices()
 	{
 		u1_2 += _Uroe[2+i]*_Uroe[2+i];
 		u1_n += _Uroe[2+i]*_vec_normal[i];
-		u2_2 += _Uroe[1+i+1+_Ndim]*_Uroe[1+i+1+_Ndim];
-		u2_n += _Uroe[1+i+1+_Ndim]*_vec_normal[i];
-		u_r2 += (_Uroe[2+i]-_Uroe[1+i+1+_Ndim])*(_Uroe[2+i]-_Uroe[1+i+1+_Ndim]);
+		u2_2 += _Uroe[2+i+_Ndim]*_Uroe[2+i+_Ndim];
+		u2_n += _Uroe[2+i+_Ndim]*_vec_normal[i];
+		u_r2 += (_Uroe[2+i]-_Uroe[2+i+_Ndim])*(_Uroe[2+i]-_Uroe[2+i+_Ndim]);
 	}
 	//Ancienne construction Mat Roe (Dm1,Dm2,Dalp,Dp)
 	double alpha = _Uroe[0];
@@ -294,7 +294,7 @@ void IsothermalTwoFluid::convectionMatrices()
 		if( !Poly.belongTo(u2_n,valeurs_propres, _precision) )
 			valeurs_propres.push_back(u2_n);//vp liquid energy
 	}
-	bool doubleeigenval = Poly.modulec(valeurs_propres[0] - valeurs_propres[1])<_precision;
+	bool doubleeigenval = norm(valeurs_propres[0] - valeurs_propres[1])<_precision;//norm= suqare of the magnitude
 	if(doubleeigenval)
 	{
 		valeurs_propres[0] = valeurs_propres[valeurs_propres.size()-1];
@@ -454,10 +454,10 @@ void IsothermalTwoFluid::convectionMatrices()
 		if(_entropicCorrection)
 		{
 			entropicShift(_vec_normal);
-			y[0].real() +=_entropicShift[0];
-			y[taille_vp-1].real() +=_entropicShift[2];
+			y[0] +=_entropicShift[0];
+			y[taille_vp-1] +=_entropicShift[2];
 			for( int i=1 ; i<taille_vp-1 ; i++)
-				y[i].real() +=_entropicShift[1];
+				y[i] +=_entropicShift[1];
 		}
 
 		Poly.abs_par_interp_directe(taille_vp,valeurs_propres, _Aroe, _nVar,_precision, _absAroe,y);
@@ -846,16 +846,17 @@ void IsothermalTwoFluid::sourceVector(PetscScalar * Si,PetscScalar * Ui,PetscSca
 	for(int k=0; k<_Ndim; k++)
 		norm_ur+=(Vi[2+k]-Vi[2+k+_Ndim])*(Vi[2+k]-Vi[2+k+_Ndim]);
 	norm_ur=sqrt(norm_ur);
+
+	if(i>=0 &&_Temperature>_Tsat && alpha<1-_precision)
+		Gamma=_heatPowerField(i)/_latentHeat;
+	else
+		Gamma=0;
 	for(int k=1; k<_Ndim+1; k++)
 	{
 		//cout<<"Vi[1+"<<k+_Ndim<<"]="<<Vi[1+k+_Ndim]<<endl;
 		Si[k] =_gravite[k]*m1 -_dragCoeffs[0]*norm_ur*(Vi[1+k]-Vi[1+k+_Ndim])+ Gamma*Vi[1+k+_Ndim];//interfacial velocity= ul
 		Si[k+_Ndim+1] =_gravite[k+_Ndim+1]*m2 + _dragCoeffs[0]*norm_ur*(Vi[1+k]-Vi[1+k+_Ndim])- Gamma*Vi[1+k+_Ndim];
 	}
-	if(i>=0 &&_Temperature>_Tsat && alpha<1-_precision)
-		Gamma=_heatPowerField(i)/_latentHeat;
-	else
-		Gamma=0;
 	if(true){//heated boiling
 		Si[0]=Gamma;
 		Si[1+_Ndim]=-Gamma;
@@ -890,8 +891,8 @@ void IsothermalTwoFluid::pressureLossVector(PetscScalar * pressureLoss, double K
 {
 	double norm_u1=0, u1_n=0, norm_u2=0, u2_n=0, m1, m2;
 	for(int i=0;i<_Ndim;i++){
-		u1_n += _Uroe[1+i]      *_vec_normal[i];
-		u2_n += _Uroe[1+i+_Ndim]*_vec_normal[i];
+		u1_n += _Uroe[2+i]      *_vec_normal[i];
+		u2_n += _Uroe[2+i+_Ndim]*_vec_normal[i];
 	}
 	pressureLoss[0]=0;
 	pressureLoss[1+_Ndim]=0;
@@ -1096,11 +1097,11 @@ void IsothermalTwoFluid::entropicShift(double* n)
 			cout<<"("<<vp_right[ct].real()<< ", " <<vp_right[ct].imag() <<")";
 		cout<< endl;
 	}
-	_entropicShift[0] = Poly.module(vp_left[0]-vp_right[0]);
-	_entropicShift[2] = Poly.module(vp_left[taille_vp_left-1]-vp_right[taille_vp_right-1]);
+	_entropicShift[0] = abs(vp_left[0]-vp_right[0]);
+	_entropicShift[2] = abs(vp_left[taille_vp_left-1]-vp_right[taille_vp_right-1]);
 	_entropicShift[1]=0;
 	for(int i=1;i<min(taille_vp_right-1,taille_vp_left-1);i++)
-		_entropicShift[1] = max(_entropicShift[1],Poly.module(vp_left[i]-vp_right[i]));
+		_entropicShift[1] = max(_entropicShift[1],abs(vp_left[i]-vp_right[i]));
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
 		cout<<"eigenvalue jumps "<<endl;

@@ -966,13 +966,13 @@ int roots_polynoms::rpoly(double *op, int degree, double *zeror, double *zeroi)
   * @return  calcule le module de z*/
  double Polynoms::module(complex< double > z)
  {
- 	return sqrt(z.real()*z.real() + z.imag()*z.imag());
+ 	return abs(z);
  }
 
  /** \fn modulec calcule le module² de z */
  double Polynoms::modulec(complex< double > z)
  {
- 	return z.real()*z.real() + z.imag()*z.imag();
+ 	return norm(z);
  }
 
  /** \fn abs_generalise
@@ -1170,10 +1170,10 @@ int roots_polynoms::rpoly(double *op, int degree, double *zeror, double *zeroi)
  			p[k] = Id[k] * dif_div[0].real() ;
  	}
  	for(i=debut ; i<n ; i++){
+		for(int k=0; k<sizeA*sizeA; k++)
+			aux[k] = A[k];
  		//cerr << " on traite la racine reele " << x[i] << endl;
  		if ( fabs(x[i].imag()) < epsilon ) {
- 			for(int k=0; k<sizeA*sizeA; k++)
- 				aux[k] = A[k];
  			shift_diagonal(aux, sizeA, (- x[i].real()));
  			matrixProduct( p, sizeA, sizeA, aux, sizeA, sizeA, matProd);
  			for(int k=0; k<sizeA*sizeA; k++)
@@ -1187,7 +1187,7 @@ int roots_polynoms::rpoly(double *op, int degree, double *zeror, double *zeroi)
  					aux[k] = matProd[k];
  				for(int k=0; k<sizeA*sizeA; k++)
  					aux[k]+=(-2*x[i].real()) * A[k];
- 				shift_diagonal(aux, sizeA, module(x[i])*module(x[i]));
+ 				shift_diagonal(aux, sizeA, modulec(x[i]));
 
  				matrixProduct( p, sizeA, sizeA, aux, sizeA, sizeA, matProd);
  				for(int k=0; k<sizeA*sizeA; k++)

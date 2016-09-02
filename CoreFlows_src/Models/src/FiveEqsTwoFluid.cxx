@@ -922,7 +922,7 @@ void FiveEqsTwoFluid::convectionMatrices()
 			for( int i=0 ; i<taille_vp ; i++)
 			{
 				//cout<<"y["<<i<<"]="<<y[i].real()<<endl;
-				y[i].real() += max(entShift0,entShift1);
+				y[i] += max(entShift0,entShift1);
 			}
 		}
 
@@ -1856,7 +1856,7 @@ void FiveEqsTwoFluid::entropicShift(double* n, double& vpcorr0, double& vpcorr1)
 		}
 		vpcorr0 = 0;
 		for (int i=1; i<min(sizeLeft,sizeRight)-1; i++)
-			vpcorr0 = max(vpcorr0, Poly.module(eigValuesRight[i]-eigValuesLeft[i]));// Kieu
+			vpcorr0 = max(vpcorr0, abs(eigValuesRight[i]-eigValuesLeft[i]));// Kieu
 		vpcorr1 = vpcorr0;
 	}
 }
@@ -1922,7 +1922,7 @@ void FiveEqsTwoFluid::entropicShift(double* n)
 			cout<<eigValuesRight[i] << ", "<<endl;
 	}
 	for (int i=0; i<min(sizeLeft,sizeRight)-1; i++)
-		_entropicShift[i]= Poly.module(eigValuesRight[i]-eigValuesLeft[i]);
+		_entropicShift[i]= abs(eigValuesRight[i]-eigValuesLeft[i]);
 }
 
 Vector FiveEqsTwoFluid::convectionFlux(Vector U,Vector V, Vector normale, double porosity){

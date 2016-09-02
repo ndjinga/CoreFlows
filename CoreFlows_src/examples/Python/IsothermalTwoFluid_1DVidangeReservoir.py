@@ -63,7 +63,7 @@ def IsothermalTwoFluid_1DVidangeReservoir():
     # set the numerical method
 	myProblem.setNumericalScheme(cf.upwind, cf.Explicit);
 	#myProblem.setEntropicCorrection(True);
-        #myProblem.setWellBalancedCorrection(True);
+	myProblem.setNonLinearFormulation(cf.VFFC) 
     
     # name file save
 	fileName = "1DVidangeReservoir";
@@ -84,7 +84,6 @@ def IsothermalTwoFluid_1DVidangeReservoir():
 
     # evolution
 	myProblem.initialize();
-	print("Running python "+ fileName );
 
 	ok = myProblem.run();
 	if (ok):
@@ -97,6 +96,7 @@ def IsothermalTwoFluid_1DVidangeReservoir():
 	print( "------------ End of calculation !!! -----------" );
 
 	myProblem.terminate();
+	
 	return ok
 
 
