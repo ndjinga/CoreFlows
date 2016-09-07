@@ -119,7 +119,8 @@ protected :
 
 	// Functions of equations of states
 	void consToPrim(const double *Ucons, double* Vprim,double porosity=1);
-	void Prim2Cons(const double *V, const int &i, double *U, const int &j);
+	void primToCons(const double *V, const int &i, double *U, const int &j);
+	void primToConsJacobianMatrix(double *V);
 	double ecartPression(double m1,double m2, double alpha, double e1, double e2);
 	double ecartPressionDerivee(double m1,double m2, double alpha, double e1, double e2);
 

@@ -216,31 +216,41 @@ protected :
 	// Fonctions utilisant la loi d'etat 
 
 	/** \fn consToPrim
-	 * \brief Calcule les variables primitives à partir des variables conservatives
-	 * @param U est un vecteur de double constant qui contient les variables conservatives
-	 * @param V est un vecteur de double, contient les variables primitives
-	 * @param porosity est le coefficient de porisité en case de problème avec porosité
-	 * @return  le vecteur primitif mis à jour à partir du vecteur conservatif*/
+	 * \brief computes the primitive vector state from a conservative vector state
+	 * @param Ucons : conservative variable vector
+	 * @pram Vprim : primitive variable vector
+	 * @param porosity is the porosity coefficient in case of a porous modeling
+	 * */
 	void consToPrim(const double *U, double* V,double porosity=1);
 
-	/** \fn Prim2Cons
-	 * \brief Calcule les variables conservatives à base des variables primitives
-	 * @param V est un vecteur de double constant qui contient les variables primitives
-	 * @param U est le vecteur de double qui contient les variables conservatives
-	 * @param i,j sont les indices de la cellule en cours dans la grande matrice du problème
-	 * @return le vecteur conservatif mis à jour à partir du vecteur primitif */
-	void Prim2Cons(const double *V, const int &i, double *U, const int &j);
+	/** \fn primToCons
+	 * \brief computes the conservative vector state from a primitive vector state
+	 * @param U : conservative variable vector, may contain several states
+	 * @pram V : primitive variable vector, may contain several states
+	 * @param i : index of the conservative state in the vector U
+	 * @param j : index of the primitive state in the vector V
+	 * 	 */
+	void primToCons(const double *V, const int &i, double *U, const int &j);
+
+	/** \fn primToConsJacobianMatrix
+	 * \brief computes the jacobian matrix of the cons->prim function
+	 * @pram V : primitive vector state
+	 * 	 */
+	//void primToConsJacobianMatrix(double *V);
+
 	/** \fn computeExtendedPrimState
 	 * \brief Computes extended primitive variable vector
 	 * @param V the primitive vector
 	 * @return The vector (vapour mass concentration, pressure, mixture velocity, temperature, vapour volume fraction, relative velocity, vapour density, liquid density mixture enthalpy) */
 	Vector computeExtendedPrimState(double *V);
+
 	/** \fn relative_velocity
 	 * \brief Computes the relative velocity between the two phases
 	 * @param c_v is the vapour mass concentration: alpha_v rho_v/(alpha_v rho_v + alpha_l rho_l)
 	 * @param mean_velocity is the mixture velocity (alpha_v rho_v u_v+ alpha_l rho_l u_l)/(alpha_v rho_v + alpha_l rho_l)
 	 * @param rho_m is the mixture density : alpha_v rho_v + alpha_l rho_l
 	 * @return The relative velocity vector u_v-u_l */
+
 	Vector relative_velocity(double c_v, Vector mean_velocity, double rho_m)
 	{
 		Vector result(mean_velocity.getNumberOfRows());

@@ -37,22 +37,19 @@ DriftModel::DriftModel(pressureEstimate pEstimate, int dim){
 		_Tsat=618;//saturation temperature at 155 bars
 		_hsatl=1.63e6;//water enthalpy at saturation at 155 bars
 		_hsatv=2.6e6;//Gas enthalpy at saturation at 155 bars
-		_fluides[0] = new StiffenedGasDellacherie(1.43,0  ,2.030255e6  ,1040.14,_Tsat,2.597e6); //stiffened gas law for Gas from S. Dellacherie//dernier paramètre non utilise, sert juste a eviter d'avoir deux constructeurs de même signature
-		_fluides[1] = new StiffenedGasDellacherie(2.35,1e9,-1.167056e6,1816.2,_Tsat,1.6299e6); //stiffened gas law for water from S. Dellacherie// dernier paramètre non utilise, sert juste a eviter d'avoir deux constructeurs de même signature
+		//		_fluides[0] = new StiffenedGasDellacherie(1.43,0  ,2.030255e6  ,1040.14,_Tsat,2.597e6); //stiffened gas law for Gas from S. Dellacherie//dernier paramètre non utilise, sert juste a eviter d'avoir deux constructeurs de même signature
+		//		_fluides[1] = new StiffenedGasDellacherie(2.35,1e9,-1.167056e6,1816.2,_Tsat,1.6299e6); //stiffened gas law for water from S. Dellacherie// dernier paramètre non utilise, sert juste a eviter d'avoir deux constructeurs de même signature
 
-		/*
 		double esatv=2.444e6;//Gas internal energy at saturation at 155 bar
 		double esatl=1.604e6;//water internal energy at saturation at 155 bar
-		double sound_speed_v=433.4;//Gas sound speed at saturation at 155 bar
-		double sound_speed_l=621.4;//water sound speed at saturation at 155 bar
+		double sound_speed_v=433;//Gas sound speed at saturation at 155 bar
+		double sound_speed_l=621;//water sound speed at saturation at 155 bar
 		double cv_v=3633;//Gas specific heat capacity at saturation at 155 bar
-		double cv_l=3101;//water specific heat capacity at saturation at 155 bar
-		double rho_sat_v=101.9;//Gas density at saturation at 155 bar
-		double rho_sat_l=594.4;//water density at saturation at 155 bar
+		double cv_l=3100;//water specific heat capacity at saturation at 155 bar
+		double rho_sat_v=102;//Gas density at saturation at 155 bar
+		double rho_sat_l=594;//water density at saturation at 155 bar
 		_fluides[0] = new StiffenedGas(rho_sat_v,1.55e7,_Tsat,esatv, sound_speed_v,cv_v); //stiffened gas law for Gas at pressure 155 bar and temperature 345°C
 		_fluides[1] = new StiffenedGas(rho_sat_l,1.55e7,_Tsat,esatl, sound_speed_l,cv_l); //stiffened gas law for water at pressure 155 bar
-		 */
-
 	}
 	_latentHeat=_hsatv-_hsatl;
 	cout<<"Liquid saturation enthalpy "<< _hsatl<<" J/Kg"<<endl;
@@ -96,7 +93,7 @@ void DriftModel::convectionState( const long &i, const long &j, const bool &IsBo
 	_idm[0] = _nVar*i;
 	for(int k=1; k<_nVar; k++)
 		_idm[k] = _idm[k-1] + 1;
-	VecGetValues(_courant, _nVar, _idm, _Ui);
+	VecGetValues(_conservativeVars, _nVar, _idm, _Ui);
 
 	_idm[0] = _nVar*j;
 	for(int k=1; k<_nVar; k++)
@@ -104,7 +101,7 @@ void DriftModel::convectionState( const long &i, const long &j, const bool &IsBo
 	if(IsBord)
 		VecGetValues(_Uext, _nVar, _idm, _Uj);
 	else
-		VecGetValues(_courant, _nVar, _idm, _Uj);
+		VecGetValues(_conservativeVars, _nVar, _idm, _Uj);
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
 		cout<<"Convection Left state cell " << i<< ": "<<endl;
@@ -145,7 +142,7 @@ void DriftModel::convectionState( const long &i, const long &j, const bool &IsBo
 	xi = _Ui[_nVar-1];//phi rho E
 	xj = _Uj[_nVar-1];
 	Ii = i*_nVar+1; // correct Kieu
-	VecGetValues(_primitives, 1, &Ii, &pi);// _primitives pour p
+	VecGetValues(_primitiveVars, 1, &Ii, &pi);// _primitiveVars pour p
 	if(IsBord)
 	{
 		consToPrim(_Uj,_Vj,_porosityj);
@@ -154,7 +151,7 @@ void DriftModel::convectionState( const long &i, const long &j, const bool &IsBo
 	else
 	{
 		Ii = j*_nVar+1; // correct Kieu
-		VecGetValues(_primitives, 1, &Ii, &pj);
+		VecGetValues(_primitiveVars, 1, &Ii, &pj);
 	}
 	xi = (xi + pi)/_Ui[0];
 	xj = (xj + pj)/_Uj[0];
@@ -163,7 +160,7 @@ void DriftModel::convectionState( const long &i, const long &j, const bool &IsBo
 		cout << "Enthalpie totale de Roe H  gauche " << i << ": " << xi << ", droite " << j << ": " << xj << "->" << _Uroe[_nVar-1] << endl;
 	// Moyenne de Roe de Tg et Td
 	Ii = i*_nVar+_nVar-1;
-	VecGetValues(_primitives, 1, &Ii, &xi);// _primitives pour T
+	VecGetValues(_primitiveVars, 1, &Ii, &xi);// _primitiveVars pour T
 	if(IsBord)
 	{
 		//consToPrim(_Uj,_Vj,_porosityj);//Fonction déjà appelée
@@ -172,7 +169,7 @@ void DriftModel::convectionState( const long &i, const long &j, const bool &IsBo
 	else
 	{
 		Ii = j*_nVar+_nVar-1;
-		VecGetValues(_primitives, 1, &Ii, &xj);
+		VecGetValues(_primitiveVars, 1, &Ii, &xj);
 	}
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
@@ -189,7 +186,7 @@ void DriftModel::diffusionStateAndMatrices(const long &i,const long &j, const bo
 	for(int k=1; k<_nVar; k++)
 		_idm[k] = _idm[k-1] + 1;
 
-	VecGetValues(_courant, _nVar, _idm, _Ui);
+	VecGetValues(_conservativeVars, _nVar, _idm, _Ui);
 	_idm[0] = _nVar*j;
 	for(int k=1; k<_nVar; k++)
 		_idm[k] = _idm[k-1] + 1;
@@ -197,7 +194,7 @@ void DriftModel::diffusionStateAndMatrices(const long &i,const long &j, const bo
 	if(IsBord)
 		VecGetValues(_Uextdiff, _nVar, _idm, _Uj);
 	else
-		VecGetValues(_courant, _nVar, _idm, _Uj);
+		VecGetValues(_conservativeVars, _nVar, _idm, _Uj);
 
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
@@ -289,7 +286,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 	_idm[0] = _nVar*j;
 	for(k=1; k<_nVar; k++)
 		_idm[k] = _idm[k-1] + 1;
-	VecGetValues(_courant, _nVar, _idm, _externalStates);//On recupere le champ conservatif de la cellule interne
+	VecGetValues(_conservativeVars, _nVar, _idm, _externalStates);//On recupere le champ conservatif de la cellule interne
 	for(k=0; k<_Ndim; k++)
 		q_n+=_externalStates[(k+2)]*normale[k];
 
@@ -318,7 +315,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 		_idm[0] = _nVar*j;
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
-		VecGetValues(_primitives, _nVar, _idm, _Vj);
+		VecGetValues(_primitiveVars, _nVar, _idm, _Vj);
 		double concentration=_Vj[0];
 		double pression=_Vj[1];
 		double T=_limitField[nameOfGroup].T;
@@ -347,7 +344,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 			}
 		}
 		_externalStates[_nVar-1] = _externalStates[1]*_fluides[0]->getInternalEnergy(_limitField[nameOfGroup].T,rho_v)
-																																													 +(_externalStates[0]-_externalStates[1])*_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + _externalStates[0]*v2/2;
+																																															 +(_externalStates[0]-_externalStates[1])*_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + _externalStates[0]*v2/2;
 		_idm[0] = 0;
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
@@ -371,7 +368,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 	else if (_limitField[nameOfGroup].bcType==Inlet){
 
 		if(q_n<=0){
-			VecGetValues(_primitives, _nVar, _idm, _Vj);
+			VecGetValues(_primitiveVars, _nVar, _idm, _Vj);
 			double concentration=_limitField[nameOfGroup].conc;
 			double pression=_Vj[1];
 			double T=_limitField[nameOfGroup].T;
@@ -416,7 +413,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 	}
 	else if (_limitField[nameOfGroup].bcType==InletPressure){
 
-		VecGetValues(_primitives, _nVar, _idm, _Vj);
+		VecGetValues(_primitiveVars, _nVar, _idm, _Vj);
 		double concentration, Tm;
 		if(q_n<=0){
 			concentration=_limitField[nameOfGroup].conc;
@@ -463,7 +460,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 		if(q_n<=0  &&  _nbTimeStep%_freqSave ==0)
 			cout<< "Warning : fluid going in through outlet boundary "<<nameOfGroup<<". Applying Neumann boundary condition for concentration, velocity and temperature"<<endl;
 
-		VecGetValues(_primitives, _nVar, _idm, _Vj);
+		VecGetValues(_primitiveVars, _nVar, _idm, _Vj);
 
 		double concentration=_Vj[0];
 		double pression=_limitField[nameOfGroup].p;
@@ -518,11 +515,10 @@ void DriftModel::convectionMatrices()
 
 	vector<complex<double> > vp_dist(3);
 
-	/*
+
 	if(_spaceScheme==staggered && _nonLinearFormulation==VFFC)//special case
 		staggeredVFFCMatrices(umn);
 	else
-	 */
 	{
 		double rhom=_Uroe[0];
 		double cm=_Uroe[1];
@@ -681,6 +677,20 @@ void DriftModel::convectionMatrices()
 					cout<<_absAroe[i*_nVar+j]<<" , ";
 				cout<<endl;
 			}
+			cout<<endl<<"Matrice _AroeMinus"<<endl;
+			for(int i=0; i<_nVar;i++)
+			{
+				for(int j=0; j<_nVar;j++)
+					cout << _AroeMinus[i*_nVar+j]<< " , ";
+				cout<<endl;
+			}
+			cout<<endl<<"Matrice _AroePlus"<<endl;
+			for(int i=0; i<_nVar;i++)
+			{
+				for(int j=0; j<_nVar;j++)
+					cout << _AroePlus[i*_nVar+j]<< " , ";
+				cout<<endl;
+			}
 		}
 	}
 
@@ -715,24 +725,6 @@ void DriftModel::convectionMatrices()
 	}
 	else
 		throw CdmathException("DriftModel::roeMatrices: well balanced option not treated");
-
-	if(_verbose && _nbTimeStep%_freqSave ==0)
-	{
-		cout<<endl<<"Matrice _AroeMinus"<<endl;
-		for(int i=0; i<_nVar;i++)
-		{
-			for(int j=0; j<_nVar;j++)
-				cout << _AroeMinus[i*_nVar+j]<< " , ";
-			cout<<endl;
-		}
-		cout<<endl<<"Matrice _AroePlus"<<endl;
-		for(int i=0; i<_nVar;i++)
-		{
-			for(int j=0; j<_nVar;j++)
-				cout << _AroePlus[i*_nVar+j]<< " , ";
-			cout<<endl;
-		}
-	}
 }
 
 void DriftModel::addDiffusionToSecondMember
@@ -753,7 +745,7 @@ void DriftModel::addDiffusionToSecondMember
 	for(int k=0; k<_nVar; k++)
 		_idm[k] = _nVar*i + k;
 
-	VecGetValues(_primitives, _nVar, _idm, _Vi);
+	VecGetValues(_primitiveVars, _nVar, _idm, _Vi);
 	if (_verbose && _nbTimeStep%_freqSave ==0)
 	{
 		cout << "Contribution diffusion: variables primitives maille " << i<<endl;
@@ -766,7 +758,7 @@ void DriftModel::addDiffusionToSecondMember
 		for(int k=0; k<_nVar; k++)
 			_idn[k] = _nVar*j + k;
 
-		VecGetValues(_primitives, _nVar, _idn, _Vj);
+		VecGetValues(_primitiveVars, _nVar, _idn, _Vj);
 	}
 	else
 	{
@@ -959,19 +951,22 @@ void DriftModel::porosityGradientSourceVector()
 }
 
 void DriftModel::jacobian(const int &j, string nameOfGroup,double * normale)
-{//Jacobienne condition limite convection
+{
+	if(_verbose && _nbTimeStep%_freqSave ==0)
+		cout<<"Jacobienne condition limite convection bord "<< nameOfGroup<<endl;
+
 	int k;
 	for(k=0; k<_nVar*_nVar;k++)
-		_Jcb[k] = 0;
+		_Jcb[k] = 0;//No implicitation at this stage
 
 	_idm[0] = _nVar*j;
 	for(k=1; k<_nVar; k++)
 		_idm[k] = _idm[k-1] + 1;
-	VecGetValues(_courant, _nVar, _idm, _externalStates);
+	VecGetValues(_conservativeVars, _nVar, _idm, _externalStates);
 	double q_n=0;//quantité de mouvement normale à la paroi
 	for(k=0; k<_Ndim; k++)
 		q_n+=_externalStates[(k+1)]*normale[k];
-	return;
+
 	// loop of boundary types
 	if (_limitField[nameOfGroup].bcType==Wall)
 	{
@@ -983,10 +978,11 @@ void DriftModel::jacobian(const int &j, string nameOfGroup,double * normale)
 	}
 	else if (_limitField[nameOfGroup].bcType==Inlet)
 	{
+		return;//For the moment no implicitation, should debug inlet
 		if(q_n<0){
 			//Boundary state quantities
 			double v[_Ndim], ve[_Ndim], v2, ve2;
-			VecGetValues(_primitives, _nVar, _idm, _Vj);
+			VecGetValues(_primitiveVars, _nVar, _idm, _Vj);
 			double concentration=_limitField[nameOfGroup].conc;
 			double pression=_Vj[1];
 			double T=_limitField[nameOfGroup].T;
@@ -1055,9 +1051,10 @@ void DriftModel::jacobian(const int &j, string nameOfGroup,double * normale)
 	}
 	else if (_limitField[nameOfGroup].bcType==InletPressure && q_n<0)
 	{
+		return;//For the moment no implicitation, should debug inletPressure
 		//Boundary state quantities
 		double v[_Ndim], v2=0;
-		VecGetValues(_primitives, _nVar, _idm, _Vj);
+		VecGetValues(_primitiveVars, _nVar, _idm, _Vj);
 		double concentration=_limitField[nameOfGroup].conc;
 		double pression=_limitField[nameOfGroup].p;
 		double T=_limitField[nameOfGroup].T;
@@ -1089,9 +1086,10 @@ void DriftModel::jacobian(const int &j, string nameOfGroup,double * normale)
 
 	}
 	else if (_limitField[nameOfGroup].bcType==Outlet || (_limitField[nameOfGroup].bcType==InletPressure && q_n>=0)){
+		return;//For the moment no implicitation, should debug inletPressure
 		//Boundary state quantities
 		double v[_Ndim], v2;
-		VecGetValues(_primitives, _nVar, _idm, _Vj);
+		VecGetValues(_primitiveVars, _nVar, _idm, _Vj);
 		double concentration=_Vj[0];
 		double pression=_limitField[nameOfGroup].p;
 		double T=_Vj[_nVar-1];
@@ -1167,6 +1165,10 @@ void DriftModel::jacobian(const int &j, string nameOfGroup,double * normale)
 //calcule la jacobienne pour une CL de diffusion
 void  DriftModel::jacobianDiff(const int &j, string nameOfGroup)
 {
+	if(_verbose && _nbTimeStep%_freqSave ==0)
+		cout<<"Jacobienne condition limite diffusion bord "<< nameOfGroup<<endl;
+
+
 	double v2=0,cd = 1,cn=0,p0, gamma;
 	int idim,jdim,k;
 
@@ -1179,7 +1181,7 @@ void  DriftModel::jacobianDiff(const int &j, string nameOfGroup)
 			||_limitField[nameOfGroup].bcType==Inlet || _limitField[nameOfGroup].bcType==InletPressure)
 	{
 		for(k=0;k<_nVar;k++)
-			_Jcb[k*_nVar+k]=1;
+			_JcbDiff[k*_nVar+k]=1;
 	}
 	else{
 		cout << "group named "<<nameOfGroup << " : unknown boundary condition" << endl;
@@ -1260,7 +1262,7 @@ Vector DriftModel::computeExtendedPrimState(double *V)
 }
 
 
-void DriftModel::Prim2Cons(const double *P, const int &i, double *W, const int &j){
+void DriftModel::primToCons(const double *P, const int &i, double *W, const int &j){
 	double concentration=P[i*_nVar];
 	double pression=P[i*_nVar+1];
 	double temperature=P[i*_nVar+_nVar-1];
@@ -1272,7 +1274,7 @@ void DriftModel::Prim2Cons(const double *P, const int &i, double *W, const int &
 	{
 		cout<<"rhov= "<<rho_v<<", rhol= "<<rho_l<<endl;
 		cout<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
-		throw CdmathException("DriftModel::Prim2Cons: impossible to compute mixture density, division by zero");
+		throw CdmathException("DriftModel::primToCons: impossible to compute mixture density, division by zero");
 	}
 	W[j*(_nVar)]  =(rho_v*rho_l/(concentration*rho_l+(1-concentration)*rho_v))*_porosityField(j);//phi*rho
 	W[j*(_nVar)+1]  =W[j*(_nVar)] *concentration;//phi *rho*c_v
@@ -1284,7 +1286,7 @@ void DriftModel::Prim2Cons(const double *P, const int &i, double *W, const int &
 		W[j*_nVar+_nVar-1] += W[j*_nVar]*P[i*_nVar+(k+2)]*P[i*_nVar+(k+2)]*0.5;//phi rhom e_m + phi rho u*u
 
 	if(_verbose && _nbTimeStep%_freqSave ==0){
-		cout<<"DriftModel::Prim2Cons: T="<<temperature<<", pression= "<<pression<<endl;
+		cout<<"DriftModel::primToCons: T="<<temperature<<", pression= "<<pression<<endl;
 		cout<<"rhov= "<<rho_v<<", rhol= "<<rho_l<<", rhom= "<<W[j*(_nVar)]<<" e_v="<<e_v<<" e_l="<<e_l<<endl;
 	}
 }
@@ -1424,7 +1426,7 @@ void DriftModel::getMixturePressureAndTemperature(double c_v, double rhom, doubl
 		StiffenedGas* fluide1=dynamic_cast<StiffenedGas*>(_fluides[1]);
 
 		temperature= (rhom_em-m_v*fluide0->getInternalEnergy(0)-m_l*fluide1->getInternalEnergy(0))
-																																											/(m_v*fluide0->constante("cv")+m_l*fluide1->constante("cv"));
+																																													/(m_v*fluide0->constante("cv")+m_l*fluide1->constante("cv"));
 
 		double e_v=fluide0->getInternalEnergy(temperature);
 		double e_l=fluide1->getInternalEnergy(temperature);
@@ -1821,10 +1823,10 @@ void DriftModel::staggeredVFFCMatrices(double u_mn)
 			_AroePlus[1*_nVar+2+_Ndim]=0;
 			for(int i=0;i<_Ndim;i++)
 			{
-				_AroePlus[(2+i)*_nVar+0]=-ui_n*_Ui[2+i];
+				_AroePlus[(2+i)*_nVar+0]=-ui_n*_Vi[2+i];
 				_AroePlus[(2+i)*_nVar+1]=0;
 				for(int j=0;j<_Ndim;j++)
-					_AroePlus[(2+i)*_nVar+2+j]=_Ui[2+i]*_vec_normal[j];
+					_AroePlus[(2+i)*_nVar+2+j]=_Vi[2+i]*_vec_normal[j];
 				_AroePlus[(2+i)*_nVar+2+i]+=ui_n;
 				_AroePlus[(2+i)*_nVar+2+_Ndim]=0;
 			}
@@ -1850,14 +1852,14 @@ void DriftModel::staggeredVFFCMatrices(double u_mn)
 				_AroeMinus[(2+i)*_nVar+0]=(_khi+_kappa*ecinj)*_vec_normal[i];
 				_AroeMinus[(2+i)*_nVar+1]=_ksi*_vec_normal[i];
 				for(int j=0;j<_Ndim;j++)
-					_AroeMinus[(2+i)*_nVar+2+j]=-_kappa*_vec_normal[i]*_Uj[2+j];
+					_AroeMinus[(2+i)*_nVar+2+j]=-_kappa*_vec_normal[i]*_Vj[2+j];
 				_AroeMinus[(2+i)*_nVar+2+i]+=0;
 				_AroeMinus[(2+i)*_nVar+2+_Ndim]=_kappa*_vec_normal[i];
 			}
 			_AroeMinus[(2+_Ndim)*_nVar+0]=(_khi+_kappa*ecinj)*ui_n;
 			_AroeMinus[(2+_Ndim)*_nVar+1]=_ksi*ui_n;
 			for(int i=0;i<_Ndim;i++)
-				_AroeMinus[(2+_Ndim)*_nVar+2+i]=-_kappa*uj_n*_Ui[2+i];
+				_AroeMinus[(2+_Ndim)*_nVar+2+i]=-_kappa*uj_n*_Vi[2+i];
 			_AroeMinus[(2+_Ndim)*_nVar+2+_Ndim]=_kappa*ui_n;
 		}
 		else
@@ -1899,14 +1901,14 @@ void DriftModel::staggeredVFFCMatrices(double u_mn)
 				_AroePlus[(2+i)*_nVar+0]=(_khi+_kappa*ecini)*_vec_normal[i];
 				_AroePlus[(2+i)*_nVar+1]=_ksi*_vec_normal[i];
 				for(int j=0;j<_Ndim;j++)
-					_AroePlus[(2+i)*_nVar+2+j]=-_kappa*_vec_normal[i]*_Ui[2+j];
+					_AroePlus[(2+i)*_nVar+2+j]=-_kappa*_vec_normal[i]*_Vi[2+j];
 				_AroePlus[(2+i)*_nVar+2+i]+=0;
 				_AroePlus[(2+i)*_nVar+2+_Ndim]=_kappa*_vec_normal[i];
 			}
 			_AroePlus[(2+_Ndim)*_nVar+0]=(_khi+_kappa*ecini)*ui_n;
 			_AroePlus[(2+_Ndim)*_nVar+1]=_ksi*ui_n;
 			for(int i=0;i<_Ndim;i++)
-				_AroePlus[(2+_Ndim)*_nVar+2+i]=-_kappa*uj_n*_Ui[2+i];
+				_AroePlus[(2+_Ndim)*_nVar+2+i]=-_kappa*uj_n*_Vj[2+i];
 			_AroePlus[(2+_Ndim)*_nVar+2+_Ndim]=_kappa*ui_n;
 
 			/******** Construction de la matrice A^- *********/
@@ -1922,10 +1924,10 @@ void DriftModel::staggeredVFFCMatrices(double u_mn)
 			_AroeMinus[1*_nVar+2+_Ndim]=0;
 			for(int i=0;i<_Ndim;i++)
 			{
-				_AroeMinus[(2+i)*_nVar+0]=-uj_n*_Uj[2+i];
+				_AroeMinus[(2+i)*_nVar+0]=-uj_n*_Vj[2+i];
 				_AroeMinus[(2+i)*_nVar+1]=0;
 				for(int j=0;j<_Ndim;j++)
-					_AroeMinus[(2+i)*_nVar+2+j]=_Uj[2+i]*_vec_normal[j];
+					_AroeMinus[(2+i)*_nVar+2+j]=_Vj[2+i]*_vec_normal[j];
 				_AroeMinus[(2+i)*_nVar+2+i]+=uj_n;
 				_AroeMinus[(2+i)*_nVar+2+_Ndim]=0;
 			}
@@ -1935,6 +1937,11 @@ void DriftModel::staggeredVFFCMatrices(double u_mn)
 				_AroeMinus[(2+_Ndim)*_nVar+2+i]=Hm*_vec_normal[i];
 			_AroeMinus[(2+_Ndim)*_nVar+2+_Ndim]=uj_n;
 		}
+	}
+	for(int i=0; i<_nVar*_nVar;i++)
+	{
+		_Aroe[i] = (_AroeMinus[i]+_AroePlus[i])/2;
+		_absAroe[i]  = (_AroeMinus[i]-_AroePlus[i])/2;
 	}
 	/*
 	 ******* Construction de la matrice de Roe ********
@@ -1963,7 +1970,6 @@ void DriftModel::staggeredVFFCMatrices(double u_mn)
 		_Aroe[(2+_Ndim)*_nVar+2+i]=Hm*_vec_normal[i]-_kappa*uj_n*_Ui[2+i];
 	_Aroe[(2+_Ndim)*_nVar+2+_Ndim]=(_kappa+1)*ui_n;
 	 */
-
 }
 
 void DriftModel::applyVFRoeLowMachCorrections()
@@ -1980,7 +1986,7 @@ void DriftModel::applyVFRoeLowMachCorrections()
 			double 	c = _maxvploc;//mixture sound speed
 			double M=sqrt(u_2)/c;//Mach number
 			_Vij[1]=M*_Vij[1]+(1-M)*(_Vi[1]+_Vj[1])/2;
-			Prim2Cons(_Vij,0,_Uij,0);
+			primToCons(_Vij,0,_Uij,0);
 		}
 		else if(_spaceScheme==pressureCorrection)
 		{
@@ -2015,7 +2021,7 @@ void DriftModel::applyVFRoeLowMachCorrections()
 					_Vij[2+i]=_Vj[2+i];
 				_Vij[_nVar-1]=_Vj[_nVar-1];
 			}
-			Prim2Cons(_Vij,0,_Uij,0);
+			primToCons(_Vij,0,_Uij,0);
 		}
 	}
 }
@@ -2045,7 +2051,7 @@ void DriftModel::testConservation()
 			compponentl=I*_nVar+l;
 			VecGetValues(_old, 1, &compponentl, &x);//on recupere la valeur du champ
 			SUM += x;
-			VecGetValues(_next, 1, &compponentl, &x);//on recupere la variation du champ
+			VecGetValues(_newtonVariation, 1, &compponentl, &x);//on recupere la variation du champ
 			DELTA += x;
 		}
 		{
@@ -2068,7 +2074,7 @@ void DriftModel::save(){
 		// j = 0 : concentration, j=1 : pressure; j = _nVar - 1: temperature; j = 2,..,_nVar-2: velocity
 		for (int j = 0; j < _nVar; j++){
 			Ii = i*_nVar +j;
-			VecGetValues(_primitives,1,&Ii,&_VV(i,j));
+			VecGetValues(_primitiveVars,1,&Ii,&_VV(i,j));
 		}
 	}
 	if(_saveConservativeField){
@@ -2077,7 +2083,7 @@ void DriftModel::save(){
 			// j = 0 : total density; j = 1 : vapour density; j = _nVar - 1 : energy j = 2,..,_nVar-2: momentum
 			for (int j = 0; j < _nVar; j++){
 				Ii = i*_nVar +j;
-				VecGetValues(_courant,1,&Ii,&tmp);
+				VecGetValues(_conservativeVars,1,&Ii,&tmp);
 				_UU(i,j)=tmp;///_porosityField(i);
 			}
 		}
@@ -2172,7 +2178,7 @@ void DriftModel::save(){
 			for (int j = 0; j < _Ndim; j++)//On récupère les composantes de vitesse
 			{
 				int Ii = i*_nVar +2+j;
-				VecGetValues(_primitives,1,&Ii,&_Vitesse(i,j));
+				VecGetValues(_primitiveVars,1,&Ii,&_Vitesse(i,j));
 			}
 			for (int j = _Ndim; j < 3; j++)//On met à zero les composantes de vitesse si la dimension est <3
 				_Vitesse(i,j)=0;
@@ -2216,13 +2222,13 @@ void DriftModel::save(){
 		int Ii;
 		for (long i = 0; i < _Nmailles; i++){
 			Ii = i*_nVar;
-			VecGetValues(_courant,1,&Ii,&rhom);
+			VecGetValues(_conservativeVars,1,&Ii,&rhom);
 			Ii = i*_nVar;
-			VecGetValues(_primitives,1,&Ii,&cv);
+			VecGetValues(_primitiveVars,1,&Ii,&cv);
 			Ii = i*_nVar +1;
-			VecGetValues(_primitives,1,&Ii,&p);
+			VecGetValues(_primitiveVars,1,&Ii,&p);
 			Ii = i*_nVar +_nVar-1;
-			VecGetValues(_primitives,1,&Ii,&Tm);
+			VecGetValues(_primitiveVars,1,&Ii,&Tm);
 
 			rho_v=_fluides[0]->getDensity(p,Tm);
 			alpha_v=cv*rhom/rho_v;
@@ -2264,13 +2270,13 @@ void DriftModel::save(){
 		int Ii;
 		for (long i = 0; i < _Nmailles; i++){
 			Ii = i*_nVar;
-			VecGetValues(_courant,1,&Ii,&rhom);
+			VecGetValues(_conservativeVars,1,&Ii,&rhom);
 			Ii = i*_nVar;
-			VecGetValues(_primitives,1,&Ii,&cv);
+			VecGetValues(_primitiveVars,1,&Ii,&cv);
 			Ii = i*_nVar +1;
-			VecGetValues(_primitives,1,&Ii,&p);
+			VecGetValues(_primitiveVars,1,&Ii,&p);
 			Ii = i*_nVar +_nVar-1;
-			VecGetValues(_primitives,1,&Ii,&Tm);
+			VecGetValues(_primitiveVars,1,&Ii,&Tm);
 
 			double rho_v=_fluides[0]->getDensity(p,Tm);
 			double rho_l=_fluides[1]->getDensity(p,Tm);

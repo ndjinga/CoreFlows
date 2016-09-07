@@ -43,6 +43,7 @@ void ProblemFluid::initialize()
 	_absAroe = new PetscScalar[_nVar*_nVar];
 	_signAroe = new PetscScalar[_nVar*_nVar];
 	_invAroe = new PetscScalar[_nVar*_nVar];
+	_primToConsJacoMat = new PetscScalar[_nVar*_nVar];
 	_phi = new PetscScalar[_nVar];
 	_Jcb = new PetscScalar[_nVar*_nVar];
 	_JcbDiff = new PetscScalar[_nVar*_nVar];
@@ -110,7 +111,7 @@ void ProblemFluid::initialize()
 			initialFieldPrim[i*_nVar+j]=_VV(i,j);
 	double *initialFieldCons = new double[_nVar*_Nmailles];
 	for(int i=0; i<_Nmailles; i++)
-		Prim2Cons(initialFieldPrim, i, initialFieldCons, i);
+		primToCons(initialFieldPrim, i, initialFieldCons, i);
 	for(int i =0; i<_Nmailles;i++)
 		for(int j =0; j<_nVar;j++)
 			_UU(i,j)=initialFieldCons[i*_nVar+j];
@@ -125,21 +126,21 @@ void ProblemFluid::initialize()
 	VecCreateSeq(PETSC_COMM_SELF, _nVar, &_Uext);
 	VecCreateSeq(PETSC_COMM_SELF, _nVar, &_Vext);
 	VecCreateSeq(PETSC_COMM_SELF, _nVar, &_Uextdiff);
-	//	  VecCreateSeq(PETSC_COMM_SELF, _nVar*_Nmailles, &_courant);
-	VecCreate(PETSC_COMM_SELF, &_courant);
-	VecSetSizes(_courant,PETSC_DECIDE,_nVar*_Nmailles);
-	VecSetBlockSize(_courant,_nVar);
-	VecSetFromOptions(_courant);
-	VecDuplicate(_courant, &_old);
-	VecDuplicate(_courant, &_next);
-	VecDuplicate(_courant, &_b);
-	VecDuplicate(_courant, &_primitives);
+	//	  VecCreateSeq(PETSC_COMM_SELF, _nVar*_Nmailles, &_conservativeVars);
+	VecCreate(PETSC_COMM_SELF, &_conservativeVars);
+	VecSetSizes(_conservativeVars,PETSC_DECIDE,_nVar*_Nmailles);
+	VecSetBlockSize(_conservativeVars,_nVar);
+	VecSetFromOptions(_conservativeVars);
+	VecDuplicate(_conservativeVars, &_old);
+	VecDuplicate(_conservativeVars, &_newtonVariation);
+	VecDuplicate(_conservativeVars, &_b);
+	VecDuplicate(_conservativeVars, &_primitiveVars);
 
 	if(_isScaling)
 	{
-		VecDuplicate(_courant, &_vecScaling);
-		VecDuplicate(_courant, &_invVecScaling);
-		VecDuplicate(_courant, &_bScaling);
+		VecDuplicate(_conservativeVars, &_vecScaling);
+		VecDuplicate(_conservativeVars, &_invVecScaling);
+		VecDuplicate(_conservativeVars, &_bScaling);
 
 		_blockDiag = new PetscScalar[_nVar];
 		_invBlockDiag = new PetscScalar[_nVar];
@@ -149,22 +150,22 @@ void ProblemFluid::initialize()
 	int *indices = new int[_Nmailles];
 	for(int i=0; i<_Nmailles; i++)
 		indices[i] = i;
-	VecSetValuesBlocked(_courant, _Nmailles, indices, initialFieldCons, INSERT_VALUES);
-	VecAssemblyBegin(_courant);
-	VecAssemblyEnd(_courant);
-	VecCopy(_courant, _old);
+	VecSetValuesBlocked(_conservativeVars, _Nmailles, indices, initialFieldCons, INSERT_VALUES);
+	VecAssemblyBegin(_conservativeVars);
+	VecAssemblyEnd(_conservativeVars);
+	VecCopy(_conservativeVars, _old);
 	VecAssemblyBegin(_old);
 	VecAssemblyEnd(_old);
-	VecSetValuesBlocked(_primitives, _Nmailles, indices, initialFieldPrim, INSERT_VALUES);
-	VecAssemblyBegin(_primitives);
-	VecAssemblyEnd(_primitives);
+	VecSetValuesBlocked(_primitiveVars, _Nmailles, indices, initialFieldPrim, INSERT_VALUES);
+	VecAssemblyBegin(_primitiveVars);
+	VecAssemblyEnd(_primitiveVars);
 	if(_system)
 	{
 		cout << "Variables primitives initiales:" << endl;
-		VecView(_primitives,  PETSC_VIEWER_STDOUT_WORLD);
+		VecView(_primitiveVars,  PETSC_VIEWER_STDOUT_WORLD);
 		cout << endl;
-		cout<<"Vecteur _courant initial "<<endl;
-		VecView(_courant,  PETSC_VIEWER_STDOUT_SELF);
+		cout<<"Vecteur _conservativeVars initial "<<endl;
+		VecView(_conservativeVars,  PETSC_VIEWER_STDOUT_SELF);
 	}
 
 	delete[] initialFieldPrim;
@@ -229,8 +230,8 @@ bool ProblemFluid::iterateTimeStep(bool &converged)
 				for(int k=0; k<_nVar; k++)
 				{
 					I = (j-1)*_nVar + k;
-					VecGetValues(_next, 1, &I, &dx);
-					VecGetValues(_courant, 1, &I, &x);
+					VecGetValues(_newtonVariation, 1, &I, &dx);
+					VecGetValues(_conservativeVars, 1, &I, &x);
 					if (fabs(x)*fabs(x)< _precision)
 					{
 						if(_erreur_rel < fabs(dx))
@@ -246,7 +247,7 @@ bool ProblemFluid::iterateTimeStep(bool &converged)
 
 	double relaxation=1;//Uk+1=Uk+relaxation*daltaU
 
-	VecAXPY(_courant,  relaxation, _next);
+	VecAXPY(_conservativeVars,  relaxation, _newtonVariation);
 
 	//mise a jour du champ primitif
 	updatePrimitives();
@@ -261,9 +262,9 @@ bool ProblemFluid::iterateTimeStep(bool &converged)
 	if(_system)
 	{
 		cout<<"Vecteur Ukp1-Uk "<<endl;
-		VecView(_next,  PETSC_VIEWER_STDOUT_SELF);
+		VecView(_newtonVariation,  PETSC_VIEWER_STDOUT_SELF);
 		cout << "Nouvel etat courant Uk de l'iteration Newton: " << endl;
-		VecView(_courant,  PETSC_VIEWER_STDOUT_SELF);
+		VecView(_conservativeVars,  PETSC_VIEWER_STDOUT_SELF);
 	}
 
 	if(_nbPhases==2 && _nbTimeStep%_freqSave ==0){
@@ -293,7 +294,7 @@ double ProblemFluid::computeTimeStep(bool & stop){
 		MatZeroEntries(_A);
 
 	VecAssemblyBegin(_b);
-	VecAssemblyBegin(_courant);
+	VecAssemblyBegin(_conservativeVars);
 	IntTab idCells;
 	PetscInt idm, idn, size = 1;
 
@@ -371,10 +372,17 @@ double ProblemFluid::computeTimeStep(bool & stop){
 					jacobian(idCells[k],nameOfGroup,_vec_normal);
 					jacobianDiff(idCells[k],nameOfGroup);
 					if(_verbose && _nbTimeStep%_freqSave ==0){
-						cout << "Matrice Jacobienne:" << endl;
+						cout << "Matrice Jacobienne CL convection:" << endl;
 						for(int p=0; p<_nVar; p++){
 							for(int q=0; q<_nVar; q++)
 								cout << _Jcb[p*_nVar+q] << "\t";
+							cout << endl;
+						}
+						cout << endl;
+						cout << "Matrice Jacobienne CL diffusion:" << endl;
+						for(int p=0; p<_nVar; p++){
+							for(int q=0; q<_nVar; q++)
+								cout << _JcbDiff[p*_nVar+q] << "\t";
 							cout << endl;
 						}
 						cout << endl;
@@ -627,7 +635,7 @@ double ProblemFluid::computeTimeStep(bool & stop){
 			throw CdmathException("ProblemFluid::ComputeTimeStep(): incompatible number of cells around a face");
 
 	}
-	VecAssemblyEnd(_courant);
+	VecAssemblyEnd(_conservativeVars);
 	VecAssemblyEnd(_b);
 
 	if(_timeScheme == Implicit){
@@ -659,7 +667,7 @@ void ProblemFluid::computeNewtonVariation()
 	if(_system)
 	{
 		cout<<"Vecteur courant Uk "<<endl;
-		VecView(_courant,PETSC_VIEWER_STDOUT_SELF);
+		VecView(_conservativeVars,PETSC_VIEWER_STDOUT_SELF);
 		cout << endl;
 		cout<<"Right hand side _b "<<endl;
 		VecView(_b,PETSC_VIEWER_STDOUT_SELF);
@@ -667,12 +675,12 @@ void ProblemFluid::computeNewtonVariation()
 	}
 	if(_timeScheme == Explicit)
 	{
-		VecCopy(_b,_next);
-		VecScale(_next, _dt);
+		VecCopy(_b,_newtonVariation);
+		VecScale(_newtonVariation, _dt);
 		if(_verbose && _nbTimeStep%_freqSave ==0)
 		{
-			cout<<"Vecteur _next =_b*dt"<<endl;
-			VecView(_next,PETSC_VIEWER_STDOUT_SELF);
+			cout<<"Vecteur _newtonVariation =_b*dt"<<endl;
+			VecView(_newtonVariation,PETSC_VIEWER_STDOUT_SELF);
 			cout << endl;
 		}
 	}
@@ -682,7 +690,7 @@ void ProblemFluid::computeNewtonVariation()
 		MatAssemblyEnd(_A, MAT_FINAL_ASSEMBLY);
 
 		VecAXPY(_b, 1/_dt, _old);
-		VecAXPY(_b, -1/_dt, _courant);
+		VecAXPY(_b, -1/_dt, _conservativeVars);
 		MatShift(_A, 1/_dt);
 
 		#if PETSC_VERSION_GREATER_3_5
@@ -697,7 +705,7 @@ void ProblemFluid::computeNewtonVariation()
 			KSPSetComputeEigenvalues(_ksp,PETSC_TRUE);
 		if(!_isScaling)
 		{
-			KSPSolve(_ksp, _b, _next);
+			KSPSolve(_ksp, _b, _newtonVariation);
 		}
 		else
 		{
@@ -740,12 +748,12 @@ void ProblemFluid::computeNewtonVariation()
 			}
 
 			KSPSolve(_ksp,_b, _bScaling);
-			VecPointwiseMult(_next,_invVecScaling,_bScaling);
+			VecPointwiseMult(_newtonVariation,_invVecScaling,_bScaling);
 		}
 		if(_system)
 		{
 			cout << "solution du systeme lineaire local:" << endl;
-			VecView(_next, PETSC_VIEWER_STDOUT_SELF);
+			VecView(_newtonVariation, PETSC_VIEWER_STDOUT_SELF);
 			cout << endl;
 		}
 	}
@@ -758,9 +766,9 @@ void ProblemFluid::validateTimeStep()
 		cout<<" Vecteur Un"<<endl;
 		VecView(_old,  PETSC_VIEWER_STDOUT_WORLD);
 		cout<<" Vecteur Un+1"<<endl;
-		VecView(_courant,  PETSC_VIEWER_STDOUT_WORLD);
+		VecView(_conservativeVars,  PETSC_VIEWER_STDOUT_WORLD);
 	}
-	VecAXPY(_old,  -1, _courant);//old contient old-courant
+	VecAXPY(_old,  -1, _conservativeVars);//old contient old-courant
 
 	//Calcul de la variation Un+1-Un
 	_erreur_rel= 0;
@@ -773,7 +781,7 @@ void ProblemFluid::validateTimeStep()
 		{
 			I = (j-1)*_nVar + k;
 			VecGetValues(_old, 1, &I, &dx);
-			VecGetValues(_courant, 1, &I, &x);
+			VecGetValues(_conservativeVars, 1, &I, &x);
 			if (fabs(x)< _precision)
 			{
 				if(_erreur_rel < fabs(dx))
@@ -786,7 +794,7 @@ void ProblemFluid::validateTimeStep()
 
 	_isStationary =_erreur_rel <_precision;
 
-	VecCopy(_courant, _old);
+	VecCopy(_conservativeVars, _old);
 
 	if(_verbose && _nbTimeStep%_freqSave ==0){
 		testConservation();
@@ -799,7 +807,7 @@ void ProblemFluid::validateTimeStep()
 		I = 0;
 		for(int j=1; j<=_Nmailles; j++)
 		{
-			VecGetValues(_primitives, 1, &I, &x);//extract void fraction
+			VecGetValues(_primitiveVars, 1, &I, &x);//extract void fraction
 			if(x>alphamax)
 				alphamax=x;
 			if(x<alphamin)
@@ -821,67 +829,6 @@ void ProblemFluid::abortTimeStep(){
 	_dt = 0;
 }
 
-void ProblemFluid::terminate(){
-
-	delete[] _AroePlus;
-	delete[] _Diffusion;
-	delete[] _Gravity;
-	delete[] _AroeMinus;
-	delete[] _Aroe;
-	delete[] _absAroe;
-	delete[] _signAroe;
-	delete[] _invAroe;
-	delete[] _phi;
-	delete[] _Jcb;
-	delete[] _JcbDiff;
-	delete[] _a;
-
-	delete[] _l;
-	delete[] _r;
-	delete[] _Uroe;
-	delete[] _Udiff;
-	delete[] _temp;
-	delete[] _externalStates;
-	delete[] _idm;
-	delete[] _idn;
-	delete[] _vec_normal;
-	delete[] _Ui;
-	delete[] _Uj;
-	delete[] _Vi;
-	delete[] _Vj;
-	if(_nonLinearFormulation==VFRoe){
-		delete[] _Uij;
-		delete[] _Vij;
-	}
-	delete[] _Si;
-	delete[] _Sj;
-	delete[] _pressureLossVector;
-	delete[] _porosityGradientSourceVector;
-	if(_isScaling)
-	{
-		delete[] _blockDiag;
-		delete[] _invBlockDiag;
-
-		VecDestroy(&_vecScaling);
-		VecDestroy(&_invVecScaling);
-		VecDestroy(&_bScaling);
-	}
-
-	VecDestroy(&_courant);
-	VecDestroy(&_next);
-	VecDestroy(&_b);
-	VecDestroy(&_primitives);
-	VecDestroy(&_Uext);
-	VecDestroy(&_Vext);
-	VecDestroy(&_Uextdiff);
-
-	// 	PCDestroy(_pc);
-	KSPDestroy(&_ksp);
-	for(int i=0;i<_nbPhases;i++)
-		delete _fluides[i];
-
-}
-
 void ProblemFluid::addConvectionToSecondMember
 (		const int &i,
 		const int &j, bool isBord
@@ -890,14 +837,14 @@ void ProblemFluid::addConvectionToSecondMember
 	//extraction des valeurs
 	for(int k=0; k<_nVar; k++)
 		_idm[k] = _nVar*i + k;
-	VecGetValues(_courant, _nVar, _idm, _Ui);
-	VecGetValues(_primitives, _nVar, _idm, _Vi);
+	VecGetValues(_conservativeVars, _nVar, _idm, _Ui);
+	VecGetValues(_primitiveVars, _nVar, _idm, _Vi);
 
 	if(!isBord){
 		for(int k=0; k<_nVar; k++)
 			_idn[k] = _nVar*j + k;
-		VecGetValues(_courant, _nVar, _idn, _Uj);
-		VecGetValues(_primitives, _nVar, _idn, _Vj);
+		VecGetValues(_conservativeVars, _nVar, _idn, _Uj);
+		VecGetValues(_primitiveVars, _nVar, _idn, _Vj);
 	}
 	else{
 		for(int k=0; k<_nVar; k++)
@@ -1106,8 +1053,8 @@ void ProblemFluid::addSourceTermToSecondMember
 	_idm[0] = i*_nVar;
 	for(int k=1; k<_nVar;k++)
 		_idm[k] = _idm[k-1] + 1;
-	VecGetValues(_courant, _nVar, _idm, _Ui);
-	VecGetValues(_primitives, _nVar, _idm, _Vi);
+	VecGetValues(_conservativeVars, _nVar, _idm, _Ui);
+	VecGetValues(_primitiveVars, _nVar, _idm, _Vi);
 	sourceVector(_Si,_Ui,_Vi,i);
 
 	if (_verbose && _nbTimeStep%_freqSave ==0)
@@ -1120,8 +1067,8 @@ void ProblemFluid::addSourceTermToSecondMember
 	if(!isBord){
 		for(int k=0; k<_nVar; k++)
 			_idn[k] = _nVar*j + k;
-		VecGetValues(_courant, _nVar, _idn, _Uj);
-		VecGetValues(_primitives, _nVar, _idn, _Vj);
+		VecGetValues(_conservativeVars, _nVar, _idn, _Uj);
+		VecGetValues(_primitiveVars, _nVar, _idn, _Vj);
 		sourceVector(_Sj,_Uj,_Vj,j);
 	}else
 	{
@@ -1249,14 +1196,14 @@ void ProblemFluid::addSourceTermToSecondMember
 
 void ProblemFluid::updatePrimitives()
 {
-	VecAssemblyBegin(_primitives);
+	VecAssemblyBegin(_primitiveVars);
 	for(int i=1; i<=_Nmailles; i++)
 	{
 		_idm[0] = _nVar*( (i-1));
 		for(int k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
 
-		VecGetValues(_courant, _nVar, _idm, _Ui);
+		VecGetValues(_conservativeVars, _nVar, _idm, _Ui);
 		if(_verbose && _nbTimeStep%_freqSave ==0)
 		{
 			cout << "ProblemFluid::updatePrimitives() cell " << i << endl;
@@ -1270,18 +1217,18 @@ void ProblemFluid::updatePrimitives()
 		consToPrim(_Ui,_Vi,_porosityField(i-1));
 		if(_nbPhases==2 && _Psat>-1e30){//Cas simulation flashing
 			double pressure;
-			VecGetValues(_primitives, 1, _idm+1, &pressure);
+			VecGetValues(_primitiveVars, 1, _idm+1, &pressure);
 			_dp_over_dt(i-1)=(_Vi[1]-pressure)/_dt;//pn+1-pn
 		}
 		_idm[0] = i-1;
-		VecSetValuesBlocked(_primitives, 1, _idm, _Vi, INSERT_VALUES);
+		VecSetValuesBlocked(_primitiveVars, 1, _idm, _Vi, INSERT_VALUES);
 	}
-	VecAssemblyEnd(_primitives);
+	VecAssemblyEnd(_primitiveVars);
 
 	if(_system)
 	{
 		cout << "Nouvelles variables primitives:" << endl;
-		VecView(_primitives,  PETSC_VIEWER_STDOUT_WORLD);
+		VecView(_primitiveVars,  PETSC_VIEWER_STDOUT_WORLD);
 		cout << endl;
 	}
 }
@@ -1396,3 +1343,63 @@ void ProblemFluid::InvMatriceRoe(vector< complex<double> > valeurs_propres_dist)
 	Poly.abs_par_interp_directe(nbVp_dist,valeurs_propres_dist, _Aroe, _nVar,_precision, _invAroe,y);
 }
 
+void ProblemFluid::terminate(){
+
+	delete[] _AroePlus;
+	delete[] _Diffusion;
+	delete[] _Gravity;
+	delete[] _AroeMinus;
+	delete[] _Aroe;
+	delete[] _absAroe;
+	delete[] _signAroe;
+	delete[] _invAroe;
+	delete[] _phi;
+	delete[] _Jcb;
+	delete[] _JcbDiff;
+	delete[] _a;
+	delete[] _primToConsJacoMat;
+
+	delete[] _l;
+	delete[] _r;
+	delete[] _Uroe;
+	delete[] _Udiff;
+	delete[] _temp;
+	delete[] _externalStates;
+	delete[] _idm;
+	delete[] _idn;
+	delete[] _vec_normal;
+	delete[] _Ui;
+	delete[] _Uj;
+	delete[] _Vi;
+	delete[] _Vj;
+	if(_nonLinearFormulation==VFRoe){
+		delete[] _Uij;
+		delete[] _Vij;
+	}
+	delete[] _Si;
+	delete[] _Sj;
+	delete[] _pressureLossVector;
+	delete[] _porosityGradientSourceVector;
+	if(_isScaling)
+	{
+		delete[] _blockDiag;
+		delete[] _invBlockDiag;
+
+		VecDestroy(&_vecScaling);
+		VecDestroy(&_invVecScaling);
+		VecDestroy(&_bScaling);
+	}
+
+	VecDestroy(&_conservativeVars);
+	VecDestroy(&_newtonVariation);
+	VecDestroy(&_b);
+	VecDestroy(&_primitiveVars);
+	VecDestroy(&_Uext);
+	VecDestroy(&_Vext);
+	VecDestroy(&_Uextdiff);
+
+	// 	PCDestroy(_pc);
+	KSPDestroy(&_ksp);
+	for(int i=0;i<_nbPhases;i++)
+		delete _fluides[i];
+}

@@ -2,7 +2,6 @@
 # -*-coding:utf-8 -*
 
 import CoreFlows as cf
-import cdmath as cm
 
 def SinglePhase_1DHeatedChannel():
 

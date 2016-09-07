@@ -103,6 +103,8 @@ protected :
 	Vector staggeredVFFCFlux();
 	//!Computes the matrices A^+ and A^- for the VFFC formulation of the staggered upwinding
 	void staggeredVFFCMatrices(double u_n);
+	//!Computes the matrices A^+ and A^- for the VFFC formulation of the staggered upwinding using Primitive Variables
+	void staggeredVFFCMatricesPrimitiveVariables(double u_n);
 	//!Compute the corrected interfacial state for lowMach, pressureCorrection and staggered versions of the VFRoe formulation
 	void applyVFRoeLowMachCorrections();
 	//!Special preconditioner based on a matrix scaling strategy
@@ -111,7 +113,8 @@ protected :
 	void entropicShift(double* n);
 	// Fonctions utilisant la loi d'etat
 	void consToPrim(const double *Ucons, double* Vprim,double porosity=1);
-	void Prim2Cons(const double *V, const int &i, double *U, const int &j);
+	void primToCons(const double *V, const int &i, double *U, const int &j);
+	void primToConsJacobianMatrix(double *V);
 
 };
 #endif /* SINGLEPHASE_HXX_*/

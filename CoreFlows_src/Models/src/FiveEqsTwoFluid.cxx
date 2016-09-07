@@ -50,9 +50,9 @@ void FiveEqsTwoFluid::initialize(){
 	if(static_cast<StiffenedGas*>(_fluides[0])==NULL || static_cast<StiffenedGas*>(_fluides[1])==NULL)
 		throw CdmathException("FiveEqsTwoFluid::initialize: both phase must have stiffened gas EOS");
 
-	_JacoMat = new PetscScalar[_nVar*_nVar];
-	_lCon = new PetscScalar[_nVar];
-	_rCon = new PetscScalar[_nVar];
+	_lCon = new PetscScalar[_nVar];//should be deleted in ::terminate
+	_rCon = new PetscScalar[_nVar];//should be deleted in ::terminate
+	_JacoMat = new PetscScalar[_nVar*_nVar];//should be deleted in ::terminate
 
 	_gravite = vector<double>(_nVar,0);
 	_Gravity = new PetscScalar[_nVar*_nVar];
@@ -84,12 +84,12 @@ void FiveEqsTwoFluid::initialize(){
 
 void FiveEqsTwoFluid::convectionState( const long &i, const long &j, const bool &IsBord){
 	//sortie: WRoe en (alpha, p, u1, u2, T, dm1,dm2,dalpha1,dp)
-	//entree: _courant en (rho1, rho1 u1, rho2, rho2 u2)
+	//entree: _conservativeVars en (rho1, rho1 u1, rho2, rho2 u2)
 
 	_idm[0] = _nVar*i;
 	for(int k=1; k<_nVar; k++)
 		_idm[k] = _idm[k-1] + 1;
-	VecGetValues(_courant, _nVar, _idm, _Ui);
+	VecGetValues(_conservativeVars, _nVar, _idm, _Ui);
 
 	_idm[0] = _nVar*j;
 	for(int k=1; k<_nVar; k++)
@@ -97,7 +97,7 @@ void FiveEqsTwoFluid::convectionState( const long &i, const long &j, const bool 
 	if(IsBord)
 		VecGetValues(_Uext, _nVar, _idm, _Uj);
 	else
-		VecGetValues(_courant, _nVar, _idm, _Uj);
+		VecGetValues(_conservativeVars, _nVar, _idm, _Uj);
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
 		cout<<"Convection Left state cell " << i<< ": "<<endl;
@@ -126,7 +126,7 @@ void FiveEqsTwoFluid::convectionState( const long &i, const long &j, const bool 
 	_idm[0] = _nVar*i;
 	for(int k=1; k<_nVar; k++)
 		_idm[k] = _idm[k-1] + 1;
-	VecGetValues(_primitives, _nVar, _idm, _l);
+	VecGetValues(_primitiveVars, _nVar, _idm, _l);
 
 	if(IsBord)
 	{
@@ -142,7 +142,7 @@ void FiveEqsTwoFluid::convectionState( const long &i, const long &j, const bool 
 		_idm[0] = _nVar*j;
 		for(int k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
-		VecGetValues(_primitives, _nVar, _idm, _r);
+		VecGetValues(_primitiveVars, _nVar, _idm, _r);
 	}
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
@@ -208,7 +208,7 @@ void FiveEqsTwoFluid::diffusionStateAndMatrices(const long &i,const long &j, con
 	for(int k=1; k<_nVar; k++)
 		_idm[k] = _idm[k-1] + 1;
 
-	VecGetValues(_courant, _nVar, _idm, _Ui);
+	VecGetValues(_conservativeVars, _nVar, _idm, _Ui);
 	_idm[0] = _nVar*j;
 	for(int k=1; k<_nVar; k++)
 		_idm[k] = _idm[k-1] + 1;
@@ -216,7 +216,7 @@ void FiveEqsTwoFluid::diffusionStateAndMatrices(const long &i,const long &j, con
 	if(IsBord)
 		VecGetValues(_Uextdiff, _nVar, _idm, _Uj);
 	else
-		VecGetValues(_courant, _nVar, _idm, _Uj);
+		VecGetValues(_conservativeVars, _nVar, _idm, _Uj);
 
 	for(int k=0; k<_nVar; k++)
 		_Udiff[k] = (_Ui[k]+_Uj[k])/2;
@@ -430,21 +430,224 @@ double FiveEqsTwoFluid::intPressDef(double alpha, double u_r2, double rho1, doub
 					-(1-alpha)*(1-alpha)*rho1*rho1/(_fluides[1]->vitesseSonTemperature(Temperature,rho2)*_fluides[1]->vitesseSonTemperature(Temperature,rho2)));
 }
 
-void FiveEqsTwoFluid::computeScaling(double maxvp)
-{
-	_blockDiag[0]=1;//alphaScaling;
-	_invBlockDiag[0]=1;//_blockDiag[0];
-	_blockDiag[1+_Ndim]=1;//-alphaScaling;
-	_invBlockDiag[1+_Ndim]=1.0;//_blockDiag[1+_Ndim];
-	for(int q=1; q<_Ndim+1; q++)
-	{
-		_blockDiag[q]=1/maxvp;
-		_invBlockDiag[q]=1/_blockDiag[q];
-		_blockDiag[q+1+_Ndim]=1/maxvp;
-		_invBlockDiag[q+1+_Ndim]=1/_blockDiag[q+1+_Ndim];
+Vector FiveEqsTwoFluid::convectionFlux(Vector U,Vector V, Vector normale, double porosity){
+	if(_verbose){
+		cout<<"Ucons"<<endl;
+		cout<<U<<endl;
+		cout<<"Vprim"<<endl;
+		cout<<V<<endl;
 	}
-	_blockDiag[_nVar - 1]=1/(maxvp*maxvp);//1
-	_invBlockDiag[_nVar - 1]=  1./_blockDiag[_nVar - 1] ;// 1.;//
+
+	double phim1=U(0);//phi alpha1 rho1
+	double phim2=U(1+_Ndim);//phi alpha2 rho2
+	Vector phiq1(_Ndim),phiq2(_Ndim);//phi alpha1 rho1 u1, phi alpha2 rho2 u2
+	for(int i=0;i<_Ndim;i++){
+		phiq1(i)=U(1+i);
+		phiq2(i)=U(2+_Ndim+i);
+	}
+	double alpha=V(0);
+	double pression=V(1);
+	Vector vitesse1(_Ndim),vitesse2(_Ndim);
+	for(int i=0;i<_Ndim;i++){
+		vitesse1(i)=V(2+i);
+		vitesse2(i)=V(2+_Ndim+i);
+	}
+	double Temperature= V(_nVar-1);
+
+	double vitesse1n=vitesse1*normale;
+	double vitesse2n=vitesse2*normale;
+	double rho1=_fluides[0]->getDensity(pression,Temperature);
+	double rho2=_fluides[1]->getDensity(pression,Temperature);
+	double e1_int=_fluides[0]->getInternalEnergy(Temperature,rho1);
+	double e2_int=_fluides[1]->getInternalEnergy(Temperature,rho2);
+
+	double alpha_roe = _Uroe[0];//Toumi formula
+	// interfacial pressure term (hyperbolic correction)
+	double dpi = _Uroe[_nVar];
+
+	Vector F(_nVar);
+	F(0)=phim1*vitesse1n;
+	F(1+_Ndim)=phim2*vitesse2n;
+	for(int i=0;i<_Ndim;i++){
+		F(1+i)=phim1*vitesse1n*vitesse1(i)+(alpha_roe*pression+dpi*alpha)*porosity*normale(i);
+		F(2+_Ndim+i)=phim2*vitesse2n*vitesse2(i)+((1-alpha_roe)*pression+dpi*(1-alpha))*normale(i)*porosity;
+	}
+	F(_nVar-1)=phim1*(e1_int+0.5*vitesse1*vitesse1+pression/rho1)*vitesse1n+phim2*(e2_int+0.5*vitesse2*vitesse2+pression/rho2)*vitesse2n;
+
+	if(_verbose){
+		cout<<"Flux F(U,V)"<<endl;
+		cout<<F<<endl;
+	}
+
+	return F;
+}
+
+void FiveEqsTwoFluid::convectionJacobianMatrix(double *V, double *n)
+{
+	complex< double > tmp;
+	// enter : V(nVar) : primitive variables
+	//            n    : normal vector
+	double alp = V[0];
+	double p = V[1];
+	double Tm = V[_nVar-1];
+	double rho1 = _fluides[0]->getDensity(p, Tm);
+	double rho2 = _fluides[1]->getDensity(p, Tm);
+	double ur_2 = 0;
+	for (int idim=0; idim<_Ndim; idim++){
+		ur_2 += (V[2+idim]-V[2+idim+_Ndim])*(V[2+idim]-V[2+idim+_Ndim]);
+	}
+	// interfacial pressure term (hyperbolic correction)
+	double dpi1 = intPressDef(alp,ur_2, rho1, rho2,Tm);
+	double dpi2 = dpi1;
+
+	/********Prepare the parameters to compute the Jacobian Matrix********/
+	/**** coefficients a, b, c ****/
+	double inv_a1_2,inv_a2_2,b1,c1,a2,b2,c2;
+	double e1,e2;
+	e1 = _fluides[0]->getInternalEnergy(V[_nVar-1],rho1);// primitive variable _l[_nVar-1]=Tm
+	e2 = _fluides[1]->getInternalEnergy(V[_nVar-1],rho2);
+	inv_a1_2 = static_cast<StiffenedGas*>(_fluides[0])->getDiffDensPress(e1);
+	inv_a2_2 = static_cast<StiffenedGas*>(_fluides[1])->getDiffDensPress(e2);
+	//double getJumpDensInternalEnergy(const double p_l,const double p_r,const double e_l,const double e_r);
+	b1 = static_cast<StiffenedGas*>(_fluides[0])->getDiffDensInternalEnergy(p,e1);
+	b2 = static_cast<StiffenedGas*>(_fluides[1])->getDiffDensInternalEnergy(p,e2);
+	//double getJumpInternalEnergyTemperature();
+	c1 = static_cast<StiffenedGas*>(_fluides[0])->getDiffInternalEnergyTemperature();
+	c2 = static_cast<StiffenedGas*>(_fluides[1])->getDiffInternalEnergyTemperature();
+	/**** coefficients eta,  varrho_2 ****/
+	double eta[_Ndim], varrho_2;
+	// prefix m is arithmetic mean
+	double m1,m2, eta_n;
+	double u1[_Ndim],u2[_Ndim], alp_u1[_Ndim],alp_u2[_Ndim];
+	m1 = alp*rho1;
+	m2 = (1-alp)*rho2;
+	varrho_2 =1/((alp*rho2)*inv_a1_2+((1-alp)*rho1)*inv_a2_2);
+	eta_n = 0.;
+	for (int idim=0; idim<_Ndim; idim++){
+		u1[idim] = V[idim+2];
+		u2[idim] = V[_Ndim+idim+2];
+		alp_u1[idim] = alp*u1[idim];
+		alp_u2[idim] = (1-alp)*u2[idim];
+		eta_n += (alp_u1[idim]*(1-p/rho1*inv_a1_2)+alp_u2[idim]*(1-p/rho2*inv_a2_2))*n[idim];
+	}
+	double eta_varrho_2n = eta_n*varrho_2;
+	/**** compute jump of Delta T, Delta e1, Delta e2 ****/
+	double inv_cm = 1/(c1*m1+c2*m2);
+	double DeltaT [_nVar], Delta_e1[_nVar], Delta_e2[_nVar];
+	// initialize DeltaT
+	DeltaT[0] =-e1;
+	DeltaT[1+_Ndim] =-e2;
+	DeltaT[_nVar-1] = 1 ;
+	for (int idim=0; idim<_Ndim; idim++){
+		DeltaT[idim+1] = 0.;
+		DeltaT[1+_Ndim+idim+1] = 0;
+	}
+	for (int idim=0; idim<_Ndim; idim++){
+		// wrt mass gas
+		DeltaT[0] += 0.5*u1[idim]*u1[idim];
+		// wrt mass liquid
+		DeltaT[_Ndim+1] += 0.5*u2[idim]*u2[idim];
+		// wrt momentum gass
+		DeltaT[idim+1] += - u1[idim];//*n[idim]
+		// wrt momentum liquid
+		DeltaT[_Ndim+idim+2] += - u2[idim];//*n[idim]
+	}
+	// finalize  DeltaT, Delta_e1 and Delta_e2
+	for (int i =0; i< _nVar; ++i){
+		DeltaT[i] = inv_cm*DeltaT[i];
+		Delta_e1[i] = c1*DeltaT[i];
+		Delta_e2[i] = c2*DeltaT[i];
+	}
+	/**** compute differential flux (energy equation) A5 ****/
+
+	double dF5[_nVar];
+	// initialize A5
+	for (int i=0; i<_nVar; i++){
+		dF5[i]=0;
+	}
+	dF5[0] = eta_varrho_2n*rho2; // mass gas
+	dF5[_Ndim+1] = eta_varrho_2n*rho1; // mass liquid
+	for (int idim=0; idim<_Ndim; idim++){
+		// momentum gas
+		dF5[idim+1]= (e1+p/rho1)*n[idim];
+		// momentum liquid
+		dF5[_Ndim+idim+2]=(e2+p/rho2)*n[idim];
+	}
+	// assign the value of A5 (last row of the Roe matrix)
+	for (int idim=0; idim<_Ndim; idim++){
+		for (int jdim=0; jdim<_Ndim;jdim++){
+			dF5[0] -= u1[idim]*u1[jdim]*u1[jdim]*n[idim];// -uin * ujn^2
+			dF5[_Ndim+1] -= u2[idim]*u2[jdim]*u2[jdim]*n[idim];
+			//momentum gas
+			dF5[idim+1] += u1[idim]*u1[jdim]*n[jdim]+0.5*(u1[jdim]*u1[jdim])*n[idim];
+			//momentum liquid
+			dF5[_Ndim+idim+2] += u2[idim]*u2[jdim]*n[jdim]+0.5*(u2[jdim]*u2[jdim])*n[idim];
+		}
+	}
+	// final dF5
+	double coef_e1, coef_e2;
+	coef_e1 = - eta_varrho_2n*alp*rho2*b1;
+	coef_e2 = - eta_varrho_2n*(1-alp)*rho1*b2;
+	for (int idim=0; idim<_Ndim; idim++){
+		coef_e1 += (alp*rho1 - alp*p*b1/rho1)*u1[idim]*n[idim];
+		coef_e2 += ((1-alp)*rho2 - (1-alp)*p*b2/rho2)*u2[idim]*n[idim];
+	}
+	for (int i =0; i< _nVar; i++){
+		dF5[i] += coef_e1*Delta_e1[i] + coef_e2*Delta_e2[i];
+	}
+	/******** Construction de la matrice J *********/
+	//lignes de masse
+	for(int i=0; i<_nVar*_nVar;i++)
+		_JacoMat[i]=0.;
+
+	for(int idim=0; idim<_Ndim;idim++)
+	{
+		_JacoMat[1+idim]=n[idim];
+		_JacoMat[1+idim+_Ndim+1]=0.;
+		_JacoMat[(_Ndim+1)*_nVar+1+idim]=0.;
+		_JacoMat[(_Ndim+1)*_nVar+1+idim+_Ndim+1]=n[idim];
+	}
+	// Roe Matrix new version
+	for(int idim=0; idim<_Ndim;idim++)
+		for (int jdim=0; jdim<_Ndim;jdim++){
+			// momentum gas (neglect delta alpha and delta P)
+			_JacoMat[ (1+idim)*_nVar] += -u1[idim]*u1[jdim]*n[jdim];
+			_JacoMat[(1+idim)*_nVar+jdim+1] += u1[idim]*n[jdim];
+			_JacoMat[(1+idim)*_nVar+idim+1] += u1[jdim]*n[jdim];
+			// momentum liquid (neglect delta alpha and delta P)
+			_JacoMat[(2+_Ndim+idim)*_nVar+_Ndim+1] += -u2[idim]*u2[jdim]*n[jdim];
+			_JacoMat[(2+_Ndim+idim)*_nVar+_Ndim+1+jdim+1] += u2[idim]*n[jdim];
+			_JacoMat[(2+_Ndim+idim)*_nVar+_Ndim+1+idim+1] += u2[jdim]*n[jdim];
+		}
+	// update \Delta alpha
+	/*
+	 * (alpha *rho2*varrho_2+dpi1*(1-alpha)*inv_a2_2*varrho_2)*n[idim]
+	 */
+	for (int idim=0; idim<_Ndim; idim++){
+		_JacoMat[ (1+idim)*_nVar] += dpi1*varrho_2*(1-alp)*inv_a2_2*n[idim];
+		_JacoMat[ (1+idim)*_nVar+_Ndim+1] += -dpi1*varrho_2*alp*inv_a1_2*n[idim];
+		_JacoMat[(2+_Ndim+idim)*_nVar] += - dpi2*varrho_2*(1-alp)*inv_a2_2*n[idim];
+		_JacoMat[(2+_Ndim+idim)*_nVar+_Ndim+1] += dpi2*varrho_2*alp*inv_a1_2*n[idim];
+		for  (int i=0; i<_nVar; i++){
+			_JacoMat[ (1+idim)*_nVar+i]+=dpi1*varrho_2*(-alp*(1-alp)*inv_a2_2*b1*Delta_e1[i]+alp*(1-alp)*inv_a1_2*b2*Delta_e2[i])*n[idim];
+			_JacoMat[(_Ndim+1)*_nVar+ (1+idim)*_nVar+i]+=-dpi2*varrho_2*(-alp*(1-alp)*inv_a2_2*b1*Delta_e1[i]+alp*(1-alp)*inv_a1_2*b2*Delta_e2[i])*n[idim];
+		}
+	}
+	// update \Delta P
+	for (int idim=0; idim<_Ndim; idim++){
+		_JacoMat[ (1+idim)*_nVar] += alp*varrho_2*rho2*n[idim];
+		_JacoMat[ (1+idim)*_nVar+_Ndim+1] +=alp* varrho_2*rho1*n[idim];
+		_JacoMat[(2+_Ndim+idim)*_nVar] +=  (1-alp)*varrho_2*rho2*n[idim];
+		_JacoMat[(2+_Ndim+idim)*_nVar+_Ndim+1] += (1-alp)* varrho_2*rho1*n[idim];
+		for  (int i=0; i<_nVar; i++){
+			_JacoMat[ (1+idim)*_nVar+i]+=alp*varrho_2*(-alp*rho2*b1*Delta_e1[i] -(1-alp)*rho1*b2*Delta_e2[i])*n[idim];
+			_JacoMat[(_Ndim+1)*_nVar+ (1+idim)*_nVar+i]+=(1-alp)*varrho_2*(-alp*rho2*b1*Delta_e1[i] -(1-alp)*rho1*b2*Delta_e2[i])*n[idim];
+		}
+	}
+	// last row (total energy)
+	for (int i=0; i<_nVar; i++){
+		_JacoMat[(2*_Ndim+2)*_nVar +i] = dF5[i];
+	}
 }
 
 void FiveEqsTwoFluid::convectionMatrices()
@@ -1037,6 +1240,7 @@ void FiveEqsTwoFluid::convectionMatrices()
 		}
 	}
 }
+
 void FiveEqsTwoFluid::jacobianDiff(const int &j, string nameOfGroup)
 {
 	int k;
@@ -1046,8 +1250,8 @@ void FiveEqsTwoFluid::jacobianDiff(const int &j, string nameOfGroup)
 		_idm[0] = _nVar*j;
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
-		VecGetValues(_primitives, _nVar, _idm, _Vj);
-		VecGetValues(_courant, _nVar, _idm, _Uj);
+		VecGetValues(_primitiveVars, _nVar, _idm, _Vj);
+		VecGetValues(_conservativeVars, _nVar, _idm, _Uj);
 
 		double pression=_Vj[1];//pressure inside
 		double T=_Vj[_nVar-1];//temperature outside
@@ -1107,8 +1311,8 @@ void FiveEqsTwoFluid::jacobianDiff(const int &j, string nameOfGroup)
 		_idm[0] = j*_nVar;
 		for(k=1; k<_nVar;k++)
 		{_idm[k] = _idm[k-1] + 1;}
-		VecGetValues(_courant, _nVar, _idm, _phi);
-		VecGetValues(_primitives, _nVar, _idm, _externalStates);
+		VecGetValues(_conservativeVars, _nVar, _idm, _phi);
+		VecGetValues(_primitiveVars, _nVar, _idm, _externalStates);
 		 */
 	}
 	else if (_limitField[nameOfGroup].bcType!=Neumann && _limitField[nameOfGroup].bcType!=InletPressure){
@@ -1128,7 +1332,7 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 	for(k=1; k<_nVar; k++)
 		_idm[k] = _idm[k-1] + 1;
 
-	VecGetValues(_courant, _nVar, _idm, _externalStates);//variables conservatives de la cellule interne
+	VecGetValues(_conservativeVars, _nVar, _idm, _externalStates);//variables conservatives de la cellule interne
 
 	for(k=0; k<_Ndim; k++){
 		q1_n+=_externalStates[(k+1)]*normale[k];
@@ -1148,7 +1352,7 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 
 	if (_limitField[nameOfGroup].bcType==Wall){
 
-		VecGetValues(_primitives, _nVar, _idm, _Vj);
+		VecGetValues(_primitiveVars, _nVar, _idm, _Vj);
 		for(k=0; k<_Ndim; k++){
 			_externalStates[(k+1)]-= 2*q1_n*normale[k];
 			_externalStates[(k+1+1+_Ndim)]-= 2*q2_n*normale[k];
@@ -1193,7 +1397,7 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
 
-		VecGetValues(_primitives, _nVar, _idm, _Vj);
+		VecGetValues(_primitiveVars, _nVar, _idm, _Vj);
 		_idm[0] = 0;
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
@@ -1215,7 +1419,7 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
 
-		VecGetValues(_primitives, _nVar, _idm, _Vj);
+		VecGetValues(_primitiveVars, _nVar, _idm, _Vj);
 		double alpha=_limitField[nameOfGroup].alpha;//void fraction outside
 		double pression=_Vj[1];//pressure inside
 		double T=_limitField[nameOfGroup].T;//temperature outside
@@ -1269,7 +1473,7 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
 
-		VecGetValues(_primitives, _nVar, _idm,_Vj);
+		VecGetValues(_primitiveVars, _nVar, _idm,_Vj);
 		double alpha=_limitField[nameOfGroup].alpha;
 		double pression=_limitField[nameOfGroup].p;
 		double T=_limitField[nameOfGroup].T;
@@ -1310,7 +1514,7 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
 
-		VecGetValues(_primitives, _nVar, _idm,_Vj);
+		VecGetValues(_primitiveVars, _nVar, _idm,_Vj);
 		double pression_int=_Vj[1];
 		double pression_ext=_limitField[nameOfGroup].p;
 		double T=_Vj[_nVar-1];
@@ -1373,7 +1577,7 @@ void FiveEqsTwoFluid::addDiffusionToSecondMember
 	for(int k=1; k<_nVar; k++)
 		_idm[k] = _idm[k-1] + 1;
 
-	VecGetValues(_primitives, _nVar, _idm, _Vi);
+	VecGetValues(_primitiveVars, _nVar, _idm, _Vi);
 	if (_verbose && _nbTimeStep%_freqSave ==0)
 	{
 		cout << "Contribution diffusion: variables primitives maille " << i<<endl;
@@ -1388,7 +1592,7 @@ void FiveEqsTwoFluid::addDiffusionToSecondMember
 		for(int k=0; k<_nVar; k++)
 			_idm[k] = _nVar*j + k;
 
-		VecGetValues(_primitives, _nVar, _idm, _Vj);
+		VecGetValues(_primitiveVars, _nVar, _idm, _Vj);
 	}
 	else
 	{
@@ -1471,7 +1675,8 @@ void FiveEqsTwoFluid::jacobian(const int &j, string nameOfGroup, double * normal
 {
 	int k;
 	for(k=0; k<_nVar*_nVar;k++)
-		_Jcb[k] = 0;
+		_Jcb[k] = 0;//No implicitation at this stage
+
 	// loop of boundary types
 	if (_limitField[nameOfGroup].bcType==Wall)
 	{
@@ -1507,8 +1712,8 @@ void FiveEqsTwoFluid::jacobian(const int &j, string nameOfGroup, double * normal
 		_idm[0] = j*_nVar;
 		for(k=1; k<_nVar;k++)
 		{_idm[k] = _idm[k-1] + 1;}
-		VecGetValues(_courant, _nVar, _idm, _phi);
-		VecGetValues(_primitives, _nVar, _idm, _externalStates);
+		VecGetValues(_conservativeVars, _nVar, _idm, _phi);
+		VecGetValues(_primitiveVars, _nVar, _idm, _externalStates);
 	}
 	else  if (_limitField[nameOfGroup].bcType!=Neumann && _limitField[nameOfGroup].bcType!=InletPressure)// not wall, not inlet, not outlet
 	{
@@ -1518,7 +1723,7 @@ void FiveEqsTwoFluid::jacobian(const int &j, string nameOfGroup, double * normal
 }
 
 
-void FiveEqsTwoFluid::Prim2Cons(const double *P, const int &i, double *W, const int &j){
+void FiveEqsTwoFluid::primToCons(const double *P, const int &i, double *W, const int &j){
 	//P= alpha, p, u1, u2, T
 	//W=m1,q1,m2,q2,rhoE =alpha1*rho1*(e1+u1^2/2)+alpha2*rho2*(e2+u2^2/2)
 	double alpha=P[i*_nVar];
@@ -1614,173 +1819,6 @@ void FiveEqsTwoFluid::consToPrim(const double *Wcons, double* Wprim,double poros
 	}
 	Wprim[_nVar-1] = temperature;
 }
-void FiveEqsTwoFluid::JacobianMatrix(double *V, double *n)
-{
-	complex< double > tmp;
-	// enter : V(nVar) : primitive variables
-	//            n    : normal vector
-	double alp = V[0];
-	double p = V[1];
-	double Tm = V[_nVar-1];
-	double rho1 = _fluides[0]->getDensity(p, Tm);
-	double rho2 = _fluides[1]->getDensity(p, Tm);
-	double ur_2 = 0;
-	for (int idim=0; idim<_Ndim; idim++){
-		ur_2 += (V[2+idim]-V[2+idim+_Ndim])*(V[2+idim]-V[2+idim+_Ndim]);
-	}
-	// interfacial pressure term (hyperbolic correction)
-	double dpi1 = intPressDef(alp,ur_2, rho1, rho2,Tm);
-	double dpi2 = dpi1;
-
-	/********Prepare the parameters to compute the Jacobian Matrix********/
-	/**** coefficients a, b, c ****/
-	double inv_a1_2,inv_a2_2,b1,c1,a2,b2,c2;
-	double e1,e2;
-	e1 = _fluides[0]->getInternalEnergy(V[_nVar-1],rho1);// primitive variable _l[_nVar-1]=Tm
-	e2 = _fluides[1]->getInternalEnergy(V[_nVar-1],rho2);
-	inv_a1_2 = static_cast<StiffenedGas*>(_fluides[0])->getDiffDensPress(e1);
-	inv_a2_2 = static_cast<StiffenedGas*>(_fluides[1])->getDiffDensPress(e2);
-	//double getJumpDensInternalEnergy(const double p_l,const double p_r,const double e_l,const double e_r);
-	b1 = static_cast<StiffenedGas*>(_fluides[0])->getDiffDensInternalEnergy(p,e1);
-	b2 = static_cast<StiffenedGas*>(_fluides[1])->getDiffDensInternalEnergy(p,e2);
-	//double getJumpInternalEnergyTemperature();
-	c1 = static_cast<StiffenedGas*>(_fluides[0])->getDiffInternalEnergyTemperature();
-	c2 = static_cast<StiffenedGas*>(_fluides[1])->getDiffInternalEnergyTemperature();
-	/**** coefficients eta,  varrho_2 ****/
-	double eta[_Ndim], varrho_2;
-	// prefix m is arithmetic mean
-	double m1,m2, eta_n;
-	double u1[_Ndim],u2[_Ndim], alp_u1[_Ndim],alp_u2[_Ndim];
-	m1 = alp*rho1;
-	m2 = (1-alp)*rho2;
-	varrho_2 =1/((alp*rho2)*inv_a1_2+((1-alp)*rho1)*inv_a2_2);
-	eta_n = 0.;
-	for (int idim=0; idim<_Ndim; idim++){
-		u1[idim] = V[idim+2];
-		u2[idim] = V[_Ndim+idim+2];
-		alp_u1[idim] = alp*u1[idim];
-		alp_u2[idim] = (1-alp)*u2[idim];
-		eta_n += (alp_u1[idim]*(1-p/rho1*inv_a1_2)+alp_u2[idim]*(1-p/rho2*inv_a2_2))*n[idim];
-	}
-	double eta_varrho_2n = eta_n*varrho_2;
-	/**** compute jump of Delta T, Delta e1, Delta e2 ****/
-	double inv_cm = 1/(c1*m1+c2*m2);
-	double DeltaT [_nVar], Delta_e1[_nVar], Delta_e2[_nVar];
-	// initialize DeltaT
-	DeltaT[0] =-e1;
-	DeltaT[1+_Ndim] =-e2;
-	DeltaT[_nVar-1] = 1 ;
-	for (int idim=0; idim<_Ndim; idim++){
-		DeltaT[idim+1] = 0.;
-		DeltaT[1+_Ndim+idim+1] = 0;
-	}
-	for (int idim=0; idim<_Ndim; idim++){
-		// wrt mass gas
-		DeltaT[0] += 0.5*u1[idim]*u1[idim];
-		// wrt mass liquid
-		DeltaT[_Ndim+1] += 0.5*u2[idim]*u2[idim];
-		// wrt momentum gass
-		DeltaT[idim+1] += - u1[idim];//*n[idim]
-		// wrt momentum liquid
-		DeltaT[_Ndim+idim+2] += - u2[idim];//*n[idim]
-	}
-	// finalize  DeltaT, Delta_e1 and Delta_e2
-	for (int i =0; i< _nVar; ++i){
-		DeltaT[i] = inv_cm*DeltaT[i];
-		Delta_e1[i] = c1*DeltaT[i];
-		Delta_e2[i] = c2*DeltaT[i];
-	}
-	/**** compute differential flux (energy equation) A5 ****/
-
-	double dF5[_nVar];
-	// initialize A5
-	for (int i=0; i<_nVar; i++){
-		dF5[i]=0;
-	}
-	dF5[0] = eta_varrho_2n*rho2; // mass gas
-	dF5[_Ndim+1] = eta_varrho_2n*rho1; // mass liquid
-	for (int idim=0; idim<_Ndim; idim++){
-		// momentum gas
-		dF5[idim+1]= (e1+p/rho1)*n[idim];
-		// momentum liquid
-		dF5[_Ndim+idim+2]=(e2+p/rho2)*n[idim];
-	}
-	// assign the value of A5 (last row of the Roe matrix)
-	for (int idim=0; idim<_Ndim; idim++){
-		for (int jdim=0; jdim<_Ndim;jdim++){
-			dF5[0] -= u1[idim]*u1[jdim]*u1[jdim]*n[idim];// -uin * ujn^2
-			dF5[_Ndim+1] -= u2[idim]*u2[jdim]*u2[jdim]*n[idim];
-			//momentum gas
-			dF5[idim+1] += u1[idim]*u1[jdim]*n[jdim]+0.5*(u1[jdim]*u1[jdim])*n[idim];
-			//momentum liquid
-			dF5[_Ndim+idim+2] += u2[idim]*u2[jdim]*n[jdim]+0.5*(u2[jdim]*u2[jdim])*n[idim];
-		}
-	}
-	// final dF5
-	double coef_e1, coef_e2;
-	coef_e1 = - eta_varrho_2n*alp*rho2*b1;
-	coef_e2 = - eta_varrho_2n*(1-alp)*rho1*b2;
-	for (int idim=0; idim<_Ndim; idim++){
-		coef_e1 += (alp*rho1 - alp*p*b1/rho1)*u1[idim]*n[idim];
-		coef_e2 += ((1-alp)*rho2 - (1-alp)*p*b2/rho2)*u2[idim]*n[idim];
-	}
-	for (int i =0; i< _nVar; i++){
-		dF5[i] += coef_e1*Delta_e1[i] + coef_e2*Delta_e2[i];
-	}
-	/******** Construction de la matrice J *********/
-	//lignes de masse
-	for(int i=0; i<_nVar*_nVar;i++)
-		_JacoMat[i]=0.;
-
-	for(int idim=0; idim<_Ndim;idim++)
-	{
-		_JacoMat[1+idim]=n[idim];
-		_JacoMat[1+idim+_Ndim+1]=0.;
-		_JacoMat[(_Ndim+1)*_nVar+1+idim]=0.;
-		_JacoMat[(_Ndim+1)*_nVar+1+idim+_Ndim+1]=n[idim];
-	}
-	// Roe Matrix new version
-	for(int idim=0; idim<_Ndim;idim++)
-		for (int jdim=0; jdim<_Ndim;jdim++){
-			// momentum gas (neglect delta alpha and delta P)
-			_JacoMat[ (1+idim)*_nVar] += -u1[idim]*u1[jdim]*n[jdim];
-			_JacoMat[(1+idim)*_nVar+jdim+1] += u1[idim]*n[jdim];
-			_JacoMat[(1+idim)*_nVar+idim+1] += u1[jdim]*n[jdim];
-			// momentum liquid (neglect delta alpha and delta P)
-			_JacoMat[(2+_Ndim+idim)*_nVar+_Ndim+1] += -u2[idim]*u2[jdim]*n[jdim];
-			_JacoMat[(2+_Ndim+idim)*_nVar+_Ndim+1+jdim+1] += u2[idim]*n[jdim];
-			_JacoMat[(2+_Ndim+idim)*_nVar+_Ndim+1+idim+1] += u2[jdim]*n[jdim];
-		}
-	// update \Delta alpha
-	/*
-	 * (alpha *rho2*varrho_2+dpi1*(1-alpha)*inv_a2_2*varrho_2)*n[idim]
-	 */
-	for (int idim=0; idim<_Ndim; idim++){
-		_JacoMat[ (1+idim)*_nVar] += dpi1*varrho_2*(1-alp)*inv_a2_2*n[idim];
-		_JacoMat[ (1+idim)*_nVar+_Ndim+1] += -dpi1*varrho_2*alp*inv_a1_2*n[idim];
-		_JacoMat[(2+_Ndim+idim)*_nVar] += - dpi2*varrho_2*(1-alp)*inv_a2_2*n[idim];
-		_JacoMat[(2+_Ndim+idim)*_nVar+_Ndim+1] += dpi2*varrho_2*alp*inv_a1_2*n[idim];
-		for  (int i=0; i<_nVar; i++){
-			_JacoMat[ (1+idim)*_nVar+i]+=dpi1*varrho_2*(-alp*(1-alp)*inv_a2_2*b1*Delta_e1[i]+alp*(1-alp)*inv_a1_2*b2*Delta_e2[i])*n[idim];
-			_JacoMat[(_Ndim+1)*_nVar+ (1+idim)*_nVar+i]+=-dpi2*varrho_2*(-alp*(1-alp)*inv_a2_2*b1*Delta_e1[i]+alp*(1-alp)*inv_a1_2*b2*Delta_e2[i])*n[idim];
-		}
-	}
-	// update \Delta P
-	for (int idim=0; idim<_Ndim; idim++){
-		_JacoMat[ (1+idim)*_nVar] += alp*varrho_2*rho2*n[idim];
-		_JacoMat[ (1+idim)*_nVar+_Ndim+1] +=alp* varrho_2*rho1*n[idim];
-		_JacoMat[(2+_Ndim+idim)*_nVar] +=  (1-alp)*varrho_2*rho2*n[idim];
-		_JacoMat[(2+_Ndim+idim)*_nVar+_Ndim+1] += (1-alp)* varrho_2*rho1*n[idim];
-		for  (int i=0; i<_nVar; i++){
-			_JacoMat[ (1+idim)*_nVar+i]+=alp*varrho_2*(-alp*rho2*b1*Delta_e1[i] -(1-alp)*rho1*b2*Delta_e2[i])*n[idim];
-			_JacoMat[(_Ndim+1)*_nVar+ (1+idim)*_nVar+i]+=(1-alp)*varrho_2*(-alp*rho2*b1*Delta_e1[i] -(1-alp)*rho1*b2*Delta_e2[i])*n[idim];
-		}
-	}
-	// last row (total energy)
-	for (int i=0; i<_nVar; i++){
-		_JacoMat[(2*_Ndim+2)*_nVar +i] = dF5[i];
-	}
-}
 
 void FiveEqsTwoFluid::entropicShift(double* n, double& vpcorr0, double& vpcorr1)
 {
@@ -1796,7 +1834,7 @@ void FiveEqsTwoFluid::entropicShift(double* n, double& vpcorr0, double& vpcorr1)
 	int info_l = 0, info_r = 0;
 
 	/******** Left: Compute the eigenvalues and eigenvectors of Jacobian Matrix (using lapack)********/
-	JacobianMatrix(_l, n);
+	convectionJacobianMatrix(_l, n);
 	for (int i=0; i<_nVar*_nVar; i++){
 		JacoMat[i] = _JacoMat[i];
 	}
@@ -1807,7 +1845,7 @@ void FiveEqsTwoFluid::entropicShift(double* n, double& vpcorr0, double& vpcorr1)
 			&info_l);
 
 	//	/******** Right: Compute the eigenvalues and eigenvectors of Jacobian Matrix (using lapack)********/
-	JacobianMatrix(_r, n);
+	convectionJacobianMatrix(_r, n);
 	for (int i=0; i<_nVar*_nVar; i++){
 		JacoMat[i] = _JacoMat[i];
 	}
@@ -1874,7 +1912,7 @@ void FiveEqsTwoFluid::entropicShift(double* n)
 	double WORK[LWORK], JacoMat[_nVar*_nVar],egvaReal[_nVar],egvaImag[_nVar],egVectorL[_nVar*_nVar],egVectorR[_nVar*_nVar];
 	int info = 0;
 	/******** Left: Compute the eigenvalues and eigenvectors of Jacobian Matrix (using lapack)********/
-	JacobianMatrix(_l, n);
+	convectionJacobianMatrix(_l, n);
 	for (int i=0; i<_nVar*_nVar; i++){
 		JacoMat[i] = _JacoMat[i];
 	}
@@ -1892,7 +1930,7 @@ void FiveEqsTwoFluid::entropicShift(double* n)
 		eigValuesLeft[j] = complex<double>(egvaReal[j],egvaImag[j]);
 	}
 	//	/******** Right: Compute the eigenvalues and eigenvectors of Jacobian Matrix (using lapack)********/
-	JacobianMatrix(_r, n);
+	convectionJacobianMatrix(_r, n);
 	for (int i=0; i<_nVar*_nVar; i++){
 		JacoMat[i] = _JacoMat[i];
 	}
@@ -1923,58 +1961,6 @@ void FiveEqsTwoFluid::entropicShift(double* n)
 	}
 	for (int i=0; i<min(sizeLeft,sizeRight)-1; i++)
 		_entropicShift[i]= abs(eigValuesRight[i]-eigValuesLeft[i]);
-}
-
-Vector FiveEqsTwoFluid::convectionFlux(Vector U,Vector V, Vector normale, double porosity){
-	if(_verbose){
-		cout<<"Ucons"<<endl;
-		cout<<U<<endl;
-		cout<<"Vprim"<<endl;
-		cout<<V<<endl;
-	}
-
-	double phim1=U(0);//phi alpha1 rho1
-	double phim2=U(1+_Ndim);//phi alpha2 rho2
-	Vector phiq1(_Ndim),phiq2(_Ndim);//phi alpha1 rho1 u1, phi alpha2 rho2 u2
-	for(int i=0;i<_Ndim;i++){
-		phiq1(i)=U(1+i);
-		phiq2(i)=U(2+_Ndim+i);
-	}
-	double alpha=V(0);
-	double pression=V(1);
-	Vector vitesse1(_Ndim),vitesse2(_Ndim);
-	for(int i=0;i<_Ndim;i++){
-		vitesse1(i)=V(2+i);
-		vitesse2(i)=V(2+_Ndim+i);
-	}
-	double Temperature= V(_nVar-1);
-
-	double vitesse1n=vitesse1*normale;
-	double vitesse2n=vitesse2*normale;
-	double rho1=_fluides[0]->getDensity(pression,Temperature);
-	double rho2=_fluides[1]->getDensity(pression,Temperature);
-	double e1_int=_fluides[0]->getInternalEnergy(Temperature,rho1);
-	double e2_int=_fluides[1]->getInternalEnergy(Temperature,rho2);
-
-	double alpha_roe = _Uroe[0];//Toumi formula
-	// interfacial pressure term (hyperbolic correction)
-	double dpi = _Uroe[_nVar];
-
-	Vector F(_nVar);
-	F(0)=phim1*vitesse1n;
-	F(1+_Ndim)=phim2*vitesse2n;
-	for(int i=0;i<_Ndim;i++){
-		F(1+i)=phim1*vitesse1n*vitesse1(i)+(alpha_roe*pression+dpi*alpha)*porosity*normale(i);
-		F(2+_Ndim+i)=phim2*vitesse2n*vitesse2(i)+((1-alpha_roe)*pression+dpi*(1-alpha))*normale(i)*porosity;
-	}
-	F(_nVar-1)=phim1*(e1_int+0.5*vitesse1*vitesse1+pression/rho1)*vitesse1n+phim2*(e2_int+0.5*vitesse2*vitesse2+pression/rho2)*vitesse2n;
-
-	if(_verbose){
-		cout<<"Flux F(U,V)"<<endl;
-		cout<<F<<endl;
-	}
-
-	return F;
 }
 
 Vector FiveEqsTwoFluid::staggeredVFFCFlux()
@@ -2079,7 +2065,7 @@ void FiveEqsTwoFluid::applyVFRoeLowMachCorrections()
 			double 	c = _maxvploc;//mixture sound speed
 			double M=max(sqrt(u1_2),sqrt(u2_2))/c;//Mach number
 			_Vij[1]=M*_Vij[1]+(1-M)*(_Vi[1]+_Vj[1])/2;
-			Prim2Cons(_Vij,0,_Uij,0);
+			primToCons(_Vij,0,_Uij,0);
 		}
 		else if(_spaceScheme==pressureCorrection)
 		{
@@ -2129,9 +2115,26 @@ void FiveEqsTwoFluid::applyVFRoeLowMachCorrections()
 				}
 				_Vij[_nVar-1]=_Vj[_nVar-1];
 			}
-			Prim2Cons(_Vij,0,_Uij,0);
+			primToCons(_Vij,0,_Uij,0);
 		}
 	}
+}
+
+void FiveEqsTwoFluid::computeScaling(double maxvp)
+{
+	_blockDiag[0]=1;//alphaScaling;
+	_invBlockDiag[0]=1;//_blockDiag[0];
+	_blockDiag[1+_Ndim]=1;//-alphaScaling;
+	_invBlockDiag[1+_Ndim]=1.0;//_blockDiag[1+_Ndim];
+	for(int q=1; q<_Ndim+1; q++)
+	{
+		_blockDiag[q]=1/maxvp;
+		_invBlockDiag[q]=1/_blockDiag[q];
+		_blockDiag[q+1+_Ndim]=1/maxvp;
+		_invBlockDiag[q+1+_Ndim]=1/_blockDiag[q+1+_Ndim];
+	}
+	_blockDiag[_nVar - 1]=1/(maxvp*maxvp);//1
+	_invBlockDiag[_nVar - 1]=  1./_blockDiag[_nVar - 1] ;// 1.;//
 }
 
 void FiveEqsTwoFluid::testConservation()
@@ -2162,7 +2165,7 @@ void FiveEqsTwoFluid::testConservation()
 		{
 			VecGetValues(_old, 1, &I, &x);//on recupere la valeur du champ
 			SUM += x;
-			VecGetValues(_next, 1, &I, &x);//on recupere la variation du champ
+			VecGetValues(_newtonVariation, 1, &I, &x);//on recupere la variation du champ
 			DELTA += x;
 			I += _nVar;
 		}
@@ -2190,14 +2193,14 @@ void FiveEqsTwoFluid::save(){
 			   j = 8 : temperature */
 		for (int j = 0; j < _nVar; j++){
 			Ii = i*_nVar +j;
-			VecGetValues(_primitives,1,&Ii,&_VV(i,j));
+			VecGetValues(_primitiveVars,1,&Ii,&_VV(i,j));
 		}
 	}
 	if(_saveConservativeField){
 		for (long i = 0; i < _Nmailles; i++){
 			for (int j = 0; j < _nVar; j++){
 				Ii = i*_nVar +j;
-				VecGetValues(_courant,1,&Ii,&_UU(i,j));
+				VecGetValues(_conservativeVars,1,&Ii,&_UU(i,j));
 			}
 		}
 		_UU.setTime(_time,_nbTimeStep+1);
@@ -2301,9 +2304,9 @@ void FiveEqsTwoFluid::save(){
 			for (int j = 0; j < _Ndim; j++)//On récupère les composantes de vitesse
 			{
 				Ii = i*_nVar +2+j;
-				VecGetValues(_primitives,1,&Ii,&_Vitesse1(i,j));
+				VecGetValues(_primitiveVars,1,&Ii,&_Vitesse1(i,j));
 				Ii=i*_nVar +2+j+_Ndim;
-				VecGetValues(_primitives,1,&Ii,&_Vitesse2(i,j));
+				VecGetValues(_primitiveVars,1,&Ii,&_Vitesse2(i,j));
 			}
 			for (int j = _Ndim; j < 3; j++){//On met à zero les composantes de vitesse si la dimension est <3
 				_Vitesse1(i,j)=0;

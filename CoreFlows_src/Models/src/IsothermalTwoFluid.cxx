@@ -70,7 +70,7 @@ void IsothermalTwoFluid::initialize(){
 
 void IsothermalTwoFluid::convectionState( const long &i, const long &j, const bool &IsBord){
 	//sortie: WRoe en (alpha, p, u1, u2, dm1,dm2,dalpha1,dp)z
-	//entree: _courant en (alpha1 rho1, alpha1 rho1 u1, alpha2 rho2, alpha2 rho2 u2)
+	//entree: _conservativeVars en (alpha1 rho1, alpha1 rho1 u1, alpha2 rho2, alpha2 rho2 u2)
 
 	// _l always inside the domain (index i)
 	// _r is maybe the boundary cell (negative index)
@@ -79,7 +79,7 @@ void IsothermalTwoFluid::convectionState( const long &i, const long &j, const bo
 	_idm[0] = _nVar*i;
 	for(int k=1; k<_nVar; k++)
 		_idm[k] = _idm[k-1] + 1;
-	VecGetValues(_courant, _nVar, _idm, _Ui);
+	VecGetValues(_conservativeVars, _nVar, _idm, _Ui);
 
 	_idm[0] = _nVar*j;
 	for(int k=1; k<_nVar; k++)
@@ -87,7 +87,7 @@ void IsothermalTwoFluid::convectionState( const long &i, const long &j, const bo
 	if(IsBord)
 		VecGetValues(_Uext, _nVar, _idm, _Uj);
 	else
-		VecGetValues(_courant, _nVar, _idm, _Uj);
+		VecGetValues(_conservativeVars, _nVar, _idm, _Uj);
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
 		cout<<"Convection Left state cell " << i<< ": "<<endl;
@@ -115,7 +115,7 @@ void IsothermalTwoFluid::convectionState( const long &i, const long &j, const bo
 	_idm[0] = _nVar*i;
 	for(int k=1; k<_nVar; k++)
 		_idm[k] = _idm[k-1] + 1;
-	VecGetValues(_primitives, _nVar, _idm, _l);
+	VecGetValues(_primitiveVars, _nVar, _idm, _l);
 
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
@@ -136,7 +136,7 @@ void IsothermalTwoFluid::convectionState( const long &i, const long &j, const bo
 		_idm[0] = _nVar*j;
 		for(int k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
-		VecGetValues(_primitives, _nVar, _idm, _r);
+		VecGetValues(_primitiveVars, _nVar, _idm, _r);
 	}
 
 	if(_verbose && _nbTimeStep%_freqSave ==0)
@@ -200,7 +200,7 @@ void IsothermalTwoFluid::diffusionStateAndMatrices(const long &i,const long &j, 
 	for(int k=1; k<_nVar; k++)
 		_idm[k] = _idm[k-1] + 1;
 
-	VecGetValues(_courant, _nVar, _idm, _Ui);
+	VecGetValues(_conservativeVars, _nVar, _idm, _Ui);
 	_idm[0] = _nVar*j;
 	for(int k=1; k<_nVar; k++)
 		_idm[k] = _idm[k-1] + 1;
@@ -208,7 +208,7 @@ void IsothermalTwoFluid::diffusionStateAndMatrices(const long &i,const long &j, 
 	if(IsBord)
 		VecGetValues(_Uextdiff, _nVar, _idm, _Uj);
 	else
-		VecGetValues(_courant, _nVar, _idm, _Uj);
+		VecGetValues(_conservativeVars, _nVar, _idm, _Uj);
 
 	for(int k=0; k<_nVar; k++)
 		_Udiff[k] = (_Ui[k]+_Uj[k])/2;
@@ -566,7 +566,7 @@ void IsothermalTwoFluid::setBoundaryState(string nameOfGroup, const int &j,doubl
 	for(k=1; k<_nVar; k++)
 		_idm[k] = _idm[k-1] + 1;
 
-	VecGetValues(_courant, _nVar, _idm, _externalStates);
+	VecGetValues(_conservativeVars, _nVar, _idm, _externalStates);
 	double q1_n=0, q2_n=0;//quantité de mouvement normale à la paroi
 	for(k=0; k<_Ndim; k++){
 		q1_n+=_externalStates[(k+1)]*normale[k];
@@ -629,7 +629,7 @@ void IsothermalTwoFluid::setBoundaryState(string nameOfGroup, const int &j,doubl
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
 
-		VecGetValues(_primitives, _nVar, _idm, _Vj);
+		VecGetValues(_primitiveVars, _nVar, _idm, _Vj);
 		double alpha=_limitField[nameOfGroup].alpha;
 		double pression=_Vj[1];
 		double T=_Temperature;
@@ -664,7 +664,7 @@ void IsothermalTwoFluid::setBoundaryState(string nameOfGroup, const int &j,doubl
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
 
-		VecGetValues(_primitives, _nVar, _idm, _Vj);
+		VecGetValues(_primitiveVars, _nVar, _idm, _Vj);
 		double pression=_limitField[nameOfGroup].p;
 		double alpha=_limitField[nameOfGroup].alpha;
 		double T=_Temperature;
@@ -699,7 +699,7 @@ void IsothermalTwoFluid::setBoundaryState(string nameOfGroup, const int &j,doubl
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
 
-		VecGetValues(_primitives, _nVar, _idm,_Vj);
+		VecGetValues(_primitiveVars, _nVar, _idm,_Vj);
 		double pression_int=_Vj[1];
 		double pression_ext=_limitField[nameOfGroup].p;
 		double T=_Vj[_nVar-1];
@@ -746,7 +746,7 @@ void IsothermalTwoFluid::addDiffusionToSecondMember
 	for(int k=1; k<_nVar; k++)
 		_idm[k] = _idm[k-1] + 1;
 
-	VecGetValues(_primitives, _nVar, _idm, _Vi);
+	VecGetValues(_primitiveVars, _nVar, _idm, _Vi);
 	if (_verbose && _nbTimeStep%_freqSave ==0)
 	{
 		cout << "Contribution diffusion: variables primitives maille " << i<<endl;
@@ -760,7 +760,7 @@ void IsothermalTwoFluid::addDiffusionToSecondMember
 	if(!isBord ){
 		for(int k=0; k<_nVar; k++)
 			_idm[k] = _nVar*j + k;
-		VecGetValues(_primitives, _nVar, _idm, _Vj);
+		VecGetValues(_primitiveVars, _nVar, _idm, _Vj);
 	}
 	else
 	{
@@ -1134,7 +1134,7 @@ void IsothermalTwoFluid::jacobian(const int &j, string nameOfGroup,double * norm
 {
 	int k;
 	for(k=0; k<_nVar*_nVar;k++)
-		_Jcb[k] = 0;
+		_Jcb[k] = 0;//No implicitation at this stage
 
 	// loop on boundaries
 	if (_limitField[nameOfGroup].bcType==Wall)
@@ -1171,8 +1171,8 @@ void IsothermalTwoFluid::jacobian(const int &j, string nameOfGroup,double * norm
 		_idm[0] = j*_nVar;
 		for(k=1; k<_nVar;k++)
 		{_idm[k] = _idm[k-1] + 1;}
-		VecGetValues(_courant, _nVar, _idm, _phi);
-		VecGetValues(_primitives, _nVar, _idm, _externalStates);
+		VecGetValues(_conservativeVars, _nVar, _idm, _phi);
+		VecGetValues(_primitiveVars, _nVar, _idm, _externalStates);
 	}
 	else  if (_limitField[nameOfGroup].bcType!=Neumann && _limitField[nameOfGroup].bcType!=InletPressure)// not wall, not inlet, not outlet
 	{
@@ -1227,8 +1227,8 @@ void IsothermalTwoFluid::jacobianDiff(const int &j, string nameOfGroup)
 		_idm[0] = j*_nVar;
 		for(k=1; k<_nVar;k++)
 		{_idm[k] = _idm[k-1] + 1;}
-		VecGetValues(_courant, _nVar, _idm, _phi);
-		VecGetValues(_primitives, _nVar, _idm, _externalStates);
+		VecGetValues(_conservativeVars, _nVar, _idm, _phi);
+		VecGetValues(_primitiveVars, _nVar, _idm, _externalStates);
 		 */
 	}
 	else if (_limitField[nameOfGroup].bcType!=Neumann && _limitField[nameOfGroup].bcType!=InletPressure){
@@ -1237,7 +1237,7 @@ void IsothermalTwoFluid::jacobianDiff(const int &j, string nameOfGroup)
 	}
 }
 
-void IsothermalTwoFluid::Prim2Cons(const double *P, const int &i, double *W, const int &j){
+void IsothermalTwoFluid::primToCons(const double *P, const int &i, double *W, const int &j){
 	//P=alpha,p,u1,u2
 	//W=m1,q1,m2,q2
 	W[j*_nVar] = P[i*_nVar]*_fluides[0]->getDensity(P[i*_nVar+1],_Temperature);
@@ -1478,7 +1478,7 @@ void IsothermalTwoFluid::applyVFRoeLowMachCorrections()
 			double 	c = _maxvploc;//mixture sound speed
 			double M=max(sqrt(u1_2),sqrt(u2_2))/c;//Mach number
 			_Vij[1]=M*_Vij[1]+(1-M)*(_Vi[1]+_Vj[1])/2;
-			Prim2Cons(_Vij,0,_Uij,0);
+			primToCons(_Vij,0,_Uij,0);
 		}
 		else if(_spaceScheme==pressureCorrection)
 		{
@@ -1526,7 +1526,7 @@ void IsothermalTwoFluid::applyVFRoeLowMachCorrections()
 					_Vij[2+i+_Ndim] =_Vj[2+i+_Ndim];
 				}
 			}
-			Prim2Cons(_Vij,0,_Uij,0);
+			primToCons(_Vij,0,_Uij,0);
 		}
 	}
 }
@@ -1557,7 +1557,7 @@ void IsothermalTwoFluid::testConservation()
 		{
 			VecGetValues(_old, 1, &I, &x);//on recupere la valeur du champ
 			SUM += x;
-			VecGetValues(_next, 1, &I, &x);//on recupere la variation du champ
+			VecGetValues(_newtonVariation, 1, &I, &x);//on recupere la variation du champ
 			DELTA += x;
 			I += _nVar;
 		}
@@ -1584,7 +1584,7 @@ void IsothermalTwoFluid::save(){
 			   j = 5, 6, 7: velocity phase 2 */
 		for (int j = 0; j < _nVar; j++){
 			Ii = i*_nVar +j;
-			VecGetValues(_primitives,1,&Ii,&_VV(i,j));
+			VecGetValues(_primitiveVars,1,&Ii,&_VV(i,j));
 		}
 	}
 	if(_saveConservativeField){
@@ -1592,7 +1592,7 @@ void IsothermalTwoFluid::save(){
 			for (int j = 0; j < _nVar; j++){
 				Ii = i*_nVar +j;
 				//				cout<<"i= "<<i<< " j= "<<j<<" UU(i,j)= "<<_UU(i,j)<<endl;
-				VecGetValues(_courant,1,&Ii,&_UU(i,j));
+				VecGetValues(_conservativeVars,1,&Ii,&_UU(i,j));
 			}
 		}
 		_UU.setTime(_time,_nbTimeStep);
@@ -1694,9 +1694,9 @@ void IsothermalTwoFluid::save(){
 			for (int j = 0; j < _Ndim; j++)//On récupère les composantes de vitesse
 			{
 				Ii = i*_nVar +2+j;
-				VecGetValues(_primitives,1,&Ii,&_Vitesse1(i,j));
+				VecGetValues(_primitiveVars,1,&Ii,&_Vitesse1(i,j));
 				Ii=i*_nVar +2+j+_Ndim;
-				VecGetValues(_primitives,1,&Ii,&_Vitesse2(i,j));
+				VecGetValues(_primitiveVars,1,&Ii,&_Vitesse2(i,j));
 			}
 			for (int j = _Ndim; j < 3; j++){//On met à zero les composantes de vitesse si la dimension est <3
 				_Vitesse1(i,j)=0;

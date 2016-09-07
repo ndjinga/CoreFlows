@@ -86,11 +86,14 @@ class FiveEqsTwoFluid : public ProblemFluid{
 
   protected :
 	Field _Vitesse1,_Vitesse2;
-	PetscScalar * _JacoMat, *_lCon, *_rCon;	// Jacobian matrix for the five equations model, left and right conservative vectors
+	PetscScalar *_lCon, *_rCon;	// left and right conservative vectors
+	PetscScalar * _JacoMat; //Jacobian matrix of the convection fluxes, used to compute the entropic corrections for the 5eqs two-fluid model
 	PetscReal *_realPart, *_imagPart;
 	double _intPressCoeff;
 	//!calcule l'etat de Roe de deux etats
 	void convectionState( const long &i, const long &j, const bool &IsBord);
+	//!calcule la matrice de jacobienne de la convection de l'etat associé à une cellule
+	void convectionJacobianMatrix(double *V, double *n);
 	//!calcule la matrice de convection de l'etat interfacial entre deux cellules voisinnes
 	void convectionMatrices();
 	//!Calcule le flux pour un état et une porosité et une normale donnés
@@ -123,10 +126,11 @@ class FiveEqsTwoFluid : public ProblemFluid{
 
 	// Functions of equations of states
 	void consToPrim(const double *Ucons, double* Vprim,double porosity=1);
-	void Prim2Cons(const double *V, const int &i, double *U, const int &j);
+	void primToCons(const double *V, const int &i, double *U, const int &j);
+	void primToConsJacobianMatrix(double *V);
+
 
 	double intPressDef(double alpha, double ur_n, double rho1, double rho2, double temperature);
-	void JacobianMatrix(double *V, double *n);
 	void entropicShift(double*n, double& vpcorr0, double& vpcorr1);
 };
 

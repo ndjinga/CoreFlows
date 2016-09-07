@@ -47,7 +47,7 @@ We close the Drift-Model system with a stiffened gas law \f$p = (\gamma_k -1) \r
 
 For the sake of simplicity, for the moment we consider constant viscosity and conductivity, and neglect the contribution of viscous forces in the energy equation.
 
-The constant parameters \f$\lambda_k, \nu_k,\vec g, K_k\f$ and the fields \f$\phi(\vec x),\: \Phi(\vec x),\: K_s(\vec x)\f$ can be set by the userzz. The default value for \f$\phi\f$ is \f$\phi=1\f$.
+The constant parameters \f$\lambda_k, \nu_k,\vec g, K_k\f$ and the fields \f$\phi(\vec x),\: \Phi(\vec x),\: K_s(\vec x)\f$ can be set by the user. The default value for \f$\phi\f$ is \f$\phi=1\f$.
 
 
 To close the system we need a drift correlation for the relative velocity:

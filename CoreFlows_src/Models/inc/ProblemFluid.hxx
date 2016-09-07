@@ -391,10 +391,11 @@ protected :
 	bool _saveInterfacialField;//Save interfacial fields of the VFRoe scheme
 
 	// Variables du schema numerique 
-	Vec _courant, _next, _bScaling,_old, _primitives, _Uext,_Uextdiff ,_vecScaling,_invVecScaling, _Vext;
+	Vec _conservativeVars, _newtonVariation, _bScaling,_old, _primitiveVars, _Uext,_Uextdiff ,_vecScaling,_invVecScaling, _Vext;
 	//courant state vector, vector computed at next time step, second member of the equation
 	PetscScalar *_AroePlus, *_AroeMinus,*_Jcb,*_JcbDiff, *_a, *_blockDiag,  *_invBlockDiag,*_Diffusion, *_Gravity;
 	PetscScalar *_Aroe, *_absAroe, *_signAroe, *_invAroe;
+	PetscScalar * _primToConsJacoMat; //Jacobian matrix of the prim-->cons function
 	PetscScalar *_phi, *_Ui, *_Uj,  *_Vi, *_Vj,  *_Si, *_Sj, * _pressureLossVector, * _porosityGradientSourceVector, *_externalStates;
 	double *_Uroe, *_Udiff, *_temp, *_l, *_r,  *_vec_normal;
 	double * _Uij, *_Vij;//Conservative and primitive interfacial states of the VFRoe scheme
@@ -452,7 +453,7 @@ protected :
 	/** \fn convectionFlux
 	 * \brief Computes the convection flux F(U) projected on a vector n
 	 * @param U is the conservative variable vector 
-	 * @param V is the extended primitive variable vector 
+	 * @param V is the primitive variable vector
 	 * @param normal is a unit vector giving the direction where the convection flux matrix F(U) is projected
 	 * @param porosity is the ration of the volume occupied by the fluid in the cell (default value is 1)
 	 * @return The convection flux projected in the direction given by the normal vector: F(U)*normal */
@@ -541,23 +542,30 @@ protected :
 	// Fonctions utilisant la loi d'etat 
 
 	/** \fn consToPrim
-	 * \brief calcule le vecteur primitif à partir du vecteur conservatif
-	 * \Details est une fonction virtuelle pure, on la surcharge dans chacun des modèles
-	 * @param Ucons : vecteur conservatif
-	 * @pram Vprim : vecteur primitif
-	 * @param porosity est le coefficient de porisité en case de problème avec porosité
+	 * \brief computes the primitive vector state from a conservative vector state
+	 * \Details ure virtual, implemented by each model
+	 * @param Ucons : conservative variable vector
+	 * @pram Vprim : primitive variable vector
+	 * @param porosity is the porosity coefficient in case of a porous modeling
 	 * */
 	virtual void consToPrim(const double *Ucons, double* Vprim,double porosity=1) = 0;
 
-	/** \fn Prim2Cons
-	 * \brief calcule le vecteur conservatif à partir du vecteur primitif
-	 * \Details est une fonction virtuelle pure, on la surcharge dans chacun des modèles
-	 * @param U : vecteur conservatif
-	 * @pram V : vecteur primitif
-	 * @param i,j : les indices des cellules voisines pour les quelles on veut calculer
-	 * le vecteur conservatif
+	/** \fn primToCons
+	 * \brief computes the conservative vector state from a primitive vector state
+	 * \Details pure virtual, implemented by each model
+	 * @param U : conservative variable vector, may contain several states
+	 * @pram V : primitive variable vector, may contain several states
+	 * @param i : index of the conservative state in the vector U
+	 * @param j : index of the primitive state in the vector V
 	 * 	 */
-	virtual void Prim2Cons(const double *V, const int &i, double *U, const int &j)=0;
+	virtual void primToCons(const double *V, const int &i, double *U, const int &j)=0;
+
+	/** \fn primToConsJacobianMatrix
+	 * \brief computes the jacobian matrix of the cons->prim function
+	 * \Details pure virtual, implemented by each model
+	 * @pram V : primitive vector state
+	 * 	 */
+	//void primToConsJacobianMatrix(double *V)=0;
 
 	/** \fn getRacines
 	 * \brief Computes the roots of a polynomial
