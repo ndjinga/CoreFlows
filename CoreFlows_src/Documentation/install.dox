@@ -98,4 +98,10 @@ $CoreFlows
 python my_file.py
 \endverbatim
 
+- If you use the graphic interface, you need to run a Salomé Unix shell and type the command line
+\verbatim
+runSalome -mCOREFLOWS
+\verbatim
+then click on new study to open CoreFlows interface
+
 */

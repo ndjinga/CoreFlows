@@ -23,8 +23,9 @@ public :
 	 * \brief Constructor for the four equation drift model
 	 * \param [in] pressureEstimate : \ref around1bar or \ref around155bars
 	 * \param [in] int : mesh dimension
+	 * \param [in] bool : There are two possible equations of state for each phase
 	 *  */
-	DriftModel( pressureEstimate pEstimate, int dim);
+	DriftModel( pressureEstimate pEstimate, int dim, bool _useDellacherieEOS=true);
 	//! system initialisation
 	void initialize();
 
@@ -91,6 +92,19 @@ public :
 	void setWallBoundaryCondition(string groupName,double Temperature,double v_x, double v_y=0, double v_z=0){
 		_limitField[groupName]=LimitField(Wall,-1,vector<double>(1,v_x),vector<double>(1,v_y),vector<double>(1,v_z),Temperature,-1,-1,-1);
 	};
+
+	/** \fn computeNewtonVariation
+	 * \brief Builds and solves the linear system to obtain the variation Vkp1-Vk in a Newton scheme using primitive variables
+	 * @param
+	 * */
+	void computeNewtonVariation();
+
+	/** \fn iterateTimeStep
+	 * \brief calls computeNewtonVariation to perform one Newton iteration and tests the convergence
+	 * @param
+	 * @return boolean ok is true is the newton iteration gave a physically acceptable result
+	 * */
+	bool iterateTimeStep(bool &ok);
 
 protected :
 	double _khi, _ksi, _kappa;//mixture pressure derivatives with regard to rhom, m_c and rhom_em
@@ -236,7 +250,7 @@ protected :
 	 * \brief computes the jacobian matrix of the cons->prim function
 	 * @pram V : primitive vector state
 	 * 	 */
-	//void primToConsJacobianMatrix(double *V);
+	void primToConsJacobianMatrix(double *V);
 
 	/** \fn computeExtendedPrimState
 	 * \brief Computes extended primitive variable vector

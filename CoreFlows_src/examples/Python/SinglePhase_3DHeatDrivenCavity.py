@@ -93,7 +93,7 @@ def SinglePhase_3DHeatDrivenCavity():
 	myProblem.setTimeMax(maxTime);
 	myProblem.setFreqSave(freqSave);
 	myProblem.setFileName(fileName);
-	myProblem.setNewtonSolver(precision,20);
+	myProblem.setNewtonSolver(precision,50);
 	myProblem.saveConservativeField(True);
 	if(spaceDim>1):
 		myProblem.saveVelocity();

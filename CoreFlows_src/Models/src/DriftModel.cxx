@@ -8,7 +8,7 @@
 
 using namespace std;
 
-DriftModel::DriftModel(pressureEstimate pEstimate, int dim){
+DriftModel::DriftModel(pressureEstimate pEstimate, int dim, bool _useDellacherieEOS){
 	_Ndim=dim;
 	_nVar=_Ndim+3;
 	_nbPhases  = 2;
@@ -37,19 +37,24 @@ DriftModel::DriftModel(pressureEstimate pEstimate, int dim){
 		_Tsat=618;//saturation temperature at 155 bars
 		_hsatl=1.63e6;//water enthalpy at saturation at 155 bars
 		_hsatv=2.6e6;//Gas enthalpy at saturation at 155 bars
-		//		_fluides[0] = new StiffenedGasDellacherie(1.43,0  ,2.030255e6  ,1040.14,_Tsat,2.597e6); //stiffened gas law for Gas from S. Dellacherie//dernier paramètre non utilise, sert juste a eviter d'avoir deux constructeurs de même signature
-		//		_fluides[1] = new StiffenedGasDellacherie(2.35,1e9,-1.167056e6,1816.2,_Tsat,1.6299e6); //stiffened gas law for water from S. Dellacherie// dernier paramètre non utilise, sert juste a eviter d'avoir deux constructeurs de même signature
-
-		double esatv=2.444e6;//Gas internal energy at saturation at 155 bar
-		double esatl=1.604e6;//water internal energy at saturation at 155 bar
-		double sound_speed_v=433;//Gas sound speed at saturation at 155 bar
-		double sound_speed_l=621;//water sound speed at saturation at 155 bar
-		double cv_v=3633;//Gas specific heat capacity at saturation at 155 bar
-		double cv_l=3100;//water specific heat capacity at saturation at 155 bar
-		double rho_sat_v=102;//Gas density at saturation at 155 bar
-		double rho_sat_l=594;//water density at saturation at 155 bar
-		_fluides[0] = new StiffenedGas(rho_sat_v,1.55e7,_Tsat,esatv, sound_speed_v,cv_v); //stiffened gas law for Gas at pressure 155 bar and temperature 345°C
-		_fluides[1] = new StiffenedGas(rho_sat_l,1.55e7,_Tsat,esatl, sound_speed_l,cv_l); //stiffened gas law for water at pressure 155 bar
+		if(_useDellacherieEOS)
+		{
+			_fluides[0] = new StiffenedGasDellacherie(1.43,0  ,2.030255e6  ,1040.14,_Tsat,2.597e6); //stiffened gas law for Gas from S. Dellacherie//dernier paramètre non utilise, sert juste a eviter d'avoir deux constructeurs de même signature
+			_fluides[1] = new StiffenedGasDellacherie(2.35,1e9,-1.167056e6,1816.2,_Tsat,1.6299e6); //stiffened gas law for water from S. Dellacherie// dernier paramètre non utilise, sert juste a eviter d'avoir deux constructeurs de même signature
+		}
+		else
+		{
+			double esatv=2.444e6;//Gas internal energy at saturation at 155 bar
+			double esatl=1.604e6;//water internal energy at saturation at 155 bar
+			double sound_speed_v=433;//Gas sound speed at saturation at 155 bar
+			double sound_speed_l=621;//water sound speed at saturation at 155 bar
+			double cv_v=3633;//Gas specific heat capacity at saturation at 155 bar
+			double cv_l=3100;//water specific heat capacity at saturation at 155 bar
+			double rho_sat_v=102;//Gas density at saturation at 155 bar
+			double rho_sat_l=594;//water density at saturation at 155 bar
+			_fluides[0] = new StiffenedGas(rho_sat_v,1.55e7,_Tsat,esatv, sound_speed_v,cv_v); //stiffened gas law for Gas at pressure 155 bar and temperature 345°C
+			_fluides[1] = new StiffenedGas(rho_sat_l,1.55e7,_Tsat,esatl, sound_speed_l,cv_l); //stiffened gas law for water at pressure 155 bar
+		}
 	}
 	_latentHeat=_hsatv-_hsatl;
 	cout<<"Liquid saturation enthalpy "<< _hsatl<<" J/Kg"<<endl;
@@ -85,6 +90,221 @@ void DriftModel::initialize(){
 		_entropicShift=vector<double>(3);//at most 3 distinct eigenvalues
 
 	ProblemFluid::initialize();
+}
+
+bool DriftModel::iterateTimeStep(bool &converged)
+{
+	if(!_usePrimitiveVarsInNewton)
+		ProblemFluid::iterateTimeStep(converged);
+	else
+	{
+		bool stop=false;
+
+		if(_NEWTON_its>0){//Pas besoin de computeTimeStep à la première iteration de Newton
+			_maxvp=0;
+			computeTimeStep(stop);
+		}
+		if(stop){//Le compute time step ne s'est pas bien passé
+			cout<<"ComputeTimeStep failed"<<endl;
+			converged=false;
+			return false;
+		}
+
+		computeNewtonVariation();
+
+		//converged=convergence des iterations
+		if(_timeScheme == Explicit)
+			converged=true;
+		else{//Implicit scheme
+
+			KSPGetIterationNumber(_ksp, &_PetscIts);
+			if( _MaxIterLinearSolver < _PetscIts)//save the maximum number of iterations needed during the newton scheme
+				_MaxIterLinearSolver = _PetscIts;
+			if(_PetscIts>=_maxPetscIts)//solving the linear system failed
+			{
+				cout<<"Systeme lineaire : pas de convergence de Petsc. Itérations maximales "<<_maxPetscIts<<" atteintes"<<endl;
+				//_runLogFile<<"Systeme lineaire : pas de convergence de Petsc. Itérations maximales "<<_maxPetscIts<<" atteintes"<<endl;
+				converged=false;
+				return false;
+			}
+			else{//solving the linear system succeeded
+				//Calcul de la variation relative Uk+1-Uk
+				_erreur_rel = 0.;
+				double x, dx;
+				int I;
+				for(int j=1; j<=_Nmailles; j++)
+				{
+					for(int k=0; k<_nVar; k++)
+					{
+						I = (j-1)*_nVar + k;
+						VecGetValues(_newtonVariation, 1, &I, &dx);
+						VecGetValues(_primitiveVars, 1, &I, &x);
+						if (fabs(x)*fabs(x)< _precision)
+						{
+							if(_erreur_rel < fabs(dx))
+								_erreur_rel = fabs(dx);
+						}
+						else if(_erreur_rel < fabs(dx/x))
+							_erreur_rel = fabs(dx/x);
+					}
+				}
+			}
+			converged = _erreur_rel <= _precision_Newton;
+		}
+
+		double relaxation=1;//Vk+1=Vk+relaxation*deltaV
+
+		VecAXPY(_primitiveVars,  relaxation, _newtonVariation);
+
+		//mise a jour du champ primitif
+		updateConservatives();
+
+		if(_nbPhases==2 && fabs(_err_press_max) > _precision)//la pression n'a pu être calculée en diphasique à partir des variables conservatives
+		{
+			cout<<"Warning consToPrim: nbiter max atteint, erreur relative pression= "<<_err_press_max<<" precision= " <<_precision<<endl;
+			//_runLogFile<<"Warning consToPrim: nbiter max atteint, erreur relative pression= "<<_err_press_max<<" precision= " <<_precision<<endl;
+			converged=false;
+			return false;
+		}
+		if(_system)
+		{
+			cout<<"Vecteur Vkp1-Vk "<<endl;
+			VecView(_newtonVariation,  PETSC_VIEWER_STDOUT_SELF);
+			cout << "Nouvel etat courant Vk de l'iteration Newton: " << endl;
+			VecView(_primitiveVars,  PETSC_VIEWER_STDOUT_SELF);
+		}
+
+		if(_nbPhases==2 && _nbTimeStep%_freqSave ==0){
+			if(_minm1<-_precision || _minm2<-_precision)
+			{
+				cout<<"!!!!!!!!! WARNING masse partielle negative sur " << _nbMaillesNeg << " faces, min m1= "<< _minm1 << " , minm2= "<< _minm2<< " precision "<<_precision<<endl;
+				//_runLogFile<<"!!!!!!!!! WARNING masse partielle negative sur " << _nbMaillesNeg << " faces, min m1= "<< _minm1 << " , minm2= "<< _minm2<< " precision "<<_precision<<endl;
+			}
+
+			if (_nbVpCplx>0){
+				cout << "!!!!!!!!!!!!!!!!!!!!!!!! Complex eigenvalues on " << _nbVpCplx << " cells, max imag= " << _part_imag_max << endl;
+				//_runLogFile << "!!!!!!!!!!!!!!!!!!!!!!!! Complex eigenvalues on " << _nbVpCplx << " cells, max imag= " << _part_imag_max << endl;
+			}
+		}
+		_minm1=1e30;
+		_minm2=1e30;
+		_nbMaillesNeg=0;
+		_nbVpCplx =0;
+		_part_imag_max=0;
+
+		return true;
+	}
+}
+void DriftModel::computeNewtonVariation()
+{
+	if(!_usePrimitiveVarsInNewton)
+		ProblemFluid::computeNewtonVariation();
+	else
+	{
+		if(_system)
+		{
+			cout<<"Vecteur courant Vk "<<endl;
+			VecView(_primitiveVars,PETSC_VIEWER_STDOUT_SELF);
+			cout << endl;
+			cout<<"Right hand side _b "<<endl;
+			VecView(_b,PETSC_VIEWER_STDOUT_SELF);
+			cout << endl;
+		}
+		if(_timeScheme == Explicit)
+		{
+			VecCopy(_b,_newtonVariation);
+			VecScale(_newtonVariation, _dt);
+			if(_verbose && _nbTimeStep%_freqSave ==0)
+			{
+				cout<<"Vecteur _newtonVariation =_b*dt"<<endl;
+				VecView(_newtonVariation,PETSC_VIEWER_STDOUT_SELF);
+				cout << endl;
+			}
+		}
+		else
+		{
+			MatAssemblyBegin(_A, MAT_FINAL_ASSEMBLY);
+
+			VecAXPY(_b, 1/_dt, _old);
+			VecAXPY(_b, -1/_dt, _conservativeVars);
+
+			for(int imaille = 0; imaille<_Nmailles; imaille++){
+				_idm[0] = _nVar*imaille;
+				for(int k=1; k<_nVar; k++)
+					_idm[k] = _idm[k-1] + 1;
+				VecGetValues(_primitiveVars, _nVar, _idm, _Vi);
+				primToConsJacobianMatrix(_Vi);
+				for(int k=0; k<_nVar; k++)
+					_primToConsJacoMat[k]*=1/_dt;
+				MatSetValuesBlocked(_A, 1, &imaille, 1, &imaille, _primToConsJacoMat, ADD_VALUES);
+			}
+			MatAssemblyEnd(_A, MAT_FINAL_ASSEMBLY);
+
+#if PETSC_VERSION_GREATER_3_5
+			KSPSetOperators(_ksp, _A, _A);
+#else
+			KSPSetOperators(_ksp, _A, _A,SAME_NONZERO_PATTERN);
+#endif
+
+			KSPSetInitialGuessNonzero(_ksp,PETSC_FALSE);
+
+			if(_conditionNumber)
+				KSPSetComputeEigenvalues(_ksp,PETSC_TRUE);
+			if(!_isScaling)
+			{
+				KSPSolve(_ksp, _b, _newtonVariation);
+			}
+			else
+			{
+				computeScaling(_maxvp);
+				int indice;
+				VecAssemblyBegin(_vecScaling);
+				VecAssemblyBegin(_invVecScaling);
+				for(int imaille = 0; imaille<_Nmailles; imaille++)
+				{
+					indice = imaille;
+					VecSetValuesBlocked(_vecScaling,1 , &indice, _blockDiag, INSERT_VALUES);
+					VecSetValuesBlocked(_invVecScaling,1,&indice,_invBlockDiag, INSERT_VALUES);
+				}
+				VecAssemblyEnd(_vecScaling);
+				VecAssemblyEnd(_invVecScaling);
+
+				if(_system)
+				{
+					cout << "Matrice avant le preconditionneur des vecteurs propres " << endl;
+					MatView(_A,PETSC_VIEWER_STDOUT_SELF);
+					cout << endl;
+					cout << "Second membre avant le preconditionneur des vecteurs propres " << endl;
+					VecView(_b, PETSC_VIEWER_STDOUT_SELF);
+					cout << endl;
+				}
+				MatDiagonalScale(_A,_vecScaling,_invVecScaling);
+				if(_system)
+				{
+					cout << "Matrice apres le preconditionneur des vecteurs propres " << endl;
+					MatView(_A,PETSC_VIEWER_STDOUT_SELF);
+					cout << endl;
+				}
+				VecCopy(_b,_bScaling);
+				VecPointwiseMult(_b,_vecScaling,_bScaling);
+				if(_system)
+				{
+					cout << "Produit du second membre par le preconditionneur bloc diagonal  a gauche" << endl;
+					VecView(_b, PETSC_VIEWER_STDOUT_SELF);
+					cout << endl;
+				}
+
+				KSPSolve(_ksp,_b, _bScaling);
+				VecPointwiseMult(_newtonVariation,_invVecScaling,_bScaling);
+			}
+			if(_system)
+			{
+				cout << "solution du systeme lineaire local:" << endl;
+				VecView(_newtonVariation, PETSC_VIEWER_STDOUT_SELF);
+				cout << endl;
+			}
+		}
+	}
 }
 
 void DriftModel::convectionState( const long &i, const long &j, const bool &IsBord){
@@ -344,7 +564,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 			}
 		}
 		_externalStates[_nVar-1] = _externalStates[1]*_fluides[0]->getInternalEnergy(_limitField[nameOfGroup].T,rho_v)
-																																															 +(_externalStates[0]-_externalStates[1])*_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + _externalStates[0]*v2/2;
+																																																	 +(_externalStates[0]-_externalStates[1])*_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + _externalStates[0]*v2/2;
 		_idm[0] = 0;
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
@@ -1290,6 +1510,174 @@ void DriftModel::primToCons(const double *P, const int &i, double *W, const int 
 		cout<<"rhov= "<<rho_v<<", rhol= "<<rho_l<<", rhom= "<<W[j*(_nVar)]<<" e_v="<<e_v<<" e_l="<<e_l<<endl;
 	}
 }
+void DriftModel::primToConsJacobianMatrix(double *V)
+{
+	double concentration=V[0];
+	double pression=V[1];
+	double temperature=V[_nVar-1];
+	double vitesse[_Ndim];
+	for(int idim=0;idim<_Ndim;idim++)
+		vitesse[idim]=V[2+idim];
+	double v2=0;
+	for(int idim=0;idim<_Ndim;idim++)
+		v2+=vitesse[idim]*vitesse[idim];
+
+	double rho_v=_fluides[0]->getDensity(pression,temperature);
+	double rho_l=_fluides[1]->getDensity(pression,temperature);
+	double gamma_v=_fluides[0]->constante("gamma");
+	double gamma_l=_fluides[1]->constante("gamma");
+	double q_v=_fluides[0]->constante("q");
+	double q_l=_fluides[1]->constante("q");
+
+	double rho=concentration*rho_v+(1-concentration)*rho_l;;
+
+	for(int k=0;k<_nVar*_nVar; k++)
+		_primToConsJacoMat[k]=0;
+
+	if(		dynamic_cast<StiffenedGas*>(_fluides[0])!=NULL
+			&& dynamic_cast<StiffenedGas*>(_fluides[1])!=NULL)
+	{
+		StiffenedGas* fluide0=dynamic_cast<StiffenedGas*>(_fluides[0]);
+		StiffenedGas* fluide1=dynamic_cast<StiffenedGas*>(_fluides[1]);
+		double e_v = fluide0->getInternalEnergy(temperature);
+		double e_l = fluide0->getInternalEnergy(temperature);
+		double cv_v=fluide0->constante("cv");
+		double cv_l=fluide1->constante("cv");
+		double e=concentration*e_v+(1-concentration)*e_l;
+		double E=e+0.5*v2;
+
+		/******* Masse totale **********/
+		_primToConsJacoMat[0]=-rho*rho*(1/rho_v-1/rho_l);
+		_primToConsJacoMat[1]=rho*rho*(
+				concentration /(rho_v*rho_v*(gamma_v-1)*(e_v-q_v))
+				+(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(e_l-q_l))
+		);
+		_primToConsJacoMat[_nVar-1]=-rho*rho*(
+				cv_v*   concentration /(rho_v*(e_v-q_v))
+				+cv_l*(1-concentration)/(rho_l*(e_l-q_l))
+		);
+
+		/******* Masse partielle **********/
+		_primToConsJacoMat[_nVar]=rho-concentration*rho*rho*(1/rho_v-1/rho_l);
+		_primToConsJacoMat[_nVar+1]=concentration*rho*rho*(
+				concentration /(rho_v*rho_v*(gamma_v-1)*(e_v-q_v))
+				+(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(e_l-q_l))
+		);
+		_primToConsJacoMat[_nVar+_nVar-1]=-concentration*rho*rho*(
+				cv_v*   concentration /(rho_v*(e_v-q_v))
+				+cv_l*(1-concentration)/(rho_l*(e_l-q_l))
+		);
+		/******* Quantité de mouvement **********/
+		for(int idim=0;idim<_Ndim;idim++)
+		{
+			_primToConsJacoMat[2*_nVar+idim*_nVar]=-vitesse[idim]*rho*rho*(1/rho_v-1/rho_l);
+			_primToConsJacoMat[2*_nVar+idim*_nVar+1]=vitesse[idim]*rho*rho*(
+					concentration /(rho_v*rho_v*(gamma_v-1)*(e_v-q_v))
+					+(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(e_l-q_l))
+			);
+			_primToConsJacoMat[2*_nVar+idim*_nVar+2+idim]=rho;
+			_primToConsJacoMat[2*_nVar+idim*_nVar+_nVar-1]=-vitesse[idim]*rho*rho*(
+					cv_v*   concentration /(rho_v*(e_v-q_v))
+					+cv_l*(1-concentration)/(rho_l*(e_l-q_l))
+			);
+		}
+		/******* Energie totale **********/
+		_primToConsJacoMat[(_nVar-1)*_nVar]=rho*(e_v-e_l)-E*rho*rho*(1/rho_v-1/rho_l);
+		_primToConsJacoMat[(_nVar-1)*_nVar+1]=E*rho*rho*(
+				concentration /(rho_v*rho_v*(gamma_v-1)*(e_v-q_v))
+				+(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(e_l-q_l))
+		);
+		for(int idim=0;idim<_Ndim;idim++)
+			_primToConsJacoMat[(_nVar-1)*_nVar+2+idim]=rho*vitesse[idim];
+		_primToConsJacoMat[(_nVar-1)*_nVar+_nVar-1]=rho*(cv_v*concentration + cv_l*(1-concentration))
+																-rho*rho*E*(
+																		cv_v*   concentration /(rho_v*(e_v-q_v))
+																		+cv_l*(1-concentration)/(rho_l*(e_l-q_l))
+																);
+
+	}
+	else if(dynamic_cast<StiffenedGasDellacherie*>(_fluides[0])!=NULL
+			&& dynamic_cast<StiffenedGasDellacherie*>(_fluides[1])!=NULL)
+	{
+		StiffenedGasDellacherie* fluide0=dynamic_cast<StiffenedGasDellacherie*>(_fluides[0]);
+		StiffenedGasDellacherie* fluide1=dynamic_cast<StiffenedGasDellacherie*>(_fluides[1]);
+		double h_v=fluide0->getEnthalpy(temperature);
+		double h_l=fluide1->getEnthalpy(temperature);
+		double h=concentration*h_v+(1-concentration)*h_l;
+		double H=h+0.5*v2;
+		double cp_v=fluide0->constante("cp");
+		double cp_l=fluide1->constante("cp");
+
+		/******* Masse totale **********/
+		_primToConsJacoMat[0]=-rho*rho*(1/rho_v-1/rho_l);
+		_primToConsJacoMat[1]=rho*rho*(
+				gamma_v*   concentration /(rho_v*rho_v*(gamma_v-1)*(h_v-q_v))
+				+gamma_l*(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(h_l-q_l))
+		);
+		_primToConsJacoMat[_nVar-1]=-rho*rho*(
+				cp_v*   concentration /(rho_v*(h_v-q_v))
+				+cp_l*(1-concentration)/(rho_l*(h_l-q_l))
+		);
+
+		/******* Masse partielle **********/
+		_primToConsJacoMat[_nVar]=rho-concentration*rho*rho*(1/rho_v-1/rho_l);
+		_primToConsJacoMat[_nVar+1]=concentration*rho*rho*(
+				gamma_v*   concentration /(rho_v*rho_v*(gamma_v-1)*(h_v-q_v))
+				+gamma_l*(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(h_l-q_l))
+		);
+		_primToConsJacoMat[_nVar+_nVar-1]=-concentration*rho*rho*(
+				cp_v*   concentration /(rho_v*(h_v-q_v))
+				+cp_l*(1-concentration)/(rho_l*(h_l-q_l))
+		);
+		/******* Quantité de mouvement **********/
+		for(int idim=0;idim<_Ndim;idim++)
+		{
+			_primToConsJacoMat[2*_nVar+idim*_nVar]=-vitesse[idim]*rho*rho*(1/rho_v-1/rho_l);
+			_primToConsJacoMat[2*_nVar+idim*_nVar+1]=vitesse[idim]*rho*rho*(
+					gamma_v*   concentration /(rho_v*rho_v*(gamma_v-1)*(h_v-q_v))
+					+gamma_l*(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(h_l-q_l))
+			);
+			_primToConsJacoMat[2*_nVar+idim*_nVar+2+idim]=rho;
+			_primToConsJacoMat[2*_nVar+idim*_nVar+_nVar-1]=-vitesse[idim]*rho*rho*(
+					cp_v*   concentration /(rho_v*(h_v-q_v))
+					+cp_l*(1-concentration)/(rho_l*(h_l-q_l))
+			);
+		}
+		/******* Energie totale **********/
+		_primToConsJacoMat[(_nVar-1)*_nVar]=rho*(h_v-h_l)-H*rho*rho*(1/rho_v-1/rho_l);
+		_primToConsJacoMat[(_nVar-1)*_nVar+1]=H*rho*rho*(
+				gamma_v*   concentration /(rho_v*rho_v*(gamma_v-1)*(h_v-q_v))
+				+gamma_l*(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(h_l-q_l))
+		)-1;
+		for(int idim=0;idim<_Ndim;idim++)
+			_primToConsJacoMat[(_nVar-1)*_nVar+2+idim]=rho*vitesse[idim];
+		_primToConsJacoMat[(_nVar-1)*_nVar+_nVar-1]=rho*(cp_v*concentration + cp_l*(1-concentration))
+																-rho*rho*H*(
+																		cp_v*   concentration /(rho_v*(h_v-q_v))
+																		+cp_l*(1-concentration)/(rho_l*(h_l-q_l))
+																);
+	}
+	else
+		throw CdmathException("SinglePhase::primToConsJacobianMatrix: only StiffenedGas eos implemented, not StiffenedGasDellacherie");
+
+	if(_verbose && _nbTimeStep%_freqSave ==0)
+	{
+		cout<<" SinglePhase::primToConsJacobianMatrix" << endl;
+		cout<<" _Vi " << endl;
+		for (int j=0; j<_nVar; j++)
+			cout<<_Vi[j] <<", ";
+		cout<< endl;
+		cout<<"rho_v= "<<rho_v<<"rho_l= "<<rho_l<<endl;
+		cout<<" Jacobienne primToCons: " << endl;
+		for (int i=0; i<_nVar; i++){
+			for (int j=0; j<_nVar; j++)
+				cout<<_primToConsJacoMat[i*_nVar+j] <<", ";
+			cout<< endl;
+		}
+		cout<< endl;
+	}
+}
+
 void DriftModel::consToPrim(const double *Wcons, double* Wprim,double porosity)
 {
 	double m_v=Wcons[1]/porosity;
@@ -1426,7 +1814,7 @@ void DriftModel::getMixturePressureAndTemperature(double c_v, double rhom, doubl
 		StiffenedGas* fluide1=dynamic_cast<StiffenedGas*>(_fluides[1]);
 
 		temperature= (rhom_em-m_v*fluide0->getInternalEnergy(0)-m_l*fluide1->getInternalEnergy(0))
-																																													/(m_v*fluide0->constante("cv")+m_l*fluide1->constante("cv"));
+																																															/(m_v*fluide0->constante("cv")+m_l*fluide1->constante("cv"));
 
 		double e_v=fluide0->getInternalEnergy(temperature);
 		double e_l=fluide1->getInternalEnergy(temperature);

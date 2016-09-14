@@ -332,7 +332,6 @@ void ProblemCoreFlows::setLinearSolver(linearSolver kspType, preconditioner pcTy
 // (s'il n'a besoin d'aucun champ d'entree).
 // Precondition: initialize
 // Seule la methode terminate peut etre appelee apres
-
 bool ProblemCoreFlows::run()
 {
 	if(!_initializedMemory)

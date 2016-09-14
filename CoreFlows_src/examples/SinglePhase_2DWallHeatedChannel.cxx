@@ -93,7 +93,7 @@ int SinglePhase_2DWallHeatedChannel()
 	// parameters calculation
 	unsigned MaxNbOfTimeStep = 3;
 	int freqSave = 1;
-	double cfl = 100;
+	double cfl = 10;
 	double maxTime = 50;
 	double precision = 1e-6;
 

@@ -90,11 +90,14 @@ If you use C language: edit the file CoreFlows-master/CoreFlows_src/main.cxx the
 - `cd CoreFlows-master/CoreFlows_build  `
 - `make -j `
 - `make install -j `
-
 Then you can run the simulation in any directory with the command line
 - `$CoreFlows `
 
 If you use python language: edit your own python file `my_file.py` following for example the pattern of the file `CoreFlows-master/CoreFlows_src/main.py`. Then in a terminal type
 - `python my_file.py `
+
+If you use the graphic interface, you need to run a Salomé Unix shell and type the command line
+- `runSalome -mCOREFLOWS`
+then click on new study to open CoreFlows interface
 
 The complete documentation is available in the directory `$CoreFlows_ROOT/CoreFlows_install/share/doc/`

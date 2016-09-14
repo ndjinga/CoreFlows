@@ -17,13 +17,14 @@ ProblemFluid::ProblemFluid(void){
 	_idm=NULL;_idn=NULL;
 	_saveVelocity=false;
 	_saveConservativeField=false;
+	_usePrimitiveVarsInNewton=false;
+	_saveInterfacialField=false;
 	//Pour affichage donnees diphasiques dans IterateTimeStep
 	_err_press_max=0; _part_imag_max=0; _nbMaillesNeg=0; _nbVpCplx=0;_minm1=1e30;_minm2=1e30;
 	_isScaling=false;
 	_entropicCorrection=false;
 	_nonLinearFormulation=Roe;
-	_saveInterfacialField=false;
-	_maxvploc=0;
+	_maxvploc=0.;
 }
 
 void ProblemFluid::initialize()
@@ -194,7 +195,7 @@ bool ProblemFluid::iterateTimeStep(bool &converged)
 	bool stop=false;
 
 	if(_NEWTON_its>0){//Pas besoin de computeTimeStep à la première iteration de Newton
-		_maxvp=0;
+		_maxvp=0.;
 		computeTimeStep(stop);
 	}
 	if(stop){//Le compute time step ne s'est pas bien passé
@@ -639,7 +640,7 @@ double ProblemFluid::computeTimeStep(bool & stop){
 	VecAssemblyEnd(_b);
 
 	if(_timeScheme == Implicit){
-		for(int imaille = 0; imaille<_mesh.getNumberOfCells(); imaille++)
+		for(int imaille = 0; imaille<_Nmailles; imaille++)
 			MatSetValuesBlocked(_A, size, &imaille, size, &imaille, _Gravity, ADD_VALUES);
 
 		if(_verbose && _nbTimeStep%_freqSave ==0)
@@ -659,7 +660,13 @@ double ProblemFluid::computeTimeStep(bool & stop){
 	}
 
 	stop=false;
-	return _cfl*_minl/_maxvp;
+
+/*
+	if(_nbTimeStep<_cfl)
+		return (_nbTimeStep+1)*_minl/_maxvp;
+	else
+*/
+		return _cfl*_minl/_maxvp;
 }
 
 void ProblemFluid::computeNewtonVariation()
@@ -800,6 +807,7 @@ void ProblemFluid::validateTimeStep()
 		testConservation();
 		cout <<"Valeur propre locale max: " << _maxvp << endl;
 	}
+
 	if(_nbPhases==2 && _nbTimeStep%_freqSave ==0){
 		//Find minimum and maximum void fractions
 		double alphamin=1e30;
@@ -1206,11 +1214,14 @@ void ProblemFluid::updatePrimitives()
 		VecGetValues(_conservativeVars, _nVar, _idm, _Ui);
 		if(_verbose && _nbTimeStep%_freqSave ==0)
 		{
-			cout << "ProblemFluid::updatePrimitives() cell " << i << endl;
+			cout << "ProblemFluid::updatePrimitives() cell " << i-1 << endl;
 			cout << "Ui = ";
 			for(int q=0; q<_nVar; q++)
 				cout << _Ui[q]  << "\t";
 			cout << endl;
+			cout << "Vi = ";
+			for(int q=0; q<_nVar; q++)
+				cout << _Vi[q]  << "\t";
 			cout << endl;
 		}
 
@@ -1229,6 +1240,44 @@ void ProblemFluid::updatePrimitives()
 	{
 		cout << "Nouvelles variables primitives:" << endl;
 		VecView(_primitiveVars,  PETSC_VIEWER_STDOUT_WORLD);
+		cout << endl;
+	}
+}
+
+void ProblemFluid::updateConservatives()
+{
+	VecAssemblyBegin(_conservativeVars);
+	for(int i=1; i<=_Nmailles; i++)
+	{
+		_idm[0] = _nVar*( (i-1));
+		for(int k=1; k<_nVar; k++)
+			_idm[k] = _idm[k-1] + 1;
+
+		VecGetValues(_primitiveVars, _nVar, _idm, _Vi);
+
+		primToCons(_Vi,0,_Ui,0);
+		_idm[0] = i-1;
+		VecSetValuesBlocked(_conservativeVars, 1, _idm, _Ui, INSERT_VALUES);
+
+		if(_verbose && _nbTimeStep%_freqSave ==0)
+		{
+			cout << "ProblemFluid::updateConservatives() cell " << i-1 << endl;
+			cout << "Vi = ";
+			for(int q=0; q<_nVar; q++)
+				cout << _Vi[q]  << "\t";
+			cout << endl;
+			cout << "Ui = ";
+			for(int q=0; q<_nVar; q++)
+				cout << _Ui[q]  << "\t";
+			cout << endl;
+		}
+}
+	VecAssemblyEnd(_conservativeVars);
+
+	if(_system)
+	{
+		cout << "Nouvelles variables conservatives:" << endl;
+		VecView(_conservativeVars,  PETSC_VIEWER_STDOUT_WORLD);
 		cout << endl;
 	}
 }

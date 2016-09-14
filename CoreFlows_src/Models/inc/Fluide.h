@@ -120,7 +120,7 @@ class StiffenedGasDellacherie:public Fluide{
   double getInternalEnergy(double T, double rho);
   double getEnthalpy(double T, double rho=0);
   double getTemperatureFromPressure(double  p, double rho);
-  double getTemperatureFromEnthalpy(const double  h, const double rho);
+  double getTemperatureFromEnthalpy(const double  h, const double rho=0);
   double getDensity(double p, double T);
 
  };

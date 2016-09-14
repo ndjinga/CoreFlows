@@ -73,11 +73,11 @@ public :
 	void abortTimeStep();
 
 	/** \fn iterateTimeStep
-	 * \brief
+	 * \brief calls computeNewtonVariation to perform one Newton iteration and tests the convergence
 	 * @param
-	 * @return
+	 * @return boolean ok is true is the newton iteration gave a physically acceptable result
 	 * */
-	bool iterateTimeStep(bool &ok);
+	virtual bool iterateTimeStep(bool &ok);
 
 	/** \fn save
 	 * \brief saves the current results in MED or VTK files
@@ -159,10 +159,10 @@ public :
 	};
 
 	/** \fn computeNewtonVariation
-	 * \brief Calcule les itération de Newton
+	 * \brief Builds and solves the linear system to obtain the variation Ukp1-Uk in a Newton scheme
 	 * @param void
 	 * */
-	void computeNewtonVariation();
+	virtual void computeNewtonVariation();
 
 	/** \fn testConservation
 	 * \brief Teste et affiche la conservation de masse et de la quantité de mouvement
@@ -347,6 +347,14 @@ public :
 		return _nonLinearFormulation;
 	}
 
+	/** \fn usePrimitiveVarsInNewton
+	 * \brief use Primitive Vars instead of conservative vars In Newton scheme for implicit schemes
+	 * \param [in] bool
+	 *  */
+	void usePrimitiveVarsInNewton(bool usePrimitiveVarsInNewton){
+		_usePrimitiveVarsInNewton=usePrimitiveVarsInNewton;
+	}
+
 	//données initiales
 	/*
 	virtual vector<string> getInputFieldsNames()=0 ;//Renvoie les noms des champs dont le problème a besoin (données initiales)
@@ -389,6 +397,7 @@ protected :
 	bool _saveVelocity;//In order to display streamlines with paraview
 	bool _saveConservativeField;//Save conservative fields such as density momentum...
 	bool _saveInterfacialField;//Save interfacial fields of the VFRoe scheme
+	bool _usePrimitiveVarsInNewton;
 
 	// Variables du schema numerique 
 	Vec _conservativeVars, _newtonVariation, _bScaling,_old, _primitiveVars, _Uext,_Uextdiff ,_vecScaling,_invVecScaling, _Vext;
@@ -585,10 +594,17 @@ protected :
 	virtual void addConvectionToSecondMember(const int &i,const int &j,bool isBord);
 
 	/** \fn updatePrimitives
-	 * \brief met à jour le vecteur primitif à partir du champ conservatif
+	 * \brief updates the global primitive vector from the global conservative vector
 	 * @param void
 	 * */
 	void updatePrimitives();
+
+	/** \fn updateConservatives
+	 * \brief updates the global conservative vector from the global primitive vector
+	 * @param void
+	 * */
+	void updateConservatives();
+
 	/** \fn AbsMatriceRoe
 	 * \brief Computes the absolute value of the Roe matrix
 	 * @param valeurs_propres_dist is the vector of distinct eigenvalues of the Roe matrix

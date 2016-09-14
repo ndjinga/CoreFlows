@@ -81,7 +81,6 @@ def SinglePhase_2DThermalDiffusion():
 
 	# set the numerical method
 	myProblem.setNumericalScheme(cf.staggered, cf.Implicit);
-	myProblem.setLinearSolver(cf.GMRES,cf.LU,True);
 
 	# name file save
 	fileName = "2DThermalDiffusion";
@@ -89,7 +88,7 @@ def SinglePhase_2DThermalDiffusion():
 	# parameters calculation
 	MaxNbOfTimeStep = 3 ;
 	freqSave = 1;
-	cfl = 1;
+	cfl = .01;
 	maxTime = 5000;
 	precision = 1e-6;
 
@@ -99,7 +98,7 @@ def SinglePhase_2DThermalDiffusion():
 	myProblem.setTimeMax(maxTime);
 	myProblem.setFreqSave(freqSave);
 	myProblem.setFileName(fileName);
-	myProblem.setNewtonSolver(1e10,20);
+	myProblem.setNewtonSolver(precision,20);
 	myProblem.saveVelocity();
 
 	# evolution
