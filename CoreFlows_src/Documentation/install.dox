@@ -8,12 +8,12 @@ You will need the packages '\a doxygen' if you want to generate this documentati
 Download and compilation of Petsc
 ---------------------------------
 First you need to download and compile the sources of Petsc (version 3.4 or later). 
-The sources of Petsc 3.7.2 can be downloaded from
--  `http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-3.7.2.tar.gz`
+The sources of Petsc 3.7.3 can be downloaded from
+-  `http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-3.7.3.tar.gz`
 
 Then type on the commands
 \verbatim 
- ./configure  --prefix=~/workspace/petsc-3.7.2 --with-mpi=0 --download-f-blas-lapack=1
+ ./configure  --with-mpi=0 --download-f-blas-lapack=1
  make all
  make install
 \endverbatim

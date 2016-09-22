@@ -643,13 +643,22 @@ public :
 	//  some supplementary functions
 
 	/** \fn displayMatrix
-	 * \brief Affiche la matrice "matrix" de taille "size"
-	 * @param  matrix est un vecteur double*
-	 * @param size est un entier correspend à la taille de la matrice qu'on veut afficher
-	 * @param i,j ce sont des entiers qui correspondent aux indices du premier élément de la mtrice
-	 * @return affiche la matrice sur le terminal
+	 * \brief displays a matrix of size "size x size" for profiling
+	 * @param  matrix is a pointer of size "size"
+	 * @param size, size of the matrix
+	 * @param name, string, name or description of the matrix
+	 * @return displays the matrix on the terminal
 	 *  */
-	void displayMatrix(double *matrix, int size, int i, int j);
+	void displayMatrix(double *matrix, int size, string name);
+
+	/** \fn displayMatrix
+	 * \brief displays a vector of size "size" for profiling
+	 * @param  vector is a pointer of size "size"
+	 * @param size, size of the vector
+	 * @param name, string, name or description of the vector
+	 * @return displays the vector on the terminal
+	 *  */
+	void displayVector(double *vector, int size, string name);
 
 protected :
 

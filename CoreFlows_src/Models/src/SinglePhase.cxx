@@ -173,13 +173,16 @@ void SinglePhase::computeNewtonVariation()
 		ProblemFluid::computeNewtonVariation();
 	else
 	{
-		if(_system)
+		if(_verbose)
 		{
 			cout<<"Vecteur courant Vk "<<endl;
 			VecView(_primitiveVars,PETSC_VIEWER_STDOUT_SELF);
 			cout << endl;
-			cout<<"Right hand side _b "<<endl;
-			VecView(_b,PETSC_VIEWER_STDOUT_SELF);
+			cout << "Matrice du système linéaire avant contribution delta t" << endl;
+			MatView(_A,PETSC_VIEWER_STDOUT_SELF);
+			cout << endl;
+			cout << "Second membre du système linéaire avant contribution delta t" << endl;
+			VecView(_b, PETSC_VIEWER_STDOUT_SELF);
 			cout << endl;
 		}
 		if(_timeScheme == Explicit)
@@ -206,7 +209,7 @@ void SinglePhase::computeNewtonVariation()
 					_idm[k] = _idm[k-1] + 1;
 				VecGetValues(_primitiveVars, _nVar, _idm, _Vi);
 				primToConsJacobianMatrix(_Vi);
-				for(int k=0; k<_nVar; k++)
+				for(int k=0; k<_nVar*_nVar; k++)
 					_primToConsJacoMat[k]*=1/_dt;
 				MatSetValuesBlocked(_A, 1, &imaille, 1, &imaille, _primToConsJacoMat, ADD_VALUES);
 			}
@@ -218,7 +221,15 @@ void SinglePhase::computeNewtonVariation()
 			KSPSetOperators(_ksp, _A, _A,SAME_NONZERO_PATTERN);
 #endif
 
-			KSPSetInitialGuessNonzero(_ksp,PETSC_FALSE);
+			if(_verbose)
+			{
+				cout << "Matrice du système linéaire" << endl;
+				MatView(_A,PETSC_VIEWER_STDOUT_SELF);
+				cout << endl;
+				cout << "Second membre du système linéaire" << endl;
+				VecView(_b, PETSC_VIEWER_STDOUT_SELF);
+				cout << endl;
+			}
 
 			if(_conditionNumber)
 				KSPSetComputeEigenvalues(_ksp,PETSC_TRUE);
@@ -430,7 +441,7 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
-		cout << "Boundary conditions for group "<< nameOfGroup << " face unit normal vector "<<endl;
+		cout << "setBoundaryState for group "<< nameOfGroup << " face unit normal vector "<<endl;
 		for(k=0; k<_Ndim; k++){
 			cout<<normale[k]<<", ";
 		}
@@ -592,6 +603,9 @@ void SinglePhase::convectionMatrices()
 {
 	//entree: URoe = rho, u, H
 	//sortie: matrices Roe+  et Roe-
+
+	if(_verbose && _nbTimeStep%_freqSave ==0)
+		cout<<"SinglePhase::convectionMatrices()"<<endl;
 
 	double u_n=0, u_2=0;//vitesse normale et carré du module
 
@@ -1378,22 +1392,14 @@ void SinglePhase::primToConsJacobianMatrix(double *V)
 		_primToConsJacoMat[(_nVar-1)*_nVar+_nVar-1]=rho*cp*(1-H/(h-q));
 	}
 	else
-		throw CdmathException("SinglePhase::primToConsJacobianMatrix: only StiffenedGas eos implemented, not StiffenedGasDellacherie");
+		throw CdmathException("SinglePhase::primToConsJacobianMatrix: eos should be StiffenedGas or StiffenedGasDellacherie");
 
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
 		cout<<" SinglePhase::primToConsJacobianMatrix" << endl;
-		cout<<" _Vi " << endl;
-		for (int j=0; j<_nVar; j++)
-			cout<<_Vi[j] <<", ";
-		cout<< endl;
+		displayVector(_Vi,_nVar," _Vi " );
 		cout<<" Jacobienne primToCons: " << endl;
-		for (int i=0; i<_nVar; i++){
-			for (int j=0; j<_nVar; j++)
-				cout<<_primToConsJacoMat[i*_nVar+j] <<", ";
-			cout<< endl;
-		}
-		cout<< endl;
+		displayMatrix(_primToConsJacoMat,_nVar," Jacobienne primToCons: ");
 	}
 }
 
@@ -1497,6 +1503,9 @@ Vector SinglePhase::convectionFlux(Vector U,Vector V, Vector normale, double por
 
 Vector SinglePhase::staggeredVFFCFlux()
 {
+	if(_verbose && _nbTimeStep%_freqSave ==0)
+		cout<<"SinglePhase::staggeredVFFCFlux()"<<endl;
+
 	if(_spaceScheme!=staggered || _nonLinearFormulation!=VFFC)
 		throw CdmathException("SinglePhase::staggeredVFFCFlux: staggeredVFFCFlux method should be called only for VFFC formulation and staggered upwinding");
 	else//_spaceScheme==staggered && _nonLinearFormulation==VFFC
@@ -1531,8 +1540,11 @@ Vector SinglePhase::staggeredVFFCFlux()
 
 void SinglePhase::staggeredVFFCMatrices(double un)//vitesse normale de Roe en entrée
 {
+	if(_verbose && _nbTimeStep%_freqSave ==0)
+		cout<<"SinglePhase::staggeredVFFCMatrices()"<<endl;
+
 	if(_spaceScheme!=staggered || _nonLinearFormulation!=VFFC)
-		throw CdmathException("SinglePhase::staggeredVFFCFlux: staggeredVFFCFlux method should be called only for VFFC formulation and staggered upwinding");
+		throw CdmathException("SinglePhase::staggeredVFFCMatrices: staggeredVFFCMatrices method should be called only for VFFC formulation and staggered upwinding");
 	else//_spaceScheme==staggered && _nonLinearFormulation==VFFC
 	{
 		double ui_n=0, ui_2=0, uj_n=0, uj_2=0;//vitesse normale et carré du module
@@ -1736,8 +1748,11 @@ void SinglePhase::staggeredVFFCMatrices(double un)//vitesse normale de Roe en en
 
 void SinglePhase::staggeredVFFCMatricesPrimitiveVariables(double un)//vitesse normale de Roe en entrée
 {
+	if(_verbose && _nbTimeStep%_freqSave ==0)
+		cout<<"SinglePhase::staggeredVFFCMatricesPrimitiveVariables()"<<endl;
+
 	if(_spaceScheme!=staggered || _nonLinearFormulation!=VFFC)
-		throw CdmathException("SinglePhase::staggeredVFFCFlux: staggeredVFFCFlux method should be called only for VFFC formulation and staggered upwinding");
+		throw CdmathException("SinglePhase::staggeredVFFCMatricesPrimitiveVariables: staggeredVFFCMatricesPrimitiveVariables method should be called only for VFFC formulation and staggered upwinding");
 	else//_spaceScheme==staggered && _nonLinearFormulation==VFFC
 	{
 		double ui_n=0., ui_2=0., uj_n=0., uj_2=0.;//vitesse normale et carré du module
@@ -1764,173 +1779,188 @@ void SinglePhase::staggeredVFFCMatricesPrimitiveVariables(double un)//vitesse no
 				cout<<_Vj[i]<<", ";
 			cout<<endl;
 		}
+
 		double gamma=_fluides[0]->constante("gamma");
 		double Pinf=_fluides[0]->constante("p0");
 		double q=_fluides[0]->constante("q");
-		double cv=_fluides[0]->constante("cv");
 
-		if(un>=0)
+		if(		dynamic_cast<StiffenedGas*>(_fluides[0])!=NULL)
 		{
-			double rhoi,pj, Ei, rhoj, ei;
-			double cj;//vitesse du son pour calcul valeurs propres
-			rhoi=_Ui[0]/_porosityi;
-			Ei= _Ui[_Ndim+1]/(rhoi*_porosityi);
-			ei=Ei-0.5*ui_2;
-			pj=_Vj[0];
-			rhoj=_Uj[0]/_porosityj;
-			H =Ei+pj/rhoi;
-			cj = _fluides[0]->vitesseSonTemperature(_Vj[_Ndim+1],rhoj);
+			StiffenedGas* fluide0=dynamic_cast<StiffenedGas*>(_fluides[0]);
+			double cv=fluide0->constante("cv");
+			//double cv=_fluides[0]->constante("cv");
 
-			/***********Calcul des valeurs propres ********/
-			vector<complex<double> > vp_dist(3,0);
-			vp_dist[0]=ui_n-cj;vp_dist[1]=ui_n;vp_dist[2]=ui_n+cj;
-
-			_maxvploc=fabs(ui_n)+cj;
-			if(_maxvploc>_maxvp)
-				_maxvp=_maxvploc;
-
-			if(_verbose && _nbTimeStep%_freqSave ==0)
-				cout<<"Valeurs propres "<<ui_n-cj<<" , "<<ui_n<<" , "<<ui_n+cj<<endl;
-
-			/******** Construction de la matrice A^+ *********/
-			//premiere ligne (masse)
-			_AroePlus[0]=ui_n/((gamma-1)*(ei-q));
-			for(int idim=0; idim<_Ndim;idim++)
-				_AroePlus[1+idim]=rhoi*_vec_normal[idim];
-			_AroePlus[_nVar-1]=-rhoi*ui_n*cv/(ei-q);
-
-			//lignes intermadiaires(qdm)
-			for(int idim=0; idim<_Ndim;idim++)
+			if(un>=0)
 			{
-				//premiere colonne
-				_AroePlus[(1+idim)*_nVar]=ui_n/((gamma-1)*(ei-q))*_Vi[1+idim];
-				//colonnes intermediaires
-				for(int jdim=0; jdim<_Ndim;jdim++)
-					_AroePlus[(1+idim)*_nVar + jdim + 1] = rhoi*_Vi[1+idim]*_vec_normal[jdim];
-				//matrice identite
-				_AroePlus[(1+idim)*_nVar + idim + 1] += rhoi*ui_n;
-				//derniere colonne
-				_AroePlus[(1+idim)*_nVar + _nVar-1]=-rhoi*ui_n*cv/(ei-q)*_Vi[1+idim];
+				double rhoi,pj, Ei, rhoj, ei;
+				double cj;//vitesse du son pour calcul valeurs propres
+				rhoi=_Ui[0]/_porosityi;
+				Ei= _Ui[_Ndim+1]/(rhoi*_porosityi);
+				ei=Ei-0.5*ui_2;
+				pj=_Vj[0];
+				rhoj=_Uj[0]/_porosityj;
+				H =Ei+pj/rhoi;
+				cj = _fluides[0]->vitesseSonTemperature(_Vj[_Ndim+1],rhoj);
+
+				/***********Calcul des valeurs propres ********/
+				vector<complex<double> > vp_dist(3,0);
+				vp_dist[0]=ui_n-cj;vp_dist[1]=ui_n;vp_dist[2]=ui_n+cj;
+
+				_maxvploc=fabs(ui_n)+cj;
+				if(_maxvploc>_maxvp)
+					_maxvp=_maxvploc;
+
+				if(_verbose && _nbTimeStep%_freqSave ==0)
+					cout<<"Valeurs propres "<<ui_n-cj<<" , "<<ui_n<<" , "<<ui_n+cj<<endl;
+
+				/******** Construction de la matrice A^+ *********/
+				//premiere ligne (masse)
+				_AroePlus[0]=ui_n/((gamma-1)*(ei-q));
+				for(int idim=0; idim<_Ndim;idim++)
+					_AroePlus[1+idim]=rhoi*_vec_normal[idim];
+				_AroePlus[_nVar-1]=-rhoi*ui_n*cv/(ei-q);
+
+				//lignes intermadiaires(qdm)
+				for(int idim=0; idim<_Ndim;idim++)
+				{
+					//premiere colonne
+					_AroePlus[(1+idim)*_nVar]=ui_n/((gamma-1)*(ei-q))*_Vi[1+idim];
+					//colonnes intermediaires
+					for(int jdim=0; jdim<_Ndim;jdim++)
+						_AroePlus[(1+idim)*_nVar + jdim + 1] = rhoi*_Vi[1+idim]*_vec_normal[jdim];
+					//matrice identite
+					_AroePlus[(1+idim)*_nVar + idim + 1] += rhoi*ui_n;
+					//derniere colonne
+					_AroePlus[(1+idim)*_nVar + _nVar-1]=-rhoi*ui_n*cv/(ei-q)*_Vi[1+idim];
+				}
+
+				//derniere ligne (energie)
+				_AroePlus[_nVar*(_nVar-1)] = Ei*ui_n/((gamma-1)*(ei-q));
+				for(int idim=0; idim<_Ndim;idim++)
+					_AroePlus[_nVar*(_nVar-1)+idim+1]=rhoi*(H+ui_2)*_vec_normal[idim] ;
+				_AroePlus[_nVar*_nVar -1] = rhoi*ui_n*(1-Ei/(ei-q))*cv;
+
+				/******** Construction de la matrice A^- *********/
+				//premiere ligne (masse)
+				_AroeMinus[0]=0;
+				for(int idim=0; idim<_Ndim;idim++)
+					_AroeMinus[1+idim]=0;
+				_AroeMinus[_nVar-1]=0;
+
+				//lignes intermadiaires(qdm)
+				for(int idim=0; idim<_Ndim;idim++)
+				{
+					//premiere colonne
+					_AroeMinus[(1+idim)*_nVar]=_vec_normal[idim] ;
+					//colonnes intermediaires
+					for(int jdim=0; jdim<_Ndim;jdim++)
+						_AroeMinus[(1+idim)*_nVar + jdim + 1] = 0;
+					//matrice identite
+					_AroeMinus[(1+idim)*_nVar + idim + 1] += 0;
+					//derniere colonne
+					_AroeMinus[(1+idim)*_nVar + _nVar-1]=0;
+				}
+
+				//derniere ligne (energie)
+				_AroeMinus[_nVar*(_nVar-1)] = ui_n;
+				for(int idim=0; idim<_Ndim;idim++)
+					_AroeMinus[_nVar*(_nVar-1)+idim+1]= 0;
+				_AroeMinus[_nVar*_nVar -1] = 0;
 			}
-
-			//derniere ligne (energie)
-			_AroePlus[_nVar*(_nVar-1)] = Ei*ui_n/((gamma-1)*(ei-q));
-			for(int idim=0; idim<_Ndim;idim++)
-				_AroePlus[_nVar*(_nVar-1)+idim+1]=rhoi*(H+ui_2)*_vec_normal[idim] ;
-			_AroePlus[_nVar*_nVar -1] = rhoi*ui_n*(1-Ei/(ei-q))*cv;
-
-			/******** Construction de la matrice A^- *********/
-			//premiere ligne (masse)
-			_AroeMinus[0]=0;
-			for(int idim=0; idim<_Ndim;idim++)
-				_AroeMinus[1+idim]=0;
-			_AroeMinus[_nVar-1]=0;
-
-			//lignes intermadiaires(qdm)
-			for(int idim=0; idim<_Ndim;idim++)
+			else
 			{
-				//premiere colonne
-				_AroeMinus[(1+idim)*_nVar]=_vec_normal[idim] ;
-				//colonnes intermediaires
-				for(int jdim=0; jdim<_Ndim;jdim++)
-					_AroeMinus[(1+idim)*_nVar + jdim + 1] = 0;
-				//matrice identite
-				_AroeMinus[(1+idim)*_nVar + idim + 1] += 0;
-				//derniere colonne
-				_AroeMinus[(1+idim)*_nVar + _nVar-1]=0;
-			}
+				double rhoi,pi, Ej, rhoj, ej;
+				double ci;//vitesse du son pour calcul valeurs propres
+				rhoj=_Uj[0]/_porosityj;
+				Ej= _Uj[_Ndim+1]/rhoj;
+				ej=Ej-0.5*uj_2;
+				pi=_Vi[0];
+				rhoi=_Ui[0]/_porosityi;
+				H =Ej+pi/rhoj;
+				ci = _fluides[0]->vitesseSonTemperature(_Vi[_Ndim+1],rhoi);
 
-			//derniere ligne (energie)
-			_AroeMinus[_nVar*(_nVar-1)] = ui_n;
-			for(int idim=0; idim<_Ndim;idim++)
-				_AroeMinus[_nVar*(_nVar-1)+idim+1]= 0;
-			_AroeMinus[_nVar*_nVar -1] = 0;
+				/***********Calcul des valeurs propres ********/
+				vector<complex<double> > vp_dist(3,0);
+				vp_dist[0]=uj_n-ci;vp_dist[1]=uj_n;vp_dist[2]=uj_n+ci;
+
+				_maxvploc=fabs(uj_n)+ci;
+				if(_maxvploc>_maxvp)
+					_maxvp=_maxvploc;
+
+				if(_verbose && _nbTimeStep%_freqSave ==0)
+					cout<<"Valeurs propres "<<uj_n-ci<<" , "<<uj_n<<" , "<<uj_n+ci<<endl;
+
+				/******** Construction de la matrice A^+ *********/
+				//premiere ligne (masse)
+				_AroePlus[0]=0;
+				for(int idim=0; idim<_Ndim;idim++)
+					_AroePlus[1+idim]=0;
+				_AroePlus[_nVar-1]=0;
+
+				//lignes intermadiaires(qdm)
+				for(int idim=0; idim<_Ndim;idim++)
+				{
+					//premiere colonne
+					_AroePlus[(1+idim)*_nVar]=0;
+					//colonnes intermediaires
+					for(int jdim=0; jdim<_Ndim;jdim++)
+						_AroePlus[(1+idim)*_nVar + jdim + 1] = 0;
+					//matrice identite
+					_AroePlus[(1+idim)*_nVar + idim + 1] += 0;
+					//derniere colonne
+					_AroePlus[(1+idim)*_nVar + _nVar-1]=0;
+				}
+
+				//derniere ligne (energie)
+				_AroePlus[_nVar*(_nVar-1)] = uj_n;
+				for(int idim=0; idim<_Ndim;idim++)
+					_AroePlus[_nVar*(_nVar-1)+idim+1]= 0;
+				_AroePlus[_nVar*_nVar -1] =  0;
+
+				/******** Construction de la matrice A^- *********/
+				//premiere ligne (masse)
+				_AroeMinus[0]=uj_n/((gamma-1)*(ej-q));
+				for(int idim=0; idim<_Ndim;idim++)
+					_AroeMinus[1+idim]=rhoj*_vec_normal[idim];
+				_AroeMinus[_nVar-1]=-rhoj*uj_n*cv/(ej-q);
+
+				//lignes intermadiaires(qdm)
+				for(int idim=0; idim<_Ndim;idim++)
+				{
+					//premiere colonne
+					_AroeMinus[(1+idim)*_nVar]= uj_n/((gamma-1)*(ej-q))*_Vj[1+idim];
+					//colonnes intermediaires
+					for(int jdim=0; jdim<_Ndim;jdim++)
+						_AroeMinus[(1+idim)*_nVar + jdim + 1] = rhoj*_Vj[1+idim]*_vec_normal[jdim];
+					//matrice identite
+					_AroeMinus[(1+idim)*_nVar + idim + 1] += rhoj*uj_n;
+					//derniere colonne
+					_AroeMinus[(1+idim)*_nVar + _nVar-1]=-rhoj*uj_n*cv/(ej-q)*_Vj[1+idim];
+				}
+
+				//derniere ligne (energie)
+				_AroeMinus[_nVar*(_nVar-1)] = Ej*uj_n/((gamma-1)*(ej-q));
+				for(int idim=0; idim<_Ndim;idim++)
+					_AroeMinus[_nVar*(_nVar-1)+idim+1]=rhoj*(H+uj_2)*_vec_normal[idim] ;
+				_AroeMinus[_nVar*_nVar -1] = rhoj*uj_n*(1-Ej/(ej-q))*cv;
+			}
+		}
+		else if(dynamic_cast<StiffenedGasDellacherie*>(_fluides[0])!=NULL )
+		{
+			StiffenedGasDellacherie* fluide0=dynamic_cast<StiffenedGasDellacherie*>(_fluides[0]);
+			double cp_v=fluide0->constante("cp");
+			throw CdmathException("SinglePhase::staggeredVFFCMatricePrimitiveVariabless: staggeredVFFCMatrices not yet available for StiffenedGasDellacherie stiffened gas law");
 		}
 		else
+			throw CdmathException("SinglePhase::staggeredVFFCMatricesPrimitiveVariables: eos should be StiffenedGas or StiffenedGasDellacherie");
+
+		for(int i=0; i<_nVar*_nVar;i++)
 		{
-			double rhoi,pi, Ej, rhoj, ej;
-			double ci;//vitesse du son pour calcul valeurs propres
-			rhoj=_Uj[0]/_porosityj;
-			Ej= _Uj[_Ndim+1]/rhoj;
-			ej=Ej-0.5*uj_2;
-			pi=_Vi[0];
-			rhoi=_Ui[0]/_porosityi;
-			H =Ej+pi/rhoj;
-			ci = _fluides[0]->vitesseSonTemperature(_Vi[_Ndim+1],rhoi);
-
-			/***********Calcul des valeurs propres ********/
-			vector<complex<double> > vp_dist(3,0);
-			vp_dist[0]=uj_n-ci;vp_dist[1]=uj_n;vp_dist[2]=uj_n+ci;
-
-			_maxvploc=fabs(uj_n)+ci;
-			if(_maxvploc>_maxvp)
-				_maxvp=_maxvploc;
-
-			if(_verbose && _nbTimeStep%_freqSave ==0)
-				cout<<"Valeurs propres "<<uj_n-ci<<" , "<<uj_n<<" , "<<uj_n+ci<<endl;
-
-			/******** Construction de la matrice A^+ *********/
-			//premiere ligne (masse)
-			_AroePlus[0]=0;
-			for(int idim=0; idim<_Ndim;idim++)
-				_AroePlus[1+idim]=0;
-			_AroePlus[_nVar-1]=0;
-
-			//lignes intermadiaires(qdm)
-			for(int idim=0; idim<_Ndim;idim++)
-			{
-				//premiere colonne
-				_AroePlus[(1+idim)*_nVar]=0;
-				//colonnes intermediaires
-				for(int jdim=0; jdim<_Ndim;jdim++)
-					_AroePlus[(1+idim)*_nVar + jdim + 1] = 0;
-				//matrice identite
-				_AroePlus[(1+idim)*_nVar + idim + 1] += 0;
-				//derniere colonne
-				_AroePlus[(1+idim)*_nVar + _nVar-1]=0;
-			}
-
-			//derniere ligne (energie)
-			_AroePlus[_nVar*(_nVar-1)] = uj_n;
-			for(int idim=0; idim<_Ndim;idim++)
-				_AroePlus[_nVar*(_nVar-1)+idim+1]= 0;
-			_AroePlus[_nVar*_nVar -1] =  0;
-
-			/******** Construction de la matrice A^- *********/
-			//premiere ligne (masse)
-			_AroeMinus[0]=uj_n/((gamma-1)*(ej-q));
-			for(int idim=0; idim<_Ndim;idim++)
-				_AroeMinus[1+idim]=rhoj*_vec_normal[idim];
-			_AroeMinus[_nVar-1]=-rhoj*uj_n*cv/(ej-q);
-
-			//lignes intermadiaires(qdm)
-			for(int idim=0; idim<_Ndim;idim++)
-			{
-				//premiere colonne
-				_AroeMinus[(1+idim)*_nVar]= uj_n/((gamma-1)*(ej-q))*_Vj[1+idim];
-				//colonnes intermediaires
-				for(int jdim=0; jdim<_Ndim;jdim++)
-					_AroeMinus[(1+idim)*_nVar + jdim + 1] = rhoj*_Vj[1+idim]*_vec_normal[jdim];
-				//matrice identite
-				_AroeMinus[(1+idim)*_nVar + idim + 1] += rhoj*uj_n;
-				//derniere colonne
-				_AroeMinus[(1+idim)*_nVar + _nVar-1]=-rhoj*uj_n*cv/(ej-q)*_Vj[1+idim];
-			}
-
-			//derniere ligne (energie)
-			_AroeMinus[_nVar*(_nVar-1)] = Ej*uj_n/((gamma-1)*(ej-q));
-			for(int idim=0; idim<_Ndim;idim++)
-				_AroeMinus[_nVar*(_nVar-1)+idim+1]=rhoj*(H+uj_2)*_vec_normal[idim] ;
-			_AroeMinus[_nVar*_nVar -1] = rhoj*uj_n*(1-Ej/(ej-q))*cv;
+			_Aroe[i] = (_AroeMinus[i]+_AroePlus[i])/2;
+			_absAroe[i]  = (_AroeMinus[i]-_AroePlus[i])/2;
 		}
 	}
-	for(int i=0; i<_nVar*_nVar;i++)
-	{
-		_Aroe[i] = (_AroeMinus[i]+_AroePlus[i])/2;
-		_absAroe[i]  = (_AroeMinus[i]-_AroePlus[i])/2;
-	}
 }
-
 void SinglePhase::applyVFRoeLowMachCorrections()
 {
 	if(_nonLinearFormulation!=VFRoe)
@@ -2004,7 +2034,10 @@ void SinglePhase::testConservation()
 		DELTA = 0;
 		for(int j=1; j<=_Nmailles; j++)
 		{
-			VecGetValues(_conservativeVars, 1, &I, &x);//on recupere la valeur du champ
+			if(!_usePrimitiveVarsInNewton)
+				VecGetValues(_conservativeVars, 1, &I, &x);//on recupere la valeur du champ
+			else
+				VecGetValues(_primitiveVars, 1, &I, &x);//on recupere la valeur du champ
 			SUM += x*_mesh.getCell(j-1).getMeasure();
 			VecGetValues(_newtonVariation, 1, &I, &x);//on recupere la variation du champ
 			DELTA += x*_mesh.getCell(j-1).getMeasure();

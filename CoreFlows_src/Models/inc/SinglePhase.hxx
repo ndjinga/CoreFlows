@@ -26,7 +26,7 @@ public :
 	 * \param [in] int : mesh dimension
 	 * \param [in] bool : There are two possible equations of state for the fluid
 	 *  */
-	SinglePhase(phaseType fluid, pressureEstimate pEstimate,int dim,bool _useDellacherieEOS=true);
+	SinglePhase(phaseType fluid, pressureEstimate pEstimate,int dim,bool _useDellacherieEOS=false);
 	//! system initialisation
 	void initialize();
 

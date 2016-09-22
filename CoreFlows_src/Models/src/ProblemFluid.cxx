@@ -394,19 +394,17 @@ double ProblemFluid::computeTimeStep(bool & stop){
 					Poly.matrixProduct(_AroeMinus, _nVar, _nVar, _Jcb, _nVar, _nVar, _a);
 					MatSetValuesBlocked(_A, size, &idm, size, &idm, _a, ADD_VALUES);
 
-					if(_system){
-						cout << "_a: ";
-						displayMatrix(_a, _nVar, idm, idm);
-					}
+					if(_system)
+						displayMatrix(_a, _nVar, "produit A^-*Jcb pour CL");
+
 					//insertion de -A^-
 					for(int k=0; k<_nVar*_nVar;k++){
 						_AroeMinus[k] *= -1;
 					}
 					MatSetValuesBlocked(_A, size, &idm, size, &idm, _AroeMinus, ADD_VALUES);
-					if(_system){
-						cout << "-_AroeMinus: ";
-						displayMatrix(_AroeMinus, _nVar, idm, idm);
-					}
+					if(_system)
+						displayMatrix(_AroeMinus, _nVar,"-_AroeMinus: ");
+
 					//calcul et insertion de D*JcbDiff
 					Poly.matrixProduct(_Diffusion, _nVar, _nVar, _JcbDiff, _nVar, _nVar, _a);
 					MatSetValuesBlocked(_A, size, &idm, size, &idm, _a, ADD_VALUES);
@@ -487,10 +485,8 @@ double ProblemFluid::computeTimeStep(bool & stop){
 				MatSetValuesBlocked(_A, size, &idm, size, &idn, _Diffusion, ADD_VALUES);
 
 				if(_system){
-					cout << "+_AroeMinus: ";
-					displayMatrix(_AroeMinus, _nVar, idm, idn);
-					cout << "+_Diffusion: ";
-					displayMatrix(_Diffusion, _nVar, idm, idm);
+					displayMatrix(_AroeMinus, _nVar, "+_AroeMinus: ");
+					displayMatrix(_Diffusion, _nVar, "+_Diffusion: ");
 				}
 				for(int k=0;k<_nVar*_nVar;k++){
 					_AroeMinus[k] *= -1;
@@ -499,10 +495,8 @@ double ProblemFluid::computeTimeStep(bool & stop){
 				MatSetValuesBlocked(_A, size, &idm, size, &idm, _AroeMinus, ADD_VALUES);
 				MatSetValuesBlocked(_A, size, &idm, size, &idm, _Diffusion, ADD_VALUES);
 				if(_system){
-					cout << "-_AroeMinus: ";
-					displayMatrix(_AroeMinus, _nVar, idm, idm);
-					cout << "-_Diffusion: ";
-					displayMatrix(_Diffusion, _nVar, idm, idm);
+					displayMatrix(_AroeMinus, _nVar, "-_AroeMinus: ");
+					displayMatrix(_Diffusion, _nVar, "-_Diffusion: ");
 				}
 				for(int k=0; k<_nVar*_nVar;k++)
 				{
@@ -511,10 +505,8 @@ double ProblemFluid::computeTimeStep(bool & stop){
 				}
 				MatSetValuesBlocked(_A, size, &idn, size, &idn, _AroePlus, ADD_VALUES);
 				MatSetValuesBlocked(_A, size, &idn, size, &idn, _Diffusion, ADD_VALUES);
-				if(_system){
-					cout << "+_AroePlus: ";
-					displayMatrix(_AroePlus, _nVar, idn, idn);
-				}
+				if(_system)
+					displayMatrix(_AroePlus, _nVar, "+_AroePlus: ");
 
 				for(int k=0;k<_nVar*_nVar;k++){
 					_AroePlus[k] *= -1;
@@ -523,11 +515,9 @@ double ProblemFluid::computeTimeStep(bool & stop){
 				MatSetValuesBlocked(_A, size, &idn, size, &idm, _AroePlus, ADD_VALUES);
 				MatSetValuesBlocked(_A, size, &idn, size, &idm, _Diffusion, ADD_VALUES);
 
-				if(_system){
-					cout << "-_AroePlus: ";
-					displayMatrix(_AroePlus, _nVar, idn, idm);
+				if(_system)
+					displayMatrix(_AroePlus, _nVar, "-_AroePlus: ");
 				}
-			}
 		}
 		else if( Fj.getNumberOfCells()>2 && _Ndim==1 ){//inner face with more than two neighbours
 			if(_verbose && _nbTimeStep%_freqSave ==0)
@@ -588,10 +578,8 @@ double ProblemFluid::computeTimeStep(bool & stop){
 						MatSetValuesBlocked(_A, size, &idm, size, &idn, _Diffusion, ADD_VALUES);
 
 						if(_system){
-							cout << "+_AroeMinus: ";
-							displayMatrix(_AroeMinus, _nVar, idm, idn);
-							cout << "+_Diffusion: ";
-							displayMatrix(_Diffusion, _nVar, idm, idn);
+							displayMatrix(_AroeMinus, _nVar, "+_AroeMinus: ");
+							displayMatrix(_Diffusion, _nVar, "+_Diffusion: ");
 						}
 						for(int k=0;k<_nVar*_nVar;k++){
 							_AroeMinus[k] *= -1;
@@ -600,10 +588,8 @@ double ProblemFluid::computeTimeStep(bool & stop){
 						MatSetValuesBlocked(_A, size, &idm, size, &idm, _AroeMinus, ADD_VALUES);
 						MatSetValuesBlocked(_A, size, &idm, size, &idm, _Diffusion, ADD_VALUES);
 						if(_system){
-							cout << "-_AroeMinus: ";
-							displayMatrix(_AroeMinus, _nVar, idm, idm);
-							cout << "-_Diffusion: ";
-							displayMatrix(_Diffusion, _nVar, idm, idm);
+							displayMatrix(_AroeMinus, _nVar, "-_AroeMinus: ");
+							displayMatrix(_Diffusion, _nVar, "-_Diffusion: ");
 						}
 						for(int k=0; k<_nVar*_nVar;k++)
 						{
@@ -612,10 +598,8 @@ double ProblemFluid::computeTimeStep(bool & stop){
 						}
 						MatSetValuesBlocked(_A, size, &idn, size, &idn, _AroePlus, ADD_VALUES);
 						MatSetValuesBlocked(_A, size, &idn, size, &idn, _Diffusion, ADD_VALUES);
-						if(_system){
-							cout << "+_AroePlus: ";
-							displayMatrix(_AroePlus, _nVar, idn, idn);
-						}
+						if(_system)
+							displayMatrix(_AroePlus, _nVar, "+_AroePlus: ");
 
 						for(int k=0;k<_nVar*_nVar;k++){
 							_AroePlus[k] *= -1;
@@ -624,11 +608,9 @@ double ProblemFluid::computeTimeStep(bool & stop){
 						MatSetValuesBlocked(_A, size, &idn, size, &idm, _AroePlus, ADD_VALUES);
 						MatSetValuesBlocked(_A, size, &idn, size, &idm, _Diffusion, ADD_VALUES);
 
-						if(_system){
-							cout << "-_AroePlus: ";
-							displayMatrix(_AroePlus, _nVar, idn, idm);
-						}
-					}
+						if(_system)
+							displayMatrix(_AroePlus, _nVar, "-_AroePlus: ");
+											}
 				}
 			}
 		}
@@ -644,11 +626,7 @@ double ProblemFluid::computeTimeStep(bool & stop){
 			MatSetValuesBlocked(_A, size, &imaille, size, &imaille, _Gravity, ADD_VALUES);
 
 		if(_verbose && _nbTimeStep%_freqSave ==0)
-		{
-			cout<<"Gravity matrix:"<<endl;
-			for(int k=0;k<_nVar*_nVar;k++)
-				cout<<_Gravity[k]<<" , ";
-		}
+			displayMatrix(_Gravity,_nVar,"Gravity matrix:");
 
 		MatAssemblyBegin(_A, MAT_FINAL_ASSEMBLY);
 		MatAssemblyEnd(_A, MAT_FINAL_ASSEMBLY);
@@ -671,13 +649,16 @@ double ProblemFluid::computeTimeStep(bool & stop){
 
 void ProblemFluid::computeNewtonVariation()
 {
-	if(_system)
+	if(_verbose)
 	{
 		cout<<"Vecteur courant Uk "<<endl;
 		VecView(_conservativeVars,PETSC_VIEWER_STDOUT_SELF);
 		cout << endl;
-		cout<<"Right hand side _b "<<endl;
-		VecView(_b,PETSC_VIEWER_STDOUT_SELF);
+		cout << "Matrice du système linéaire avant contribution delta t" << endl;
+		MatView(_A,PETSC_VIEWER_STDOUT_SELF);
+		cout << endl;
+		cout << "Second membre du système linéaire avant contribution delta t" << endl;
+		VecView(_b, PETSC_VIEWER_STDOUT_SELF);
 		cout << endl;
 	}
 	if(_timeScheme == Explicit)
@@ -706,7 +687,15 @@ void ProblemFluid::computeNewtonVariation()
 			KSPSetOperators(_ksp, _A, _A,SAME_NONZERO_PATTERN);
 		#endif
 
-		KSPSetInitialGuessNonzero(_ksp,PETSC_FALSE);
+			if(_verbose)
+			{
+				cout << "Matrice du système linéaire" << endl;
+				MatView(_A,PETSC_VIEWER_STDOUT_SELF);
+				cout << endl;
+				cout << "Second membre du système linéaire" << endl;
+				VecView(_b, PETSC_VIEWER_STDOUT_SELF);
+				cout << endl;
+			}
 
 		if(_conditionNumber)
 			KSPSetComputeEigenvalues(_ksp,PETSC_TRUE);
@@ -757,7 +746,7 @@ void ProblemFluid::computeNewtonVariation()
 			KSPSolve(_ksp,_b, _bScaling);
 			VecPointwiseMult(_newtonVariation,_invVecScaling,_bScaling);
 		}
-		if(_system)
+		if(_verbose)
 		{
 			cout << "solution du systeme lineaire local:" << endl;
 			VecView(_newtonVariation, PETSC_VIEWER_STDOUT_SELF);
@@ -1353,15 +1342,7 @@ void ProblemFluid::SigneMatriceRoe(vector< complex<double> > valeurs_propres_dis
 	Poly.abs_par_interp_directe(nbVp_dist,valeurs_propres_dist, _Aroe, _nVar,_precision, _signAroe,y);
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
-		cout<<" Roe Matrix " << endl;
-		for (int i=0; i<_nVar; i++){
-			for (int j=0; j<_nVar; j++){
-				cout<<_Aroe[i*_nVar+j] <<", ";
-			}
-			cout<< endl;
-		}
-		cout<< endl;
-		cout<<" SigneMatriceRoe: Valeurs propres :" << nbVp_dist<<endl;
+		cout<< endl<<" SigneMatriceRoe: Valeurs propres :" << nbVp_dist<<endl;
 		for(int ct =0; ct<nbVp_dist; ct++)
 			cout<< "("<<valeurs_propres_dist[ct].real()<< ", " <<valeurs_propres_dist[ct].imag() <<")  ";
 		cout<< endl;

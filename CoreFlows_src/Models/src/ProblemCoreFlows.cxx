@@ -419,8 +419,9 @@ bool ProblemCoreFlows::run()
 	return !stop;
 }
 
-void ProblemCoreFlows::displayMatrix(double *matrix, int size, int i, int j)
+void ProblemCoreFlows::displayMatrix(double *matrix, int size, string name)
 {
+	cout<<name<<endl;
 	for(int p=0; p<size; p++)
 	{
 		for(int q=0; q<size; q++)
@@ -432,6 +433,15 @@ void ProblemCoreFlows::displayMatrix(double *matrix, int size, int i, int j)
 	cout << endl;
 }
 
+void ProblemCoreFlows::displayVector(double *vector, int size, string name)
+{
+	cout<<name<<endl;
+		for(int q=0; q<size; q++)
+		{
+			cout << vector[q] << "\t";
+		}
+		cout << endl;
+}
 void ProblemCoreFlows::setFileName(string fileName){
 	_fileName = fileName;
 }
