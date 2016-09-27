@@ -1,4 +1,5 @@
-#include "SinglePhase_1DRiemannProblem.cxx"
+#include "SinglePhase.hxx"
+
 
 using namespace std;
 
