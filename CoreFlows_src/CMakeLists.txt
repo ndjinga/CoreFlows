@@ -11,10 +11,10 @@ option (COREFLOWS_WITH_PYTHON "Compile Python interface for COREFLOWS." OFF)
 option (COREFLOWS_WITH_GUI "Compile Graphic user Interface for COREFLOWS." OFF)
 option (COREFLOWS_WITH_PACKAGE "Generate RPM, Debian and tarball packages." OFF)
 
+enable_testing()											   #
 # Debug mode activates testing and profiling ---------------------------------------------------------------#
 if (CMAKE_BUILD_TYPE=Debug)										   #
 													   #
- enable_testing()											   #
  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")								   #
  SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")						   #
  SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")					   #
