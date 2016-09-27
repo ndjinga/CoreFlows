@@ -45,19 +45,21 @@ SET(CoreFlowsExample_SOURCES
  
 )
 
-ADD_LIBRARY(CoreFlowsExample SHARED ${CoreFlowsExample_SOURCES})
 SET(_extra_lib_CoreFlows CoreFlows ${PETSC_LIBRARIES} ${CDMATH_LIBRARIES})
-TARGET_LINK_LIBRARIES(CoreFlowsExample ${_extra_lib_CoreFlows})
-INSTALL(TARGETS CoreFlowsExample DESTINATION lib)
+
+#ADD_LIBRARY(CoreFlowsExample SHARED ${CoreFlowsExample_SOURCES})
+#SET(_extra_lib_CoreFlows CoreFlows ${PETSC_LIBRARIES} ${CDMATH_LIBRARIES})
+#TARGET_LINK_LIBRARIES(CoreFlowsExample ${_extra_lib_CoreFlows})
+#INSTALL(TARGETS CoreFlowsExample DESTINATION lib)
 
 SET(MAIN_SOURCES
   main_tests.cxx
   )
 
-ADD_EXECUTABLE(CoreFlowsExampleExe ${MAIN_SOURCES})
-SET_TARGET_PROPERTIES(CoreFlowsExampleExe PROPERTIES COMPILE_FLAGS "")
-TARGET_LINK_LIBRARIES(CoreFlowsExampleExe ${_extra_lib_CoreFlows} CoreFlowsExample)
-ADD_TEST(NAME CoreFlowsCPPTests COMMAND CoreFlowsExampleExe)
+#ADD_EXECUTABLE(CoreFlowsExampleExe ${MAIN_SOURCES})
+#SET_TARGET_PROPERTIES(CoreFlowsExampleExe PROPERTIES COMPILE_FLAGS "")
+#TARGET_LINK_LIBRARIES(CoreFlowsExampleExe ${_extra_lib_CoreFlows} CoreFlowsExample)
+#ADD_TEST(NAME CoreFlowsCPPTests COMMAND CoreFlowsExampleExe)
 
 if(CMAKE_COMPILER_IS_GNUCXX)
     if (CMAKE_BUILD_TYPE=Debug)
@@ -66,13 +68,13 @@ if(CMAKE_COMPILER_IS_GNUCXX)
     endif()
 endif()
 
-INSTALL(TARGETS CoreFlowsExampleExe DESTINATION bin/Executable)
+#INSTALL(TARGETS CoreFlowsExampleExe DESTINATION bin/Executable)
 #-- Copier les examples dans le CoreFlows_install
-INSTALL(FILES ${CoreFlowsExample_SOURCES} DESTINATION share/examples)
-
-file(GLOB NICE_EXAMPLES_TO_INSTALL resources Python )
-
-install(DIRECTORY ${NICE_EXAMPLES_TO_INSTALL} DESTINATION share/examples)
+#INSTALL(FILES ${CoreFlowsExample_SOURCES} DESTINATION share/examples)
+#
+#file(GLOB NICE_EXAMPLES_TO_INSTALL resources Python )
+#
+#install(DIRECTORY ${NICE_EXAMPLES_TO_INSTALL} DESTINATION share/examples)
 
 #####################################
 
