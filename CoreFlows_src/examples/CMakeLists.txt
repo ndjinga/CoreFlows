@@ -1,3 +1,5 @@
+project(test)
+
 add_subdirectory (${CoreFlows_EXAMPLES}/Python)
 
 INCLUDE_DIRECTORIES(
@@ -72,4 +74,24 @@ file(GLOB NICE_EXAMPLES_TO_INSTALL resources Python )
 
 install(DIRECTORY ${NICE_EXAMPLES_TO_INSTALL} DESTINATION share/examples)
 
+#####################################
+
+function(CreateTestExec SourceTestFile libList)
+     get_filename_component( FILE_BASENAME ${SourceTestFile} NAME_WE) # <path>/testxxx.c --> testxxx
+     set( EXECNAME "${FILE_BASENAME}.exe" )                     # testxxx          --> testxxx.exe
+     add_executable(${EXECNAME} ${SourceTestFile})                    # compilation of the testxxx.exe 
+     set_target_properties(${EXECNAME} PROPERTIES COMPILE_FLAGS "")
+     target_link_libraries(${EXECNAME} ${libList})              # provide required lib for testxxx.exe 
+     add_test(${FILE_BASENAME} ${EXECNAME} "./${EXECNAME}")     # adding a ctest Test
+     message("setting test ${EXECNAME}")
+endfunction(CreateTestExec)
+
+
+#add_executable(test_template.exe test_template.cxx)
+#set_target_properties(test_template.exe PROPERTIES COMPILE_FLAGS "")
+#target_link_libraries(test_template.exe ${_extra_lib_CoreFlows})
+
+set( libs_for_tests ${_extra_lib_CoreFlows} )
+
+CreateTestExec(test_template.cxx "${libs_for_tests}")
 
