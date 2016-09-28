@@ -10,7 +10,7 @@ int main(int argc, char** argv)
 	double xsup=1.0;
 	double yinf=0.0;
 	double ysup=1.0;
-	Mesh M("../CoreFlows_src/examples/resources/BoxWithMeshWithTriangularCells.med");
+	Mesh M("resources/BoxWithMeshWithTriangularCells.med");
 	double eps=1.E-6;
 	M.setGroupAtPlan(xsup,0,eps,"wall");
 	M.setGroupAtPlan(xinf,0,eps,"wall");

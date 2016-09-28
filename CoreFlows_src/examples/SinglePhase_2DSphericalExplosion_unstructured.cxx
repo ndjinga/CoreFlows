@@ -36,7 +36,7 @@ int main(int argc, char** argv)
 {
 	// preprocessing: mesh and group creation
 	cout << "Loading unstructured mesh for test SinglePhase_2DSphericalExplosion_unstructured()" << endl;
-	string inputfile="../CoreFlows_src/examples/resources/BoxWithMeshWithTriangularCells";
+	string inputfile="resources/BoxWithMeshWithTriangularCells";
 	string fieldName="Initial variables for spherical explosion";
 	int spaceDim=2;
 

@@ -10,7 +10,7 @@ int main(int argc, char** argv)
 	double yinf=0;
 	double ysup=1;
 	cout << "Loading unstuctured mesh for test SinglePhase_2DHeatDrivenCavity_unstructured" << endl;
-	Mesh M("../CoreFlows_src/examples/resources/BoxWithMeshWithTriangularCells.med");
+	Mesh M("resources/BoxWithMeshWithTriangularCells.med");
 	double eps=1.E-6;
 	M.setGroupAtPlan(xinf,0,eps,"coldWall");
 	M.setGroupAtPlan(xsup,0,eps,"hotWall");

@@ -6,7 +6,7 @@ int main(int argc, char** argv)
 {
 	//Preprocessing: mesh and group importation
 	cout << "Reading a mesh with sudden cross-section change for test SinglePhase_2DWallHeatedChannel_ChangeSect()" << endl;
-	Mesh M("../CoreFlows_src/examples/resources/VaryingSectionDuct.med");
+	Mesh M("resources/VaryingSectionDuct.med");
 
 	// Conditions aux limites 
 	//Bords externes

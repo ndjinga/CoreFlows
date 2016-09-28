@@ -6,10 +6,10 @@ int main(int argc, char** argv)
 {
 	//Preprocessing: mesh and group creation
 	cout << "Reading mesh with two branches and two forks" << endl;
-	Mesh M("../CoreFlows_src/examples/resources/BifurcatingFlow2BranchesEqualSections.med");
+	Mesh M("resources/BifurcatingFlow2BranchesEqualSections.med");
 	cout << "Reading power and coss sectional area fields " << endl;
-	Field Sections("../CoreFlows_src/examples/resources/BifurcatingFlow2BranchesEqualSections", CELLS,"Section area");
-	Field heatPowerField("../CoreFlows_src/examples/resources/BifurcatingFlow2BranchesEqualSections", CELLS,"Heat power");
+	Field Sections("resources/BifurcatingFlow2BranchesEqualSections", CELLS,"Section area");
+	Field heatPowerField("resources/BifurcatingFlow2BranchesEqualSections", CELLS,"Heat power");
 
 	heatPowerField.writeVTK("heatPowerField");
 	Sections.writeVTK("crossSectionPowerField");

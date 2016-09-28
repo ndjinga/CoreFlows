@@ -133,4 +133,7 @@ CreateTestExec(SinglePhase_3DHeatDrivenCavity.cxx  "${libs_for_tests}" )
 CreateTestExec(SinglePhase_HeatedWire_2Branches.cxx  "${libs_for_tests}" )
 CreateTestExec(TransportEquation_1DHeatedChannel.cxx  "${libs_for_tests}" )
 
+# copy tests resources (med files etc.) into the build directory
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
 #TODO: install for tests and test data
