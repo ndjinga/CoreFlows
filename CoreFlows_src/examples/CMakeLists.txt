@@ -8,42 +8,42 @@ INCLUDE_DIRECTORIES(
   ${CoreFlows_SRC}/inc 
 )
 
-SET(CoreFlowsExample_SOURCES
-    
-    DiffusionEquation_1DHeatedRod.cxx
-    DriftModel_1DBoilingChannel.cxx
-    DriftModel_1DPressureLoss.cxx
-    DriftModel_1DDepressurisation.cxx
-    DriftModel_1DRiemannProblem.cxx
-    DriftModel_2DInclinedBoilingChannel.cxx
-    DriftModel_3DCanalCloison.cxx
-    FiveEqsTwoFluid_1DBoilingChannel.cxx
-    FiveEqsTwoFluid_1DDepressurisation.cxx
-    FiveEqsTwoFluid_1DRiemannProblem.cxx
-    FiveEqsTwoFluid_2DInclinedBoilingChannel.cxx
-    FiveEqsTwoFluid_2DInclinedSedimentation.cxx
-    IsothermalTwoFluid_1DDepressurisation.cxx
-    IsothermalTwoFluid_1DRiemannProblem.cxx
-    IsothermalTwoFluid_1DSedimentation.cxx
-    IsothermalTwoFluid_2DInclinedSedimentation.cxx
-    IsothermalTwoFluid_2DVidangeReservoir.cxx
-    SinglePhase_1DDepressurisation.cxx
-    SinglePhase_1DHeatedChannel.cxx
-    SinglePhase_1DRiemannProblem.cxx
-    SinglePhase_2DHeatDrivenCavity.cxx
-    SinglePhase_2DHeatDrivenCavity_unstructured.cxx
-    SinglePhase_2DLidDrivenCavity.cxx
-    SinglePhase_2DLidDrivenCavity_unstructured.cxx
-    SinglePhase_2DSphericalExplosion_unstructured.cxx
-    SinglePhase_2DWallHeatedChannel_ChangeSect.cxx
-    SinglePhase_2DWallHeatedChannel.cxx
-    SinglePhase_2DHeatedChannelInclined.cxx
-    SinglePhase_3DHeatDrivenCavity.cxx
-    SinglePhase_HeatedWire_2Branches.cxx
-    TransportEquation_1DHeatedChannel.cxx
-    CoupledTransportDiffusionEquations_1DHeatedChannel.cxx
- 
-)
+#SET(CoreFlowsExample_SOURCES
+#    
+#    DiffusionEquation_1DHeatedRod.cxx
+#    DriftModel_1DBoilingChannel.cxx
+#    DriftModel_1DPressureLoss.cxx
+#    DriftModel_1DDepressurisation.cxx
+#    DriftModel_1DRiemannProblem.cxx
+#    DriftModel_2DInclinedBoilingChannel.cxx
+#    DriftModel_3DCanalCloison.cxx
+#    FiveEqsTwoFluid_1DBoilingChannel.cxx
+#    FiveEqsTwoFluid_1DDepressurisation.cxx
+#    FiveEqsTwoFluid_1DRiemannProblem.cxx
+#    FiveEqsTwoFluid_2DInclinedBoilingChannel.cxx
+#    FiveEqsTwoFluid_2DInclinedSedimentation.cxx
+#    IsothermalTwoFluid_1DDepressurisation.cxx
+#    IsothermalTwoFluid_1DRiemannProblem.cxx
+#    IsothermalTwoFluid_1DSedimentation.cxx
+#    IsothermalTwoFluid_2DInclinedSedimentation.cxx
+#    IsothermalTwoFluid_2DVidangeReservoir.cxx
+#    SinglePhase_1DDepressurisation.cxx
+#    SinglePhase_1DHeatedChannel.cxx
+#    SinglePhase_1DRiemannProblem.cxx
+#    SinglePhase_2DHeatDrivenCavity.cxx
+#    SinglePhase_2DHeatDrivenCavity_unstructured.cxx
+#    SinglePhase_2DLidDrivenCavity.cxx
+#    SinglePhase_2DLidDrivenCavity_unstructured.cxx
+#    SinglePhase_2DSphericalExplosion_unstructured.cxx
+#    SinglePhase_2DWallHeatedChannel_ChangeSect.cxx
+#    SinglePhase_2DWallHeatedChannel.cxx
+#    SinglePhase_2DHeatedChannelInclined.cxx
+#    SinglePhase_3DHeatDrivenCavity.cxx
+#    SinglePhase_HeatedWire_2Branches.cxx
+#    TransportEquation_1DHeatedChannel.cxx
+#    CoupledTransportDiffusionEquations_1DHeatedChannel.cxx
+# 
+#)
 
 SET(_extra_lib_CoreFlows CoreFlows ${PETSC_LIBRARIES} ${CDMATH_LIBRARIES})
 
@@ -88,12 +88,10 @@ function(CreateTestExec SourceTestFile libList)
      message("setting test ${EXECNAME}")
 endfunction(CreateTestExec)
 
-
-#add_executable(test_template.exe test_template.cxx)
-#set_target_properties(test_template.exe PROPERTIES COMPILE_FLAGS "")
-#target_link_libraries(test_template.exe ${_extra_lib_CoreFlows})
-
 set( libs_for_tests ${_extra_lib_CoreFlows} )
+
+# copy tests resources (med files etc.) into the build directory
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 CreateTestExec(test_template.cxx  "${libs_for_tests}" )
 
@@ -133,7 +131,5 @@ CreateTestExec(SinglePhase_3DHeatDrivenCavity.cxx  "${libs_for_tests}" )
 CreateTestExec(SinglePhase_HeatedWire_2Branches.cxx  "${libs_for_tests}" )
 CreateTestExec(TransportEquation_1DHeatedChannel.cxx  "${libs_for_tests}" )
 
-# copy tests resources (med files etc.) into the build directory
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 #TODO: install for tests and test data
