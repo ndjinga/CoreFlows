@@ -2,7 +2,7 @@
 
 using namespace std;
 
-bool SinglePhase_1DRiemannProblem()
+int main(int argc, char** argv)
 {
 	//Preprocessing: mesh and group creation
 	cout << "Building Cartesian mesh " << endl;
@@ -88,5 +88,5 @@ bool SinglePhase_1DRiemannProblem()
 	cout << "------------ End of calculation !!! -----------" << endl;
 	myProblem.terminate();
 
-	return ok;
+	return EXIT_SUCCESS;
 }
