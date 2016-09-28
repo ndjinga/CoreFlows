@@ -2,7 +2,7 @@
 
 using namespace std;
 
-bool DriftModel_2DInclinedBoilingChannel()
+int main(int argc, char** argv)
 {
 	int spaceDim = 2;
 
@@ -93,5 +93,5 @@ bool DriftModel_2DInclinedBoilingChannel()
 	cout << "------------ End of calculation !!! -----------" << endl;
 	myProblem.terminate();
 
-	return ok;
+	return EXIT_SUCCESS;
 }

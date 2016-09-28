@@ -2,7 +2,7 @@
 
 using namespace std;
 
-bool FiveEqsTwoFluid_1DBoilingChannel()
+int main(int argc, char** argv)
 {
 	//Preprocessing: mesh data
 	cout << "Building cartesian mesh" << endl;
@@ -80,5 +80,5 @@ bool FiveEqsTwoFluid_1DBoilingChannel()
 	cout << "------------ End of calculation -----------" << endl;
 	myProblem.terminate();
 
-	return ok;
+	return EXIT_SUCCESS;
 }

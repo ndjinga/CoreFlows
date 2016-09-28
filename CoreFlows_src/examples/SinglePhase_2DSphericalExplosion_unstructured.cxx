@@ -32,7 +32,7 @@ using namespace std;
 	}
 	//VV.writeMED("../examples/ressources/BoxWithMeshWithTriangularCells",false);
 }*/
-bool SinglePhase_2DSphericalExplosion_unstructured()
+int main(int argc, char** argv)
 {
 	// preprocessing: mesh and group creation
 	cout << "Loading unstructured mesh for test SinglePhase_2DSphericalExplosion_unstructured()" << endl;
@@ -90,5 +90,5 @@ bool SinglePhase_2DSphericalExplosion_unstructured()
 	cout << "------------ End of calculation !!! -----------" << endl;
 	myProblem.terminate();
 
-	return ok;
+	return EXIT_SUCCESS;
 }

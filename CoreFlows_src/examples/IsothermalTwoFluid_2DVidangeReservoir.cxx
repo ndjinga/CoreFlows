@@ -4,7 +4,7 @@
 
 using namespace std;
 
-int IsothermalTwoFluid_2DVidangeReservoir()
+int main(int argc, char** argv)
 {
 	//Preprocessing: mesh and group creation
 	cout << "Building Cartesian mesh " << endl;
@@ -90,5 +90,5 @@ int IsothermalTwoFluid_2DVidangeReservoir()
 	cout << "------------ End of calculation !!! -----------" << endl;
 	myProblem.terminate();
 
-	return ok;
+	return EXIT_SUCCESS;
 }

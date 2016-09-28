@@ -2,7 +2,7 @@
 
 using namespace std;
 
-bool FiveEqsTwoFluid_1DRiemannProblem()
+int main(int argc, char** argv)
 {
 	//Preprocessing: mesh and group creation
 	cout << "Building cartesian mesh " << endl;
@@ -90,5 +90,5 @@ bool FiveEqsTwoFluid_1DRiemannProblem()
 	cout << "------------ End of calculation -----------" << endl;
 	myProblem.terminate();
 
-	return ok;
+	return EXIT_SUCCESS;
 }

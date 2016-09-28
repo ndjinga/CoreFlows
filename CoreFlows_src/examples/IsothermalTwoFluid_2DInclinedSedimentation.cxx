@@ -2,7 +2,7 @@
 
 using namespace std;
 
-bool IsothermalTwoFluid_2DInclinedSedimentation()
+int main(int argc, char** argv)
 {
 	//Preprocessing: mesh and group creation
 	cout << "Building Cartesian mesh " << endl;
@@ -87,5 +87,5 @@ bool IsothermalTwoFluid_2DInclinedSedimentation()
 	cout << "------------ End of calculation !!! -----------" << endl;
 	myProblem.terminate();
 
-	return ok;
+	return EXIT_SUCCESS;
 }

@@ -3,7 +3,7 @@
 
 using namespace std;
 
-int SinglePhase_2DHeatedChannelInclined()
+int main(int argc, char** argv)
 {
 	int spaceDim = 2;
 
@@ -95,6 +95,6 @@ int SinglePhase_2DHeatedChannelInclined()
 	cout << "------------ End of calculation -----------" << endl;
 	myProblem.terminate();
 
-	return ok;
+	return EXIT_SUCCESS;
 }
 

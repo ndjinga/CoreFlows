@@ -18,7 +18,7 @@ void power_field_CoupledTransportDiffusionTest(Field & Phi){
 	}
 }
 
-int CoupledTransportDiffusionEquations_1DHeatedChannel()
+int main(int argc, char** argv)
 {
 	//Preprocessing: mesh and group creation
 	double xinf=0.0;
@@ -195,5 +195,5 @@ int CoupledTransportDiffusionEquations_1DHeatedChannel()
 	myDiffusionEquation.terminate();
 	myTransportEquation.terminate();
 
-	return ok;
+	return EXIT_SUCCESS;
 }

@@ -2,7 +2,7 @@
 
 using namespace std;
 
-int SinglePhase_2DWallHeatedChannel()
+int main(int argc, char** argv)
 {
 	//Preprocessing: mesh and group creation
 	double xinf=-0.005;
@@ -118,5 +118,5 @@ int SinglePhase_2DWallHeatedChannel()
 
 	myProblem.terminate();
 
-	return ok;
+	return EXIT_SUCCESS;
 }

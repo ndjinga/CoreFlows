@@ -2,7 +2,7 @@
 
 using namespace std;
 
-int SinglePhase_3DHeatDrivenCavity()
+int main(int argc, char** argv)
 {
 	int spaceDim = 3;
 	/*Preprocessing: mesh data*/
@@ -99,5 +99,5 @@ int SinglePhase_3DHeatDrivenCavity()
 
 	myProblem.terminate();
 
-	return ok;
+	return EXIT_SUCCESS;
 }

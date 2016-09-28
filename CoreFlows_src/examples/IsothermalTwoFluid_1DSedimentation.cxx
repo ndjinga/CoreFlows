@@ -2,7 +2,7 @@
 
 using namespace std;
 
-bool IsothermalTwoFluid_1DSedimentation()
+int main(int argc, char** argv)
 {
 	cout << "Building Cartesian mesh " << endl;
 	int spaceDim=1;
@@ -70,5 +70,5 @@ bool IsothermalTwoFluid_1DSedimentation()
 	cout << "------------ End of simulation !!! -----------" << endl;
 	myProblem.terminate();
 
-	return ok;
+	return EXIT_SUCCESS;
 }

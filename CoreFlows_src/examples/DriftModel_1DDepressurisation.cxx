@@ -2,7 +2,7 @@
 
 using namespace std;
 
-bool DriftModel_1DDepressurisation()
+int main(int argc, char** argv)
 {
 	//Preprocessing: mesh and group creation
 	cout << "Building regular mesh " << endl;
@@ -75,5 +75,5 @@ bool DriftModel_1DDepressurisation()
 	cout << "------------ End of calculation -----------" << endl;
 	myProblem.terminate();
 
-	return ok;
+	return EXIT_SUCCESS;
 }

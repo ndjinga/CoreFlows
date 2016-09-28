@@ -2,7 +2,7 @@
 
 using namespace std;
 
-bool IsothermalTwoFluid_1DDepressurisation()
+int main(int argc, char** argv)
 {
 	//Preprocessing: mesh and group creation
 	cout << "Building cartesian mesh" << endl;
@@ -85,5 +85,5 @@ bool IsothermalTwoFluid_1DDepressurisation()
 	cout << "------------ End of simulation !!! -----------" << endl;
 	myProblem.terminate();
 
-	return ok;
+	return EXIT_SUCCESS;
 }

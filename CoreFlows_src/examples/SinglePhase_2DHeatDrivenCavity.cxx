@@ -2,7 +2,7 @@
 
 using namespace std;
 
-int SinglePhase_2DHeatDrivenCavity()
+int main(int argc, char** argv)
 {
 	/*Preprocessing: mesh and group creation*/
 	double xinf=0;
@@ -104,5 +104,5 @@ int SinglePhase_2DHeatDrivenCavity()
 
 	myProblem.terminate();
 
-	return ok;
+	return EXIT_SUCCESS;
 }

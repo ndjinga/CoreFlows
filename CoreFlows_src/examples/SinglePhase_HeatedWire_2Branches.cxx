@@ -2,7 +2,7 @@
 
 using namespace std;
 
-int SinglePhase_HeatedWire_2Branches()
+int main(int argc, char** argv)
 {
 	//Preprocessing: mesh and group creation
 	cout << "Reading mesh with two branches and two forks" << endl;
@@ -83,6 +83,6 @@ int SinglePhase_HeatedWire_2Branches()
 	cout << "------------ End of calculation -----------" << endl;
 	myProblem.terminate();
 
-	return ok;
+	return EXIT_SUCCESS;
 }
 

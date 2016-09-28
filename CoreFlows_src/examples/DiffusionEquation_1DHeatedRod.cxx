@@ -17,7 +17,7 @@ void power_field_diffusionTest(Field & Phi){
 	}
 }
 
-int DiffusionEquation_1DHeatedRod()
+int main(int argc, char** argv)
 {
 	//Preprocessing: mesh and group creation
 	double xinf=0.0;
@@ -96,5 +96,5 @@ int DiffusionEquation_1DHeatedRod()
 	cout << "------------ End of calculation -----------" << endl;
 	myProblem.terminate();
 
-	return ok;
+	return EXIT_SUCCESS;
 }

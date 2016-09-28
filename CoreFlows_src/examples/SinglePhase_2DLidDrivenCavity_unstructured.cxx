@@ -2,7 +2,7 @@
 
 using namespace std;
 
-bool SinglePhase_2DLidDrivenCavity_unstructured()
+int main(int argc, char** argv)
 {
 	/* preprocessing: mesh and group creation */
 	cout << "Loading unstructured mesh for test SinglePhase_2DLidDrivenCavity_unstructured()" << endl;
@@ -102,5 +102,5 @@ bool SinglePhase_2DLidDrivenCavity_unstructured()
 	cout << "------------ End of calculation !!! -----------" << endl;
 	myProblem.terminate();
 
-	return ok;
+	return EXIT_SUCCESS;
 }

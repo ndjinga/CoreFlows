@@ -2,7 +2,7 @@
 
 using namespace std;
 
-bool FiveEqsTwoFluid_2DInclinedBoilingChannel()
+int main(int argc, char** argv)
 {
 	//Preprocessing: mesh and group creation
 	cout << "Building regular mesh " << endl;
@@ -108,5 +108,5 @@ bool FiveEqsTwoFluid_2DInclinedBoilingChannel()
 	cout << "------------ End of calculation !!! -----------" << endl;
 	myProblem.terminate();
 
-	return ok;
+	return EXIT_SUCCESS;
 }

@@ -2,7 +2,7 @@
 
 using namespace std;
 
-bool SinglePhase_2DLidDrivenCavity()
+int main(int argc, char** argv)
 {
 	//Preprocessing: mesh and group creation
 	cout << "Building cartesian mesh " << endl;
@@ -88,6 +88,6 @@ bool SinglePhase_2DLidDrivenCavity()
 	cout << "------------ End of calculation !!! -----------" << endl;
 	myProblem.terminate();
 
-	return ok;
+	return EXIT_SUCCESS;
 
 }

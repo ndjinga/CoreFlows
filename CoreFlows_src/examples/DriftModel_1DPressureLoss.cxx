@@ -2,7 +2,7 @@
 
 using namespace std;
 
-bool DriftModel_1DPressureLoss()
+int main(int argc, char** argv)
 {
 	cout << "Building a regular grid " << endl;
 	int spaceDim=1;
@@ -83,5 +83,5 @@ bool DriftModel_1DPressureLoss()
 	cout << "------------ End of calculation -----------" << endl;
 	myProblem.terminate();
 
-	return ok;
+	return EXIT_SUCCESS;
 }

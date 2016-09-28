@@ -2,7 +2,7 @@
 
 using namespace std;
 
-bool DriftModel_1DBoilingAssembly()
+int main(int argc, char** argv)
 {
 	//setting mesh and groups
 	cout << "Building a regular grid " << endl;
@@ -99,5 +99,5 @@ bool DriftModel_1DBoilingAssembly()
 	cout << "------------ End of calculation -----------" << endl;
 	myProblem.terminate();
 
-	return ok;
+	return EXIT_SUCCESS;
 }

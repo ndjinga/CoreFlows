@@ -2,7 +2,7 @@
 
 using namespace std;
 
-bool SinglePhase_1DHeatedChannel()
+int main(int argc, char** argv)
 {
 	//Preprocessing: mesh and group creation
 	double xinf=0.0;
@@ -84,6 +84,6 @@ bool SinglePhase_1DHeatedChannel()
 	cout << "------------ End of calculation -----------" << endl;
 	myProblem.terminate();
 
-	return ok;
+	return EXIT_SUCCESS;
 }
 

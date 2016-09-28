@@ -2,7 +2,7 @@
 
 using namespace std;
 
-int SinglePhase_2DWallHeatedChannel_ChangeSect()
+int main(int argc, char** argv)
 {
 	//Preprocessing: mesh and group importation
 	cout << "Reading a mesh with sudden cross-section change for test SinglePhase_2DWallHeatedChannel_ChangeSect()" << endl;
@@ -113,5 +113,5 @@ int SinglePhase_2DWallHeatedChannel_ChangeSect()
 
 	myProblem.terminate();
 
-	return ok;
+	return EXIT_SUCCESS;
 }

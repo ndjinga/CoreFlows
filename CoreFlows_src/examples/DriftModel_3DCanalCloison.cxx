@@ -2,7 +2,7 @@
 
 using namespace std;
 
-bool DriftModel_3DCanalCloison()
+int main(int argc, char** argv)
 {
 	int spaceDim = 3;
 	// Prepare for the mesh
@@ -151,5 +151,5 @@ bool DriftModel_3DCanalCloison()
 	cout << "------------ End of calculation !!! -----------" << endl;
 	myProblem.terminate();
 
-	return ok;
+	return EXIT_SUCCESS;
 }
