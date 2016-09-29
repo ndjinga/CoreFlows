@@ -575,7 +575,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 			}
 		}
 		_externalStates[_nVar-1] = _externalStates[1]*_fluides[0]->getInternalEnergy(_limitField[nameOfGroup].T,rho_v)
-																																																					 +(_externalStates[0]-_externalStates[1])*_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + _externalStates[0]*v2/2;
+																																																							 +(_externalStates[0]-_externalStates[1])*_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + _externalStates[0]*v2/2;
 		_idm[0] = 0;
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
@@ -749,21 +749,24 @@ void DriftModel::convectionMatrices()
 
 	vector<complex<double> > vp_dist(3);
 
-
-	if(_spaceScheme==staggered && _nonLinearFormulation==VFFC)//special case
+	if(_spaceScheme==staggered && _nonLinearFormulation==VFFC)//special case where we need no Roe matrix
 	{
-		if(!_usePrimitiveVarsInNewton)
-			staggeredVFFCMatrices(umn);
+		if(_timeScheme==Explicit || !_usePrimitiveVarsInNewton)
+			staggeredVFFCMatricesConservativeVariables(umn);
 		else
 			staggeredVFFCMatricesPrimitiveVariables(umn);
 	}
-	else
+	else//In this case we build a Roe matrix
 	{
 		double rhom=_Uroe[0];
 		double cm=_Uroe[1];
 		double Hm=_Uroe[_nVar-1];
 		double hm=Hm-0.5*u_2;
+		double m_v=cm*rhom, m_l=rhom-m_v;
 		double Tm;
+		Vector vitesse(_Ndim);
+		for(int idim=0;idim<_Ndim;idim++)
+			vitesse[idim]=_Uroe[2+idim];
 
 		if(cm<_precision)//pure liquid
 			Tm=_fluides[1]->getTemperatureFromEnthalpy(hm,rhom);
@@ -773,44 +776,26 @@ void DriftModel::convectionMatrices()
 			Tm=_Tsat;
 
 		double pression= getMixturePressure(cm, rhom, Tm);
-		double m_v=cm*rhom, m_l=rhom-m_v;
+
 		if(_verbose && _nbTimeStep%_freqSave ==0)
 			cout<<"Roe state rhom="<<rhom<<" cm= "<<cm<<" Hm= "<<Hm<<" Tm= "<<Tm<<" pression "<<pression<<endl;
-		getMixturePressureDerivatives( m_v, m_l, pression, Tm);
-		double ecin=0.5*u_2;
 
-		//On remplit la matrice de Roe
-		_Aroe[0*_nVar+0]=0;
-		_Aroe[0*_nVar+1]=0;
-		for(int i=0;i<_Ndim;i++)
-			_Aroe[0*_nVar+2+i]=_vec_normal[i];
-		_Aroe[0*_nVar+2+_Ndim]=0;
-		_Aroe[1*_nVar+0]=-umn*cm;
-		_Aroe[1*_nVar+1]=umn;
-		for(int i=0;i<_Ndim;i++)
-			_Aroe[1*_nVar+2+i]=cm*_vec_normal[i];
-		_Aroe[1*_nVar+2+_Ndim]=0;
-		for(int i=0;i<_Ndim;i++)
-		{
-			_Aroe[(2+i)*_nVar+0]=(_khi+_kappa*ecin)*_vec_normal[i]-umn*_Uroe[2+i];
-			_Aroe[(2+i)*_nVar+1]=_ksi*_vec_normal[i];
-			for(int j=0;j<_Ndim;j++)
-				_Aroe[(2+i)*_nVar+2+j]=_Uroe[2+i]*_vec_normal[j]-_kappa*_vec_normal[i]*_Uroe[2+j];
-			_Aroe[(2+i)*_nVar+2+i]+=umn;
-			_Aroe[(2+i)*_nVar+2+_Ndim]=_kappa*_vec_normal[i];
-		}
-		_Aroe[(2+_Ndim)*_nVar+0]=(_khi+_kappa*ecin-Hm)*umn;
-		_Aroe[(2+_Ndim)*_nVar+1]=_ksi*umn;
-		for(int i=0;i<_Ndim;i++)
-			_Aroe[(2+_Ndim)*_nVar+2+i]=Hm*_vec_normal[i]-_kappa*umn*_Uroe[2+i];
-		_Aroe[(2+_Ndim)*_nVar+2+_Ndim]=(_kappa+1)*umn;
-
+		getMixturePressureDerivatives( m_v, m_l, pression, Tm);//EOS is involved to express pressure jump and sound speed
 		if(_kappa*hm+_khi+cm*_ksi<0)
 			throw CdmathException("Calcul matrice de Roe: vitesse du son complexe");
 
 		double am=sqrt(_kappa*hm+_khi+cm*_ksi);//vitesse du son du melange
 		if(_verbose && _nbTimeStep%_freqSave ==0)
 			cout<<"_khi= "<<_khi<<", _kappa= "<< _kappa << ", _ksi= "<<_ksi <<", am= "<<am<<endl;
+
+		//On remplit la matrice de Roe
+		double ecin=0.5*u_2;
+		if(_timeScheme==Explicit || !_usePrimitiveVarsInNewton)
+			RoeMatrixConservativeVariables( cm, umn, ecin, Hm,vitesse);
+		else{
+			getDensityDerivatives(cm, pression, Tm,u_2);//EOS is more involved with primitive variables
+			RoeMatrixPrimitiveVariables( cm, rhom, umn, Hm, vitesse);
+		}
 
 		//On remplit les valeurs propres
 		vp_dist[0]=umn+am;
@@ -830,42 +815,11 @@ void DriftModel::convectionMatrices()
 				_absAroe[i] = 0;
 		}
 		else if( _spaceScheme ==staggered){
-			//Calcul de décentrement de type décalé
-			_absAroe[0*_nVar+0]=0;
-			_absAroe[0*_nVar+1]=0;
-			for(int i=0;i<_Ndim;i++)
-				_absAroe[0*_nVar+2+i]=_vec_normal[i];
-			_absAroe[0*_nVar+2+_Ndim]=0;
-			_absAroe[1*_nVar+0]=-umn*cm;
-			_absAroe[1*_nVar+1]=umn;
-			for(int i=0;i<_Ndim;i++)
-				_absAroe[1*_nVar+2+i]=cm*_vec_normal[i];
-			_absAroe[1*_nVar+2+_Ndim]=0;
-			for(int i=0;i<_Ndim;i++)
-			{
-				_absAroe[(2+i)*_nVar+0]=-(_khi+_kappa*ecin)*_vec_normal[i]-umn*_Uroe[2+i];
-				_absAroe[(2+i)*_nVar+1]=-_ksi*_vec_normal[i];
-				for(int j=0;j<_Ndim;j++)
-					_absAroe[(2+i)*_nVar+2+j]=_Uroe[2+i]*_vec_normal[j]+_kappa*_vec_normal[i]*_Uroe[2+j];
-				_absAroe[(2+i)*_nVar+2+i]+=umn;
-				_absAroe[(2+i)*_nVar+2+_Ndim]=-_kappa*_vec_normal[i];
-			}
-			_absAroe[(2+_Ndim)*_nVar+0]=(-_khi-_kappa*ecin-Hm)*umn;
-			_absAroe[(2+_Ndim)*_nVar+1]=-_ksi*umn;
-			for(int i=0;i<_Ndim;i++)
-				_absAroe[(2+_Ndim)*_nVar+2+i]=Hm*_vec_normal[i]+_kappa*umn*_Uroe[2+i];
-			_absAroe[(2+_Ndim)*_nVar+2+_Ndim]=(-_kappa+1)*umn;
-
-			double signu;
-			if(umn>0)
-				signu=1;
-			else if (umn<0)
-				signu=-1;
+			//Calcul de décentrement de type décalé pour formulation Roe
+			if(_timeScheme==Explicit || !_usePrimitiveVarsInNewton)
+				staggeredRoeUpwindingMatrixConservativeVariables( cm, umn, ecin, Hm, vitesse);
 			else
-				signu=0;
-
-			for(int i=0; i<_nVar*_nVar;i++)
-				_absAroe[i] *= signu;
+				staggeredRoeUpwindingMatrixPrimitiveVariables( cm, umn, ecin, Hm, vitesse);
 		}
 		else if(_spaceScheme == upwind || _spaceScheme ==pressureCorrection || _spaceScheme ==lowMach || (_spaceScheme==staggered)){
 			if(_entropicCorrection)
@@ -1607,11 +1561,8 @@ void DriftModel::primToConsJacobianMatrix(double *V)
 		for(int idim=0;idim<_Ndim;idim++)
 			_primToConsJacoMat[(_nVar-1)*_nVar+2+idim]=rho*vitesse[idim];
 		_primToConsJacoMat[(_nVar-1)*_nVar+_nVar-1]=rho*(cv_v*concentration + cv_l*(1-concentration))
-																				-rho*rho*E*(
-																						cv_v*   concentration /(rho_v*(e_v-q_v))
-																						+cv_l*(1-concentration)/(rho_l*(e_l-q_l))
-																				);
-
+													-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
+																+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
 	}
 	else if(dynamic_cast<StiffenedGasDellacherie*>(_fluides[0])!=NULL
 			&& dynamic_cast<StiffenedGasDellacherie*>(_fluides[1])!=NULL)
@@ -1669,10 +1620,8 @@ void DriftModel::primToConsJacobianMatrix(double *V)
 		for(int idim=0;idim<_Ndim;idim++)
 			_primToConsJacoMat[(_nVar-1)*_nVar+2+idim]=rho*vitesse[idim];
 		_primToConsJacoMat[(_nVar-1)*_nVar+_nVar-1]=rho*(cp_v*concentration + cp_l*(1-concentration))
-																				-rho*rho*H*(
-																						cp_v*   concentration /(rho_v*(h_v-q_v))
-																						+cp_l*(1-concentration)/(rho_l*(h_l-q_l))
-																				);
+													-rho*rho*H*(cp_v*   concentration /(rho_v*(h_v-q_v))
+																+cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
 	}
 	else
 		throw CdmathException("SinglePhase::primToConsJacobianMatrix: eos should be StiffenedGas or StiffenedGasDellacherie");
@@ -1822,7 +1771,7 @@ void DriftModel::getMixturePressureAndTemperature(double c_v, double rhom, doubl
 		StiffenedGas* fluide1=dynamic_cast<StiffenedGas*>(_fluides[1]);
 
 		temperature= (rhom_em-m_v*fluide0->getInternalEnergy(0)-m_l*fluide1->getInternalEnergy(0))
-																																																			/(m_v*fluide0->constante("cv")+m_l*fluide1->constante("cv"));
+																																																					/(m_v*fluide0->constante("cv")+m_l*fluide1->constante("cv"));
 
 		double e_v=fluide0->getInternalEnergy(temperature);
 		double e_l=fluide1->getInternalEnergy(temperature);
@@ -2143,7 +2092,7 @@ Vector DriftModel::staggeredVFFCFlux()
 	}
 }
 
-void DriftModel::staggeredVFFCMatrices(double u_mn)
+void DriftModel::staggeredVFFCMatricesConservativeVariables(double u_mn)
 {
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 		cout<<"DriftModel::staggeredVFFCMatrices()"<<endl;
@@ -2643,45 +2592,225 @@ void DriftModel::applyVFRoeLowMachCorrections()
 		}
 	}
 }
-void DriftModel::testConservation()
+void DriftModel::RoeMatrixConservativeVariables(double cm, double umn,double ecin, double Hm,Vector vitesse)
 {
-	double SUM, DELTA, x;
-	int I,compponentl;
-	for(int l=0; l<_nVar; l++)
+	//On remplit la matrice de Roe en variables conservatives : F(u_L)-F(U_R)=Aroe (U_L-U_R)
+	_Aroe[0*_nVar+0]=0;
+	_Aroe[0*_nVar+1]=0;
+	for(int i=0;i<_Ndim;i++)
+		_Aroe[0*_nVar+2+i]=_vec_normal[i];
+	_Aroe[0*_nVar+2+_Ndim]=0;
+	_Aroe[1*_nVar+0]=-umn*cm;
+	_Aroe[1*_nVar+1]=umn;
+	for(int i=0;i<_Ndim;i++)
+		_Aroe[1*_nVar+2+i]=cm*_vec_normal[i];
+	_Aroe[1*_nVar+2+_Ndim]=0;
+	for(int i=0;i<_Ndim;i++)
 	{
-		{
-			if(l == 0)
-				cout << "Masse totale (kg): ";
-			else if(l == 1)
-				cout << "Masse partielle 1 (kg): ";
-			else
-			{
-				if(l == _nVar-1)
-					cout << "Energie totale (J): ";
-				else
-					cout << "Quantite de mouvement direction "<<l-1<<" (kg.m.s^-1): ";
-			}
-		}
-		SUM = 0;
-		DELTA = 0;
-		for(int I=0; I<_Nmailles; I++)
-		{
-			compponentl=I*_nVar+l;
-			if(!_usePrimitiveVarsInNewton)
-				VecGetValues(_old, 1, &compponentl, &x);//on recupere la valeur du champ
-			else
-				VecGetValues(_primitiveVars, 1, &I, &x);//on recupere la valeur du champ
-			SUM += x;
-			VecGetValues(_newtonVariation, 1, &compponentl, &x);//on recupere la variation du champ
-			DELTA += x;
-		}
-		{
-			if(fabs(SUM)>_precision)
-				cout << SUM << ", variation relative: " << fabs(DELTA /SUM)  << endl;
-			else
-				cout << " a une somme nulle,  variation absolue: " << fabs(DELTA) << endl;
-		}
+		_Aroe[(2+i)*_nVar+0]=(_khi+_kappa*ecin)*_vec_normal[i]-umn*vitesse[i];
+		_Aroe[(2+i)*_nVar+1]=_ksi*_vec_normal[i];
+		for(int j=0;j<_Ndim;j++)
+			_Aroe[(2+i)*_nVar+2+j]=vitesse[i]*_vec_normal[j]-_kappa*_vec_normal[i]*vitesse[j];
+		_Aroe[(2+i)*_nVar+2+i]+=umn;
+		_Aroe[(2+i)*_nVar+2+_Ndim]=_kappa*_vec_normal[i];
 	}
+	_Aroe[(2+_Ndim)*_nVar+0]=(_khi+_kappa*ecin-Hm)*umn;
+	_Aroe[(2+_Ndim)*_nVar+1]=_ksi*umn;
+	for(int i=0;i<_Ndim;i++)
+		_Aroe[(2+_Ndim)*_nVar+2+i]=Hm*_vec_normal[i]-_kappa*umn*vitesse[i];
+	_Aroe[(2+_Ndim)*_nVar+2+_Ndim]=(_kappa+1)*umn;
+}
+
+void DriftModel::staggeredRoeUpwindingMatrixConservativeVariables(double cm, double umn,double ecin, double Hm, Vector vitesse)
+{
+	//Calcul de décentrement de type décalé pour formulation Roe
+	_absAroe[0*_nVar+0]=0;
+	_absAroe[0*_nVar+1]=0;
+	for(int i=0;i<_Ndim;i++)
+		_absAroe[0*_nVar+2+i]=_vec_normal[i];
+	_absAroe[0*_nVar+2+_Ndim]=0;
+	_absAroe[1*_nVar+0]=-umn*cm;
+	_absAroe[1*_nVar+1]=umn;
+	for(int i=0;i<_Ndim;i++)
+		_absAroe[1*_nVar+2+i]=cm*_vec_normal[i];
+	_absAroe[1*_nVar+2+_Ndim]=0;
+	for(int i=0;i<_Ndim;i++)
+	{
+		_absAroe[(2+i)*_nVar+0]=-(_khi+_kappa*ecin)*_vec_normal[i]-umn*vitesse[i];
+		_absAroe[(2+i)*_nVar+1]=-_ksi*_vec_normal[i];
+		for(int j=0;j<_Ndim;j++)
+			_absAroe[(2+i)*_nVar+2+j]=vitesse[i]*_vec_normal[j]+_kappa*_vec_normal[i]*vitesse[j];
+		_absAroe[(2+i)*_nVar+2+i]+=umn;
+		_absAroe[(2+i)*_nVar+2+_Ndim]=-_kappa*_vec_normal[i];
+	}
+	_absAroe[(2+_Ndim)*_nVar+0]=(-_khi-_kappa*ecin-Hm)*umn;
+	_absAroe[(2+_Ndim)*_nVar+1]=-_ksi*umn;
+	for(int i=0;i<_Ndim;i++)
+		_absAroe[(2+_Ndim)*_nVar+2+i]=Hm*_vec_normal[i]+_kappa*umn*vitesse[2+i];
+	_absAroe[(2+_Ndim)*_nVar+2+_Ndim]=(-_kappa+1)*umn;
+
+	double signu;
+	if(umn>0)
+		signu=1;
+	else if (umn<0)
+		signu=-1;
+	else
+		signu=0;
+
+	for(int i=0; i<_nVar*_nVar;i++)
+		_absAroe[i] *= signu;
+}
+
+void DriftModel::RoeMatrixPrimitiveVariables(double concentration, double rhom, double umn, double Hm, Vector vitesse)
+{
+	//On remplit la matrice de Roe en variables primitives : F(V_L)-F(V_R)=Aroe (V_L-V_R)
+	_Aroe[0*_nVar+0]=_drho_sur_dcv*umn;
+	_Aroe[0*_nVar+1]=_drho_sur_dp*umn;
+	for(int i=0;i<_Ndim;i++)
+		_Aroe[0*_nVar+2+i]=rhom*_vec_normal[i];
+	_Aroe[0*_nVar+2+_Ndim]=_drho_sur_dT*umn;
+	_Aroe[1*_nVar+0]=_drhocv_sur_dcv*umn;
+	_Aroe[1*_nVar+1]=_drhocv_sur_dp*umn;
+	for(int i=0;i<_Ndim;i++)
+		_Aroe[1*_nVar+2+i]=rhom*concentration*_vec_normal[i];
+	_Aroe[1*_nVar+2+_Ndim]=_drhocv_sur_dT*umn;
+	for(int i=0;i<_Ndim;i++)
+	{
+		_Aroe[(2+i)*_nVar+0]=_drho_sur_dcv*umn*vitesse[i];
+		_Aroe[(2+i)*_nVar+1]=_drho_sur_dp *umn*vitesse[i]+_vec_normal[i];
+		for(int j=0;j<_Ndim;j++)
+			_Aroe[(2+i)*_nVar+2+j]=rhom*vitesse[i]*_vec_normal[j];
+		_Aroe[(2+i)*_nVar+2+i]+=rhom*umn;
+		_Aroe[(2+i)*_nVar+2+_Ndim]=_drho_sur_dT*umn*vitesse[i];
+	}
+	_Aroe[(2+_Ndim)*_nVar+0]= _drhoE_sur_dcv  *umn;
+	_Aroe[(2+_Ndim)*_nVar+1]=(_drhoE_sur_dp+1)*umn;
+	for(int i=0;i<_Ndim;i++)
+		_Aroe[(2+_Ndim)*_nVar+2+i]=rhom*(Hm*_vec_normal[i]+umn*vitesse[i]);
+	_Aroe[(2+_Ndim)*_nVar+2+_Ndim]=_drhoE_sur_dT*umn;
+}
+
+void DriftModel::staggeredRoeUpwindingMatrixPrimitiveVariables(double concentration, double rhom, double umn, double Hm, Vector vitesse)
+{
+	_Aroe[0*_nVar+0]= _drho_sur_dcv*umn;
+	_Aroe[0*_nVar+1]=-_drho_sur_dp *umn;
+	for(int i=0;i<_Ndim;i++)
+		_Aroe[0*_nVar+2+i]=rhom*_vec_normal[i];
+	_Aroe[0*_nVar+2+_Ndim]=_drho_sur_dT*umn;
+	_Aroe[1*_nVar+0]= _drhocv_sur_dcv*umn;
+	_Aroe[1*_nVar+1]=-_drhocv_sur_dp *umn;
+	for(int i=0;i<_Ndim;i++)
+		_Aroe[1*_nVar+2+i]=rhom*concentration*_vec_normal[i];
+	_Aroe[1*_nVar+2+_Ndim]=_drhocv_sur_dT*umn;
+	for(int i=0;i<_Ndim;i++)
+	{
+		_Aroe[(2+i)*_nVar+0]= _drho_sur_dcv*umn*vitesse[i];
+		_Aroe[(2+i)*_nVar+1]=-_drho_sur_dp *umn*vitesse[i]+_vec_normal[i];
+		for(int j=0;j<_Ndim;j++)
+			_Aroe[(2+i)*_nVar+2+j]=rhom*vitesse[i]*_vec_normal[j];
+		_Aroe[(2+i)*_nVar+2+i]+=rhom*umn;
+		_Aroe[(2+i)*_nVar+2+_Ndim]=_drho_sur_dT*umn*vitesse[i];
+	}
+	_Aroe[(2+_Ndim)*_nVar+0]=  _drhoE_sur_dcv  *umn;
+	_Aroe[(2+_Ndim)*_nVar+1]=(-_drhoE_sur_dp+1)*umn;
+	for(int i=0;i<_Ndim;i++)
+		_Aroe[(2+_Ndim)*_nVar+2+i]=rhom*(Hm*_vec_normal[i]+umn*vitesse[i]);
+	_Aroe[(2+_Ndim)*_nVar+2+_Ndim]=_drhoE_sur_dT*umn;
+}
+void DriftModel::getDensityDerivatives(double concentration, double pression, double temperature,double v2)
+{
+	double rho_v=_fluides[0]->getDensity(pression,temperature);
+	double rho_l=_fluides[1]->getDensity(pression,temperature);
+	double gamma_v=_fluides[0]->constante("gamma");
+	double gamma_l=_fluides[1]->constante("gamma");
+	double q_v=_fluides[0]->constante("q");
+	double q_l=_fluides[1]->constante("q");
+
+	double rho=concentration*rho_v+(1-concentration)*rho_l;;
+
+	if(		dynamic_cast<StiffenedGas*>(_fluides[0])!=NULL
+			&& dynamic_cast<StiffenedGas*>(_fluides[1])!=NULL)
+	{
+		StiffenedGas* fluide0=dynamic_cast<StiffenedGas*>(_fluides[0]);
+		StiffenedGas* fluide1=dynamic_cast<StiffenedGas*>(_fluides[1]);
+		double e_v = fluide0->getInternalEnergy(temperature);
+		double e_l = fluide0->getInternalEnergy(temperature);
+		double cv_v=fluide0->constante("cv");
+		double cv_l=fluide1->constante("cv");
+		double e=concentration*e_v+(1-concentration)*e_l;
+		double E=e+0.5*v2;
+
+		_drho_sur_dcv=-rho*rho*(1/rho_v-1/rho_l);
+		_drho_sur_dp=rho*rho*(
+				concentration /(rho_v*rho_v*(gamma_v-1)*(e_v-q_v))
+				+(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(e_l-q_l))
+		);
+		_drho_sur_dT=-rho*rho*(
+				cv_v*   concentration /(rho_v*(e_v-q_v))
+				+cv_l*(1-concentration)/(rho_l*(e_l-q_l))
+		);
+
+		_drhocv_sur_dcv=rho-concentration*rho*rho*(1/rho_v-1/rho_l);
+		_drhocv_sur_dp=concentration*rho*rho*(
+				concentration /(rho_v*rho_v*(gamma_v-1)*(e_v-q_v))
+				+(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(e_l-q_l))
+		);
+		_drhocv_sur_dT=-concentration*rho*rho*(
+				cv_v*   concentration /(rho_v*(e_v-q_v))
+				+cv_l*(1-concentration)/(rho_l*(e_l-q_l))
+		);
+		_drhoE_sur_dcv=rho*(e_v-e_l)-E*rho*rho*(1/rho_v-1/rho_l);
+		_drhoE_sur_dp=E*rho*rho*(
+				concentration /(rho_v*rho_v*(gamma_v-1)*(e_v-q_v))
+				+(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(e_l-q_l))
+		);
+		_drhoE_sur_dT=rho*(cv_v*concentration + cv_l*(1-concentration))
+					-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
+							    +cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
+	}
+	else if(dynamic_cast<StiffenedGasDellacherie*>(_fluides[0])!=NULL
+			&& dynamic_cast<StiffenedGasDellacherie*>(_fluides[1])!=NULL)
+	{
+		StiffenedGasDellacherie* fluide0=dynamic_cast<StiffenedGasDellacherie*>(_fluides[0]);
+		StiffenedGasDellacherie* fluide1=dynamic_cast<StiffenedGasDellacherie*>(_fluides[1]);
+		double h_v=fluide0->getEnthalpy(temperature);
+		double h_l=fluide1->getEnthalpy(temperature);
+		double h=concentration*h_v+(1-concentration)*h_l;
+		double H=h+0.5*v2;
+		double cp_v=fluide0->constante("cp");
+		double cp_l=fluide1->constante("cp");
+
+		_drho_sur_dcv=-rho*rho*(1/rho_v-1/rho_l);
+		_drho_sur_dp=rho*rho*(
+				gamma_v*   concentration /(rho_v*rho_v*(gamma_v-1)*(h_v-q_v))
+				+gamma_l*(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(h_l-q_l))
+		);
+		_drho_sur_dp=-rho*rho*(
+				cp_v*   concentration /(rho_v*(h_v-q_v))
+				+cp_l*(1-concentration)/(rho_l*(h_l-q_l))
+		);
+
+		_drhocv_sur_dcv=rho-concentration*rho*rho*(1/rho_v-1/rho_l);
+		_drhocv_sur_dp=concentration*rho*rho*(
+				gamma_v*   concentration /(rho_v*rho_v*(gamma_v-1)*(h_v-q_v))
+				+gamma_l*(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(h_l-q_l))
+		);
+		_drhocv_sur_dT=-concentration*rho*rho*(
+				cp_v*   concentration /(rho_v*(h_v-q_v))
+				+cp_l*(1-concentration)/(rho_l*(h_l-q_l))
+		);
+		_drhoE_sur_dcv=rho*(h_v-h_l)-H*rho*rho*(1/rho_v-1/rho_l);
+		_drhoE_sur_dp=H*rho*rho*(
+				gamma_v*   concentration /(rho_v*rho_v*(gamma_v-1)*(h_v-q_v))
+				+gamma_l*(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(h_l-q_l))
+		)-1;
+		for(int idim=0;idim<_Ndim;idim++)
+		_drhoE_sur_dT=rho*(cp_v*concentration + cp_l*(1-concentration))
+					-rho*rho*H*( cp_v*   concentration /(rho_v*(h_v-q_v))
+								+cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
+	}
+	else
+		throw CdmathException("SinglePhase::primToConsJacobianMatrix: eos should be StiffenedGas or StiffenedGasDellacherie");
 }
 
 void DriftModel::save(){
@@ -2938,3 +3067,45 @@ void DriftModel::save(){
 		}
 	}
 }
+
+void DriftModel::testConservation()
+{
+	double SUM, DELTA, x;
+	int I,compponentl;
+	for(int l=0; l<_nVar; l++)
+	{
+		{
+			if(l == 0)
+				cout << "Masse totale (kg): ";
+			else if(l == 1)
+				cout << "Masse partielle 1 (kg): ";
+			else
+			{
+				if(l == _nVar-1)
+					cout << "Energie totale (J): ";
+				else
+					cout << "Quantite de mouvement direction "<<l-1<<" (kg.m.s^-1): ";
+			}
+		}
+		SUM = 0;
+		DELTA = 0;
+		for(int I=0; I<_Nmailles; I++)
+		{
+			compponentl=I*_nVar+l;
+			if(!_usePrimitiveVarsInNewton)
+				VecGetValues(_old, 1, &compponentl, &x);//on recupere la valeur du champ
+			else
+				VecGetValues(_primitiveVars, 1, &I, &x);//on recupere la valeur du champ
+			SUM += x;
+			VecGetValues(_newtonVariation, 1, &compponentl, &x);//on recupere la variation du champ
+			DELTA += x;
+		}
+		{
+			if(fabs(SUM)>_precision)
+				cout << SUM << ", variation relative: " << fabs(DELTA /SUM)  << endl;
+			else
+				cout << " a une somme nulle,  variation absolue: " << fabs(DELTA) << endl;
+		}
+	}
+}
+
