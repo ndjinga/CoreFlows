@@ -52,9 +52,9 @@ SET(_extra_lib_CoreFlows CoreFlows ${PETSC_LIBRARIES} ${CDMATH_LIBRARIES})
 #TARGET_LINK_LIBRARIES(CoreFlowsExample ${_extra_lib_CoreFlows})
 #INSTALL(TARGETS CoreFlowsExample DESTINATION lib)
 
-SET(MAIN_SOURCES
-  main_tests.cxx
-  )
+#SET(MAIN_SOURCES
+#  main_tests.cxx
+#  )
 
 #ADD_EXECUTABLE(CoreFlowsExampleExe ${MAIN_SOURCES})
 #SET_TARGET_PROPERTIES(CoreFlowsExampleExe PROPERTIES COMPILE_FLAGS "")
@@ -78,6 +78,11 @@ endif()
 
 #####################################
 
+install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/resources  DESTINATION share/examples)
+install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Python  DESTINATION share/examples)
+
+
+# this function creates a target and a ctest test
 function(CreateTestExec SourceTestFile libList)
      get_filename_component( FILE_BASENAME ${SourceTestFile} NAME_WE) # <path>/testxxx.c --> testxxx
      set( EXECNAME "${FILE_BASENAME}.exe" )                     # testxxx          --> testxxx.exe
@@ -88,48 +93,63 @@ function(CreateTestExec SourceTestFile libList)
      message("setting test ${EXECNAME}")
 endfunction(CreateTestExec)
 
+# this function creates a target and a ctest test
+# and also create install rules for copying the example
+# in the install dir
+function(CreateTestExecAndInstall SourceTestFile libList)
+     get_filename_component( FILE_BASENAME ${SourceTestFile} NAME_WE) # <path>/testxxx.c --> testxxx
+     set( EXECNAME "${FILE_BASENAME}.exe" )                     # testxxx          --> testxxx.exe
+     add_executable(${EXECNAME} ${SourceTestFile})                    # compilation of the testxxx.exe 
+     set_target_properties(${EXECNAME} PROPERTIES COMPILE_FLAGS "")
+     target_link_libraries(${EXECNAME} ${libList})              # provide required lib for testxxx.exe 
+     add_test(${FILE_BASENAME} ${EXECNAME} "./${EXECNAME}")     # adding a ctest Test
+     install(TARGETS ${EXECNAME} DESTINATION share/examples)
+     message("setting test ${EXECNAME}")
+endfunction(CreateTestExecAndInstall)
+
+
 set( libs_for_tests ${_extra_lib_CoreFlows} )
 
 # copy tests resources (med files etc.) into the build directory
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-CreateTestExec(test_template.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(test_template.cxx  "${libs_for_tests}" )
 
-CreateTestExec(CoupledTransportDiffusionEquations_1DHeatedChannel.cxx  "${libs_for_tests}" )
-CreateTestExec(DiffusionEquation_1DHeatedRod.cxx  "${libs_for_tests}" )
-CreateTestExec(DriftModel_1DBoilingAssembly.cxx  "${libs_for_tests}" )
-CreateTestExec(DriftModel_1DBoilingChannel.cxx  "${libs_for_tests}" )
-CreateTestExec(DriftModel_1DDepressurisation.cxx  "${libs_for_tests}" )
-CreateTestExec(DriftModel_1DPorosityJump.cxx  "${libs_for_tests}" )
-CreateTestExec(DriftModel_1DPressureLoss.cxx  "${libs_for_tests}" )
-CreateTestExec(DriftModel_1DRiemannProblem.cxx  "${libs_for_tests}" )
-CreateTestExec(DriftModel_2DInclinedBoilingChannel.cxx  "${libs_for_tests}" )
-CreateTestExec(DriftModel_3DCanalCloison.cxx  "${libs_for_tests}" )
-CreateTestExec(FiveEqsTwoFluid_1DBoilingChannel.cxx  "${libs_for_tests}" )
-CreateTestExec(FiveEqsTwoFluid_1DDepressurisation.cxx  "${libs_for_tests}" )
-CreateTestExec(FiveEqsTwoFluid_1DRiemannProblem.cxx  "${libs_for_tests}" )
-CreateTestExec(FiveEqsTwoFluid_2DInclinedBoilingChannel.cxx  "${libs_for_tests}" )
-CreateTestExec(FiveEqsTwoFluid_2DInclinedSedimentation.cxx  "${libs_for_tests}" )
-CreateTestExec(IsothermalTwoFluid_1DDepressurisation.cxx  "${libs_for_tests}" )
-CreateTestExec(IsothermalTwoFluid_1DRiemannProblem.cxx  "${libs_for_tests}" )
-CreateTestExec(IsothermalTwoFluid_1DSedimentation.cxx  "${libs_for_tests}" )
-CreateTestExec(IsothermalTwoFluid_2DInclinedSedimentation.cxx  "${libs_for_tests}" )
-CreateTestExec(IsothermalTwoFluid_2DVidangeReservoir.cxx  "${libs_for_tests}" )
-CreateTestExec(SinglePhase_1DDepressurisation.cxx  "${libs_for_tests}" )
-CreateTestExec(SinglePhase_1DHeatedChannel.cxx  "${libs_for_tests}" )
-CreateTestExec(SinglePhase_1DPorosityJump.cxx  "${libs_for_tests}" )
-CreateTestExec(SinglePhase_1DRiemannProblem.cxx  "${libs_for_tests}" )
-CreateTestExec(SinglePhase_2DHeatDrivenCavity.cxx  "${libs_for_tests}" )
-CreateTestExec(SinglePhase_2DHeatDrivenCavity_unstructured.cxx  "${libs_for_tests}" )
-CreateTestExec(SinglePhase_2DHeatedChannelInclined.cxx  "${libs_for_tests}" )
-CreateTestExec(SinglePhase_2DLidDrivenCavity.cxx  "${libs_for_tests}" )
-CreateTestExec(SinglePhase_2DLidDrivenCavity_unstructured.cxx  "${libs_for_tests}" )
-CreateTestExec(SinglePhase_2DSphericalExplosion_unstructured.cxx  "${libs_for_tests}" )
-CreateTestExec(SinglePhase_2DWallHeatedChannel_ChangeSect.cxx  "${libs_for_tests}" )
-CreateTestExec(SinglePhase_2DWallHeatedChannel.cxx  "${libs_for_tests}" )
-CreateTestExec(SinglePhase_3DHeatDrivenCavity.cxx  "${libs_for_tests}" )
-CreateTestExec(SinglePhase_HeatedWire_2Branches.cxx  "${libs_for_tests}" )
-CreateTestExec(TransportEquation_1DHeatedChannel.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(CoupledTransportDiffusionEquations_1DHeatedChannel.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(DiffusionEquation_1DHeatedRod.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(DriftModel_1DBoilingAssembly.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(DriftModel_1DBoilingChannel.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(DriftModel_1DDepressurisation.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(DriftModel_1DPorosityJump.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(DriftModel_1DPressureLoss.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(DriftModel_1DRiemannProblem.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(DriftModel_2DInclinedBoilingChannel.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(DriftModel_3DCanalCloison.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(FiveEqsTwoFluid_1DBoilingChannel.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(FiveEqsTwoFluid_1DDepressurisation.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(FiveEqsTwoFluid_1DRiemannProblem.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(FiveEqsTwoFluid_2DInclinedBoilingChannel.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(FiveEqsTwoFluid_2DInclinedSedimentation.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(IsothermalTwoFluid_1DDepressurisation.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(IsothermalTwoFluid_1DRiemannProblem.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(IsothermalTwoFluid_1DSedimentation.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(IsothermalTwoFluid_2DInclinedSedimentation.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(IsothermalTwoFluid_2DVidangeReservoir.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(SinglePhase_1DDepressurisation.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(SinglePhase_1DHeatedChannel.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(SinglePhase_1DPorosityJump.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(SinglePhase_1DRiemannProblem.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(SinglePhase_2DHeatDrivenCavity.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(SinglePhase_2DHeatDrivenCavity_unstructured.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(SinglePhase_2DHeatedChannelInclined.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(SinglePhase_2DLidDrivenCavity.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(SinglePhase_2DLidDrivenCavity_unstructured.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(SinglePhase_2DSphericalExplosion_unstructured.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(SinglePhase_2DWallHeatedChannel_ChangeSect.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(SinglePhase_2DWallHeatedChannel.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(SinglePhase_3DHeatDrivenCavity.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(SinglePhase_HeatedWire_2Branches.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(TransportEquation_1DHeatedChannel.cxx  "${libs_for_tests}" )
 
 
 #TODO: install for tests and test data
