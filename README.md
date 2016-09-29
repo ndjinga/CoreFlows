@@ -23,14 +23,14 @@ You will need the packages 'doxygen' if you want to generate de documentation an
 Download and compilation of PETSC
 ---------------------------------
 In order to install PETSC you need first to download and compile the sources of PETSC, version 3.4 or later. 
-The sources of PETSC 3.7.2 can be downloaded with the command
--  `wget http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-3.7.2.tar.gz`
+The sources of PETSC 3.7.3 can be downloaded with the command
+-  `wget http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-3.7.3.tar.gz`
 Unzip the file and move into the newly created directory using the commands
-- `tar xzf petsc-3.7.2.tar.gz `
-- `cd petsc-3.7.2`
+- `tar xzf petsc-3.7.3.tar.gz `
+- `cd petsc-3.7.3`
 Then compile petsc using on the commands
-- `./configure  --prefix=~/workspace/petsc-3.7.2 --with-mpi=0 --download-f2cblaslapack=1`
-- `make PETSC_DIR=~/workspace/petsc-3.7.2 PETSC_ARCH=arch-linux2-c-opt all`
+- `./configure  --with-mpi=0 --download-f2cblaslapack=1`
+- `make PETSC_DIR=~/workspace/petsc-3.7.3 PETSC_ARCH=arch-linux2-c-opt all`
 
 For the moment, CDMATH-CoreFlows is a sequential library (no parallelism).
 
@@ -39,7 +39,7 @@ Download and compilation of CDMATH
 In order to download 'CDMATH' either unzip the following file to a directory cdmath_src
 - `wget https://github.com/PROJECT-CDMATH/CDMATH/archive/master.zip`
 
-or
+or clone the git repository to a folder cdmath_src
 - `git clone https://github.com/PROJECT-CDMATH/CDMATH.git cdmath_src`
 
 In order to compile 'CDMATH' you will need the packages 'cmake ', and 'hdf5' plus 'numpy' and 'swig' if you intend to use cdmath functions in your python scripts. 

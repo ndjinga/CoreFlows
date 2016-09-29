@@ -8,10 +8,14 @@ You will need the packages '\a doxygen' if you want to generate this documentati
 Download and compilation of Petsc
 ---------------------------------
 First you need to download and compile the sources of Petsc (version 3.4 or later). 
-The sources of Petsc 3.7.3 can be downloaded from
+The sources of Petsc 3.7.3 can be downloaded with the command
 -  `http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-3.7.3.tar.gz`
-
-Then type on the commands
+Unzip the file and move into the newly created directory using the commands
+\verbatim 
+- tar xzf petsc-3.7.3.tar.gz
+- cd petsc-3.7.3
+\endverbatim
+Then compile petsc using on the commands
 \verbatim 
  ./configure  --with-mpi=0 --download-f-blas-lapack=1
  make all
@@ -25,7 +29,7 @@ Download and compilation of CDMATH
 In order to download \ref cdmath either unzip the following file to a directory cdmath_src
 - `https://github.com/PROJECT-CDMATH/CDMATH/archive/master.zip`
 
-or
+or clone the git repository to a folder cdmath_src
 \verbatim 
 git clone https://github.com/PROJECT-CDMATH/CDMATH.git cdmath_src
 \endverbatim 
