@@ -577,7 +577,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 			}
 		}
 		_externalStates[_nVar-1] = _externalStates[1]*_fluides[0]->getInternalEnergy(_limitField[nameOfGroup].T,rho_v)
-																																																											 +(_externalStates[0]-_externalStates[1])*_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + _externalStates[0]*v2/2;
+																																																													 +(_externalStates[0]-_externalStates[1])*_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + _externalStates[0]*v2/2;
 		_idm[0] = 0;
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
@@ -890,6 +890,23 @@ void DriftModel::convectionMatrices()
 		{
 			_AroeMinusImplicit[i] = (_AroeImplicit[i]-_absAroeImplicit[i])/2;
 			_AroePlusImplicit[i]  = (_AroeImplicit[i]+_absAroeImplicit[i])/2;
+
+			if(_verbose && _nbTimeStep%_freqSave ==0){
+				cout<<endl<<"Matrice _AroeMinusImplicit"<<endl;
+				for(int i=0; i<_nVar;i++)
+				{
+					for(int j=0; j<_nVar;j++)
+						cout << _AroeMinusImplicit[i*_nVar+j]<< " , ";
+					cout<<endl;
+				}
+				cout<<endl<<"Matrice _AroePlusImplicit"<<endl;
+				for(int i=0; i<_nVar;i++)
+				{
+					for(int j=0; j<_nVar;j++)
+						cout << _AroePlusImplicit[i*_nVar+j]<< " , ";
+					cout<<endl;
+				}
+			}
 		}
 	else
 		for(int i=0; i<_nVar*_nVar;i++)
@@ -1574,8 +1591,8 @@ void DriftModel::primToConsJacobianMatrix(double *V)
 		for(int idim=0;idim<_Ndim;idim++)
 			_primToConsJacoMat[(_nVar-1)*_nVar+2+idim]=rho*vitesse[idim];
 		_primToConsJacoMat[(_nVar-1)*_nVar+_nVar-1]=rho*(cv_v*concentration + cv_l*(1-concentration))
-																	-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
-																			+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
+																			-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
+																					+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
 	}
 	else if(dynamic_cast<StiffenedGasDellacherie*>(_fluides[0])!=NULL
 			&& dynamic_cast<StiffenedGasDellacherie*>(_fluides[1])!=NULL)
@@ -1633,8 +1650,8 @@ void DriftModel::primToConsJacobianMatrix(double *V)
 		for(int idim=0;idim<_Ndim;idim++)
 			_primToConsJacoMat[(_nVar-1)*_nVar+2+idim]=rho*vitesse[idim];
 		_primToConsJacoMat[(_nVar-1)*_nVar+_nVar-1]=rho*(cp_v*concentration + cp_l*(1-concentration))
-																	-rho*rho*H*(cp_v*   concentration /(rho_v*(h_v-q_v))
-																			+cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
+																			-rho*rho*H*(cp_v*   concentration /(rho_v*(h_v-q_v))
+																					+cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
 	}
 	else
 		throw CdmathException("SinglePhase::primToConsJacobianMatrix: eos should be StiffenedGas or StiffenedGasDellacherie");
@@ -1784,7 +1801,7 @@ void DriftModel::getMixturePressureAndTemperature(double c_v, double rhom, doubl
 		StiffenedGas* fluide1=dynamic_cast<StiffenedGas*>(_fluides[1]);
 
 		temperature= (rhom_em-m_v*fluide0->getInternalEnergy(0)-m_l*fluide1->getInternalEnergy(0))
-																																																									/(m_v*fluide0->constante("cv")+m_l*fluide1->constante("cv"));
+																																																											/(m_v*fluide0->constante("cv")+m_l*fluide1->constante("cv"));
 
 		double e_v=fluide0->getInternalEnergy(temperature);
 		double e_l=fluide1->getInternalEnergy(temperature);
@@ -2108,10 +2125,10 @@ Vector DriftModel::staggeredVFFCFlux()
 void DriftModel::staggeredVFFCMatricesConservativeVariables(double u_mn)
 {
 	if(_verbose && _nbTimeStep%_freqSave ==0)
-		cout<<"DriftModel::staggeredVFFCMatrices()"<<endl;
+		cout<<"DriftModel::staggeredVFFCMatricesConservativeVariables()"<<endl;
 
 	if(_spaceScheme!=staggered || _nonLinearFormulation!=VFFC)
-		throw CdmathException("DriftModel::staggeredVFFCMatrices: staggeredVFFCMatrices method should be called only for VFFC formulation and staggered upwinding");
+		throw CdmathException("DriftModel::staggeredVFFCMatricesConservativeVariables: staggeredVFFCMatrices method should be called only for VFFC formulation and staggered upwinding");
 	else//_spaceScheme==staggered && _nonLinearFormulation==VFFC
 	{
 		double ui_n=0, ui_2=0, uj_n=0, uj_2=0;//vitesse normale et carré du module
@@ -2546,8 +2563,8 @@ void DriftModel::staggeredVFFCMatricesPrimitiveVariables(double u_mn)
 
 		for(int i=0; i<_nVar*_nVar;i++)
 		{
-			_AroeImplicit[i] = (_AroeMinusImplicit[i]+_AroePlusImplicit[i])/2;
-			_absAroeImplicit[i]  = (_AroeMinusImplicit[i]-_AroePlusImplicit[i])/2;
+			_AroeImplicit[i]    = _AroePlusImplicit[i] + _AroeMinusImplicit[i];
+			_absAroeImplicit[i] = _AroePlusImplicit[i] - _AroeMinusImplicit[i];
 		}
 	}
 }
@@ -2778,8 +2795,8 @@ void DriftModel::getDensityDerivatives(double concentration, double pression, do
 				+(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(e_l-q_l))
 		);
 		_drhoE_sur_dT=rho*(cv_v*concentration + cv_l*(1-concentration))
-									-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
-											+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
+											-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
+													+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
 	}
 	else if(dynamic_cast<StiffenedGasDellacherie*>(_fluides[0])!=NULL
 			&& dynamic_cast<StiffenedGasDellacherie*>(_fluides[1])!=NULL)
