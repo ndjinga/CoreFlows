@@ -26,7 +26,7 @@ public :
 	 * \param [in] int : mesh dimension
 	 * \param [in] bool : There are two possible equations of state for the fluid
 	 *  */
-	SinglePhase(phaseType fluid, pressureEstimate pEstimate,int dim,bool _useDellacherieEOS=false);
+	SinglePhase(phaseType fluid, pressureEstimate pEstimate,int dim,bool useDellacherieEOS=false);
 	//! system initialisation
 	void initialize();
 
@@ -90,6 +90,8 @@ public :
 
 protected :
 	Field _Vitesse;
+	double  _drho_sur_dp,   _drho_sur_dT;//derivatives of the density rho wrt cv, p, T
+	double  _drhoE_sur_dp,  _drhoE_sur_dT;//derivatives of the total energy rho E wrt cv, p, T
 
 	//!calcule l'etat de Roe de deux etats
 	void convectionState( const long &i, const long &j, const bool &IsBord);
@@ -113,10 +115,18 @@ protected :
 	void setBoundaryState(string nameOfGroup, const int &j,double *normale);// delete &nf Kieu
 	//!Adds the contribution of diffusion to the RHS
 	void addDiffusionToSecondMember(const int &i,const int &j,bool isBord);
+	//!Computation of the Roe matrix
+	void RoeMatrixConservativeVariables(double u_n, double total_enthalpy,Vector velocity, double k, double K);
+	void RoeMatrixPrimitiveVariables( double rho, double u_n, double H,Vector velocity);
+	//!Computation of the staggered Roe upwinding matrix in conservative variables
+	void staggeredRoeUpwindingMatrixConservativeVariables(  double u_n, double total_enthalpy, Vector velocity, double k, double K);
+	//!Computation of the staggered Roe upwinding matrix in primitive variables
+	void staggeredRoeUpwindingMatrixPrimitiveVariables(double density, double u_n,double total_enthalpy, Vector velocity);
+	/**** staggered VFFC scheme has some specific features (no need for Roe matrix), hence some specific functions ******/
 	//!Computes the interfacial flux for the VFFC formulation of the staggered upwinding
 	Vector staggeredVFFCFlux();
 	//!Computes the matrices A^+ and A^- for the VFFC formulation of the staggered upwinding
-	void staggeredVFFCMatrices(double u_n);
+	void staggeredVFFCMatricesConservativeVariables(double u_n);
 	//!Computes the matrices A^+ and A^- for the VFFC formulation of the staggered upwinding using Primitive Variables
 	void staggeredVFFCMatricesPrimitiveVariables(double u_n);
 	//!Compute the corrected interfacial state for lowMach, pressureCorrection and staggered versions of the VFRoe formulation
@@ -129,6 +139,13 @@ protected :
 	void consToPrim(const double *Ucons, double* Vprim,double porosity=1);
 	void primToCons(const double *V, const int &i, double *U, const int &j);
 	void primToConsJacobianMatrix(double *V);
+	/** \fn getDensityDerivatives
+	 * \brief Computes the partial derivatives of rho, and rho E with regard to the primitive variables  p and  T
+	 * @param pressure
+	 * @param temperature
+	 * @param square of the velocity vector
+	*/
+	void getDensityDerivatives( double pressure, double temperature, double v2);
 
 };
 #endif /* SINGLEPHASE_HXX_*/

@@ -386,13 +386,13 @@ void IsothermalTwoFluid::convectionMatrices()
 	/******* Construction des matrices de decentrement *****/
 	if(_spaceScheme == centered){
 		if(_entropicCorrection)
-			throw CdmathException("IsothermalTwoFluid::roeMatrices: entropic scheme not available for centered scheme");
+			throw CdmathException("IsothermalTwoFluid::convectionMatrices: entropic scheme not available for centered scheme");
 		for(int i=0; i<_nVar*_nVar;i++)
 			_absAroe[i]=0;
 	}
 	if( _spaceScheme ==staggered){
 		if(_entropicCorrection)//To do: study entropic correction for staggered
-			throw CdmathException("IsothermalTwoFluid::roeMatrices: entropic scheme not yet available for staggered scheme");
+			throw CdmathException("IsothermalTwoFluid::convectionMatrices: entropic scheme not yet available for staggered scheme");
 		/******** Construction du decentrement du type decale *********/
 		//lignes de masse
 		for(int i=0; i<_nVar*_nVar;i++)
@@ -519,13 +519,19 @@ void IsothermalTwoFluid::convectionMatrices()
 		}
 	}
 	else
-		throw CdmathException("IsothermalTwoFluid::roeMatrices: well balanced option not treated");
+		throw CdmathException("IsothermalTwoFluid::convectionMatrices: well balanced option not treated");
 
 	for(int i=0; i<_nVar*_nVar;i++)
 	{
 		_AroeMinus[i] = (_Aroe[i]-_absAroe[i])/2;
 		_AroePlus[i]  = (_Aroe[i]+_absAroe[i])/2;
 	}
+	if(_timeScheme==Implicit && _usePrimitiveVarsInNewton)//Implicitation using primitive variables
+		for(int i=0; i<_nVar*_nVar;i++)
+			_AroeMinusImplicit[i] = (_AroeImplicit[i]-_absAroeImplicit[i])/2;
+	else
+		for(int i=0; i<_nVar*_nVar;i++)
+			_AroeMinusImplicit[i] = _AroeMinus[i];
 
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{

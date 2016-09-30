@@ -79,7 +79,6 @@ bool SinglePhase_2DSphericalExplosion_unstructured()
 
 	// evolution
 	myProblem.initialize();
-	cout<<"Running "+fileName <<endl;
 
 	bool ok = myProblem.run();
 	if (ok)

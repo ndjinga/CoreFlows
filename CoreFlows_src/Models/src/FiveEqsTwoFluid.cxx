@@ -891,12 +891,12 @@ void FiveEqsTwoFluid::convectionMatrices()
 			&LDVR, WORK,&LWORK,
 			&info);
 	if(info <0){
-		cout<<"FiveEqsTwoFluid::roeMatrices: error dgeev_ : argument "<<-info<<" invalid"<<endl;
-		throw CdmathException("FiveEqsTwoFluid::roeMatrices: dgeev_ unsuccessful computation of the eigenvalues ");
+		cout<<"FiveEqsTwoFluid::convectionMatrices: error dgeev_ : argument "<<-info<<" invalid"<<endl;
+		throw CdmathException("FiveEqsTwoFluid::convectionMatrices: dgeev_ unsuccessful computation of the eigenvalues ");
 	}
 	else if(info <0)
 	{
-		cout<<"Warning FiveEqsTwoFluid::roeMatrices: dgeev_ did not compute all the eigenvalues, trying Rusanov scheme "<<endl;
+		cout<<"Warning FiveEqsTwoFluid::convectionMatrices: dgeev_ did not compute all the eigenvalues, trying Rusanov scheme "<<endl;
 		cout<<"Converged eigenvalues are ";
 		for(int i=info; i<_nVar; i++)
 			cout<<"("<< egvaReal[i]<<","<< egvaImag[i]<<"), ";
@@ -982,7 +982,7 @@ void FiveEqsTwoFluid::convectionMatrices()
 	if(_spaceScheme == centered )
 	{
 		if(_entropicCorrection)
-			throw CdmathException("FiveEqsTwoFluid::roeMatrices: entropic scheme not available for centered scheme");
+			throw CdmathException("FiveEqsTwoFluid::convectionMatrices: entropic scheme not available for centered scheme");
 		for(int i=0; i<_nVar*_nVar;i++)
 			_absAroe[i]=0;
 		//  if(alpha<_precision || alpha>1-_precision)//rusanov
@@ -991,7 +991,7 @@ void FiveEqsTwoFluid::convectionMatrices()
 	}
 	if( _spaceScheme ==staggered){//To do: study entropic correction for staggered
 		if(_entropicCorrection)//To do: study entropic correction for staggered
-			throw CdmathException("FiveEqsTwoFluid::roeMatrices: entropic scheme not yet available for staggered scheme");
+			throw CdmathException("FiveEqsTwoFluid::convectionMatrices: entropic scheme not yet available for staggered scheme");
 		/******** Construction de la matrice de decentrement staggered *********/
 		/***** Compute eta_n **************/
 		eta_n = 0.;
@@ -1196,13 +1196,19 @@ void FiveEqsTwoFluid::convectionMatrices()
 		//_signAroe[_nVar*(_nVar-1)+_nVar-1] = signu;
 	}
 	else
-		throw CdmathException("FiveEqsTwoFluid::roeMatrices: well balanced option not treated");
+		throw CdmathException("FiveEqsTwoFluid::convectionMatrices: well balanced option not treated");
 
 	for(int i=0; i<_nVar*_nVar;i++)
 	{
 		_AroeMinus[i] = (_Aroe[i]-_absAroe[i])/2;
 		_AroePlus[i]  = (_Aroe[i]+_absAroe[i])/2;
 	}
+	if(_timeScheme==Implicit && _usePrimitiveVarsInNewton)//Implicitation using primitive variables
+		for(int i=0; i<_nVar*_nVar;i++)
+			_AroeMinusImplicit[i] = (_AroeImplicit[i]-_absAroeImplicit[i])/2;
+	else
+		for(int i=0; i<_nVar*_nVar;i++)
+			_AroeMinusImplicit[i] = _AroeMinus[i];
 
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{

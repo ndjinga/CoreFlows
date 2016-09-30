@@ -11,65 +11,60 @@ using namespace std;
 
 int main()
 {
-	//setting mesh and groups
-	cout << "Building a regular grid " << endl;
+	//Preprocessing: mesh and group creation
+	cout << "Building cartesian mesh" << endl;
 	double xinf=0.0;
-	double xsup=4.2;
-	int nx=2;//50;
+	double xsup=1.0;
+	int nx=2;
 	Mesh M(xinf,xsup,nx);
 	double eps=1.E-8;
-	M.setGroupAtPlan(xsup,0,eps,"Outlet");
-	M.setGroupAtPlan(xinf,0,eps,"Inlet");
+	M.setGroupAtPlan(xsup,0,eps,"Neumann");
+	M.setGroupAtPlan(xinf,0,eps,"Neumann");
 	int spaceDim = M.getSpaceDimension();
 
-	// setting boundary conditions
-	double inletConc=0;
-	double inletVelocityX=1;
-	double inletTemperature=565;
-	double outletPressure=155e5;
-
-	// setting physical parameters
-	double heatPower=1e8;
+	// set the limit field for each boundary
+	LimitField limitNeumann;
+	limitNeumann.bcType=Neumann;
+	map<string, LimitField> boundaryFields;
+	boundaryFields["Neumann"] = limitNeumann;
 
 	DriftModel  myProblem(around155bars600K,spaceDim);
 	int nbPhase = myProblem.getNumberOfPhases();
 	int nVar = myProblem.getNumberOfVariables();
+	Field VV("Primitive", CELLS, M, nVar);//3+spaceDim*nbPhase
 
 	// Prepare for the initial condition
-	Vector VV_Constant(nVar);
-	// constant vector
-	VV_Constant(0) = 0.;
-	VV_Constant(1) = 155e5;
-	for (int idim=0; idim<spaceDim;idim++)
-		VV_Constant(2+idim) = 1;
-	VV_Constant(nVar-1) = 565;
+	Vector VV_Left(nVar),VV_Right(nVar);
+	double discontinuity = (xinf+xsup)/2.;
+	VV_Left(0) = 0.5; VV_Right(0) = 0.2;
+	VV_Left(1) = 155e5; VV_Right(1) = 155e5;
+	for (int idim=0; idim<spaceDim;idim++){
+		VV_Left(2+idim) = 1;VV_Right(2+idim) = 1;
+	}
+	VV_Left(2+spaceDim) = 573;
+	VV_Right(2+spaceDim) = 618;
 
 	//Initial field creation
-	cout << "Setting initial data " << endl;
-	myProblem.setInitialFieldConstant(M,VV_Constant);
+	cout << "Building initial data" << endl;
+	myProblem.setInitialFieldStepFunction(M,VV_Left,VV_Right,discontinuity);
 
-	//set the boundary conditions
-	myProblem.setInletBoundaryCondition("Inlet",inletTemperature,inletConc,inletVelocityX);
-	myProblem.setOutletBoundaryCondition("Outlet", outletPressure);
-
-	// physical parameters
-	myProblem.setHeatSource(heatPower);
-
+	//set the boundary fields
+	myProblem.setBoundaryFields(boundaryFields);
 
 	// set the numerical method
 	myProblem.setNumericalScheme(staggered, Implicit);
 	myProblem.setWellBalancedCorrection(true);
 	myProblem.setNonLinearFormulation(VFFC);
 
-	// name the result file
-	string fileName = "Driftmodel1DBoilingChannel";
+	// name file save
+	string fileName = "RiemannProblem";
 
-	// setting numerical parameters
+	//numerical parameters
 	unsigned MaxNbOfTimeStep =1 ;
 	int freqSave = 1;
-	double cfl = 1;
+	double cfl = 0.95;
 	double maxTime = 1;
-	double precision = 1e-7;
+	double precision = 1e-6;
 
 	myProblem.setCFL(cfl);
 	myProblem.setPrecision(precision);
@@ -77,11 +72,11 @@ int main()
 	myProblem.setTimeMax(maxTime);
 	myProblem.setFreqSave(freqSave);
 	myProblem.setFileName(fileName);
-	myProblem.saveVoidFraction(true);
-	myProblem.saveEnthalpy(true);
-	myProblem.displayConditionNumber();
-	myProblem.usePrimitiveVarsInNewton(true);
 	myProblem.setNewtonSolver(precision,1);
+
+	// set display option to monitor the calculation
+	//myProblem.setVerbose( true);
+	myProblem.saveConservativeField(true);
 
 	// evolution
 	myProblem.initialize();

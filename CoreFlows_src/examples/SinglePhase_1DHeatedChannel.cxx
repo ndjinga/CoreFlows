@@ -73,7 +73,6 @@ bool SinglePhase_1DHeatedChannel()
 
 	// evolution
 	myProblem.initialize();
-	cout<<"Running "+fileName <<endl;
 
 	ok = myProblem.run();
 	if (ok)

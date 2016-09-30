@@ -76,7 +76,6 @@ bool SinglePhase_1DPorosityJump()
 
 	// evolution
 	myProblem.initialize();
-	cout<<"Running "+fileName <<endl;
 
 	ok = myProblem.run();
 	if (ok)

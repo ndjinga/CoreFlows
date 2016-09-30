@@ -97,7 +97,6 @@ bool FiveEqsTwoFluid_2DInclinedBoilingChannel()
 
 	// evolution
 	myProblem.initialize();
-	cout<<"Running "+fileName <<endl;
 
 	bool ok = myProblem.run();
 	if (ok)

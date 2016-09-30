@@ -84,7 +84,6 @@ int SinglePhase_2DHeatedChannelInclined()
 
 	// evolution
 	myProblem.initialize();
-	cout<<"Running "+fileName <<endl;
 
 	ok = myProblem.run();
 	if (ok)

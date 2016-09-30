@@ -69,7 +69,6 @@ bool FiveEqsTwoFluid_1DBoilingChannel()
 
 	// evolution
 	myProblem.initialize();
-	cout<<"Running "+fileName <<endl;
 
 	bool ok = myProblem.run();
 	if (ok)

@@ -78,7 +78,6 @@ bool FiveEqsTwoFluid_2DInclinedSedimentation()
 
 	// evolution
 	myProblem.initialize();
-	cout<<"Running "+fileName <<endl;
 
 	bool ok = myProblem.run();
 	if (ok)

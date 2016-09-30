@@ -25,7 +25,7 @@ public :
 	 * \param [in] int : mesh dimension
 	 * \param [in] bool : There are two possible equations of state for each phase
 	 *  */
-	DriftModel( pressureEstimate pEstimate, int dim, bool _useDellacherieEOS=true);
+	DriftModel( pressureEstimate pEstimate, int dim, bool useDellacherieEOS=true);
 	//! system initialisation
 	void initialize();
 
@@ -107,10 +107,10 @@ public :
 	bool iterateTimeStep(bool &ok);
 
 protected :
-	double _khi, _ksi, _kappa;//mixture pressure derivatives with regard to rhom, m_c and rhom_em
+	double _khi, _ksi, _kappa;//mixture pressure derivatives with regard to rhom, cm and rhom_em
 	double _drho_sur_dcv,   _drho_sur_dp,   _drho_sur_dT;//derivatives of the total density rho wrt cv, p, T
-	double _drhocv_sur_dcv, _drhocv_sur_dp, _drhocv_sur_dT;//derivatives of the gas partial density rho wrt cv, p, T
-	double _drhoE_sur_dcv,  _drhoE_sur_dp,  _drhoE_sur_dT;//derivatives of the total energy rho wrt cv, p, T
+	double _drhocv_sur_dcv, _drhocv_sur_dp, _drhocv_sur_dT;//derivatives of the gas partial density rho cv wrt cv, p, T
+	double _drhoE_sur_dcv,  _drhoE_sur_dp,  _drhoE_sur_dT;//derivatives of the total energy rho E wrt cv, p, T
 
 	Field _Vitesse, _VoidFraction, _Enthalpy;
 	bool _saveVoidFraction,_saveEnthalpy;

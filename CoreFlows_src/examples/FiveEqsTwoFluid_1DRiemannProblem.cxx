@@ -79,7 +79,6 @@ bool FiveEqsTwoFluid_1DRiemannProblem()
 
 	// evolution
 	myProblem.initialize();
-	cout<<"Running "+fileName <<endl;
 
 	bool ok = myProblem.run();
 	if (ok)

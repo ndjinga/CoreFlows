@@ -59,7 +59,6 @@ bool IsothermalTwoFluid_1DSedimentation()
 
 	// evolution
 	myProblem.initialize();
-	cout<<"Running "+fileName <<endl;
 
 	bool ok = myProblem.run();
 	if (ok)

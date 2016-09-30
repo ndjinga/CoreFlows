@@ -68,7 +68,6 @@ bool SinglePhase_1DDepressurisation()
 
 	// evolution
 	myProblem.initialize();
-	cout<<"Running "+fileName <<endl;
 
 	ok = myProblem.run();
 	if (ok)

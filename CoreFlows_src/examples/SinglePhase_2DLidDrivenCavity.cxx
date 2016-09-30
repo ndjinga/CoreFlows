@@ -77,7 +77,6 @@ bool SinglePhase_2DLidDrivenCavity()
 
 	// evolution
 	myProblem.initialize();
-	cout<<"Running "+fileName <<endl;
 
 	bool ok = myProblem.run();
 	if (ok)
