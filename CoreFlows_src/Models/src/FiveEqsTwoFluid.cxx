@@ -1399,7 +1399,7 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 			}
 		}
 		_externalStates[_nVar-1] = _externalStates[0]*(_fluides[0]->getInternalEnergy(_limitField[nameOfGroup].T,rho_v) + v1_2/2)
-																																							+_externalStates[1+_Ndim]*(_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + v2_2/2);
+																																											+_externalStates[1+_Ndim]*(_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + v2_2/2);
 		VecAssemblyBegin(_Uextdiff);
 		VecSetValues(_Uextdiff, _nVar, _idm, _externalStates, INSERT_VALUES);
 		VecAssemblyEnd(_Uextdiff);
@@ -1460,7 +1460,7 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 			_Vj[2+_Ndim+idim] = v2[idim];
 		}
 		_externalStates[_nVar-1] = _externalStates[0]      *(_fluides[0]->getInternalEnergy(T,rho_v) + v1_2/2)
-    																																			+_externalStates[1+_Ndim]*(_fluides[1]->getInternalEnergy(T,rho_l) + v2_2/2);
+    																																							+_externalStates[1+_Ndim]*(_fluides[1]->getInternalEnergy(T,rho_l) + v2_2/2);
 
 		// _Vj external primitives
 		_Vj[0] = alpha;
@@ -1485,9 +1485,20 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
 
+		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
+		Cell Cj=_mesh.getCell(j);
+		double hydroPress=Cj.x()*_gravity3d[0];
+		if(_Ndim>1){
+			hydroPress+=Cj.y()*_gravity3d[1];
+			if(_Ndim>2)
+				hydroPress+=Cj.z()*_gravity3d[2];
+		}
+		hydroPress*=_externalStates[0]+_externalStates[_Ndim];//multiplication by rho the total density
+
+		//Building the external state
 		VecGetValues(_primitiveVars, _nVar, _idm,_Vj);
 		double alpha=_limitField[nameOfGroup].alpha;
-		double pression=_limitField[nameOfGroup].p;
+		double pression=_limitField[nameOfGroup].p+hydroPress;
 		double T=_limitField[nameOfGroup].T;
 		double rho_v=_fluides[0]->getDensity(pression,T);
 		double rho_l=_fluides[1]->getDensity(pression,T);
@@ -1501,7 +1512,7 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 			v2_2+=_Vj[2+_Ndim+idim]*_Vj[2+_Ndim+idim];
 		}
 		_externalStates[_nVar-1]=    alpha *rho_v*(_fluides[0]->getInternalEnergy(T,rho_v)+v1_2/2)
-				                																														+(1-alpha)*rho_l*(_fluides[1]->getInternalEnergy(T,rho_l)+v2_2/2);
+				                																																		+(1-alpha)*rho_l*(_fluides[1]->getInternalEnergy(T,rho_l)+v2_2/2);
 
 		// _Vj external primitives
 		_Vj[0] = alpha;
@@ -2184,20 +2195,18 @@ void FiveEqsTwoFluid::testConservation()
 		SUM = 0;
 		DELTA = 0;
 		I =  i;
-		for(int j=1; j<=_Nmailles; j++)
+		for(int j=0; j<_Nmailles; j++)
 		{
 			VecGetValues(_old, 1, &I, &x);//on recupere la valeur du champ
-			SUM += x;
+			SUM += x*_mesh.getCell(j).getMeasure();
 			VecGetValues(_newtonVariation, 1, &I, &x);//on recupere la variation du champ
-			DELTA += x;
+			DELTA += x*_mesh.getCell(j).getMeasure();
 			I += _nVar;
 		}
-		{
-			if(fabs(SUM)>_precision)
-				cout << SUM << ", variation relative: " << fabs(DELTA /SUM)  << endl;
-			else
-				cout << " a une somme nulle,  variation absolue: " << fabs(DELTA) << endl;
-		}
+		if(fabs(SUM)>_precision)
+			cout << SUM << ", variation relative: " << fabs(DELTA /SUM)  << endl;
+		else
+			cout << " a une somme nulle,  variation absolue: " << fabs(DELTA) << endl;
 	}
 }
 

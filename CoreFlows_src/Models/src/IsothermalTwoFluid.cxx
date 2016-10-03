@@ -673,12 +673,23 @@ void IsothermalTwoFluid::setBoundaryState(string nameOfGroup, const int &j,doubl
 		VecAssemblyEnd(_Uextdiff);
 	}
 	else if (_limitField[nameOfGroup].bcType==InletPressure){
+		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
+		Cell Cj=_mesh.getCell(j);
+		double hydroPress=Cj.x()*_gravity3d[0];
+		if(_Ndim>1){
+			hydroPress+=Cj.y()*_gravity3d[1];
+			if(_Ndim>2)
+				hydroPress+=Cj.z()*_gravity3d[2];
+		}
+		hydroPress*=_externalStates[0]+_externalStates[_Ndim];//multiplication by rho the total density
+
+		//Building the external state
 		_idm[0] = _nVar*j;
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
 
 		VecGetValues(_primitiveVars, _nVar, _idm, _Vj);
-		double pression=_limitField[nameOfGroup].p;
+		double pression=_limitField[nameOfGroup].p+hydroPress;
 		double alpha=_limitField[nameOfGroup].alpha;
 		double T=_Temperature;
 		double rho_v=_fluides[0]->getDensity(pression,T);
@@ -1577,20 +1588,18 @@ void IsothermalTwoFluid::testConservation()
 		SUM = 0;
 		DELTA = 0;
 		I = i;
-		for(int j=1; j<=_Nmailles; j++)
+		for(int j=0; j<_Nmailles; j++)
 		{
 			VecGetValues(_old, 1, &I, &x);//on recupere la valeur du champ
-			SUM += x;
+			SUM += x*_mesh.getCell(j).getMeasure();
 			VecGetValues(_newtonVariation, 1, &I, &x);//on recupere la variation du champ
-			DELTA += x;
+			DELTA += x*_mesh.getCell(j).getMeasure();
 			I += _nVar;
 		}
-		{
-			if(fabs(SUM)>_precision)
-				cout << SUM<< ", variation relative: " << fabs(DELTA /SUM)  << endl;
-			else
-				cout << " a une somme nulle,  variation absolue: " << fabs(DELTA) << endl;
-		}
+		if(fabs(SUM)>_precision)
+			cout << SUM<< ", variation relative: " << fabs(DELTA /SUM)  << endl;
+		else
+			cout << " a une somme nulle,  variation absolue: " << fabs(DELTA) << endl;
 	}
 }
 

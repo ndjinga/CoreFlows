@@ -540,14 +540,25 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 	}
 	else if (_limitField[nameOfGroup].bcType==InletPressure){
 
+		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
+		Cell Cj=_mesh.getCell(j);
+		double hydroPress=Cj.x()*_gravity3d[0];
+		if(_Ndim>1){
+			hydroPress+=Cj.y()*_gravity3d[1];
+			if(_Ndim>2)
+				hydroPress+=Cj.z()*_gravity3d[2];
+		}
+		hydroPress*=_externalStates[0];//multiplication by rho the total density
+
+		//Building the external state
 		VecGetValues(_primitiveVars, _nVar, _idm, _externalStates);
 		if(q_n<=0){
-			_externalStates[0]=_fluides[0]->getDensity(_limitField[nameOfGroup].p,_limitField[nameOfGroup].T);
+			_externalStates[0]=_fluides[0]->getDensity(_limitField[nameOfGroup].p+hydroPress,_limitField[nameOfGroup].T);
 		}
 		else{
 			if(_nbTimeStep%_freqSave ==0)
 				cout<< "Warning : fluid going out through inletPressure boundary "<<nameOfGroup<<". Applying Neumann boundary condition for velocity and temperature"<<endl;
-			_externalStates[0]=_fluides[0]->getDensity(_limitField[nameOfGroup].p, _externalStates[_nVar-1]);
+			_externalStates[0]=_fluides[0]->getDensity(_limitField[nameOfGroup].p+hydroPress, _externalStates[_nVar-1]);
 		}
 
 		for(k=0; k<_Ndim; k++)
@@ -2258,23 +2269,21 @@ void SinglePhase::testConservation()
 		SUM = 0;
 		I =  i;
 		DELTA = 0;
-		for(int j=1; j<=_Nmailles; j++)
+		for(int j=0; j<_Nmailles; j++)
 		{
 			if(!_usePrimitiveVarsInNewton)
 				VecGetValues(_conservativeVars, 1, &I, &x);//on recupere la valeur du champ
 			else
 				VecGetValues(_primitiveVars, 1, &I, &x);//on recupere la valeur du champ
-			SUM += x*_mesh.getCell(j-1).getMeasure();
+			SUM += x*_mesh.getCell(j).getMeasure();
 			VecGetValues(_newtonVariation, 1, &I, &x);//on recupere la variation du champ
-			DELTA += x*_mesh.getCell(j-1).getMeasure();
+			DELTA += x*_mesh.getCell(j).getMeasure();
 			I += _nVar;
 		}
-		{
-			if(fabs(SUM)>_precision)
-				cout << SUM << ", variation relative: " << fabs(DELTA /SUM)  << endl;
-			else
-				cout << " a une somme quasi nulle,  variation absolue: " << fabs(DELTA) << endl;
-		}
+		if(fabs(SUM)>_precision)
+			cout << SUM << ", variation relative: " << fabs(DELTA /SUM)  << endl;
+		else
+			cout << " a une somme quasi nulle,  variation absolue: " << fabs(DELTA) << endl;
 	}
 }
 

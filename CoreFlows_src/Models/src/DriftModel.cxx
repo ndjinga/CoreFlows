@@ -578,7 +578,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 			}
 		}
 		_externalStates[_nVar-1] = _externalStates[1]*_fluides[0]->getInternalEnergy(_limitField[nameOfGroup].T,rho_v)
-																																																													 +(_externalStates[0]-_externalStates[1])*_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + _externalStates[0]*v2/2;
+																																																															 +(_externalStates[0]-_externalStates[1])*_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + _externalStates[0]*v2/2;
 		_idm[0] = 0;
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
@@ -660,7 +660,18 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 			Tm=_Vj[_nVar-1];
 		}
 
-		double pression=_limitField[nameOfGroup].p;
+		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
+		Cell Cj=_mesh.getCell(j);
+		double hydroPress=Cj.x()*_gravity3d[0];
+		if(_Ndim>1){
+			hydroPress+=Cj.y()*_gravity3d[1];
+			if(_Ndim>2)
+				hydroPress+=Cj.z()*_gravity3d[2];
+		}
+		hydroPress*=_externalStates[0];//multiplication by rho
+
+		//Building the external state
+		double pression=_limitField[nameOfGroup].p + hydroPress;
 		double rho_v=_fluides[0]->getDensity(pression, Tm);
 		double rho_l=_fluides[1]->getDensity(pression, Tm);
 		if(fabs(concentration*rho_l+(1-concentration)*rho_v)<_precision)
@@ -1603,8 +1614,8 @@ void DriftModel::primToConsJacobianMatrix(double *V)
 		for(int idim=0;idim<_Ndim;idim++)
 			_primToConsJacoMat[(_nVar-1)*_nVar+2+idim]=rho*vitesse[idim];
 		_primToConsJacoMat[(_nVar-1)*_nVar+_nVar-1]=rho*(cv_v*concentration + cv_l*(1-concentration))
-																			-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
-																					+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
+																					-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
+																							+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
 	}
 	else if(dynamic_cast<StiffenedGasDellacherie*>(_fluides[0])!=NULL
 			&& dynamic_cast<StiffenedGasDellacherie*>(_fluides[1])!=NULL)
@@ -1662,8 +1673,8 @@ void DriftModel::primToConsJacobianMatrix(double *V)
 		for(int idim=0;idim<_Ndim;idim++)
 			_primToConsJacoMat[(_nVar-1)*_nVar+2+idim]=rho*vitesse[idim];
 		_primToConsJacoMat[(_nVar-1)*_nVar+_nVar-1]=rho*(cp_v*concentration + cp_l*(1-concentration))
-																			-rho*rho*H*(cp_v*   concentration /(rho_v*(h_v-q_v))
-																					+cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
+																					-rho*rho*H*(cp_v*   concentration /(rho_v*(h_v-q_v))
+																							+cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
 	}
 	else
 		throw CdmathException("SinglePhase::primToConsJacobianMatrix: eos should be StiffenedGas or StiffenedGasDellacherie");
@@ -1813,7 +1824,7 @@ void DriftModel::getMixturePressureAndTemperature(double c_v, double rhom, doubl
 		StiffenedGas* fluide1=dynamic_cast<StiffenedGas*>(_fluides[1]);
 
 		temperature= (rhom_em-m_v*fluide0->getInternalEnergy(0)-m_l*fluide1->getInternalEnergy(0))
-																																																											/(m_v*fluide0->constante("cv")+m_l*fluide1->constante("cv"));
+																																																													/(m_v*fluide0->constante("cv")+m_l*fluide1->constante("cv"));
 
 		double e_v=fluide0->getInternalEnergy(temperature);
 		double e_l=fluide1->getInternalEnergy(temperature);
@@ -2807,8 +2818,8 @@ void DriftModel::getDensityDerivatives(double concentration, double pression, do
 				+(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(e_l-q_l))
 		);
 		_drhoE_sur_dT=rho*(cv_v*concentration + cv_l*(1-concentration))
-											-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
-													+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
+													-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
+															+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
 	}
 	else if(dynamic_cast<StiffenedGasDellacherie*>(_fluides[0])!=NULL
 			&& dynamic_cast<StiffenedGasDellacherie*>(_fluides[1])!=NULL)
@@ -3113,41 +3124,40 @@ void DriftModel::save(){
 void DriftModel::testConservation()
 {
 	double SUM, DELTA, x;
-	int I,compponentl;
-	for(int l=0; l<_nVar; l++)
+	int I;
+	for(int i=0; i<_nVar; i++)
 	{
 		{
-			if(l == 0)
+			if(i == 0)
 				cout << "Masse totale (kg): ";
-			else if(l == 1)
+			else if(i == 1)
 				cout << "Masse partielle 1 (kg): ";
 			else
 			{
-				if(l == _nVar-1)
+				if(i == _nVar-1)
 					cout << "Energie totale (J): ";
 				else
-					cout << "Quantite de mouvement direction "<<l-1<<" (kg.m.s^-1): ";
+					cout << "Quantite de mouvement direction "<<i-1<<" (kg.m.s^-1): ";
 			}
 		}
 		SUM = 0;
 		DELTA = 0;
-		for(int I=0; I<_Nmailles; I++)
+		I=i;
+		for(int j=0; j<_Nmailles; j++)
 		{
-			compponentl=I*_nVar+l;
 			if(!_usePrimitiveVarsInNewton)
-				VecGetValues(_old, 1, &compponentl, &x);//on recupere la valeur du champ
+				VecGetValues(_old, 1, &I, &x);//on recupere la valeur du champ
 			else
 				VecGetValues(_primitiveVars, 1, &I, &x);//on recupere la valeur du champ
-			SUM += x;
-			VecGetValues(_newtonVariation, 1, &compponentl, &x);//on recupere la variation du champ
-			DELTA += x;
+			SUM += x*_mesh.getCell(j).getMeasure();
+			VecGetValues(_newtonVariation, 1, &I, &x);//on recupere la variation du champ
+			DELTA += x*_mesh.getCell(j).getMeasure();
+			I += _nVar;
 		}
-		{
-			if(fabs(SUM)>_precision)
-				cout << SUM << ", variation relative: " << fabs(DELTA /SUM)  << endl;
-			else
-				cout << " a une somme nulle,  variation absolue: " << fabs(DELTA) << endl;
-		}
+		if(fabs(SUM)>_precision)
+			cout << SUM << ", variation relative: " << fabs(DELTA /SUM)  << endl;
+		else
+			cout << " a une somme nulle,  variation absolue: " << fabs(DELTA) << endl;
 	}
 }
 
