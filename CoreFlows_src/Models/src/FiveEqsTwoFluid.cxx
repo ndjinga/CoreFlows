@@ -654,6 +654,10 @@ void FiveEqsTwoFluid::convectionMatrices()
 {
 	//entree: URoe = alpha, p, u1, u2, T + ajout dpi
 	//sortie: matrices Roe+  et Roe- +Roe si schéma centre
+
+	if(_timeScheme==Implicit && _usePrimitiveVarsInNewton)
+		throw CdmathException("Implicitation with primitive variables not yet available for FiveEqsTwoFluid model");
+
 	/*Definitions */
 	complex< double > tmp;
 	double  u_r2 = 0, u1_n=0, u2_n=0;
@@ -1331,14 +1335,14 @@ void FiveEqsTwoFluid::jacobianDiff(const int &j, string nameOfGroup)
 void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *normale){
 	//To do controle signe des vitesses pour CL entree/sortie
 	int k;
-	double v1_2=0, v2_2=0, q1_n=0, q2_n=0, u1_n=0, u2_n=0;//quantités de mouvement et vitesses normales à la paroi;
+	double v1_2=0, v2_2=0, q1_n=0, q2_n=0, u1_n=0, u2_n=0;//quantités de mouvement et vitesses normales à la face limite;
 	double v1[_Ndim], v2[_Ndim];
 
 	_idm[0] = _nVar*j;
 	for(k=1; k<_nVar; k++)
 		_idm[k] = _idm[k-1] + 1;
 
-	VecGetValues(_conservativeVars, _nVar, _idm, _externalStates);//variables conservatives de la cellule interne
+	VecGetValues(_conservativeVars, _nVar, _idm, _externalStates);//On initialise l'état fantôme avec l'état interne
 
 	for(k=0; k<_Ndim; k++){
 		q1_n+=_externalStates[(k+1)]*normale[k];
@@ -1349,7 +1353,7 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
-		cout << "Boundary conditions for group "<< nameOfGroup << " face unit normal vector "<<endl;
+		cout << "Boundary conditions for group "<< nameOfGroup<< ", inner cell j= "<<j << " face unit normal vector "<<endl;
 		for(k=0; k<_Ndim; k++){
 			cout<<normale[k]<<", ";
 		}
@@ -1358,6 +1362,7 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 
 	if (_limitField[nameOfGroup].bcType==Wall){
 
+		//Pour la convection, inversion du sens des vitesses
 		VecGetValues(_primitiveVars, _nVar, _idm, _Vj);
 		for(k=0; k<_Ndim; k++){
 			_externalStates[(k+1)]-= 2*q1_n*normale[k];
@@ -1376,6 +1381,7 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 		VecAssemblyEnd(_Uext);
 		VecAssemblyEnd(_Vext);
 
+		//Pour la diffusion, paroi à vitesses et temperature imposees
 		double pression=_Vj[1];//pressure inside
 		double T=_Vj[_nVar-1];//temperature outside
 		double rho_v=_fluides[0]->getDensity(pression,T);
@@ -1520,9 +1526,20 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
 
+		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
+		Cell Cj=_mesh.getCell(j);
+		double hydroPress=Cj.x()*_gravity3d[0];
+		if(_Ndim>1){
+			hydroPress+=Cj.y()*_gravity3d[1];
+			if(_Ndim>2)
+				hydroPress+=Cj.z()*_gravity3d[2];
+		}
+		hydroPress*=_externalStates[0]+_externalStates[_Ndim];//multiplication by rho the total density
+
+		//Building the external state
 		VecGetValues(_primitiveVars, _nVar, _idm,_Vj);
 		double pression_int=_Vj[1];
-		double pression_ext=_limitField[nameOfGroup].p;
+		double pression_ext=_limitField[nameOfGroup].p+hydroPress;
 		double T=_Vj[_nVar-1];
 		double rho_v_int=_fluides[0]->getDensity(pression_int,T);
 		double rho_l_int=_fluides[1]->getDensity(pression_int,T);

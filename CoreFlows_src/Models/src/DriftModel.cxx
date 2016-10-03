@@ -515,17 +515,17 @@ void DriftModel::diffusionStateAndMatrices(const long &i,const long &j, const bo
 
 void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *normale){
 	int k;
-	double v2=0, q_n=0;//quantité de mouvement normale à la paroi
+	double v2=0, q_n=0;//q_n=quantité de mouvement normale à la face interne
 	_idm[0] = _nVar*j;
 	for(k=1; k<_nVar; k++)
 		_idm[k] = _idm[k-1] + 1;
-	VecGetValues(_conservativeVars, _nVar, _idm, _externalStates);//On recupere le champ conservatif de la cellule interne
+	VecGetValues(_conservativeVars, _nVar, _idm, _externalStates);//On initialise l'état fantôme avec l'état interne
 	for(k=0; k<_Ndim; k++)
 		q_n+=_externalStates[(k+2)]*normale[k];
 
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
-		cout << "setBoundaryState for group "<< nameOfGroup << " face unit normal vector "<<endl;
+		cout << "setBoundaryState for group "<< nameOfGroup<< ", inner cell j= "<<j << " face unit normal vector "<<endl;
 		for(k=0; k<_Ndim; k++){
 			cout<<normale[k]<<", ";
 		}
@@ -533,6 +533,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 	}
 
 	if (_limitField[nameOfGroup].bcType==Wall){
+		//Pour la convection, inversion du sens de la vitesse
 		for(k=0; k<_Ndim; k++)
 			_externalStates[(k+2)]-= 2*q_n*normale[k];
 
@@ -693,10 +694,21 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 		if(q_n<=0  &&  _nbTimeStep%_freqSave ==0)
 			cout<< "Warning : fluid going in through outlet boundary "<<nameOfGroup<<". Applying Neumann boundary condition for concentration, velocity and temperature"<<endl;
 
+		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
+		Cell Cj=_mesh.getCell(j);
+		double hydroPress=Cj.x()*_gravity3d[0];
+		if(_Ndim>1){
+			hydroPress+=Cj.y()*_gravity3d[1];
+			if(_Ndim>2)
+				hydroPress+=Cj.z()*_gravity3d[2];
+		}
+		hydroPress*=_externalStates[0];//multiplication by rho
+
+		//Building the external state
 		VecGetValues(_primitiveVars, _nVar, _idm, _Vj);
 
 		double concentration=_Vj[0];
-		double pression=_limitField[nameOfGroup].p;
+		double pression=_limitField[nameOfGroup].p+hydroPress;
 		double Tm=_Vj[_nVar-1];
 		double rho_v=_fluides[0]->getDensity(pression, Tm);
 		double rho_l=_fluides[1]->getDensity(pression, Tm);

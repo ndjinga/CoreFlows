@@ -236,6 +236,10 @@ void IsothermalTwoFluid::convectionMatrices()
 {
 	//entree: URoe = alpha, p, u1, u2 + ajout dpi pour calcul flux ultérieur
 	//sortie: matrices Roe+  et Roe- +Roe si scheme centre
+
+	if(_timeScheme==Implicit && _usePrimitiveVarsInNewton)
+		throw CdmathException("Implicitation with primitive variables not yet available for IsothermalTwoFluid model");
+
 	/*Definitions */
 	complex< double > tmp;
 	double u1_n, u1_2, u2_n, u2_2, u_r2;
@@ -572,8 +576,8 @@ void IsothermalTwoFluid::setBoundaryState(string nameOfGroup, const int &j,doubl
 	for(k=1; k<_nVar; k++)
 		_idm[k] = _idm[k-1] + 1;
 
-	VecGetValues(_conservativeVars, _nVar, _idm, _externalStates);
-	double q1_n=0, q2_n=0;//quantité de mouvement normale à la paroi
+	VecGetValues(_conservativeVars, _nVar, _idm, _externalStates);//On initialise l'état fantôme avec l'état interne
+	double q1_n=0, q2_n=0;//quantité de mouvement normale à la face limite
 	for(k=0; k<_Ndim; k++){
 		q1_n+=_externalStates[(k+1)]*normale[k];
 		q2_n+=_externalStates[(k+1+1+_Ndim)]*normale[k];
@@ -581,13 +585,15 @@ void IsothermalTwoFluid::setBoundaryState(string nameOfGroup, const int &j,doubl
 
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
-		cout << "Boundary conditions for group "<< nameOfGroup << " face unit normal vector "<<endl;
+		cout << "Boundary conditions for group "<< nameOfGroup<< ", inner cell j= "<<j << " face unit normal vector "<<endl;
 		for(k=0; k<_Ndim; k++){
 			cout<<normale[k]<<", ";
 		}
 		cout<<endl;
 	}
 	if (_limitField[nameOfGroup].bcType==Wall){
+
+		//Pour la convection, inversion du sens des vitesses
 		for(k=0; k<_Ndim; k++){
 			_externalStates[(k+1)]-= 2*q1_n*normale[k];
 			_externalStates[(k+1+1+_Ndim)]-= 2*q2_n*normale[k];
@@ -601,6 +607,7 @@ void IsothermalTwoFluid::setBoundaryState(string nameOfGroup, const int &j,doubl
 		VecSetValues(_Uext, _nVar, _idm, _externalStates, INSERT_VALUES);
 		VecAssemblyEnd(_Uext);
 
+		//Pour la diffusion, paroi à vitesses imposees
 		_externalStates[1]=_externalStates[0]*_limitField[nameOfGroup].v_x[0];
 		_externalStates[2+_Ndim]=_externalStates[1+_Ndim]*_limitField[nameOfGroup].v_x[1];
 		if(_Ndim>1)
@@ -705,9 +712,20 @@ void IsothermalTwoFluid::setBoundaryState(string nameOfGroup, const int &j,doubl
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
 
+		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
+		Cell Cj=_mesh.getCell(j);
+		double hydroPress=Cj.x()*_gravity3d[0];
+		if(_Ndim>1){
+			hydroPress+=Cj.y()*_gravity3d[1];
+			if(_Ndim>2)
+				hydroPress+=Cj.z()*_gravity3d[2];
+		}
+		hydroPress*=_externalStates[0]+_externalStates[_Ndim];//multiplication by rho the total density
+
+		//Building the external state
 		VecGetValues(_primitiveVars, _nVar, _idm,_Vj);
 		double pression_int=_Vj[1];
-		double pression_ext=_limitField[nameOfGroup].p;
+		double pression_ext=_limitField[nameOfGroup].p+hydroPress;
 		double T=_Vj[_nVar-1];
 		double rho_v_int=_fluides[0]->getDensity(pression_int,T);
 		double rho_l_int=_fluides[1]->getDensity(pression_int,T);

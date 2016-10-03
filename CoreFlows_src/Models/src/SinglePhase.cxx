@@ -430,18 +430,18 @@ void SinglePhase::diffusionStateAndMatrices(const long &i,const long &j, const b
 }
 void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *normale){
 	int k;
-	double v2=0, q_n=0;//quantité de mouvement normale à la face frontière;
+	double v2=0, q_n=0;//q_n=quantité de mouvement normale à la face frontière;
 	_idm[0] = _nVar*j;
 	for(k=1; k<_nVar; k++)
 		_idm[k] = _idm[k-1] + 1;
 
-	VecGetValues(_conservativeVars, _nVar, _idm, _externalStates);
+	VecGetValues(_conservativeVars, _nVar, _idm, _externalStates);//On initialise l'état fantôme avec l'état interne
 	for(k=0; k<_Ndim; k++)
 		q_n+=_externalStates[(k+1)]*normale[k];
 
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
-		cout << "setBoundaryState for group "<< nameOfGroup << " face unit normal vector "<<endl;
+		cout << "setBoundaryState for group "<< nameOfGroup << ", inner cell j= "<<j<< " face unit normal vector "<<endl;
 		for(k=0; k<_Ndim; k++){
 			cout<<normale[k]<<", ";
 		}
@@ -449,6 +449,7 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 	}
 
 	if (_limitField[nameOfGroup].bcType==Wall){
+		//Pour la convection, inversion du sens de la vitesse
 		for(k=0; k<_Ndim; k++)
 			_externalStates[(k+1)]-= 2*q_n*normale[k];
 
@@ -460,6 +461,7 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 		VecSetValues(_Uext, _nVar, _idm, _externalStates, INSERT_VALUES);
 		VecAssemblyEnd(_Uext);
 
+		//Pour la diffusion, paroi à vitesse et temperature imposees
 		_idm[0] = _nVar*j;
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
@@ -575,11 +577,21 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 			_idm[k] = _idm[k-1] + 1;
 		VecGetValues(_primitiveVars, _nVar, _idm, _externalStates);
 
-		_externalStates[0]=_fluides[0]->getDensity(_limitField[nameOfGroup].p, _externalStates[_nVar-1]);
+		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
+		Cell Cj=_mesh.getCell(j);
+		double hydroPress=Cj.x()*_gravity3d[0];
+		if(_Ndim>1){
+			hydroPress+=Cj.y()*_gravity3d[1];
+			if(_Ndim>2)
+				hydroPress+=Cj.z()*_gravity3d[2];
+		}
+		hydroPress*=_externalStates[0];//multiplication by rho the total density
+
+		//Building the external state
+		_externalStates[0]=_fluides[0]->getDensity(_limitField[nameOfGroup].p+hydroPress, _externalStates[_nVar-1]);
 		for(k=0; k<_Ndim; k++)
 		{
 			v2+=_externalStates[(k+1)]*_externalStates[(k+1)];
-			//mif (k==1) cout<< " vitesse sortie conv x= "<< _externalStates[1]<<endl;
 			_externalStates[(k+1)]*=_externalStates[0] ;
 		}
 		_externalStates[_nVar-1] = _externalStates[0]*(_fluides[0]->getInternalEnergy( _externalStates[_nVar-1],_externalStates[0]) + v2/2);
