@@ -2190,12 +2190,6 @@ void SinglePhase::staggeredVFFCMatricesPrimitiveVariables(double un)//vitesse no
 		}
 		else
 			throw CdmathException("SinglePhase::staggeredVFFCMatricesPrimitiveVariables: eos should be StiffenedGas or StiffenedGasDellacherie");
-
-		for(int i=0; i<_nVar*_nVar;i++)
-		{
-			_AroeImplicit[i] = (_AroeMinusImplicit[i]+_AroePlusImplicit[i])/2;
-			_absAroeImplicit[i]  = (_AroeMinusImplicit[i]-_AroePlusImplicit[i])/2;
-		}
 	}
 }
 void SinglePhase::applyVFRoeLowMachCorrections()
@@ -2319,6 +2313,12 @@ void SinglePhase::getDensityDerivatives( double pressure, double temperature, do
 	}
 	else
 		throw CdmathException("SinglePhase::staggeredVFFCMatricesPrimitiveVariables: eos should be StiffenedGas or StiffenedGasDellacherie");
+
+	if(_verbose && _nbTimeStep%_freqSave ==0)
+	{
+		cout<<"_drho_sur_dp= "<<_drho_sur_dp<<"_drho_sur_dT= "<<_drho_sur_dT<<endl;
+		cout<<"_drhoE_sur_dp= "<<_drhoE_sur_dp<<"_drhoE_sur_dT= "<<_drhoE_sur_dT<<endl;
+	}
 }
 void SinglePhase::save(){
 	string prim(_path+"/SinglePhasePrim_");///Results
@@ -2355,14 +2355,14 @@ void SinglePhase::save(){
 		system(cons_suppress.c_str());//Nettoyage des précédents calculs identiques
 
 		if(_saveConservativeField){
-			_UU.setInfoOnComponent(0,"Density (kg/m^3)");
+			_UU.setInfoOnComponent(0,"Density_(kg/m^3)");
 			_UU.setInfoOnComponent(1,"Momentum_x");// (kg/m^2/s)
 			if (_Ndim>1)
 				_UU.setInfoOnComponent(2,"Momentum_y");// (kg/m^2/s)
 			if (_Ndim>2)
 				_UU.setInfoOnComponent(3,"Momentum_z");// (kg/m^2/s)
 
-			_UU.setInfoOnComponent(_nVar-1,"Energy (J/m^3)");
+			_UU.setInfoOnComponent(_nVar-1,"Energy_(J/m^3)");
 
 			switch(_saveFormat)
 			{
@@ -2377,13 +2377,13 @@ void SinglePhase::save(){
 				break;
 			}
 		}
-		_VV.setInfoOnComponent(0,"Pressure (Pa)");
-		_VV.setInfoOnComponent(1,"Velocity_x (m/s)");
+		_VV.setInfoOnComponent(0,"Pressure_(Pa)");
+		_VV.setInfoOnComponent(1,"Velocity_x_(m/s)");
 		if (_Ndim>1)
-			_VV.setInfoOnComponent(2,"Velocity_y (m/s)");
+			_VV.setInfoOnComponent(2,"Velocity_y_(m/s)");
 		if (_Ndim>2)
-			_VV.setInfoOnComponent(3,"Velocity_z (m/s)");
-		_VV.setInfoOnComponent(_nVar-1,"Temperature (K)");
+			_VV.setInfoOnComponent(3,"Velocity_z_(m/s)");
+		_VV.setInfoOnComponent(_nVar-1,"Temperature_(K)");
 
 		switch(_saveFormat)
 		{
@@ -2440,9 +2440,9 @@ void SinglePhase::save(){
 		}
 		_Vitesse.setTime(_time,_nbTimeStep);
 		if (_nbTimeStep ==0){
-			_Vitesse.setInfoOnComponent(0,"Velocity_x (m/s)");
-			_Vitesse.setInfoOnComponent(1,"Velocity_y (m/s)");
-			_Vitesse.setInfoOnComponent(2,"Velocity_z (m/s)");
+			_Vitesse.setInfoOnComponent(0,"Velocity_x_(m/s)");
+			_Vitesse.setInfoOnComponent(1,"Velocity_y_(m/s)");
+			_Vitesse.setInfoOnComponent(2,"Velocity_z_(m/s)");
 
 			switch(_saveFormat)
 			{

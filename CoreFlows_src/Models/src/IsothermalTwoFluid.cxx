@@ -1636,19 +1636,19 @@ void IsothermalTwoFluid::save(){
 		string cons_suppress ="rm -rf "+cons+"_*";
 		system(prim_suppress.c_str());//Nettoyage des précédents calculs identiques
 		system(cons_suppress.c_str());//Nettoyage des précédents calculs identiques
-		_VV.setInfoOnComponent(0,"Void fraction");
-		_VV.setInfoOnComponent(1,"Pressure (Pa)");
-		_VV.setInfoOnComponent(2,"Velocity1_x m/s");
+		_VV.setInfoOnComponent(0,"Void_fraction");
+		_VV.setInfoOnComponent(1,"Pressure_(Pa)");
+		_VV.setInfoOnComponent(2,"Velocity1_x_m/s");
 		if (_Ndim>1)
-			_VV.setInfoOnComponent(3,"Velocity1_y m/s");
+			_VV.setInfoOnComponent(3,"Velocity1_y_m/s");
 		if (_Ndim>2)
-			_VV.setInfoOnComponent(4,"Velocity1_z m/s");
+			_VV.setInfoOnComponent(4,"Velocity1_z_m/s");
 
-		_VV.setInfoOnComponent(2+_Ndim,"Velocity2_x m/s");
+		_VV.setInfoOnComponent(2+_Ndim,"Velocity2_x_m/s");
 		if (_Ndim>1)
-			_VV.setInfoOnComponent(3+_Ndim,"Velocity2_y m/s");
+			_VV.setInfoOnComponent(3+_Ndim,"Velocity2_y_m/s");
 		if (_Ndim>2)
-			_VV.setInfoOnComponent(4+_Ndim,"Velocity2_z m/s");
+			_VV.setInfoOnComponent(4+_Ndim,"Velocity2_z_m/s");
 
 		switch(_saveFormat)
 		{
@@ -1664,14 +1664,14 @@ void IsothermalTwoFluid::save(){
 		}
 
 		if(_saveConservativeField){
-			_UU.setInfoOnComponent(0,"Partial density1");// (kg/m^3)
+			_UU.setInfoOnComponent(0,"Partial_density1");// (kg/m^3)
 			_UU.setInfoOnComponent(1,"Momentum1_x");// phase1  (kg/m^2/s)
 			if (_Ndim>1)
 				_UU.setInfoOnComponent(2,"Momentum1_y");// phase1 (kg/m^2/s)
 			if (_Ndim>2)
 				_UU.setInfoOnComponent(3,"Momentum1_z");// phase1 (kg/m^2/s)
 
-			_UU.setInfoOnComponent(1+_Ndim,"Partial density2");// phase2 (kg/m^3)
+			_UU.setInfoOnComponent(1+_Ndim,"Partial_density2");// phase2 (kg/m^3)
 			_UU.setInfoOnComponent(2+_Ndim,"Momentum2_x");// phase2 (kg/m^2/s)
 			if (_Ndim>1)
 				_UU.setInfoOnComponent(3+_Ndim,"Momentum2_y");// phase2 (kg/m^2/s)
@@ -1739,13 +1739,13 @@ void IsothermalTwoFluid::save(){
 		_Vitesse1.setTime(_time,_nbTimeStep);
 		_Vitesse2.setTime(_time,_nbTimeStep);
 		if (_nbTimeStep ==0){
-			_Vitesse1.setInfoOnComponent(0,"Velocity_x (m/s)");
-			_Vitesse1.setInfoOnComponent(1,"Velocity_y (m/s)");
-			_Vitesse1.setInfoOnComponent(2,"Velocity_z (m/s)");
+			_Vitesse1.setInfoOnComponent(0,"Velocity_x_(m/s)");
+			_Vitesse1.setInfoOnComponent(1,"Velocity_y_(m/s)");
+			_Vitesse1.setInfoOnComponent(2,"Velocity_z_(m/s)");
 
-			_Vitesse2.setInfoOnComponent(0,"Velocity_x (m/s)");
-			_Vitesse2.setInfoOnComponent(1,"Velocity_y (m/s)");
-			_Vitesse2.setInfoOnComponent(2,"Velocity_z (m/s)");
+			_Vitesse2.setInfoOnComponent(0,"Velocity_x_(m/s)");
+			_Vitesse2.setInfoOnComponent(1,"Velocity_y_(m/s)");
+			_Vitesse2.setInfoOnComponent(2,"Velocity_z_(m/s)");
 
 			switch(_saveFormat)
 			{
