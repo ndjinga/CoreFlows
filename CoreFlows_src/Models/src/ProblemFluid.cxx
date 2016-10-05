@@ -58,10 +58,8 @@ void ProblemFluid::initialize()
 	_Uj = new PetscScalar[_nVar];
 	_Vi = new PetscScalar[_nVar];
 	_Vj = new PetscScalar[_nVar];
-	if(_nonLinearFormulation==VFRoe){
-		_Uij = new PetscScalar[_nVar];
-		_Vij = new PetscScalar[_nVar];
-	}
+	_Uij = new PetscScalar[_nVar];//used for VFRoe scheme
+	_Vij = new PetscScalar[_nVar];//used for VFRoe scheme
 	_Si = new PetscScalar[_nVar];
 	_Sj = new PetscScalar[_nVar];
 	_pressureLossVector= new PetscScalar[_nVar];
@@ -643,8 +641,9 @@ double ProblemFluid::computeTimeStep(bool & stop){
 
 	stop=false;
 
+
 /*
-	if(_nbTimeStep<_cfl)
+	if(_nbTimeStep+1<_cfl)
 		return (_nbTimeStep+1)*_minl/_maxvp;
 	else
 */
@@ -809,7 +808,8 @@ void ProblemFluid::validateTimeStep()
 		//Find minimum and maximum void fractions
 		double alphamin=1e30;
 		double alphamax=-1e30;
-		double J=0, T, Tmax=-1e30;
+		double T, Tmax=-1e30;
+		int J=_nVar-1;
 		I = 0;
 		for(int j=0; j<_Nmailles; j++)
 		{
@@ -819,8 +819,12 @@ void ProblemFluid::validateTimeStep()
 			if(x<alphamin)
 				alphamin=x;
 			I += _nVar;
+			VecGetValues(_primitiveVars, 1, &J, &T);//extract void fraction
+			if(T>Tmax)
+				Tmax=T;
+			J += _nVar;
 		}
-		cout<<"Alpha min = " << alphamin << " Alpha max = " << alphamax<<endl;
+		cout<<"Alpha min = " << alphamin << ", Alpha max = " << alphamax<<", Tmax= "<<Tmax<<" K"<<endl;
 		cout<<endl;
 		//_runLogFile<<"Alpha min = " << alphamin << " Alpha max = " << alphamax<<endl;
 	}
@@ -1326,9 +1330,6 @@ void ProblemFluid::AbsMatriceRoe(vector< complex<double> > valeurs_propres_dist)
 	for( int i=0 ; i<nbVp_dist ; i++)
 		y[i] = Poly.abs_generalise(valeurs_propres_dist[i]);
 	Poly.abs_par_interp_directe(nbVp_dist,valeurs_propres_dist, _Aroe, _nVar,_precision, _absAroe,y);
-
-	if(_timeScheme==Implicit && _usePrimitiveVarsInNewton)
-		Poly.abs_par_interp_directe(nbVp_dist,valeurs_propres_dist, _AroeImplicit, _nVar,_precision, _absAroeImplicit,y);
 }
 
 void ProblemFluid::SigneMatriceRoe(vector< complex<double> > valeurs_propres_dist)

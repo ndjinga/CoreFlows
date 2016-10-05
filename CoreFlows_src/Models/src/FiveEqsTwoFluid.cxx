@@ -55,12 +55,12 @@ void FiveEqsTwoFluid::initialize(){
 	_JacoMat = new PetscScalar[_nVar*_nVar];//should be deleted in ::terminate
 
 	_gravite = vector<double>(_nVar,0);
-	_Gravity = new PetscScalar[_nVar*_nVar];
 	for(int i=0; i<_Ndim; i++)
 	{
 		_gravite[i+1]=_gravity3d[i];
 		_gravite[i+1 +_Ndim+1]=_gravity3d[i];
 	}
+	_Gravity = new PetscScalar[_nVar*_nVar];
 	for(int i=0; i<_nVar*_nVar;i++)
 		_Gravity[i] = 0;
 	if(_timeScheme==Implicit)

@@ -23,6 +23,9 @@ class Fluide{
   double getPressure(double  rhoe,const double  rho) {
   	return (_gamma - 1) * (rhoe - rho*_q) - _gamma*_p0;
   };
+  double getPressureFromEnthalpy(double  h,const double  rho) {
+  	return (_gamma - 1)/_gamma * rho * (h - _q) - _p0;
+  };
   /*For the newton scheme in the IsothermalTwoFluid model */
   double getPressureDerivativeRhoE()  { return _gamma - 1; }
   double getDensityFromEnthalpy(double p, double h)

@@ -59,7 +59,7 @@ bool DriftModel_1DBoilingChannel()
 	// setting numerical parameters
 	unsigned MaxNbOfTimeStep =3 ;
 	int freqSave = 1;
-	double cfl = 1;
+	double cfl = 500;
 	double maxTime = 1;
 	double precision = 1e-7;
 
@@ -71,7 +71,7 @@ bool DriftModel_1DBoilingChannel()
 	myProblem.setFileName(fileName);
 	myProblem.saveVoidFraction(true);
 	myProblem.saveEnthalpy(true);
-	myProblem.displayConditionNumber();
+	myProblem.usePrimitiveVarsInNewton(true);
 
 	// evolution
 	myProblem.initialize();

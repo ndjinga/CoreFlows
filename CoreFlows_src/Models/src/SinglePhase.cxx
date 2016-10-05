@@ -710,41 +710,45 @@ void SinglePhase::convectionMatrices()
 		else
 			throw CdmathException("SinglePhase::convectionMatrices: scheme not treated");
 
-		if(_verbose && _nbTimeStep%_freqSave ==0)
-		{
-			cout<<endl<<"Matrice de Roe"<<endl;
-			for(int i=0; i<_nVar;i++)
-			{
-				for(int j=0; j<_nVar;j++)
-					cout << _Aroe[i*_nVar+j]<< " , ";
-				cout<<endl;
-			}
-			cout<<"Valeur absolue matrice de Roe"<<endl;
-			for(int i=0; i<_nVar;i++){
-				for(int j=0; j<_nVar;j++)
-					cout<<_absAroe[i*_nVar+j]<<" , ";
-				cout<<endl;
-			}
-		}
 		for(int i=0; i<_nVar*_nVar;i++)
 		{
 			_AroeMinus[i] = (_Aroe[i]-_absAroe[i])/2;
 			_AroePlus[i]  = (_Aroe[i]+_absAroe[i])/2;
 		}
+		if(_timeScheme==Implicit)
+		{
+			if(_usePrimitiveVarsInNewton)//Implicitation using primitive variables
+			{
+				_Vij[0]=_fluides[0]->getPressureFromEnthalpy(_Uroe[_nVar-1]-u_2/2, _Uroe[0]);//pressure
+				_Vij[_nVar-1]=_fluides[0]->getTemperatureFromPressure( _Vij[0], _Uroe[0]);//Temperature
+				for(int idim=0;idim<_Ndim; idim++)
+					_Vij[1+idim]=_Uroe[1+idim];
+				primToConsJacobianMatrix(_Vij);
+				Polynoms Poly;
+				Poly.matrixProduct(_AroeMinus, _nVar, _nVar, _primToConsJacoMat, _nVar, _nVar, _AroeMinusImplicit);
+				Poly.matrixProduct(_AroePlus,  _nVar, _nVar, _primToConsJacoMat, _nVar, _nVar, _AroePlusImplicit);
+			}
+			else
+				for(int i=0; i<_nVar*_nVar;i++)
+				{
+					_AroeMinusImplicit[i] = _AroeMinus[i];
+					_AroePlusImplicit[i]  = _AroePlus[i];
+				}
+		}
+		if(_verbose && _nbTimeStep%_freqSave ==0)
+		{
+			displayMatrix(_Aroe, _nVar,"Matrice de Roe");
+			displayMatrix(_absAroe, _nVar,"Valeur absolue matrice de Roe");
+			displayMatrix(_AroeMinus, _nVar,"Matrice _AroeMinus");
+			displayMatrix(_AroePlus, _nVar,"Matrice _AroePlus");
+		}
 	}
 
-	if(_timeScheme==Implicit && _usePrimitiveVarsInNewton)//Implicitation using primitive variables
-		for(int i=0; i<_nVar*_nVar;i++)
-		{
-			_AroeMinusImplicit[i] = (_AroeImplicit[i]-_absAroeImplicit[i])/2;
-			_AroePlusImplicit[i]  = (_AroeImplicit[i]+_absAroeImplicit[i])/2;
-		}
-	else
-		for(int i=0; i<_nVar*_nVar;i++)
-		{
-			_AroeMinusImplicit[i] = _AroeMinus[i];
-			_AroePlusImplicit[i]  = _AroePlus[i];
-		}
+	if(_verbose && _nbTimeStep%_freqSave ==0)
+	{
+		displayMatrix(_AroeMinusImplicit, _nVar,"Matrice _AroeMinusImplicit");
+		displayMatrix(_AroePlusImplicit,  _nVar,"Matrice _AroePlusImplicit");
+	}
 
 	/*********Calcul de la matrice signe pour VFFC, VFRoe et décentrement des termes source*****/
 	if(_entropicCorrection || (_spaceScheme ==pressureCorrection ))
@@ -776,24 +780,6 @@ void SinglePhase::convectionMatrices()
 	}
 	else
 		throw CdmathException("SinglePhase::convectionMatrices: well balanced option not treated");
-
-	if(_verbose && _nbTimeStep%_freqSave ==0)
-	{
-		cout<<endl<<"Matrice _AroeMinus"<<endl;
-		for(int i=0; i<_nVar;i++)
-		{
-			for(int j=0; j<_nVar;j++)
-				cout << _AroeMinus[i*_nVar+j]<< " , ";
-			cout<<endl;
-		}
-		cout<<endl<<"Matrice _AroePlus"<<endl;
-		for(int i=0; i<_nVar;i++)
-		{
-			for(int j=0; j<_nVar;j++)
-				cout << _AroePlus[i*_nVar+j]<< " , ";
-			cout<<endl;
-		}
-	}
 }
 void SinglePhase::computeScaling(double maxvp)
 {
@@ -1508,9 +1494,10 @@ void SinglePhase::RoeMatrixConservativeVariables(double u_n, double H,Vector vel
 		_Aroe[_nVar*(_nVar-1)+idim+1]=H*_vec_normal[idim] - k*u_n*_Uroe[idim+1];
 	_Aroe[_nVar*_nVar -1] = (1 + k)*u_n;
 }
-void SinglePhase::RoeMatrixPrimitiveVariables( double rho, double u_n, double H,Vector vitesse)
+void SinglePhase::convectionMatrixPrimitiveVariables( double rho, double u_n, double H,Vector vitesse)
 {
 	//On remplit la matrice de Roe en variables primitives : F(V_L)-F(V_R)=Aroe (V_L-V_R)
+	//EOS is more involved with primitive variables
 	_AroeImplicit[0*_nVar+0]=_drho_sur_dp*u_n;
 	for(int i=0;i<_Ndim;i++)
 		_AroeImplicit[0*_nVar+1+i]=rho*_vec_normal[i];
@@ -2316,8 +2303,8 @@ void SinglePhase::getDensityDerivatives( double pressure, double temperature, do
 
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
-		cout<<"_drho_sur_dp= "<<_drho_sur_dp<<"_drho_sur_dT= "<<_drho_sur_dT<<endl;
-		cout<<"_drhoE_sur_dp= "<<_drhoE_sur_dp<<"_drhoE_sur_dT= "<<_drhoE_sur_dT<<endl;
+		cout<<"_drho_sur_dp= "<<_drho_sur_dp<<", _drho_sur_dT= "<<_drho_sur_dT<<endl;
+		cout<<"_drhoE_sur_dp= "<<_drhoE_sur_dp<<", _drhoE_sur_dT= "<<_drhoE_sur_dT<<endl;
 	}
 }
 void SinglePhase::save(){

@@ -117,7 +117,7 @@ protected :
 	void addDiffusionToSecondMember(const int &i,const int &j,bool isBord);
 	//!Computation of the Roe matrix
 	void RoeMatrixConservativeVariables(double u_n, double total_enthalpy,Vector velocity, double k, double K);
-	void RoeMatrixPrimitiveVariables( double rho, double u_n, double H,Vector velocity);
+	void convectionMatrixPrimitiveVariables( double rho, double u_n, double H,Vector velocity);
 	//!Computation of the staggered Roe upwinding matrix in conservative variables
 	void staggeredRoeUpwindingMatrixConservativeVariables(  double u_n, double total_enthalpy, Vector velocity, double k, double K);
 	//!Computation of the staggered Roe upwinding matrix in primitive variables

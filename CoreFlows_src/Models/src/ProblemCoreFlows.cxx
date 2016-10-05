@@ -44,7 +44,7 @@ ProblemCoreFlows::ProblemCoreFlows()
 	_wellBalancedCorrection=false;
 	_maxPetscIts=50;
 	_MaxIterLinearSolver=0;//During several newton iterations, stores the max petssc interations
-	_maxNewtonIts=20;
+	_maxNewtonIts=50;
 	_NEWTON_its=0;
 	int _PetscIts=0;//the number of iterations of the linear solver
 	_ksptype = (char*)&KSPGMRES;
