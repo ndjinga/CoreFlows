@@ -94,7 +94,7 @@ void DriftModel::initialize(){
 
 bool DriftModel::iterateTimeStep(bool &converged)
 {
-	if(!_usePrimitiveVarsInNewton)
+	if(_timeScheme == Explicit || !_usePrimitiveVarsInNewton)
 		ProblemFluid::iterateTimeStep(converged);
 	else
 	{

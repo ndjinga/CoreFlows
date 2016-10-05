@@ -800,7 +800,8 @@ void ProblemFluid::validateTimeStep()
 	VecCopy(_conservativeVars, _old);
 
 	if(_verbose && _nbTimeStep%_freqSave ==0){
-		testConservation();
+		if(!_usePrimitiveVarsInNewton)
+			testConservation();
 		cout <<"Valeur propre locale max: " << _maxvp << endl;
 	}
 
@@ -808,8 +809,9 @@ void ProblemFluid::validateTimeStep()
 		//Find minimum and maximum void fractions
 		double alphamin=1e30;
 		double alphamax=-1e30;
+		double J=0, T, Tmax=-1e30;
 		I = 0;
-		for(int j=1; j<=_Nmailles; j++)
+		for(int j=0; j<_Nmailles; j++)
 		{
 			VecGetValues(_primitiveVars, 1, &I, &x);//extract void fraction
 			if(x>alphamax)
