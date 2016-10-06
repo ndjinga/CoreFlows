@@ -55,12 +55,12 @@ void FiveEqsTwoFluid::initialize(){
 	_JacoMat = new PetscScalar[_nVar*_nVar];//should be deleted in ::terminate
 
 	_gravite = vector<double>(_nVar,0);
-	_Gravity = new PetscScalar[_nVar*_nVar];
 	for(int i=0; i<_Ndim; i++)
 	{
 		_gravite[i+1]=_gravity3d[i];
 		_gravite[i+1 +_Ndim+1]=_gravity3d[i];
 	}
+	_Gravity = new PetscScalar[_nVar*_nVar];
 	for(int i=0; i<_nVar*_nVar;i++)
 		_Gravity[i] = 0;
 	if(_timeScheme==Implicit)
@@ -654,6 +654,10 @@ void FiveEqsTwoFluid::convectionMatrices()
 {
 	//entree: URoe = alpha, p, u1, u2, T + ajout dpi
 	//sortie: matrices Roe+  et Roe- +Roe si schéma centre
+
+	if(_timeScheme==Implicit && _usePrimitiveVarsInNewton)
+		throw CdmathException("Implicitation with primitive variables not yet available for FiveEqsTwoFluid model");
+
 	/*Definitions */
 	complex< double > tmp;
 	double  u_r2 = 0, u1_n=0, u2_n=0;
@@ -891,12 +895,12 @@ void FiveEqsTwoFluid::convectionMatrices()
 			&LDVR, WORK,&LWORK,
 			&info);
 	if(info <0){
-		cout<<"FiveEqsTwoFluid::roeMatrices: error dgeev_ : argument "<<-info<<" invalid"<<endl;
-		throw CdmathException("FiveEqsTwoFluid::roeMatrices: dgeev_ unsuccessful computation of the eigenvalues ");
+		cout<<"FiveEqsTwoFluid::convectionMatrices: error dgeev_ : argument "<<-info<<" invalid"<<endl;
+		throw CdmathException("FiveEqsTwoFluid::convectionMatrices: dgeev_ unsuccessful computation of the eigenvalues ");
 	}
 	else if(info <0)
 	{
-		cout<<"Warning FiveEqsTwoFluid::roeMatrices: dgeev_ did not compute all the eigenvalues, trying Rusanov scheme "<<endl;
+		cout<<"Warning FiveEqsTwoFluid::convectionMatrices: dgeev_ did not compute all the eigenvalues, trying Rusanov scheme "<<endl;
 		cout<<"Converged eigenvalues are ";
 		for(int i=info; i<_nVar; i++)
 			cout<<"("<< egvaReal[i]<<","<< egvaImag[i]<<"), ";
@@ -982,7 +986,7 @@ void FiveEqsTwoFluid::convectionMatrices()
 	if(_spaceScheme == centered )
 	{
 		if(_entropicCorrection)
-			throw CdmathException("FiveEqsTwoFluid::roeMatrices: entropic scheme not available for centered scheme");
+			throw CdmathException("FiveEqsTwoFluid::convectionMatrices: entropic scheme not available for centered scheme");
 		for(int i=0; i<_nVar*_nVar;i++)
 			_absAroe[i]=0;
 		//  if(alpha<_precision || alpha>1-_precision)//rusanov
@@ -991,7 +995,7 @@ void FiveEqsTwoFluid::convectionMatrices()
 	}
 	if( _spaceScheme ==staggered){//To do: study entropic correction for staggered
 		if(_entropicCorrection)//To do: study entropic correction for staggered
-			throw CdmathException("FiveEqsTwoFluid::roeMatrices: entropic scheme not yet available for staggered scheme");
+			throw CdmathException("FiveEqsTwoFluid::convectionMatrices: entropic scheme not yet available for staggered scheme");
 		/******** Construction de la matrice de decentrement staggered *********/
 		/***** Compute eta_n **************/
 		eta_n = 0.;
@@ -1196,13 +1200,19 @@ void FiveEqsTwoFluid::convectionMatrices()
 		//_signAroe[_nVar*(_nVar-1)+_nVar-1] = signu;
 	}
 	else
-		throw CdmathException("FiveEqsTwoFluid::roeMatrices: well balanced option not treated");
+		throw CdmathException("FiveEqsTwoFluid::convectionMatrices: well balanced option not treated");
 
 	for(int i=0; i<_nVar*_nVar;i++)
 	{
 		_AroeMinus[i] = (_Aroe[i]-_absAroe[i])/2;
 		_AroePlus[i]  = (_Aroe[i]+_absAroe[i])/2;
 	}
+	if(_timeScheme==Implicit && _usePrimitiveVarsInNewton)//Implicitation using primitive variables
+		for(int i=0; i<_nVar*_nVar;i++)
+			_AroeMinusImplicit[i] = (_AroeImplicit[i]-_absAroeImplicit[i])/2;
+	else
+		for(int i=0; i<_nVar*_nVar;i++)
+			_AroeMinusImplicit[i] = _AroeMinus[i];
 
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
@@ -1325,14 +1335,14 @@ void FiveEqsTwoFluid::jacobianDiff(const int &j, string nameOfGroup)
 void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *normale){
 	//To do controle signe des vitesses pour CL entree/sortie
 	int k;
-	double v1_2=0, v2_2=0, q1_n=0, q2_n=0, u1_n=0, u2_n=0;//quantités de mouvement et vitesses normales à la paroi;
+	double v1_2=0, v2_2=0, q1_n=0, q2_n=0, u1_n=0, u2_n=0;//quantités de mouvement et vitesses normales à la face limite;
 	double v1[_Ndim], v2[_Ndim];
 
 	_idm[0] = _nVar*j;
 	for(k=1; k<_nVar; k++)
 		_idm[k] = _idm[k-1] + 1;
 
-	VecGetValues(_conservativeVars, _nVar, _idm, _externalStates);//variables conservatives de la cellule interne
+	VecGetValues(_conservativeVars, _nVar, _idm, _externalStates);//On initialise l'état fantôme avec l'état interne
 
 	for(k=0; k<_Ndim; k++){
 		q1_n+=_externalStates[(k+1)]*normale[k];
@@ -1343,7 +1353,7 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
-		cout << "Boundary conditions for group "<< nameOfGroup << " face unit normal vector "<<endl;
+		cout << "Boundary conditions for group "<< nameOfGroup<< ", inner cell j= "<<j << " face unit normal vector "<<endl;
 		for(k=0; k<_Ndim; k++){
 			cout<<normale[k]<<", ";
 		}
@@ -1352,6 +1362,7 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 
 	if (_limitField[nameOfGroup].bcType==Wall){
 
+		//Pour la convection, inversion du sens des vitesses
 		VecGetValues(_primitiveVars, _nVar, _idm, _Vj);
 		for(k=0; k<_Ndim; k++){
 			_externalStates[(k+1)]-= 2*q1_n*normale[k];
@@ -1370,6 +1381,7 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 		VecAssemblyEnd(_Uext);
 		VecAssemblyEnd(_Vext);
 
+		//Pour la diffusion, paroi à vitesses et temperature imposees
 		double pression=_Vj[1];//pressure inside
 		double T=_Vj[_nVar-1];//temperature outside
 		double rho_v=_fluides[0]->getDensity(pression,T);
@@ -1387,7 +1399,7 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 			}
 		}
 		_externalStates[_nVar-1] = _externalStates[0]*(_fluides[0]->getInternalEnergy(_limitField[nameOfGroup].T,rho_v) + v1_2/2)
-																																							+_externalStates[1+_Ndim]*(_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + v2_2/2);
+																																											+_externalStates[1+_Ndim]*(_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + v2_2/2);
 		VecAssemblyBegin(_Uextdiff);
 		VecSetValues(_Uextdiff, _nVar, _idm, _externalStates, INSERT_VALUES);
 		VecAssemblyEnd(_Uextdiff);
@@ -1448,7 +1460,7 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 			_Vj[2+_Ndim+idim] = v2[idim];
 		}
 		_externalStates[_nVar-1] = _externalStates[0]      *(_fluides[0]->getInternalEnergy(T,rho_v) + v1_2/2)
-    																																			+_externalStates[1+_Ndim]*(_fluides[1]->getInternalEnergy(T,rho_l) + v2_2/2);
+    																																							+_externalStates[1+_Ndim]*(_fluides[1]->getInternalEnergy(T,rho_l) + v2_2/2);
 
 		// _Vj external primitives
 		_Vj[0] = alpha;
@@ -1473,9 +1485,20 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
 
+		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
+		Cell Cj=_mesh.getCell(j);
+		double hydroPress=Cj.x()*_gravity3d[0];
+		if(_Ndim>1){
+			hydroPress+=Cj.y()*_gravity3d[1];
+			if(_Ndim>2)
+				hydroPress+=Cj.z()*_gravity3d[2];
+		}
+		hydroPress*=_externalStates[0]+_externalStates[_Ndim];//multiplication by rho the total density
+
+		//Building the external state
 		VecGetValues(_primitiveVars, _nVar, _idm,_Vj);
 		double alpha=_limitField[nameOfGroup].alpha;
-		double pression=_limitField[nameOfGroup].p;
+		double pression=_limitField[nameOfGroup].p+hydroPress;
 		double T=_limitField[nameOfGroup].T;
 		double rho_v=_fluides[0]->getDensity(pression,T);
 		double rho_l=_fluides[1]->getDensity(pression,T);
@@ -1489,7 +1512,7 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 			v2_2+=_Vj[2+_Ndim+idim]*_Vj[2+_Ndim+idim];
 		}
 		_externalStates[_nVar-1]=    alpha *rho_v*(_fluides[0]->getInternalEnergy(T,rho_v)+v1_2/2)
-				                																														+(1-alpha)*rho_l*(_fluides[1]->getInternalEnergy(T,rho_l)+v2_2/2);
+				                																																		+(1-alpha)*rho_l*(_fluides[1]->getInternalEnergy(T,rho_l)+v2_2/2);
 
 		// _Vj external primitives
 		_Vj[0] = alpha;
@@ -1514,9 +1537,20 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
 
+		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
+		Cell Cj=_mesh.getCell(j);
+		double hydroPress=Cj.x()*_gravity3d[0];
+		if(_Ndim>1){
+			hydroPress+=Cj.y()*_gravity3d[1];
+			if(_Ndim>2)
+				hydroPress+=Cj.z()*_gravity3d[2];
+		}
+		hydroPress*=_externalStates[0]+_externalStates[_Ndim];//multiplication by rho the total density
+
+		//Building the external state
 		VecGetValues(_primitiveVars, _nVar, _idm,_Vj);
 		double pression_int=_Vj[1];
-		double pression_ext=_limitField[nameOfGroup].p;
+		double pression_ext=_limitField[nameOfGroup].p+hydroPress;
 		double T=_Vj[_nVar-1];
 		double rho_v_int=_fluides[0]->getDensity(pression_int,T);
 		double rho_l_int=_fluides[1]->getDensity(pression_int,T);
@@ -2161,20 +2195,18 @@ void FiveEqsTwoFluid::testConservation()
 		SUM = 0;
 		DELTA = 0;
 		I =  i;
-		for(int j=1; j<=_Nmailles; j++)
+		for(int j=0; j<_Nmailles; j++)
 		{
 			VecGetValues(_old, 1, &I, &x);//on recupere la valeur du champ
-			SUM += x;
+			SUM += x*_mesh.getCell(j).getMeasure();
 			VecGetValues(_newtonVariation, 1, &I, &x);//on recupere la variation du champ
-			DELTA += x;
+			DELTA += x*_mesh.getCell(j).getMeasure();
 			I += _nVar;
 		}
-		{
-			if(fabs(SUM)>_precision)
-				cout << SUM << ", variation relative: " << fabs(DELTA /SUM)  << endl;
-			else
-				cout << " a une somme nulle,  variation absolue: " << fabs(DELTA) << endl;
-		}
+		if(fabs(SUM)>_precision)
+			cout << SUM << ", variation relative: " << fabs(DELTA /SUM)  << endl;
+		else
+			cout << " a une somme nulle,  variation absolue: " << fabs(DELTA) << endl;
 	}
 }
 
@@ -2212,20 +2244,20 @@ void FiveEqsTwoFluid::save(){
 		string cons_suppress ="rm -rf "+cons+"_*";
 		system(prim_suppress.c_str());//Nettoyage des précédents calculs identiques
 		system(cons_suppress.c_str());//Nettoyage des précédents calculs identiques
-		_VV.setInfoOnComponent(0,"Void fraction");
-		_VV.setInfoOnComponent(1,"Pressure (Pa)");
-		_VV.setInfoOnComponent(2,"Velocity1_x m/s");
+		_VV.setInfoOnComponent(0,"Void_fraction");
+		_VV.setInfoOnComponent(1,"Pressure_(Pa)");
+		_VV.setInfoOnComponent(2,"Velocity1_x_m/s");
 
 		if (_Ndim>1)
-			_VV.setInfoOnComponent(3,"Velocity1_y m/s");
+			_VV.setInfoOnComponent(3,"Velocity1_y_m/s");
 		if (_Ndim>2)
-			_VV.setInfoOnComponent(4,"Velocity1_z m/s");
-		_VV.setInfoOnComponent(2+_Ndim,"Velocity2_x m/s");
+			_VV.setInfoOnComponent(4,"Velocity1_z_m/s");
+		_VV.setInfoOnComponent(2+_Ndim,"Velocity2_x_m/s");
 		if (_Ndim>1)
-			_VV.setInfoOnComponent(3+_Ndim,"Velocity2_y m/s");
+			_VV.setInfoOnComponent(3+_Ndim,"Velocity2_y_m/s");
 		if (_Ndim>2)
-			_VV.setInfoOnComponent(4+_Ndim,"Velocity2_z m/s");
-		_VV.setInfoOnComponent(_nVar-1,"Temperature (K)");
+			_VV.setInfoOnComponent(4+_Ndim,"Velocity2_z_m/s");
+		_VV.setInfoOnComponent(_nVar-1,"Temperature_(K)");
 
 		switch(_saveFormat)
 		{
@@ -2240,20 +2272,20 @@ void FiveEqsTwoFluid::save(){
 			break;
 		}
 		if(_saveConservativeField){
-			_UU.setInfoOnComponent(0,"Partial density1");// (kg/m^3)
+			_UU.setInfoOnComponent(0,"Partial_density1");// (kg/m^3)
 			_UU.setInfoOnComponent(1,"Momentum1_x");// phase1 (kg/m^2/s)
 			if (_Ndim>1)
 				_UU.setInfoOnComponent(2,"Momentum1_y");// phase1 (kg/m^2/s)
 			if (_Ndim>2)
 				_UU.setInfoOnComponent(3,"Momentum1_z");// phase1  (kg/m^2/s)
-			_UU.setInfoOnComponent(1+_Ndim,"Partial density2");// phase2 (kg/m^3)
+			_UU.setInfoOnComponent(1+_Ndim,"Partial_density2");// phase2 (kg/m^3)
 			_UU.setInfoOnComponent(2+_Ndim,"Momentum2_x");// phase2 (kg/m^2/s)
 
 			if (_Ndim>1)
 				_UU.setInfoOnComponent(3+_Ndim,"Momentum2_y");// phase2 (kg/m^2/s)
 			if (_Ndim>2)
 				_UU.setInfoOnComponent(4+_Ndim,"Momentum2_z");// phase2 (kg/m^2/s)
-			_UU.setInfoOnComponent(_nVar-1,"Total energy");
+			_UU.setInfoOnComponent(_nVar-1,"Total_energy");
 
 			switch(_saveFormat)
 			{
@@ -2316,13 +2348,13 @@ void FiveEqsTwoFluid::save(){
 		_Vitesse1.setTime(_time,_nbTimeStep);
 		_Vitesse2.setTime(_time,_nbTimeStep);
 		if (_nbTimeStep ==0){
-			_Vitesse1.setInfoOnComponent(0,"Velocity_x (m/s)");
-			_Vitesse1.setInfoOnComponent(1,"Velocity_y (m/s)");
-			_Vitesse1.setInfoOnComponent(2,"Velocity_z (m/s)");
+			_Vitesse1.setInfoOnComponent(0,"Velocity_x_(m/s)");
+			_Vitesse1.setInfoOnComponent(1,"Velocity_y_(m/s)");
+			_Vitesse1.setInfoOnComponent(2,"Velocity_z_(m/s)");
 
-			_Vitesse2.setInfoOnComponent(0,"Velocity_x (m/s)");
-			_Vitesse2.setInfoOnComponent(1,"Velocity_y (m/s)");
-			_Vitesse2.setInfoOnComponent(2,"Velocity_z (m/s)");
+			_Vitesse2.setInfoOnComponent(0,"Velocity_x_(m/s)");
+			_Vitesse2.setInfoOnComponent(1,"Velocity_y_(m/s)");
+			_Vitesse2.setInfoOnComponent(2,"Velocity_z_(m/s)");
 
 			switch(_saveFormat)
 			{

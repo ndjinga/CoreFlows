@@ -25,7 +25,7 @@ public :
 	 * \param [in] int : mesh dimension
 	 * \param [in] bool : There are two possible equations of state for each phase
 	 *  */
-	DriftModel( pressureEstimate pEstimate, int dim, bool _useDellacherieEOS=true);
+	DriftModel( pressureEstimate pEstimate, int dim, bool useDellacherieEOS=true);
 	//! system initialisation
 	void initialize();
 
@@ -107,7 +107,11 @@ public :
 	bool iterateTimeStep(bool &ok);
 
 protected :
-	double _khi, _ksi, _kappa;//mixture pressure derivatives with regard to rhom, m_c and rhom_em
+	double _khi, _ksi, _kappa;//mixture pressure derivatives with regard to rhom, cm and rhom_em
+	double _drho_sur_dcv,   _drho_sur_dp,   _drho_sur_dT;//derivatives of the total density rho wrt cv, p, T
+	double _drhocv_sur_dcv, _drhocv_sur_dp, _drhocv_sur_dT;//derivatives of the gas partial density rho cv wrt cv, p, T
+	double _drhoE_sur_dcv,  _drhoE_sur_dp,  _drhoE_sur_dT;//derivatives of the total energy rho E wrt cv, p, T
+
 	Field _Vitesse, _VoidFraction, _Enthalpy;
 	bool _saveVoidFraction,_saveEnthalpy;
 	/** \fn convectionState
@@ -212,10 +216,18 @@ protected :
 	 * @param boolean isBoundary is true for a boundary face (i,j) and false otherwise
 	 * */
 	void addDiffusionToSecondMember(const int &i,const int &j,bool isBoundary);
+	//!Computation of the Roe matrix
+	void RoeMatrixConservativeVariables(double concentration, double umn,double kinetic_energy, double total_mixture_enthalpy,Vector velocity);
+	void convectionMatrixPrimitiveVariables(double concentration, double mixture_density, double umn, double total_mixture_enthalpy, Vector vitesse);
+	//!Computation of the staggered Roe upwinding matrix in conservative variables
+	void staggeredRoeUpwindingMatrixConservativeVariables(double concentration, double umn,double  kinetic_energy, double total_mixture_enthalpy, Vector velocity);
+	//!Computation of the staggered Roe upwinding matrix in primitive variables
+	void staggeredRoeUpwindingMatrixPrimitiveVariables(double concentration, double mixture_density, double umn,double total_mixture_enthalpy, Vector velocity);
+	/**** staggered VFFC scheme has some specific features (no need for Roe matrix), hence some specific functions ******/
 	//!Computes the interfacial flux for the VFFC formulation of the staggered upwinding
 	Vector staggeredVFFCFlux();
 	//!Computes the matrices A^+ and A^- for the VFFC formulation of the staggered upwinding
-	void staggeredVFFCMatrices(double u_mn);
+	void staggeredVFFCMatricesConservativeVariables(double u_mn);
 	//!Computes the matrices A^+ and A^- for the VFFC formulation of the staggered upwinding using Primitive Variables
 	void staggeredVFFCMatricesPrimitiveVariables(double u_mn);
 	//!Compute the corrected interfacial state for lowMach, pressureCorrection and staggered versions of the VFRoe formulation
@@ -299,13 +311,21 @@ protected :
 	void getMixturePressureAndTemperature(double c_v, double rho_m, double rhom_em, double& P, double& T);
 
 	/** \fn getMixturePressureDerivatives
-	 * \brief Computes the pressure of the two phase mixture from its temperature, mixture density and Gas concentration
+	 * \brief Computes the partial derivatives khi, ksi and kappa of the pressure of the two phase mixture with regard to the total mass rho, partial gas mass rho c_v and internal energy rho e
 	 * @param m_v is the vapour partial density: alpha_v rho_v)
 	 * @param m_l is the vapour partial density: alpha_l rho_l)
 	 * @param pressure is the mixture pressure
 	 * @param temperature is the mixture temperature
 	*/
 	void getMixturePressureDerivatives(double m_v, double m_l, double pression, double Tm);
+	/** \fn getDensityDerivatives
+	 * \brief Computes the partial derivatives of rho, rho c_v and rho E with regard to the primitive variables c_v, p, T
+	 * @param concentration
+	 * @param pressure
+	 * @param temperature
+	 * @param square of the velocity vector
+	*/
+	void getDensityDerivatives(double concentration, double pressure, double temperature, double v2);
 };
 #endif /* DRIFTMODEL_HXX_*/
 

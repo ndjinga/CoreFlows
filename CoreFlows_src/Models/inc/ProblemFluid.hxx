@@ -404,6 +404,7 @@ protected :
 	//courant state vector, vector computed at next time step, second member of the equation
 	PetscScalar *_AroePlus, *_AroeMinus,*_Jcb,*_JcbDiff, *_a, *_blockDiag,  *_invBlockDiag,*_Diffusion, *_Gravity;
 	PetscScalar *_Aroe, *_absAroe, *_signAroe, *_invAroe;
+	PetscScalar *_AroeMinusImplicit,*_AroePlusImplicit,*_AroeImplicit,*_absAroeImplicit;//negative part of the roe matrix used in the implicit scheme matrix
 	PetscScalar * _primToConsJacoMat; //Jacobian matrix of the prim-->cons function
 	PetscScalar *_phi, *_Ui, *_Uj,  *_Vi, *_Vj,  *_Si, *_Sj, * _pressureLossVector, * _porosityGradientSourceVector, *_externalStates;
 	double *_Uroe, *_Udiff, *_temp, *_l, *_r,  *_vec_normal;

@@ -59,7 +59,7 @@ int main(int argc, char** argv)
 	// setting numerical parameters
 	unsigned MaxNbOfTimeStep =3 ;
 	int freqSave = 1;
-	double cfl = 1;
+	double cfl = 500;
 	double maxTime = 1;
 	double precision = 1e-7;
 
@@ -86,5 +86,5 @@ int main(int argc, char** argv)
 	cout << "------------ End of calculation -----------" << endl;
 	myProblem.terminate();
 
-	return EXIT_SUCCESS;
+	return ok;
 }

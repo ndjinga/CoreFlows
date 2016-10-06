@@ -42,12 +42,12 @@ void IsothermalTwoFluid::initialize(){
 	_guessalpha = _VV(0,0);
 
 	_gravite = vector<double>(_nVar,0);
-	_Gravity = new PetscScalar[_nVar*_nVar];
 	for(int i=0; i<_Ndim; i++)
 	{
 		_gravite[i+1]=_gravity3d[i];
 		_gravite[i+1 +_Ndim+1]=_gravity3d[i];
 	}
+	_Gravity = new PetscScalar[_nVar*_nVar];
 	for(int i=0; i<_nVar*_nVar;i++)
 		_Gravity[i] = 0;
 	if(_timeScheme==Implicit)
@@ -236,6 +236,10 @@ void IsothermalTwoFluid::convectionMatrices()
 {
 	//entree: URoe = alpha, p, u1, u2 + ajout dpi pour calcul flux ultérieur
 	//sortie: matrices Roe+  et Roe- +Roe si scheme centre
+
+	if(_timeScheme==Implicit && _usePrimitiveVarsInNewton)
+		throw CdmathException("Implicitation with primitive variables not yet available for IsothermalTwoFluid model");
+
 	/*Definitions */
 	complex< double > tmp;
 	double u1_n, u1_2, u2_n, u2_2, u_r2;
@@ -386,13 +390,13 @@ void IsothermalTwoFluid::convectionMatrices()
 	/******* Construction des matrices de decentrement *****/
 	if(_spaceScheme == centered){
 		if(_entropicCorrection)
-			throw CdmathException("IsothermalTwoFluid::roeMatrices: entropic scheme not available for centered scheme");
+			throw CdmathException("IsothermalTwoFluid::convectionMatrices: entropic scheme not available for centered scheme");
 		for(int i=0; i<_nVar*_nVar;i++)
 			_absAroe[i]=0;
 	}
 	if( _spaceScheme ==staggered){
 		if(_entropicCorrection)//To do: study entropic correction for staggered
-			throw CdmathException("IsothermalTwoFluid::roeMatrices: entropic scheme not yet available for staggered scheme");
+			throw CdmathException("IsothermalTwoFluid::convectionMatrices: entropic scheme not yet available for staggered scheme");
 		/******** Construction du decentrement du type decale *********/
 		//lignes de masse
 		for(int i=0; i<_nVar*_nVar;i++)
@@ -519,13 +523,19 @@ void IsothermalTwoFluid::convectionMatrices()
 		}
 	}
 	else
-		throw CdmathException("IsothermalTwoFluid::roeMatrices: well balanced option not treated");
+		throw CdmathException("IsothermalTwoFluid::convectionMatrices: well balanced option not treated");
 
 	for(int i=0; i<_nVar*_nVar;i++)
 	{
 		_AroeMinus[i] = (_Aroe[i]-_absAroe[i])/2;
 		_AroePlus[i]  = (_Aroe[i]+_absAroe[i])/2;
 	}
+	if(_timeScheme==Implicit && _usePrimitiveVarsInNewton)//Implicitation using primitive variables
+		for(int i=0; i<_nVar*_nVar;i++)
+			_AroeMinusImplicit[i] = (_AroeImplicit[i]-_absAroeImplicit[i])/2;
+	else
+		for(int i=0; i<_nVar*_nVar;i++)
+			_AroeMinusImplicit[i] = _AroeMinus[i];
 
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
@@ -566,8 +576,8 @@ void IsothermalTwoFluid::setBoundaryState(string nameOfGroup, const int &j,doubl
 	for(k=1; k<_nVar; k++)
 		_idm[k] = _idm[k-1] + 1;
 
-	VecGetValues(_conservativeVars, _nVar, _idm, _externalStates);
-	double q1_n=0, q2_n=0;//quantité de mouvement normale à la paroi
+	VecGetValues(_conservativeVars, _nVar, _idm, _externalStates);//On initialise l'état fantôme avec l'état interne
+	double q1_n=0, q2_n=0;//quantité de mouvement normale à la face limite
 	for(k=0; k<_Ndim; k++){
 		q1_n+=_externalStates[(k+1)]*normale[k];
 		q2_n+=_externalStates[(k+1+1+_Ndim)]*normale[k];
@@ -575,13 +585,15 @@ void IsothermalTwoFluid::setBoundaryState(string nameOfGroup, const int &j,doubl
 
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
-		cout << "Boundary conditions for group "<< nameOfGroup << " face unit normal vector "<<endl;
+		cout << "Boundary conditions for group "<< nameOfGroup<< ", inner cell j= "<<j << " face unit normal vector "<<endl;
 		for(k=0; k<_Ndim; k++){
 			cout<<normale[k]<<", ";
 		}
 		cout<<endl;
 	}
 	if (_limitField[nameOfGroup].bcType==Wall){
+
+		//Pour la convection, inversion du sens des vitesses
 		for(k=0; k<_Ndim; k++){
 			_externalStates[(k+1)]-= 2*q1_n*normale[k];
 			_externalStates[(k+1+1+_Ndim)]-= 2*q2_n*normale[k];
@@ -595,6 +607,7 @@ void IsothermalTwoFluid::setBoundaryState(string nameOfGroup, const int &j,doubl
 		VecSetValues(_Uext, _nVar, _idm, _externalStates, INSERT_VALUES);
 		VecAssemblyEnd(_Uext);
 
+		//Pour la diffusion, paroi à vitesses imposees
 		_externalStates[1]=_externalStates[0]*_limitField[nameOfGroup].v_x[0];
 		_externalStates[2+_Ndim]=_externalStates[1+_Ndim]*_limitField[nameOfGroup].v_x[1];
 		if(_Ndim>1)
@@ -660,12 +673,23 @@ void IsothermalTwoFluid::setBoundaryState(string nameOfGroup, const int &j,doubl
 		VecAssemblyEnd(_Uextdiff);
 	}
 	else if (_limitField[nameOfGroup].bcType==InletPressure){
+		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
+		Cell Cj=_mesh.getCell(j);
+		double hydroPress=Cj.x()*_gravity3d[0];
+		if(_Ndim>1){
+			hydroPress+=Cj.y()*_gravity3d[1];
+			if(_Ndim>2)
+				hydroPress+=Cj.z()*_gravity3d[2];
+		}
+		hydroPress*=_externalStates[0]+_externalStates[_Ndim];//multiplication by rho the total density
+
+		//Building the external state
 		_idm[0] = _nVar*j;
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
 
 		VecGetValues(_primitiveVars, _nVar, _idm, _Vj);
-		double pression=_limitField[nameOfGroup].p;
+		double pression=_limitField[nameOfGroup].p+hydroPress;
 		double alpha=_limitField[nameOfGroup].alpha;
 		double T=_Temperature;
 		double rho_v=_fluides[0]->getDensity(pression,T);
@@ -699,9 +723,20 @@ void IsothermalTwoFluid::setBoundaryState(string nameOfGroup, const int &j,doubl
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
 
+		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
+		Cell Cj=_mesh.getCell(j);
+		double hydroPress=Cj.x()*_gravity3d[0];
+		if(_Ndim>1){
+			hydroPress+=Cj.y()*_gravity3d[1];
+			if(_Ndim>2)
+				hydroPress+=Cj.z()*_gravity3d[2];
+		}
+		hydroPress*=_externalStates[0]+_externalStates[_Ndim];//multiplication by rho the total density
+
+		//Building the external state
 		VecGetValues(_primitiveVars, _nVar, _idm,_Vj);
 		double pression_int=_Vj[1];
-		double pression_ext=_limitField[nameOfGroup].p;
+		double pression_ext=_limitField[nameOfGroup].p+hydroPress;
 		double T=_Vj[_nVar-1];
 		double rho_v_int=_fluides[0]->getDensity(pression_int,T);
 		double rho_l_int=_fluides[1]->getDensity(pression_int,T);
@@ -1553,20 +1588,18 @@ void IsothermalTwoFluid::testConservation()
 		SUM = 0;
 		DELTA = 0;
 		I = i;
-		for(int j=1; j<=_Nmailles; j++)
+		for(int j=0; j<_Nmailles; j++)
 		{
 			VecGetValues(_old, 1, &I, &x);//on recupere la valeur du champ
-			SUM += x;
+			SUM += x*_mesh.getCell(j).getMeasure();
 			VecGetValues(_newtonVariation, 1, &I, &x);//on recupere la variation du champ
-			DELTA += x;
+			DELTA += x*_mesh.getCell(j).getMeasure();
 			I += _nVar;
 		}
-		{
-			if(fabs(SUM)>_precision)
-				cout << SUM<< ", variation relative: " << fabs(DELTA /SUM)  << endl;
-			else
-				cout << " a une somme nulle,  variation absolue: " << fabs(DELTA) << endl;
-		}
+		if(fabs(SUM)>_precision)
+			cout << SUM<< ", variation relative: " << fabs(DELTA /SUM)  << endl;
+		else
+			cout << " a une somme nulle,  variation absolue: " << fabs(DELTA) << endl;
 	}
 }
 
@@ -1603,19 +1636,19 @@ void IsothermalTwoFluid::save(){
 		string cons_suppress ="rm -rf "+cons+"_*";
 		system(prim_suppress.c_str());//Nettoyage des précédents calculs identiques
 		system(cons_suppress.c_str());//Nettoyage des précédents calculs identiques
-		_VV.setInfoOnComponent(0,"Void fraction");
-		_VV.setInfoOnComponent(1,"Pressure (Pa)");
-		_VV.setInfoOnComponent(2,"Velocity1_x m/s");
+		_VV.setInfoOnComponent(0,"Void_fraction");
+		_VV.setInfoOnComponent(1,"Pressure_(Pa)");
+		_VV.setInfoOnComponent(2,"Velocity1_x_m/s");
 		if (_Ndim>1)
-			_VV.setInfoOnComponent(3,"Velocity1_y m/s");
+			_VV.setInfoOnComponent(3,"Velocity1_y_m/s");
 		if (_Ndim>2)
-			_VV.setInfoOnComponent(4,"Velocity1_z m/s");
+			_VV.setInfoOnComponent(4,"Velocity1_z_m/s");
 
-		_VV.setInfoOnComponent(2+_Ndim,"Velocity2_x m/s");
+		_VV.setInfoOnComponent(2+_Ndim,"Velocity2_x_m/s");
 		if (_Ndim>1)
-			_VV.setInfoOnComponent(3+_Ndim,"Velocity2_y m/s");
+			_VV.setInfoOnComponent(3+_Ndim,"Velocity2_y_m/s");
 		if (_Ndim>2)
-			_VV.setInfoOnComponent(4+_Ndim,"Velocity2_z m/s");
+			_VV.setInfoOnComponent(4+_Ndim,"Velocity2_z_m/s");
 
 		switch(_saveFormat)
 		{
@@ -1631,14 +1664,14 @@ void IsothermalTwoFluid::save(){
 		}
 
 		if(_saveConservativeField){
-			_UU.setInfoOnComponent(0,"Partial density1");// (kg/m^3)
+			_UU.setInfoOnComponent(0,"Partial_density1");// (kg/m^3)
 			_UU.setInfoOnComponent(1,"Momentum1_x");// phase1  (kg/m^2/s)
 			if (_Ndim>1)
 				_UU.setInfoOnComponent(2,"Momentum1_y");// phase1 (kg/m^2/s)
 			if (_Ndim>2)
 				_UU.setInfoOnComponent(3,"Momentum1_z");// phase1 (kg/m^2/s)
 
-			_UU.setInfoOnComponent(1+_Ndim,"Partial density2");// phase2 (kg/m^3)
+			_UU.setInfoOnComponent(1+_Ndim,"Partial_density2");// phase2 (kg/m^3)
 			_UU.setInfoOnComponent(2+_Ndim,"Momentum2_x");// phase2 (kg/m^2/s)
 			if (_Ndim>1)
 				_UU.setInfoOnComponent(3+_Ndim,"Momentum2_y");// phase2 (kg/m^2/s)
@@ -1706,13 +1739,13 @@ void IsothermalTwoFluid::save(){
 		_Vitesse1.setTime(_time,_nbTimeStep);
 		_Vitesse2.setTime(_time,_nbTimeStep);
 		if (_nbTimeStep ==0){
-			_Vitesse1.setInfoOnComponent(0,"Velocity_x (m/s)");
-			_Vitesse1.setInfoOnComponent(1,"Velocity_y (m/s)");
-			_Vitesse1.setInfoOnComponent(2,"Velocity_z (m/s)");
+			_Vitesse1.setInfoOnComponent(0,"Velocity_x_(m/s)");
+			_Vitesse1.setInfoOnComponent(1,"Velocity_y_(m/s)");
+			_Vitesse1.setInfoOnComponent(2,"Velocity_z_(m/s)");
 
-			_Vitesse2.setInfoOnComponent(0,"Velocity_x (m/s)");
-			_Vitesse2.setInfoOnComponent(1,"Velocity_y (m/s)");
-			_Vitesse2.setInfoOnComponent(2,"Velocity_z (m/s)");
+			_Vitesse2.setInfoOnComponent(0,"Velocity_x_(m/s)");
+			_Vitesse2.setInfoOnComponent(1,"Velocity_y_(m/s)");
+			_Vitesse2.setInfoOnComponent(2,"Velocity_z_(m/s)");
 
 			switch(_saveFormat)
 			{

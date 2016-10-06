@@ -49,16 +49,15 @@ def DriftModel_1DBoilingChannel():
     # set the numerical method
 	myProblem.setNumericalScheme(cf.upwind, cf.Implicit);
 	myProblem.setWellBalancedCorrection(True);  
-	myProblem.setLinearSolver(cf.GMRES,cf.LU,False);  
 	myProblem.setNonLinearFormulation(cf.VFFC) 
     
     # name of result file
-	fileName = "1DBoilingChannelUpwindWBImpliciteLU";
+	fileName = "1DBoilingChannelUpwindWBImplicite";
 
     # simulation parameters 
 	MaxNbOfTimeStep = 3 ;
 	freqSave = 1;
-	cfl = 0.5;
+	cfl = 500;
 	maxTime = 500;
 	precision = 1e-7;
 
@@ -68,9 +67,8 @@ def DriftModel_1DBoilingChannel():
 	myProblem.setTimeMax(maxTime);
 	myProblem.setFreqSave(freqSave);
 	myProblem.setFileName(fileName);
-	myProblem.setNewtonSolver(precision*1e7,20);
-	myProblem.saveConservativeField(True)
 	myProblem.saveEnthalpy(True);
+	myProblem.usePrimitiveVarsInNewton(True);
 	if(spaceDim>1):
 		myProblem.saveVelocity();
 		pass

@@ -73,7 +73,6 @@ int main(int argc, char** argv)
 
 	// evolution
 	myProblem.initialize();
-	cout<<"Running "+fileName <<endl;
 
 	ok = myProblem.run();
 	if (ok)

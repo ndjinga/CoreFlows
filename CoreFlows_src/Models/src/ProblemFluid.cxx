@@ -44,6 +44,10 @@ void ProblemFluid::initialize()
 	_absAroe = new PetscScalar[_nVar*_nVar];
 	_signAroe = new PetscScalar[_nVar*_nVar];
 	_invAroe = new PetscScalar[_nVar*_nVar];
+	_AroeImplicit = new PetscScalar[_nVar*_nVar];
+	_AroeMinusImplicit = new PetscScalar[_nVar*_nVar];
+	_AroePlusImplicit = new PetscScalar[_nVar*_nVar];
+	_absAroeImplicit = new PetscScalar[_nVar*_nVar];
 	_primToConsJacoMat = new PetscScalar[_nVar*_nVar];
 	_phi = new PetscScalar[_nVar];
 	_Jcb = new PetscScalar[_nVar*_nVar];
@@ -54,10 +58,8 @@ void ProblemFluid::initialize()
 	_Uj = new PetscScalar[_nVar];
 	_Vi = new PetscScalar[_nVar];
 	_Vj = new PetscScalar[_nVar];
-	if(_nonLinearFormulation==VFRoe){
-		_Uij = new PetscScalar[_nVar];
-		_Vij = new PetscScalar[_nVar];
-	}
+	_Uij = new PetscScalar[_nVar];//used for VFRoe scheme
+	_Vij = new PetscScalar[_nVar];//used for VFRoe scheme
 	_Si = new PetscScalar[_nVar];
 	_Sj = new PetscScalar[_nVar];
 	_pressureLossVector= new PetscScalar[_nVar];
@@ -366,7 +368,7 @@ double ProblemFluid::computeTimeStep(bool & stop){
 
 				if(_timeScheme == Implicit){
 					for(int l=0; l<_nVar*_nVar;l++){
-						_AroeMinus[l] *= _inv_dxi;
+						_AroeMinusImplicit[l] *= _inv_dxi;
 						_Diffusion[l] *=_inv_dxi*_inv_dxi;
 					}
 
@@ -391,7 +393,7 @@ double ProblemFluid::computeTimeStep(bool & stop){
 					idm = idCells[k];
 					Polynoms Poly;
 					//calcul et insertion de A^-*Jcb
-					Poly.matrixProduct(_AroeMinus, _nVar, _nVar, _Jcb, _nVar, _nVar, _a);
+					Poly.matrixProduct(_AroeMinusImplicit, _nVar, _nVar, _Jcb, _nVar, _nVar, _a);
 					MatSetValuesBlocked(_A, size, &idm, size, &idm, _a, ADD_VALUES);
 
 					if(_system)
@@ -399,11 +401,11 @@ double ProblemFluid::computeTimeStep(bool & stop){
 
 					//insertion de -A^-
 					for(int k=0; k<_nVar*_nVar;k++){
-						_AroeMinus[k] *= -1;
+						_AroeMinusImplicit[k] *= -1;
 					}
-					MatSetValuesBlocked(_A, size, &idm, size, &idm, _AroeMinus, ADD_VALUES);
+					MatSetValuesBlocked(_A, size, &idm, size, &idm, _AroeMinusImplicit, ADD_VALUES);
 					if(_system)
-						displayMatrix(_AroeMinus, _nVar,"-_AroeMinus: ");
+						displayMatrix(_AroeMinusImplicit, _nVar,"-_AroeMinusImplicit: ");
 
 					//calcul et insertion de D*JcbDiff
 					Poly.matrixProduct(_Diffusion, _nVar, _nVar, _JcbDiff, _nVar, _nVar, _a);
@@ -475,48 +477,48 @@ double ProblemFluid::computeTimeStep(bool & stop){
 			if(_timeScheme == Implicit){
 				for(int k=0; k<_nVar*_nVar;k++)
 				{
-					_AroeMinus[k] *= _inv_dxi;
+					_AroeMinusImplicit[k] *= _inv_dxi;
 					_Diffusion[k] *=_inv_dxi*2/(1/_inv_dxi+1/_inv_dxj);
 				}
 				idm = idCells[0];
 				idn = idCells[1];
 				//cout<<"idm= "<<idm<<"idn= "<<idn<<"nbvoismax= "<<_neibMaxNb<<endl;
-				MatSetValuesBlocked(_A, size, &idm, size, &idn, _AroeMinus, ADD_VALUES);
+				MatSetValuesBlocked(_A, size, &idm, size, &idn, _AroeMinusImplicit, ADD_VALUES);
 				MatSetValuesBlocked(_A, size, &idm, size, &idn, _Diffusion, ADD_VALUES);
 
 				if(_system){
-					displayMatrix(_AroeMinus, _nVar, "+_AroeMinus: ");
+					displayMatrix(_AroeMinusImplicit, _nVar, "+_AroeMinusImplicit: ");
 					displayMatrix(_Diffusion, _nVar, "+_Diffusion: ");
 				}
 				for(int k=0;k<_nVar*_nVar;k++){
-					_AroeMinus[k] *= -1;
+					_AroeMinusImplicit[k] *= -1;
 					_Diffusion[k] *= -1;
 				}
-				MatSetValuesBlocked(_A, size, &idm, size, &idm, _AroeMinus, ADD_VALUES);
+				MatSetValuesBlocked(_A, size, &idm, size, &idm, _AroeMinusImplicit, ADD_VALUES);
 				MatSetValuesBlocked(_A, size, &idm, size, &idm, _Diffusion, ADD_VALUES);
 				if(_system){
-					displayMatrix(_AroeMinus, _nVar, "-_AroeMinus: ");
+					displayMatrix(_AroeMinusImplicit, _nVar, "-_AroeMinusImplicit: ");
 					displayMatrix(_Diffusion, _nVar, "-_Diffusion: ");
 				}
 				for(int k=0; k<_nVar*_nVar;k++)
 				{
-					_AroePlus[k]  *= _inv_dxj;
+					_AroePlusImplicit[k]  *= _inv_dxj;
 					_Diffusion[k] *=_inv_dxj/_inv_dxi;
 				}
-				MatSetValuesBlocked(_A, size, &idn, size, &idn, _AroePlus, ADD_VALUES);
+				MatSetValuesBlocked(_A, size, &idn, size, &idn, _AroePlusImplicit, ADD_VALUES);
 				MatSetValuesBlocked(_A, size, &idn, size, &idn, _Diffusion, ADD_VALUES);
 				if(_system)
-					displayMatrix(_AroePlus, _nVar, "+_AroePlus: ");
+					displayMatrix(_AroePlusImplicit, _nVar, "+_AroePlusImplicit: ");
 
 				for(int k=0;k<_nVar*_nVar;k++){
-					_AroePlus[k] *= -1;
+					_AroePlusImplicit[k] *= -1;
 					_Diffusion[k] *= -1;
 				}
-				MatSetValuesBlocked(_A, size, &idn, size, &idm, _AroePlus, ADD_VALUES);
+				MatSetValuesBlocked(_A, size, &idn, size, &idm, _AroePlusImplicit, ADD_VALUES);
 				MatSetValuesBlocked(_A, size, &idn, size, &idm, _Diffusion, ADD_VALUES);
 
 				if(_system)
-					displayMatrix(_AroePlus, _nVar, "-_AroePlus: ");
+					displayMatrix(_AroePlusImplicit, _nVar, "-_AroePlusImplicit: ");
 				}
 		}
 		else if( Fj.getNumberOfCells()>2 && _Ndim==1 ){//inner face with more than two neighbours
@@ -571,45 +573,45 @@ double ProblemFluid::computeTimeStep(bool & stop){
 					if(_timeScheme == Implicit){
 						for(int k=0; k<_nVar*_nVar;k++)
 						{
-							_AroeMinus[k] *= _inv_dxi;
+							_AroeMinusImplicit[k] *= _inv_dxi;
 							_Diffusion[k] *=_inv_dxi*2/(1/_inv_dxi+1/_inv_dxj);//use sqrt as above
 						}
-						MatSetValuesBlocked(_A, size, &idm, size, &idn, _AroeMinus, ADD_VALUES);
+						MatSetValuesBlocked(_A, size, &idm, size, &idn, _AroeMinusImplicit, ADD_VALUES);
 						MatSetValuesBlocked(_A, size, &idm, size, &idn, _Diffusion, ADD_VALUES);
 
 						if(_system){
-							displayMatrix(_AroeMinus, _nVar, "+_AroeMinus: ");
+							displayMatrix(_AroeMinusImplicit, _nVar, "+_AroeMinusImplicit: ");
 							displayMatrix(_Diffusion, _nVar, "+_Diffusion: ");
 						}
 						for(int k=0;k<_nVar*_nVar;k++){
-							_AroeMinus[k] *= -1;
+							_AroeMinusImplicit[k] *= -1;
 							_Diffusion[k] *= -1;
 						}
-						MatSetValuesBlocked(_A, size, &idm, size, &idm, _AroeMinus, ADD_VALUES);
+						MatSetValuesBlocked(_A, size, &idm, size, &idm, _AroeMinusImplicit, ADD_VALUES);
 						MatSetValuesBlocked(_A, size, &idm, size, &idm, _Diffusion, ADD_VALUES);
 						if(_system){
-							displayMatrix(_AroeMinus, _nVar, "-_AroeMinus: ");
+							displayMatrix(_AroeMinusImplicit, _nVar, "-_AroeMinusImplicit: ");
 							displayMatrix(_Diffusion, _nVar, "-_Diffusion: ");
 						}
 						for(int k=0; k<_nVar*_nVar;k++)
 						{
-							_AroePlus[k] *= _inv_dxj;
+							_AroePlusImplicit[k] *= _inv_dxj;
 							_Diffusion[k] *=_inv_dxj/_inv_dxi;//use sqrt as above
 						}
-						MatSetValuesBlocked(_A, size, &idn, size, &idn, _AroePlus, ADD_VALUES);
+						MatSetValuesBlocked(_A, size, &idn, size, &idn, _AroePlusImplicit, ADD_VALUES);
 						MatSetValuesBlocked(_A, size, &idn, size, &idn, _Diffusion, ADD_VALUES);
 						if(_system)
-							displayMatrix(_AroePlus, _nVar, "+_AroePlus: ");
+							displayMatrix(_AroePlusImplicit, _nVar, "+_AroePlusImplicit: ");
 
 						for(int k=0;k<_nVar*_nVar;k++){
-							_AroePlus[k] *= -1;
+							_AroePlusImplicit[k] *= -1;
 							_Diffusion[k] *= -1;
 						}
-						MatSetValuesBlocked(_A, size, &idn, size, &idm, _AroePlus, ADD_VALUES);
+						MatSetValuesBlocked(_A, size, &idn, size, &idm, _AroePlusImplicit, ADD_VALUES);
 						MatSetValuesBlocked(_A, size, &idn, size, &idm, _Diffusion, ADD_VALUES);
 
 						if(_system)
-							displayMatrix(_AroePlus, _nVar, "-_AroePlus: ");
+							displayMatrix(_AroePlusImplicit, _nVar, "-_AroePlusImplicit: ");
 											}
 				}
 			}
@@ -631,7 +633,7 @@ double ProblemFluid::computeTimeStep(bool & stop){
 		MatAssemblyBegin(_A, MAT_FINAL_ASSEMBLY);
 		MatAssemblyEnd(_A, MAT_FINAL_ASSEMBLY);
 		if(_verbose && _nbTimeStep%_freqSave ==0){
-			cout << endl;
+			cout << "Fin ProblemFluid.cxx : matrice implicite"<<endl;
 			MatView(_A,PETSC_VIEWER_STDOUT_SELF);
 			cout << endl;
 		}
@@ -639,8 +641,9 @@ double ProblemFluid::computeTimeStep(bool & stop){
 
 	stop=false;
 
+
 /*
-	if(_nbTimeStep<_cfl)
+	if(_nbTimeStep+1<_cfl)
 		return (_nbTimeStep+1)*_minl/_maxvp;
 	else
 */
@@ -653,12 +656,6 @@ void ProblemFluid::computeNewtonVariation()
 	{
 		cout<<"Vecteur courant Uk "<<endl;
 		VecView(_conservativeVars,PETSC_VIEWER_STDOUT_SELF);
-		cout << endl;
-		cout << "Matrice du système linéaire avant contribution delta t" << endl;
-		MatView(_A,PETSC_VIEWER_STDOUT_SELF);
-		cout << endl;
-		cout << "Second membre du système linéaire avant contribution delta t" << endl;
-		VecView(_b, PETSC_VIEWER_STDOUT_SELF);
 		cout << endl;
 	}
 	if(_timeScheme == Explicit)
@@ -674,6 +671,15 @@ void ProblemFluid::computeNewtonVariation()
 	}
 	else
 	{
+		if(_verbose)
+		{
+			cout << "Matrice du système linéaire avant contribution delta t" << endl;
+			MatView(_A,PETSC_VIEWER_STDOUT_SELF);
+			cout << endl;
+			cout << "Second membre du système linéaire avant contribution delta t" << endl;
+			VecView(_b, PETSC_VIEWER_STDOUT_SELF);
+			cout << endl;
+		}
 		MatAssemblyBegin(_A, MAT_FINAL_ASSEMBLY);
 		MatAssemblyEnd(_A, MAT_FINAL_ASSEMBLY);
 
@@ -689,10 +695,10 @@ void ProblemFluid::computeNewtonVariation()
 
 			if(_verbose)
 			{
-				cout << "Matrice du système linéaire" << endl;
+				cout << "Matrice du système linéaire après contribution delta t" << endl;
 				MatView(_A,PETSC_VIEWER_STDOUT_SELF);
 				cout << endl;
-				cout << "Second membre du système linéaire" << endl;
+				cout << "Second membre du système linéaire après contribution delta t" << endl;
 				VecView(_b, PETSC_VIEWER_STDOUT_SELF);
 				cout << endl;
 			}
@@ -793,7 +799,8 @@ void ProblemFluid::validateTimeStep()
 	VecCopy(_conservativeVars, _old);
 
 	if(_verbose && _nbTimeStep%_freqSave ==0){
-		testConservation();
+		if(!_usePrimitiveVarsInNewton)
+			testConservation();
 		cout <<"Valeur propre locale max: " << _maxvp << endl;
 	}
 
@@ -801,8 +808,10 @@ void ProblemFluid::validateTimeStep()
 		//Find minimum and maximum void fractions
 		double alphamin=1e30;
 		double alphamax=-1e30;
+		double T, Tmax=-1e30;
+		int J=_nVar-1;
 		I = 0;
-		for(int j=1; j<=_Nmailles; j++)
+		for(int j=0; j<_Nmailles; j++)
 		{
 			VecGetValues(_primitiveVars, 1, &I, &x);//extract void fraction
 			if(x>alphamax)
@@ -810,8 +819,12 @@ void ProblemFluid::validateTimeStep()
 			if(x<alphamin)
 				alphamin=x;
 			I += _nVar;
+			VecGetValues(_primitiveVars, 1, &J, &T);//extract void fraction
+			if(T>Tmax)
+				Tmax=T;
+			J += _nVar;
 		}
-		cout<<"Alpha min = " << alphamin << " Alpha max = " << alphamax<<endl;
+		cout<<"Alpha min = " << alphamin << ", Alpha max = " << alphamax<<", Tmax= "<<Tmax<<" K"<<endl;
 		cout<<endl;
 		//_runLogFile<<"Alpha min = " << alphamin << " Alpha max = " << alphamax<<endl;
 	}
@@ -918,12 +931,7 @@ void ProblemFluid::addConvectionToSecondMember
 		else //Roe or VFFC
 		{
 			if(_spaceScheme==staggered && _nonLinearFormulation==VFFC)//special case
-				{
-				//Fij=staggeredVFFCFlux();
-				Fi=convectionFlux(Ui,Vi,normale,_porosityi);
-				Fj=convectionFlux(Uj,Vj,normale,_porosityj);
-				Fij=(Fi+Fj)/2+signAroe*(Fi-Fj)/2;
-				}
+				Fij=staggeredVFFCFlux();
 			else
 			{
 				Fi=convectionFlux(Ui,Vi,normale,_porosityi);
@@ -1133,7 +1141,6 @@ void ProblemFluid::addSourceTermToSecondMember
 				_Si[k]=(_phi[k]-_l[k])*mesureFace/_perimeters(i);///nbVoisinsi;
 				_Sj[k]=(_phi[k]+_l[k])*mesureFace/_perimeters(j);///nbVoisinsj;
 			}
-
 		}
 		else{
 			for(int k=0; k<_nVar;k++){
@@ -1383,6 +1390,10 @@ void ProblemFluid::terminate(){
 	delete[] _absAroe;
 	delete[] _signAroe;
 	delete[] _invAroe;
+	delete[] _AroeImplicit;
+	delete[] _AroeMinusImplicit;
+	delete[] _AroePlusImplicit;
+	delete[] _absAroeImplicit;
 	delete[] _phi;
 	delete[] _Jcb;
 	delete[] _JcbDiff;
