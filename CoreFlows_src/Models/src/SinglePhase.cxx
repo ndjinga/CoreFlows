@@ -1790,6 +1790,13 @@ void SinglePhase::staggeredVFFCMatricesConservativeVariables(double un)//vitesse
 			_AroeMinus[_nVar*_nVar -1] = uj_n;
 		}
 	}
+	if(_timeScheme==Implicit)
+		for(int i=0; i<_nVar*_nVar;i++)
+		{
+			_AroeMinusImplicit[i] = _AroeMinus[i];
+			_AroePlusImplicit[i]  = _AroePlus[i];
+		}
+
 	/******** Construction de la matrices Aroe *********/
 	/*
 	//premiere ligne (masse)
