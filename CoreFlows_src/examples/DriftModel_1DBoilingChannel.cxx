@@ -72,6 +72,7 @@ int main(int argc, char** argv)
 	myProblem.saveVoidFraction(true);
 	myProblem.saveEnthalpy(true);
 	myProblem.displayConditionNumber();
+	myProblem.setSaveFileFormat(CSV);
 
 	// evolution
 	myProblem.initialize();
