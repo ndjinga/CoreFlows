@@ -72,9 +72,8 @@ endif()
 #-- Copier les examples dans le CoreFlows_install
 #INSTALL(FILES ${CoreFlowsExample_SOURCES} DESTINATION share/examples)
 #
-#file(GLOB NICE_EXAMPLES_TO_INSTALL resources Python )
-#
-#install(DIRECTORY ${NICE_EXAMPLES_TO_INSTALL} DESTINATION share/examples)
+file(GLOB NICE_EXAMPLES_TO_INSTALL resources Python )
+install(DIRECTORY ${NICE_EXAMPLES_TO_INSTALL} DESTINATION share/examples)
 
 #####################################
 
