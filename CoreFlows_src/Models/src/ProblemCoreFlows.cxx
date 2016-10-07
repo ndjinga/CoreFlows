@@ -342,7 +342,7 @@ bool ProblemCoreFlows::run()
 
 	cout<< "Running test case "<< _fileName<<endl;
 
-	ofstream _runLogFile;
+	ofstream _runLogFile; /* to study */
 	 _runLogFile.open((_fileName+".log").c_str(), ios::out | ios::trunc);;//for creation of a log file to save the history of the simulation
 
 	// Time step loop
