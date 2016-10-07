@@ -51,3 +51,21 @@ SET_TESTS_PROPERTIES(PythonTests PROPERTIES ENVIRONMENT "${tests_env}")
 						    								#
 endif ()                                                                                                        #
 #---------------------------------------------------------------------------------------------------------------#
+
+
+
+############# python tests
+
+function(CreatePythonTest pythonFile)
+    add_test(NAME ${pythonFile} COMMAND "${pythonFile}")
+    set_tests_properties(${pythonFile} PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/swig")
+endfunction(CreatePythonTest)
+
+# copy all *.py tests files before build
+file(GLOB pythonTestFiles "*.py" )
+file(COPY ${pythonTestFiles} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+
+CreatePythonTest("${CMAKE_CURRENT_BINARY_DIR}/DiffusionEquation_1DHeatedRod.py")
+
+
