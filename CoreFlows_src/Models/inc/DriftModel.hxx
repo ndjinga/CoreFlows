@@ -68,6 +68,27 @@ public :
 		_limitField[groupName]=LimitField(Inlet,-1,vector<double>(1,v_x),vector<double>(1,v_y),vector<double>(1,v_z),Temperature,-1,-1,concentration);
 	};
 	/** \fn setIntletPressureBoundaryCondition
+	 * \brief adds a new boundary condition of type InletPressure taking into account the hydrostatic pressure variations
+	 * \details The pressure is not constant on the boundary but varies linearly with a slope given by the gravity vector
+	 * \param [in] string : the name of the boundary
+	 * \param [in] double : the value of the pressure at the boundary
+	 * \param [in] double : the value of the temperature at the boundary
+	 * \param [in] double : the value of the concentration at the boundary
+	 * \param [in] vector<double> : reference_point position on the boundary where the value Pressure will be imposed
+	 * \param [out] void
+	 *  */
+	void setInletPressureBoundaryCondition(string groupName, double pressure,double Temperature,double concentration, vector<double> reference_point){
+		/* On the boundary we have P-Pref=rho g\cdot(x-xref) hence P=Pref-g\cdot xref + g\cdot x */
+		pressure-=reference_point[0]*_gravity3d[0];
+		if(_Ndim>1){
+			pressure-=reference_point[1]*_gravity3d[1];
+			if(_Ndim>2)
+				pressure-=reference_point[2]*_gravity3d[2];
+		}
+
+		_limitField[groupName]=LimitField(InletPressure,pressure,vector<double>(0,0),vector<double>(0,0),vector<double>(0,0),Temperature,-1,-1,concentration);
+	};
+	/** \fn setIntletPressureBoundaryCondition
 	 * \brief adds a new boundary condition of type InletPressure
 	 * \details
 	 * \param [in] string : the name of the boundary

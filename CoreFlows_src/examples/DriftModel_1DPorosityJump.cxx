@@ -49,7 +49,7 @@ int main(int argc, char** argv)
 
 	//set the boundary conditions
 	myProblem.setInletBoundaryCondition("Inlet",initialTemperature,initialConc,initialVelocityX);
-	myProblem.setOutletBoundaryCondition("Outlet",initialPressure);
+	myProblem.setOutletBoundaryCondition("Outlet",initialPressure,vector<double>(1,xsup));
 
 	// physical parameters
 	myProblem.setPorosityField(porosityField);

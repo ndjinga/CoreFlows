@@ -42,7 +42,7 @@ int main(int argc, char** argv)
 
 	//set the boundary conditions
 	myProblem.setWallBoundaryCondition("Wall", wallTemperature, wallVelocityX);
-	myProblem.setOutletBoundaryCondition("Outlet", outletPressure);
+	myProblem.setOutletBoundaryCondition("Outlet", outletPressure,vector<double>(1,xsup));
 
 	// set the numerical method
 	myProblem.setNumericalScheme(upwind, Explicit);

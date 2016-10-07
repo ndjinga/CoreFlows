@@ -81,8 +81,8 @@ def DriftModel_2DVidangeReservoir():
         myProblem.setInitialFieldConstant( M, VV_bottom)
 
     # the boundary conditions
-	myProblem.setOutletBoundaryCondition("outlet", outletPressure);
-	myProblem.setInletPressureBoundaryCondition("inlet", outletPressure, inletTemperature, inletConc);
+	myProblem.setOutletBoundaryCondition("outlet", outletPressure,[xsup,ysup]);
+	myProblem.setInletPressureBoundaryCondition("inlet", outletPressure, inletTemperature, inletConc,[xsup,yinf]);
 	myProblem.setWallBoundaryCondition("wall", wallTemperature, wallVelocityX, wallVelocityY);
 
     # set physical parameters

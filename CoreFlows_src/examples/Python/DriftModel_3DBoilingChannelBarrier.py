@@ -110,7 +110,7 @@ def DriftModel_3DBoilingChannelBarrier():
 	myProblem.setInitialFieldConstant(M,VV_Constant)
 
     # the boundary conditions
-	myProblem.setOutletBoundaryCondition("outlet", outletPressure);
+	myProblem.setOutletBoundaryCondition("outlet", outletPressure,[xsup,ysup,zsup]);
 	myProblem.setInletBoundaryCondition("inlet", inletTemperature, inletConc, inletVelocityX, inletVelocityY, inletVelocityZ);
 	myProblem.setWallBoundaryCondition("wall", wallTemperature, wallVelocityX, wallVelocityY,wallVelocityZ);
 

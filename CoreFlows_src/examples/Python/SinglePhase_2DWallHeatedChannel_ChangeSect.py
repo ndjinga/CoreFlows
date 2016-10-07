@@ -69,7 +69,7 @@ def SinglePhase_2DWallHeatedChannel_ChangeSect():
 	myProblem.setInitialFieldConstant(M,VV_Constant);
 
     # the boundary conditions
-	myProblem.setOutletBoundaryCondition("Outlet", outletPressure);
+	myProblem.setOutletBoundaryCondition("Outlet", outletPressure,[xsup,ysup]);
 	myProblem.setInletBoundaryCondition("Inlet", inletTemperature, inletVelocityX, inletVelocityY);
 	myProblem.setWallBoundaryCondition("Wall", wallTemperature, wallVelocityX, wallVelocityY);
 

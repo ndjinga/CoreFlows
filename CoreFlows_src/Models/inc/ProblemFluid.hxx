@@ -95,13 +95,33 @@ public :
 	virtual void validateTimeStep();
 
 	/** \fn setOutletBoundaryCondition
-	 * \brief adds a new boundary condition of type Outlet
+	 * \brief Adds a new boundary condition of type Outlet
 	 * \details
 	 * \param [in] string : the name of the boundary
 	 * \param [in] double : the value of the pressure at the boundary
 	 * \param [out] void
 	 *  */
 	void setOutletBoundaryCondition(string groupName,double Pressure){
+		_limitField[groupName]=LimitField(Outlet,Pressure,vector<double>(_nbPhases,0),vector<double>(_nbPhases,0),vector<double>(_nbPhases,0),-1,-1,-1,-1);
+	};
+
+	/** \fn setOutletBoundaryCondition
+	 * \brief Adds a new boundary condition of type Outlet taking into account the hydrostatic pressure variations
+	 * \details The pressure is not constant on the boundary but varies linearly with a slope given by the gravity vector
+	 * \param [in] string : the name of the boundary
+	 * \param [in] double : the value of the pressure at the boundary
+	 * \param [in] vector<double> : reference_point position on the boundary where the value Pressure will be imposed
+	 * \param [out] void
+	 *  */
+	void setOutletBoundaryCondition(string groupName,double Pressure, vector<double> reference_point){
+		/* On the boundary we have P-Pref=rho g\cdot(x-xref) hence P=Pref-g\cdot xref + g\cdot x */
+		Pressure-=reference_point[0]*_gravity3d[0];
+		if(_Ndim>1){
+			Pressure-=reference_point[1]*_gravity3d[1];
+			if(_Ndim>2)
+				Pressure-=reference_point[2]*_gravity3d[2];
+		}
+
 		_limitField[groupName]=LimitField(Outlet,Pressure,vector<double>(_nbPhases,0),vector<double>(_nbPhases,0),vector<double>(_nbPhases,0),-1,-1,-1,-1);
 	};
 

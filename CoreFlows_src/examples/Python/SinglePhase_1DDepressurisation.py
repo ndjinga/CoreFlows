@@ -43,7 +43,7 @@ def SinglePhase_1DDepressurisation():
 
     # set the boundary conditions
 	myProblem.setWallBoundaryCondition("wall", wallTemperature, wallVelocityX);
-	myProblem.setOutletBoundaryCondition("outlet", outletPressure);
+	myProblem.setOutletBoundaryCondition("outlet", outletPressure,[xsup]);
 
 
     # set the numerical method

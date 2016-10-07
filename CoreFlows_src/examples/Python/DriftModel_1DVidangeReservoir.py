@@ -56,8 +56,8 @@ def DriftModel_1DVidangeReservoir():
 	myProblem.setInitialFieldStepFunction( M, VV_bottom, VV_top, .8, 0);
 
     # the boundary conditions
-	myProblem.setInletPressureBoundaryCondition("inlet", outletPressure, inletTemperature, inletConc);
-	myProblem.setOutletBoundaryCondition("outlet", outletPressure);
+	myProblem.setInletPressureBoundaryCondition("inlet", outletPressure, inletTemperature, inletConc,[xinf]);
+	myProblem.setOutletBoundaryCondition("outlet", outletPressure,[xsup]);
 
     # set physical parameters
 	myProblem.setGravity(gravite);

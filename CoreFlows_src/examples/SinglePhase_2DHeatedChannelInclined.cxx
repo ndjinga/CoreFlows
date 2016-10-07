@@ -52,7 +52,10 @@ int main(int argc, char** argv)
 					  0.0,0.0,  0,  "", "");
 
     // the boundary conditions
-	myProblem.setOutletBoundaryCondition("outlet", outletPressure);
+	vector<double>pressure_reference_point(2);
+	pressure_reference_point[0]=xsup;
+	pressure_reference_point[1]=ysup;
+	myProblem.setOutletBoundaryCondition("outlet", outletPressure,pressure_reference_point);
 	myProblem.setInletBoundaryCondition("inlet", inletTemperature, inletVelocityX, inletVelocityY);
 	myProblem.setWallBoundaryCondition("wall", wallTemperature, wallVelocityX, wallVelocityY);
     
@@ -62,7 +65,7 @@ int main(int argc, char** argv)
 
 	// set the numerical method
 	myProblem.setNumericalScheme(staggered, Implicit);
-	myProblem.setLinearSolver(GMRES,ILU,true);
+	myProblem.setNonLinearFormulation(VFFC);
     
 	// name file save
 	string fileName = "2DInclinedHeatedChannel";
@@ -80,6 +83,7 @@ int main(int argc, char** argv)
 	myProblem.setTimeMax(maxTime);
 	myProblem.setFreqSave(freqSave);
 	myProblem.setFileName(fileName);
+	myProblem.usePrimitiveVarsInNewton(true);
 	bool ok;
 
 	// evolution
