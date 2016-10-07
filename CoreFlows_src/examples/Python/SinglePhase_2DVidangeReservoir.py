@@ -70,8 +70,8 @@ def SinglePhase_2DVidangeReservoir():
         myProblem.setInitialFieldConstant( M, VV_constant)
 
     # the boundary conditions
-	myProblem.setOutletBoundaryCondition("outlet", outletPressure);
-	myProblem.setInletPressureBoundaryCondition("inlet", outletPressure, inletTemperature);
+	myProblem.setOutletBoundaryCondition("outlet", outletPressure,[xsup,ysup]);
+	myProblem.setInletPressureBoundaryCondition("inlet", outletPressure, inletTemperature,[xsup,yinf]);
 	myProblem.setWallBoundaryCondition("wall", wallTemperature, wallVelocityX, wallVelocityY);
 
     # set physical parameters

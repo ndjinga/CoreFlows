@@ -58,7 +58,7 @@ int main(int argc, char** argv)
 
 	//set the boundary conditions
 	myProblem.setInletBoundaryCondition("Inlet",inletTemperature,inletConc,inletVelocityX);
-	myProblem.setOutletBoundaryCondition("Outlet", outletPressure);
+	myProblem.setOutletBoundaryCondition("Outlet", outletPressure,vector<double>(1,xsup));
 
 	// physical parameters
 	myProblem.setHeatPowerField(heatPowerField);
@@ -84,7 +84,7 @@ int main(int argc, char** argv)
 	myProblem.setTimeMax(maxTime);
 	myProblem.setFreqSave(freqSave);
 	myProblem.setFileName(fileName);
-	//myProblem.saveVoidFraction(true);
+	myProblem.saveVoidFraction(true);
 	bool ok;
 
 	// evolution

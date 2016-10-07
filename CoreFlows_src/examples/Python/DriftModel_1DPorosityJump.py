@@ -51,7 +51,7 @@ def DriftModel_1DPorosityJump():
 
     # set the boundary conditions
     #myProblem.setInletBoundaryCondition("Inlet",initialTemperature,initialConc,initialVelocityX)
-    #myProblem.setOutletBoundaryCondition("Outlet", initialPressure);
+    #myProblem.setOutletBoundaryCondition("Outlet", initialPressure,[xsup]);
     myProblem.setNeumannBoundaryCondition("Neumann");
 
     # set physical parameters

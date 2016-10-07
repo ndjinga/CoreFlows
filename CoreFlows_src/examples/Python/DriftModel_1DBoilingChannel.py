@@ -41,7 +41,7 @@ def DriftModel_1DBoilingChannel():
 
     # set the boundary conditions
 	myProblem.setInletBoundaryCondition("inlet",inletTemperature,inletConc,inletVelocityX)
-	myProblem.setOutletBoundaryCondition("outlet", outletPressure);
+	myProblem.setOutletBoundaryCondition("outlet", outletPressure,[xsup]);
 
     # set physical parameters
 	myProblem.setHeatSource(heatPower);
@@ -57,7 +57,7 @@ def DriftModel_1DBoilingChannel():
     # simulation parameters 
 	MaxNbOfTimeStep = 3 ;
 	freqSave = 1;
-	cfl = 500;
+	cfl = 100;
 	maxTime = 500;
 	precision = 1e-7;
 

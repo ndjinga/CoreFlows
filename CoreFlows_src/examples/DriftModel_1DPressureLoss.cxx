@@ -45,7 +45,7 @@ int main(int argc, char** argv)
 
 	//set the boundary conditions
 	myProblem.setInletBoundaryCondition("inlet",inletTemperature,inletConc,inletVelocityX);
-	myProblem.setOutletBoundaryCondition("outlet", outletPressure);
+	myProblem.setOutletBoundaryCondition("outlet", outletPressure,vector<double>(1,xsup));
 
 	// physical parameters
 	myProblem.setPressureLossField(pressureLossField);

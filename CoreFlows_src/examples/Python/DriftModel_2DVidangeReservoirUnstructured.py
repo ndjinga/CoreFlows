@@ -75,7 +75,7 @@ def DriftModel_2DVidangeReservoirUnstructured():
 	myProblem.setInitialFieldConstant(M,VV_Constant)
 
     # the boundary conditions
-	myProblem.setOutletBoundaryCondition("outlet", outletPressure);
+	myProblem.setOutletBoundaryCondition("outlet", outletPressure,[xsup,ysup]);
 	myProblem.setInletBoundaryCondition("inlet", inletTemperature, inletConc, inletVelocityX, inletVelocityY);
 	#myProblem.setNeumannBoundaryCondition("inlet");
 	myProblem.setWallBoundaryCondition("wall", wallTemperature, wallVelocityX, wallVelocityY);

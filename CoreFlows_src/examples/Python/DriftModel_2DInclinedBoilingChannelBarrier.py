@@ -82,7 +82,7 @@ def DriftModel_2DInclinedBoilingChannelBarrier():
 	myProblem.setInitialFieldConstant(M,VV_Constant)
 
     # the boundary conditions
-	myProblem.setOutletBoundaryCondition("outlet", outletPressure);
+	myProblem.setOutletBoundaryCondition("outlet", outletPressure,[xsup,ysup]);
 	myProblem.setInletBoundaryCondition("inlet", inletTemperature, inletConc, inletVelocityX, inletVelocityY);
 	myProblem.setWallBoundaryCondition("wall", wallTemperature, wallVelocityX, wallVelocityY);
 

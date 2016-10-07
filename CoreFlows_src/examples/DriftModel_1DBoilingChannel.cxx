@@ -43,7 +43,7 @@ int main(int argc, char** argv)
 
 	//set the boundary conditions
 	myProblem.setInletBoundaryCondition("Inlet",inletTemperature,inletConc,inletVelocityX);
-	myProblem.setOutletBoundaryCondition("Outlet", outletPressure);
+	myProblem.setOutletBoundaryCondition("Outlet", outletPressure,vector<double>(1,xsup));
 
 	// physical parameters
 	myProblem.setHeatSource(heatPower);
@@ -52,6 +52,7 @@ int main(int argc, char** argv)
 	// set the numerical method
 	myProblem.setNumericalScheme(upwind, Implicit);
 	myProblem.setWellBalancedCorrection(true);
+	myProblem.setNonLinearFormulation(VFFC);
 
 	// name the result file
 	string fileName = "Driftmodel1DBoilingChannel";
@@ -59,7 +60,7 @@ int main(int argc, char** argv)
 	// setting numerical parameters
 	unsigned MaxNbOfTimeStep =3 ;
 	int freqSave = 1;
-	double cfl = 500;
+	double cfl = 100;
 	double maxTime = 1;
 	double precision = 1e-7;
 
@@ -69,6 +70,7 @@ int main(int argc, char** argv)
 	myProblem.setTimeMax(maxTime);
 	myProblem.setFreqSave(freqSave);
 	myProblem.setFileName(fileName);
+	myProblem.usePrimitiveVarsInNewton(true);
 	myProblem.saveVoidFraction(true);
 	myProblem.saveEnthalpy(true);
 	myProblem.displayConditionNumber();

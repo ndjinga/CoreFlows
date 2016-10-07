@@ -49,7 +49,10 @@ int main(int argc, char** argv)
 	myProblem.setInitialFieldConstant(spaceDim,VV_Constant,xinf,xsup,nx,"wall","wall",yinf,ysup,ny,"inlet","outlet");
 
 	//set the boundary conditions
-	myProblem.setOutletBoundaryCondition("outlet", outletPressure);
+	vector<double>pressure_reference_point(2);
+	pressure_reference_point[0]=xsup;
+	pressure_reference_point[1]=ysup;
+	myProblem.setOutletBoundaryCondition("outlet", outletPressure,pressure_reference_point);
 	myProblem.setInletBoundaryCondition("inlet", inletTemperature, inletConcentration, inletVelocityX, inletVelocityY);
 	myProblem.setWallBoundaryCondition("wall", wallTemperature, wallVelocityX, wallVelocityY);
 

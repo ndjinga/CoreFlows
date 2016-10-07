@@ -51,7 +51,7 @@ def SinglePhase_2DHeatedChannelInclined():
 					  0.0,0.0,  0,  "", "")
 
     # the boundary conditions
-	myProblem.setOutletBoundaryCondition("outlet", outletPressure);
+	myProblem.setOutletBoundaryCondition("outlet", outletPressure,[xsup,ysup]);
 	myProblem.setInletBoundaryCondition("inlet", inletTemperature, inletVelocityX, inletVelocityY);
 	myProblem.setWallBoundaryCondition("wall", wallTemperature, wallVelocityX, wallVelocityY);
     # set physical parameters

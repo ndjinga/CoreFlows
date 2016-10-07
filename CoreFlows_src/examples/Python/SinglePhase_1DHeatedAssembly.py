@@ -53,7 +53,7 @@ def SinglePhase_1DHeatedAssembly():
 
     # set the boundary conditions
 	myProblem.setInletBoundaryCondition("inlet",inletTemperature,inletVelocityX)
-	myProblem.setOutletBoundaryCondition("outlet", outletPressure);
+	myProblem.setOutletBoundaryCondition("outlet", outletPressure,[xsup]);
 
     # set physical parameters
 	myProblem.setHeatPowerField(heatPowerField);
