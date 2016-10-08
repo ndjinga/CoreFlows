@@ -56,14 +56,20 @@ endif ()                                                                        
 
 ############# python tests
 
+set(python_env_for_tests "${CMAKE_BINARY_DIR}/swig:${CDMATH_DIR}/lib/:${CDMATH_DIR}/lib/cdmath:${CDMATH_DIR}/bin/cdmath")
+
 function(CreatePythonTest pythonFile)
-    add_test(NAME ${pythonFile} COMMAND "${pythonFile}")
-    set_tests_properties(${pythonFile} PROPERTIES ENVIRONMENT "PYTHONPATH=${CMAKE_BINARY_DIR}/swig")
+    add_test(NAME ${pythonFile} COMMAND "${CMAKE_CURRENT_BINARY_DIR}/${pythonFile}")
+    set_tests_properties(${pythonFile} PROPERTIES 
+        ENVIRONMENT "PYTHONPATH=${python_env_for_tests}"
+        )
 endfunction(CreatePythonTest)
 
 # copy all *.py tests files before build
 file(GLOB pythonTestFiles "*.py" )
-file(COPY ${pythonTestFiles} DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${pythonTestFiles} DESTINATION ${CMAKE_CURRENT_BINARY_DIR} 
+    FILE_PERMISSIONS OWNER_EXECUTE OWNER_READ OWNER_WRITE
+)
 
 
 CreatePythonTest(DiffusionEquation_1DHeatedRod.py)
