@@ -44,11 +44,14 @@ FiveEqsTwoFluid::FiveEqsTwoFluid(pressureEstimate pEstimate, int dim){
 	_intPressCoeff=1.5;
 }
 
-void FiveEqsTwoFluid::initialize(){
+void FiveEqsTwoFluid::initialize()
+{
 	cout<<"Initialising the five equation two fluid model"<<endl;
 
 	if(static_cast<StiffenedGas*>(_fluides[0])==NULL || static_cast<StiffenedGas*>(_fluides[1])==NULL)
 		throw CdmathException("FiveEqsTwoFluid::initialize: both phase must have stiffened gas EOS");
+
+	_Uroe = new double[_nVar+1];
 
 	_lCon = new PetscScalar[_nVar];//should be deleted in ::terminate
 	_rCon = new PetscScalar[_nVar];//should be deleted in ::terminate
@@ -57,20 +60,11 @@ void FiveEqsTwoFluid::initialize(){
 	_gravite = vector<double>(_nVar,0);
 	for(int i=0; i<_Ndim; i++)
 	{
-		_gravite[i+1]=_gravity3d[i];
-		_gravite[i+1 +_Ndim+1]=_gravity3d[i];
+		_gravite[i+1]=_GravityField3d[i];
+		_gravite[i+1 +_Ndim+1]=_GravityField3d[i];
 	}
-	_Gravity = new PetscScalar[_nVar*_nVar];
-	for(int i=0; i<_nVar*_nVar;i++)
-		_Gravity[i] = 0;
-	if(_timeScheme==Implicit)
-	{
-		for(int i=0; i<_nVar/2;i++)
-			_Gravity[i*_nVar]=-_gravite[i];
-		for(int i=_nVar/2; i<_nVar;i++)
-			_Gravity[i*_nVar+_nVar/2]=-_gravite[i];
-	}
-	_Uroe = new double[_nVar+1];
+	_GravityImplicitationMatrix = new PetscScalar[_nVar*_nVar];
+
 	if(_saveVelocity){
 		_Vitesse1=Field("Gas velocity",CELLS,_mesh,3);//Forcement en dimension 3 pour le posttraitement des lignes de courant
 		_Vitesse2=Field("Liquid velocity",CELLS,_mesh,3);//Forcement en dimension 3 pour le posttraitement des lignes de courant
@@ -307,7 +301,17 @@ void FiveEqsTwoFluid::sourceVector(PetscScalar * Si,PetscScalar * Ui,PetscScalar
 	else//boundary cell, no heating
 		Si[_nVar-1]=0;
 	for(int k=0; k<_Ndim; k++)
-		Si[_nVar-1] +=_gravity3d[k]*(Ui[1+k]+Ui[2+k+_Ndim])-_dragCoeffs[0]*norm_ur*(Vi[2+k]-Vi[2+k+_Ndim])*(Vi[2+k]-Vi[2+k+_Ndim]);
+		Si[_nVar-1] +=_GravityField3d[k]*(Ui[1+k]+Ui[2+k+_Ndim])-_dragCoeffs[0]*norm_ur*(Vi[2+k]-Vi[2+k+_Ndim])*(Vi[2+k]-Vi[2+k+_Ndim]);
+
+	if(_timeScheme==Implicit)
+	{
+		for(int i=0; i<_nVar*_nVar;i++)
+			_GravityImplicitationMatrix[i] = 0;
+		for(int i=0; i<_nVar/2;i++)
+			_GravityImplicitationMatrix[i*_nVar]=-_gravite[i];
+		for(int i=_nVar/2; i<_nVar;i++)
+			_GravityImplicitationMatrix[i*_nVar+_nVar/2]=-_gravite[i];
+	}
 
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
@@ -324,6 +328,8 @@ void FiveEqsTwoFluid::sourceVector(PetscScalar * Si,PetscScalar * Ui,PetscScalar
 		for(int k=0;k<_nVar;k++)
 			cout<<Si[k]<<", ";
 		cout<<endl;
+		if(_timeScheme==Implicit)
+			displayMatrix(_GravityImplicitationMatrix, _nVar, "Gravity implicitation matrix");
 	}
 }
 
@@ -1399,7 +1405,7 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 			}
 		}
 		_externalStates[_nVar-1] = _externalStates[0]*(_fluides[0]->getInternalEnergy(_limitField[nameOfGroup].T,rho_v) + v1_2/2)
-																																											+_externalStates[1+_Ndim]*(_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + v2_2/2);
+																																													+_externalStates[1+_Ndim]*(_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + v2_2/2);
 		VecAssemblyBegin(_Uextdiff);
 		VecSetValues(_Uextdiff, _nVar, _idm, _externalStates, INSERT_VALUES);
 		VecAssemblyEnd(_Uextdiff);
@@ -1460,7 +1466,7 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 			_Vj[2+_Ndim+idim] = v2[idim];
 		}
 		_externalStates[_nVar-1] = _externalStates[0]      *(_fluides[0]->getInternalEnergy(T,rho_v) + v1_2/2)
-    																																							+_externalStates[1+_Ndim]*(_fluides[1]->getInternalEnergy(T,rho_l) + v2_2/2);
+    																																									+_externalStates[1+_Ndim]*(_fluides[1]->getInternalEnergy(T,rho_l) + v2_2/2);
 
 		// _Vj external primitives
 		_Vj[0] = alpha;
@@ -1487,11 +1493,11 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 
 		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
 		Cell Cj=_mesh.getCell(j);
-		double hydroPress=Cj.x()*_gravity3d[0];
+		double hydroPress=Cj.x()*_GravityField3d[0];
 		if(_Ndim>1){
-			hydroPress+=Cj.y()*_gravity3d[1];
+			hydroPress+=Cj.y()*_GravityField3d[1];
 			if(_Ndim>2)
-				hydroPress+=Cj.z()*_gravity3d[2];
+				hydroPress+=Cj.z()*_GravityField3d[2];
 		}
 		hydroPress*=_externalStates[0]+_externalStates[_Ndim];//multiplication by rho the total density
 
@@ -1512,7 +1518,7 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 			v2_2+=_Vj[2+_Ndim+idim]*_Vj[2+_Ndim+idim];
 		}
 		_externalStates[_nVar-1]=    alpha *rho_v*(_fluides[0]->getInternalEnergy(T,rho_v)+v1_2/2)
-				                																																		+(1-alpha)*rho_l*(_fluides[1]->getInternalEnergy(T,rho_l)+v2_2/2);
+				                																																				+(1-alpha)*rho_l*(_fluides[1]->getInternalEnergy(T,rho_l)+v2_2/2);
 
 		// _Vj external primitives
 		_Vj[0] = alpha;
@@ -1539,11 +1545,11 @@ void FiveEqsTwoFluid::setBoundaryState(string nameOfGroup, const int &j,double *
 
 		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
 		Cell Cj=_mesh.getCell(j);
-		double hydroPress=Cj.x()*_gravity3d[0];
+		double hydroPress=Cj.x()*_GravityField3d[0];
 		if(_Ndim>1){
-			hydroPress+=Cj.y()*_gravity3d[1];
+			hydroPress+=Cj.y()*_GravityField3d[1];
 			if(_Ndim>2)
-				hydroPress+=Cj.z()*_gravity3d[2];
+				hydroPress+=Cj.z()*_GravityField3d[2];
 		}
 		hydroPress*=_externalStates[0]+_externalStates[_Ndim];//multiplication by rho the total density
 

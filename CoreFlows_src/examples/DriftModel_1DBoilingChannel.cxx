@@ -88,5 +88,5 @@ int main(int argc, char** argv)
 	cout << "------------ End of calculation -----------" << endl;
 	myProblem.terminate();
 
-	return ok;
+	return EXIT_SUCCESS;
 }

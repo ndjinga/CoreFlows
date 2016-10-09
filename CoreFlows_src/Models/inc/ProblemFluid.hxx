@@ -115,11 +115,11 @@ public :
 	 *  */
 	void setOutletBoundaryCondition(string groupName,double Pressure, vector<double> reference_point){
 		/* On the boundary we have P-Pref=rho g\cdot(x-xref) hence P=Pref-g\cdot xref + g\cdot x */
-		Pressure-=reference_point[0]*_gravity3d[0];
+		Pressure-=reference_point[0]*_GravityField3d[0];
 		if(_Ndim>1){
-			Pressure-=reference_point[1]*_gravity3d[1];
+			Pressure-=reference_point[1]*_GravityField3d[1];
 			if(_Ndim>2)
-				Pressure-=reference_point[2]*_gravity3d[2];
+				Pressure-=reference_point[2]*_GravityField3d[2];
 		}
 
 		_limitField[groupName]=LimitField(Outlet,Pressure,vector<double>(_nbPhases,0),vector<double>(_nbPhases,0),vector<double>(_nbPhases,0),-1,-1,-1,-1);
@@ -154,7 +154,7 @@ public :
 	 * @param gravite is a vector of size equal to the space dimension
 	 * 				 * */
 	void setGravity(vector<double> gravite){
-		_gravity3d = gravite;
+		_GravityField3d = gravite;
 	};
 
 	/** \fn setDragCoeffs
@@ -407,7 +407,7 @@ protected :
 	vector<double> _conductivite;
 
 	// Source terms 
-	vector<double> _gravite, _gravity3d, _dragCoeffs;
+	vector<double> _gravite, _GravityField3d, _dragCoeffs;
 	double _latentHeat, _Tsat,_Psat,_dHsatl_over_dp;
 	Field _porosityField, _pressureLossField, _dp_over_dt, _sectionField;
 	bool _porosityFieldSet, _pressureLossFieldSet, _sectionFieldSet;
@@ -422,7 +422,7 @@ protected :
 	// Variables du schema numerique 
 	Vec _conservativeVars, _newtonVariation, _bScaling,_old, _primitiveVars, _Uext,_Uextdiff ,_vecScaling,_invVecScaling, _Vext;
 	//courant state vector, vector computed at next time step, second member of the equation
-	PetscScalar *_AroePlus, *_AroeMinus,*_Jcb,*_JcbDiff, *_a, *_blockDiag,  *_invBlockDiag,*_Diffusion, *_Gravity;
+	PetscScalar *_AroePlus, *_AroeMinus,*_Jcb,*_JcbDiff, *_a, *_blockDiag,  *_invBlockDiag,*_Diffusion, *_GravityImplicitationMatrix;
 	PetscScalar *_Aroe, *_absAroe, *_signAroe, *_invAroe;
 	PetscScalar *_AroeMinusImplicit,*_AroePlusImplicit,*_AroeImplicit,*_absAroeImplicit;//negative part of the roe matrix used in the implicit scheme matrix
 	PetscScalar * _primToConsJacoMat; //Jacobian matrix of the prim-->cons function

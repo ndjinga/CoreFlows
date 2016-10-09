@@ -62,7 +62,6 @@ int main(int argc, char** argv)
 
 	// set the numerical method
 	myProblem.setNumericalScheme(upwind, Explicit);
-	myProblem.setLinearSolver(GMRES,LU,true);
 	myProblem.setWellBalancedCorrection(true);
 
 	// name of result file
@@ -81,7 +80,6 @@ int main(int argc, char** argv)
 	myProblem.setTimeMax(maxTime);
 	myProblem.setFreqSave(freqSave);
 	myProblem.setFileName(fileName);
-	myProblem.setNewtonSolver(precision,20);
 	myProblem.saveVelocity();
 
 	// evolution

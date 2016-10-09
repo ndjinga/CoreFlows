@@ -55,7 +55,7 @@ int main(int argc, char** argv)
 	myProblem.setGravity(gravite);
 
 	// set the numerical method
-	myProblem.setNumericalScheme(upwind, Explicit);
+	myProblem.setNumericalScheme(upwind, Implicit);
 
 	// name file save
 	string fileName = "2DInclinedSedimentation";
@@ -63,7 +63,7 @@ int main(int argc, char** argv)
 	// parameters calculation
 	unsigned MaxNbOfTimeStep = 3 ;
 	int freqSave = 1;
-	double cfl = 0.25;
+	double cfl = 0.1;
 	double maxTime = 5;
 	double precision = 1e-6;
 
@@ -73,8 +73,9 @@ int main(int argc, char** argv)
 	myProblem.setTimeMax(maxTime);
 	myProblem.setFreqSave(freqSave);
 	myProblem.setFileName(fileName);
-	myProblem.setNewtonSolver(precision,20);
 	myProblem.saveVelocity();
+	myProblem.displayConditionNumber();
+	myProblem.setSaveFileFormat(CSV);
 
 	// evolution
 	myProblem.initialize();

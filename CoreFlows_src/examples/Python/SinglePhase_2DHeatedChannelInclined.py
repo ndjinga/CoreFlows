@@ -61,8 +61,6 @@ def SinglePhase_2DHeatedChannelInclined():
 
 	# set the numerical method
 	myProblem.setNumericalScheme(cf.staggered, cf.Implicit);
-	myProblem.setLinearSolver(cf.GMRES,cf.ILU,True);
-	myProblem.setEntropicCorrection(False);
 	myProblem.setWellBalancedCorrection(False);
     
 	# name file save
@@ -75,16 +73,12 @@ def SinglePhase_2DHeatedChannelInclined():
 	maxTime = 5000;
 	precision = 1e-6;
 
-#	MaxNbOfTimeStep = 1000000 ;
-#	freqSave = 1000;
-
 	myProblem.setCFL(cfl);
 	myProblem.setPrecision(precision);
 	myProblem.setMaxNbOfTimeStep(MaxNbOfTimeStep);
 	myProblem.setTimeMax(maxTime);
 	myProblem.setFreqSave(freqSave);
 	myProblem.setFileName(fileName);
-	myProblem.setNewtonSolver(float('inf'),20);#newton precision should be infinite for staggered scheme!!!
 	myProblem.saveConservativeField(True);
 	if(spaceDim>1):
 		myProblem.saveVelocity();

@@ -46,7 +46,7 @@ int main(int argc, char** argv)
 	// parameters calculation
 	unsigned MaxNbOfTimeStep = 3;
 	int freqSave = 1;
-	double cfl = 5;
+	double cfl = 1;
 	double maxTime = 5;
 	double precision = 1e-6;
 
@@ -56,6 +56,8 @@ int main(int argc, char** argv)
 	myProblem.setTimeMax(maxTime);
 	myProblem.setFreqSave(freqSave);
 	myProblem.setFileName(fileName);
+	myProblem.displayConditionNumber();
+	myProblem.setSaveFileFormat(CSV);
 
 	// evolution
 	myProblem.initialize();

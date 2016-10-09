@@ -68,16 +68,9 @@ void DriftModel::initialize(){
 	_Uroe = new double[_nVar];
 	_gravite = vector<double>(_nVar,0);
 	for(int i=0; i<_Ndim; i++)
-		_gravite[i+2]=_gravity3d[i];
+		_gravite[i+2]=_GravityField3d[i];
 
-	_Gravity = new PetscScalar[_nVar*_nVar];
-	for(int i=0; i<_nVar*_nVar;i++)
-		_Gravity[i] = 0;
-	if(_timeScheme==Implicit)
-	{
-		for(int i=0; i<_nVar;i++)
-			_Gravity[i*_nVar]=-_gravite[i];
-	}
+	_GravityImplicitationMatrix = new PetscScalar[_nVar*_nVar];
 
 	if(_saveVelocity)
 		_Vitesse=Field("Velocity",CELLS,_mesh,3);//Forcement en dimension 3 (3 composantes) pour le posttraitement des lignes de courant
@@ -578,7 +571,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 			}
 		}
 		_externalStates[_nVar-1] = _externalStates[1]*_fluides[0]->getInternalEnergy(_limitField[nameOfGroup].T,rho_v)
-																																																																									 +(_externalStates[0]-_externalStates[1])*_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + _externalStates[0]*v2/2;
+																																																																											 +(_externalStates[0]-_externalStates[1])*_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + _externalStates[0]*v2/2;
 		_idm[0] = 0;
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
@@ -647,6 +640,17 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 	}
 	else if (_limitField[nameOfGroup].bcType==InletPressure){
 
+		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
+		Cell Cj=_mesh.getCell(j);
+		double hydroPress=Cj.x()*_GravityField3d[0];
+		if(_Ndim>1){
+			hydroPress+=Cj.y()*_GravityField3d[1];
+			if(_Ndim>2)
+				hydroPress+=Cj.z()*_GravityField3d[2];
+		}
+		hydroPress*=_externalStates[0];//multiplication by rho
+
+		//Building the external state
 		VecGetValues(_primitiveVars, _nVar, _idm, _Vj);
 		double concentration, Tm;
 		if(q_n<=0){
@@ -660,17 +664,6 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 			Tm=_Vj[_nVar-1];
 		}
 
-		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
-		Cell Cj=_mesh.getCell(j);
-		double hydroPress=Cj.x()*_gravity3d[0];
-		if(_Ndim>1){
-			hydroPress+=Cj.y()*_gravity3d[1];
-			if(_Ndim>2)
-				hydroPress+=Cj.z()*_gravity3d[2];
-		}
-		hydroPress*=_externalStates[0];//multiplication by rho
-
-		//Building the external state
 		double pression=_limitField[nameOfGroup].p + hydroPress;
 		double rho_v=_fluides[0]->getDensity(pression, Tm);
 		double rho_l=_fluides[1]->getDensity(pression, Tm);
@@ -707,11 +700,11 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 
 		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
 		Cell Cj=_mesh.getCell(j);
-		double hydroPress=Cj.x()*_gravity3d[0];
+		double hydroPress=Cj.x()*_GravityField3d[0];
 		if(_Ndim>1){
-			hydroPress+=Cj.y()*_gravity3d[1];
+			hydroPress+=Cj.y()*_GravityField3d[1];
 			if(_Ndim>2)
-				hydroPress+=Cj.z()*_gravity3d[2];
+				hydroPress+=Cj.z()*_GravityField3d[2];
 		}
 		hydroPress*=_externalStates[0];//multiplication by rho
 
@@ -908,7 +901,7 @@ void DriftModel::convectionMatrices()
 		}
 	}
 
-	if(_verbose && _nbTimeStep%_freqSave ==0)
+	if(_verbose && _nbTimeStep%_freqSave ==0 && _timeScheme==Implicit)
 	{
 		displayMatrix(_AroeMinusImplicit, _nVar,"Matrice _AroeMinusImplicit");
 		displayMatrix(_AroePlusImplicit, _nVar,"Matrice _AroePlusImplicit");
@@ -1069,7 +1062,23 @@ void DriftModel::sourceVector(PetscScalar * Si,PetscScalar * Ui,PetscScalar * Vi
 	Si[_nVar-1]=_heatPowerField(i);
 
 	for(int k=0; k<_Ndim; k++)
-		Si[_nVar-1] +=(_gravity3d[k]*phirho-(phim1*_dragCoeffs[0]+phim2*_dragCoeffs[1])*norm_u*Vi[2+k])*Vi[2+k];
+		Si[_nVar-1] +=(_GravityField3d[k]*phirho-(phim1*_dragCoeffs[0]+phim2*_dragCoeffs[1])*norm_u*Vi[2+k])*Vi[2+k];
+
+	if(_timeScheme==Implicit)
+	{
+		for(int i=0; i<_nVar*_nVar;i++)
+			_GravityImplicitationMatrix[i] = 0;
+		if(!_usePrimitiveVarsInNewton)
+			for(int i=0; i<_nVar;i++)
+				_GravityImplicitationMatrix[i*_nVar]=-_gravite[i];
+		else
+			for(int i=0; i<_nVar;i++)
+			{
+				_GravityImplicitationMatrix[i*_nVar+0]      =-_gravite[i]*_drho_sur_dcv;
+				_GravityImplicitationMatrix[i*_nVar+1]      =-_gravite[i]*_drho_sur_dp;
+				_GravityImplicitationMatrix[i*_nVar+_nVar-1]=-_gravite[i]*_drho_sur_dT;
+			}
+	}
 
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
@@ -1086,6 +1095,8 @@ void DriftModel::sourceVector(PetscScalar * Si,PetscScalar * Ui,PetscScalar * Vi
 		for(int k=0;k<_nVar;k++)
 			cout<<Si[k]<<", ";
 		cout<<endl;
+		if(_timeScheme==Implicit)
+			displayMatrix(_GravityImplicitationMatrix, _nVar, "Gravity implicitation matrix");
 	}
 }
 
@@ -1590,8 +1601,8 @@ void DriftModel::primToConsJacobianMatrix(double *V)
 		for(int idim=0;idim<_Ndim;idim++)
 			_primToConsJacoMat[(_nVar-1)*_nVar+2+idim]=rho*vitesse[idim];
 		_primToConsJacoMat[(_nVar-1)*_nVar+_nVar-1]=rho*(cv_v*concentration + cv_l*(1-concentration))
-																															-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
-																																	+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
+																																	-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
+																																			+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
 	}
 	else if(dynamic_cast<StiffenedGasDellacherie*>(_fluides[0])!=NULL
 			&& dynamic_cast<StiffenedGasDellacherie*>(_fluides[1])!=NULL)
@@ -1649,8 +1660,8 @@ void DriftModel::primToConsJacobianMatrix(double *V)
 		for(int idim=0;idim<_Ndim;idim++)
 			_primToConsJacoMat[(_nVar-1)*_nVar+2+idim]=rho*vitesse[idim];
 		_primToConsJacoMat[(_nVar-1)*_nVar+_nVar-1]=rho*(cp_v*concentration + cp_l*(1-concentration))
-																															-rho*rho*H*(cp_v*   concentration /(rho_v*(h_v-q_v))
-																																	+cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
+																																	-rho*rho*H*(cp_v*   concentration /(rho_v*(h_v-q_v))
+																																			+cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
 	}
 	else
 		throw CdmathException("SinglePhase::primToConsJacobianMatrix: eos should be StiffenedGas or StiffenedGasDellacherie");
@@ -1800,7 +1811,7 @@ void DriftModel::getMixturePressureAndTemperature(double c_v, double rhom, doubl
 		StiffenedGas* fluide1=dynamic_cast<StiffenedGas*>(_fluides[1]);
 
 		temperature= (rhom_em-m_v*fluide0->getInternalEnergy(0)-m_l*fluide1->getInternalEnergy(0))
-																																																																							/(m_v*fluide0->constante("cv")+m_l*fluide1->constante("cv"));
+																																																																									/(m_v*fluide0->constante("cv")+m_l*fluide1->constante("cv"));
 
 		double e_v=fluide0->getInternalEnergy(temperature);
 		double e_l=fluide1->getInternalEnergy(temperature);
@@ -2792,8 +2803,8 @@ void DriftModel::getDensityDerivatives(double concentration, double pression, do
 				+(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(e_l-q_l))
 		);
 		_drhoE_sur_dT=rho*(cv_v*concentration + cv_l*(1-concentration))
-																							-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
-																									+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
+																									-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
+																											+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
 	}
 	else if(dynamic_cast<StiffenedGasDellacherie*>(_fluides[0])!=NULL
 			&& dynamic_cast<StiffenedGasDellacherie*>(_fluides[1])!=NULL)
@@ -2832,8 +2843,8 @@ void DriftModel::getDensityDerivatives(double concentration, double pression, do
 				+gamma_l*(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(h_l-q_l))
 		)-1;
 		_drhoE_sur_dT=rho*(cp_v*concentration + cp_l*(1-concentration))
-		           	    				   -rho*rho*H*( cp_v*   concentration /(rho_v*(h_v-q_v))
-		           	    						   +cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
+		           	    						   -rho*rho*H*( cp_v*   concentration /(rho_v*(h_v-q_v))
+		           	    								   +cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
 	}
 	else
 		throw CdmathException("SinglePhase::primToConsJacobianMatrix: eos should be StiffenedGas or StiffenedGasDellacherie");

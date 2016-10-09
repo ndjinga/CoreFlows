@@ -111,7 +111,6 @@ def DriftModel_2DInclinedBoilingChannelBarrier():
 	myProblem.setTimeMax(maxTime);
 	myProblem.setFreqSave(freqSave);
 	myProblem.setFileName(fileName);
-	myProblem.setNewtonSolver(precision,20);
 	myProblem.saveVelocity();
 
 	# evolution
