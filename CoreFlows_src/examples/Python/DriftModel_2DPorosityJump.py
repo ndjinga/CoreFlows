@@ -10,7 +10,7 @@ def DriftModel_2DPorosityJump():
     spaceDim = 2;
 
     # Prepare for the mesh
-	print("Building mesh " );
+    print("Building mesh " );
     xinf = 0 ;
     xsup=1.5;
     yinf=0.0;

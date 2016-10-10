@@ -131,4 +131,4 @@ def DriftModel_2DInclinedBoilingChannelBarrier():
 	return ok
 
 if __name__ == """__main__""":
-    main()
+    DriftModel_2DInclinedBoilingChannelBarrier()
