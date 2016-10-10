@@ -7,7 +7,7 @@ import cdmath as cm
 def DriftModel_2DVidangeReservoirUnstructured():
 
 	print( "Loading unstructured mesh " );
-	inputfile="../../CoreFlows_src/examples/resources/BoxWithMeshWithTriangularCells.med";	
+	inputfile="../resources/BoxWithMeshWithTriangularCells.med";	
  
 	spaceDim = 2;
 	# Prepare for the mesh

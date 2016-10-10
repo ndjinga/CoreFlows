@@ -9,7 +9,7 @@ def SinglePhase_2BranchesHeatedChannels():
 
 	spaceDim = 1;
     # Prepare for the mesh
-	M=cm.Mesh("../../CoreFlows_src/examples/resources/BifurcatingFlow2BranchesEqualSections.med")
+	M=cm.Mesh("../resources/BifurcatingFlow2BranchesEqualSections.med")
 	M.getFace(0).setGroupName("Inlet")#z=0
 	M.getFace(31).setGroupName("Outlet")#z=4.2
 
@@ -44,8 +44,8 @@ def SinglePhase_2BranchesHeatedChannels():
 	myProblem.setOutletBoundaryCondition("Outlet",outletPressure);
 
 	#set porosity, heat and gravity source
-	Sections=cm.Field("../../CoreFlows_src/examples/resources/BifurcatingFlow2BranchesEqualSections", cm.CELLS,"Section area");
-	heatPowerField=cm.Field("../../CoreFlows_src/examples/resources/BifurcatingFlow2BranchesEqualSections", cm.CELLS,"Heat power");
+	Sections=cm.Field("../resources/BifurcatingFlow2BranchesEqualSections", cm.CELLS,"Section area");
+	heatPowerField=cm.Field("../resources/BifurcatingFlow2BranchesEqualSections", cm.CELLS,"Heat power");
 
 	heatPowerField.writeVTK("heatPowerField");
 	Sections.writeVTK("crossSectionPowerField");

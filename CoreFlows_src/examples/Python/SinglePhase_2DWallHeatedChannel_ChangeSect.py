@@ -8,7 +8,7 @@ def SinglePhase_2DWallHeatedChannel_ChangeSect():
 
 	#import themesh
 	print("Reading a mesh with sudden cross-section change for test SinglePhase_2DWallHeatedChannel_ChangeSect()")
-	M=cm.Mesh("../../CoreFlows_src/examples/resources/VaryingSectionDuct.med")
+	M=cm.Mesh("../resources/VaryingSectionDuct.med")
 
     # Prepare the mesh boundaries
 	xinf=0.0;

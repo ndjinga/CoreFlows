@@ -8,7 +8,7 @@ def SinglePhase_2DLidDrivenCavity_unstructured():
 	spaceDim = 2;
 
 	print( "Loading unstructured mesh " );
-	inputfile="../../CoreFlows_src/examples/resources/BoxWithMeshWithTriangularCells.med";	
+	inputfile="../resources/BoxWithMeshWithTriangularCells.med";	
  
     # set the limit field for each boundary
 
