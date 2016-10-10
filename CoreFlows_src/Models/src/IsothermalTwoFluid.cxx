@@ -39,25 +39,18 @@ IsothermalTwoFluid::IsothermalTwoFluid(pressureEstimate pEstimate, int dim){
 void IsothermalTwoFluid::initialize(){
 	cout<<"Initialising the isothermal two-fluid model"<<endl;
 
+	_Uroe = new double[_nVar+1];
+
 	_guessalpha = _VV(0,0);
 
 	_gravite = vector<double>(_nVar,0);
 	for(int i=0; i<_Ndim; i++)
 	{
-		_gravite[i+1]=_gravity3d[i];
-		_gravite[i+1 +_Ndim+1]=_gravity3d[i];
+		_gravite[i+1]=_GravityField3d[i];
+		_gravite[i+1 +_Ndim+1]=_GravityField3d[i];
 	}
-	_Gravity = new PetscScalar[_nVar*_nVar];
-	for(int i=0; i<_nVar*_nVar;i++)
-		_Gravity[i] = 0;
-	if(_timeScheme==Implicit)
-	{
-		for(int i=0; i<_nVar/2;i++)
-			_Gravity[i*_nVar]=-_gravite[i];
-		for(int i=_nVar/2; i<_nVar;i++)
-			_Gravity[i*_nVar+_nVar/2]=-_gravite[i];
-	}
-	_Uroe = new double[_nVar+1];
+	_GravityImplicitationMatrix = new PetscScalar[_nVar*_nVar];
+
 	if(_saveVelocity){
 		_Vitesse1=Field("Gas velocity",CELLS,_mesh,3);//Forcement en dimension 3 pour le posttraitement des lignes de courant
 		_Vitesse2=Field("Liquid velocity",CELLS,_mesh,3);//Forcement en dimension 3 pour le posttraitement des lignes de courant
@@ -675,11 +668,11 @@ void IsothermalTwoFluid::setBoundaryState(string nameOfGroup, const int &j,doubl
 	else if (_limitField[nameOfGroup].bcType==InletPressure){
 		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
 		Cell Cj=_mesh.getCell(j);
-		double hydroPress=Cj.x()*_gravity3d[0];
+		double hydroPress=Cj.x()*_GravityField3d[0];
 		if(_Ndim>1){
-			hydroPress+=Cj.y()*_gravity3d[1];
+			hydroPress+=Cj.y()*_GravityField3d[1];
 			if(_Ndim>2)
-				hydroPress+=Cj.z()*_gravity3d[2];
+				hydroPress+=Cj.z()*_GravityField3d[2];
 		}
 		hydroPress*=_externalStates[0]+_externalStates[_Ndim];//multiplication by rho the total density
 
@@ -725,11 +718,11 @@ void IsothermalTwoFluid::setBoundaryState(string nameOfGroup, const int &j,doubl
 
 		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
 		Cell Cj=_mesh.getCell(j);
-		double hydroPress=Cj.x()*_gravity3d[0];
+		double hydroPress=Cj.x()*_GravityField3d[0];
 		if(_Ndim>1){
-			hydroPress+=Cj.y()*_gravity3d[1];
+			hydroPress+=Cj.y()*_GravityField3d[1];
 			if(_Ndim>2)
-				hydroPress+=Cj.z()*_gravity3d[2];
+				hydroPress+=Cj.z()*_GravityField3d[2];
 		}
 		hydroPress*=_externalStates[0]+_externalStates[_Ndim];//multiplication by rho the total density
 
@@ -905,6 +898,16 @@ void IsothermalTwoFluid::sourceVector(PetscScalar * Si,PetscScalar * Ui,PetscSca
 		Si[1+_Ndim]=0;
 	}
 
+	if(_timeScheme==Implicit)
+	{
+		for(int i=0; i<_nVar*_nVar;i++)
+			_GravityImplicitationMatrix[i] = 0;
+		for(int i=0; i<_nVar/2;i++)
+			_GravityImplicitationMatrix[i*_nVar]=-_gravite[i];
+		for(int i=_nVar/2; i<_nVar;i++)
+			_GravityImplicitationMatrix[i*_nVar+_nVar/2]=-_gravite[i];
+	}
+
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
 		cout<<"IsothermalTwoFluid::sourceVector"<<endl;
@@ -920,6 +923,8 @@ void IsothermalTwoFluid::sourceVector(PetscScalar * Si,PetscScalar * Ui,PetscSca
 		for(int k=0;k<_nVar;k++)
 			cout<<Si[k]<<", ";
 		cout<<endl;
+		if(_timeScheme==Implicit)
+			displayMatrix(_GravityImplicitationMatrix, _nVar, "Gravity implicitation matrix");
 	}
 }
 void IsothermalTwoFluid::pressureLossVector(PetscScalar * pressureLoss, double K, PetscScalar * Ui, PetscScalar * Vi, PetscScalar * Uj, PetscScalar * Vj)

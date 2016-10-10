@@ -45,16 +45,9 @@ void SinglePhase::initialize(){
 	_Uroe = new double[_nVar];
 	_gravite = vector<double>(_nVar,0);
 	for(int i=0; i<_Ndim; i++)
-		_gravite[i+1]=_gravity3d[i];
+		_gravite[i+1]=_GravityField3d[i];
 
-	_Gravity = new PetscScalar[_nVar*_nVar];
-	for(int i=0; i<_nVar*_nVar;i++)
-		_Gravity[i] = 0;
-	if(_timeScheme==Implicit)
-	{
-		for(int i=0; i<_nVar;i++)
-			_Gravity[i*_nVar]=-_gravite[i];
-	}
+	_GravityImplicitationMatrix = new PetscScalar[_nVar*_nVar];
 	if(_saveVelocity)
 		_Vitesse=Field("Velocity",CELLS,_mesh,3);//Forcement en dimension 3 pour le posttraitement des lignes de courant
 
@@ -542,11 +535,11 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 
 		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
 		Cell Cj=_mesh.getCell(j);
-		double hydroPress=Cj.x()*_gravity3d[0];
+		double hydroPress=Cj.x()*_GravityField3d[0];
 		if(_Ndim>1){
-			hydroPress+=Cj.y()*_gravity3d[1];
+			hydroPress+=Cj.y()*_GravityField3d[1];
 			if(_Ndim>2)
-				hydroPress+=Cj.z()*_gravity3d[2];
+				hydroPress+=Cj.z()*_GravityField3d[2];
 		}
 		hydroPress*=_externalStates[0];//multiplication by rho the total density
 
@@ -583,22 +576,27 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 		if(q_n<=0 &&  _nbTimeStep%_freqSave ==0)
 			cout<< "Warning : fluid going in through outlet boundary "<<nameOfGroup<<". Applying Neumann boundary condition for velocity and temperature"<<endl;
 
+		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
+		Cell Cj=_mesh.getCell(j);
+		double hydroPress=Cj.x()*_GravityField3d[0];
+		if(_Ndim>1){
+			hydroPress+=Cj.y()*_GravityField3d[1];
+			if(_Ndim>2)
+				hydroPress+=Cj.z()*_GravityField3d[2];
+		}
+		hydroPress*=_externalStates[0];//multiplication by rho the total density
+
+		if(_verbose && _nbTimeStep%_freqSave ==0)
+		{
+			cout<<"Cond lim outlet densite= "<<_externalStates[0]<<" gravite= "<<_GravityField3d[0]<<" Cj.x()= "<<Cj.x()<<endl;
+			cout<<"Cond lim outlet pression ref= "<<_limitField[nameOfGroup].p<<" pression hydro= "<<hydroPress<<" total= "<<_limitField[nameOfGroup].p+hydroPress<<endl;
+		}
+		//Building the external state
 		_idm[0] = _nVar*j;// Kieu
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
 		VecGetValues(_primitiveVars, _nVar, _idm, _externalStates);
 
-		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
-		Cell Cj=_mesh.getCell(j);
-		double hydroPress=Cj.x()*_gravity3d[0];
-		if(_Ndim>1){
-			hydroPress+=Cj.y()*_gravity3d[1];
-			if(_Ndim>2)
-				hydroPress+=Cj.z()*_gravity3d[2];
-		}
-		hydroPress*=_externalStates[0];//multiplication by rho the total density
-
-		//Building the external state
 		_externalStates[0]=_fluides[0]->getDensity(_limitField[nameOfGroup].p+hydroPress, _externalStates[_nVar-1]);
 		for(k=0; k<_Ndim; k++)
 		{
@@ -616,7 +614,7 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 		VecAssemblyEnd(_Uext);
 		VecAssemblyEnd(_Uextdiff);
 	}else {
-		cout<<"Boundary condition not set for boundary named"<<nameOfGroup<<endl;
+		cout<<"Boundary condition not set for boundary named "<<nameOfGroup<<endl;
 		cout<<"Accepted boundary condition are Neumann, Wall, Inlet, and Outlet"<<endl;
 		throw CdmathException("Unknown boundary condition");
 	}
@@ -744,7 +742,7 @@ void SinglePhase::convectionMatrices()
 		}
 	}
 
-	if(_verbose && _nbTimeStep%_freqSave ==0)
+	if(_verbose && _nbTimeStep%_freqSave ==0 && _timeScheme==Implicit)
 	{
 		displayMatrix(_AroeMinusImplicit, _nVar,"Matrice _AroeMinusImplicit");
 		displayMatrix(_AroePlusImplicit,  _nVar,"Matrice _AroePlusImplicit");
@@ -910,8 +908,22 @@ void SinglePhase::sourceVector(PetscScalar * Si, PetscScalar * Ui, PetscScalar *
 	Si[_nVar-1]=_heatPowerField(i);
 
 	for(int k=0; k<_Ndim; k++)
-		Si[_nVar-1] +=(_gravity3d[k]-_dragCoeffs[0]*norm_u*Vi[1+k])*Vi[1+k]*phirho;
+		Si[_nVar-1] +=(_GravityField3d[k]-_dragCoeffs[0]*norm_u*Vi[1+k])*Vi[1+k]*phirho;
 
+	if(_timeScheme==Implicit)
+	{
+		for(int i=0; i<_nVar*_nVar;i++)
+			_GravityImplicitationMatrix[i] = 0;
+		if(!_usePrimitiveVarsInNewton)
+			for(int i=0; i<_nVar;i++)
+				_GravityImplicitationMatrix[i*_nVar]=-_gravite[i];
+		else
+			for(int i=0; i<_nVar;i++)
+			{
+				_GravityImplicitationMatrix[i*_nVar+0]      =-_gravite[i]*_drho_sur_dp;
+				_GravityImplicitationMatrix[i*_nVar+_nVar-1]=-_gravite[i]*_drho_sur_dT;
+			}
+	}
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
 		cout<<"SinglePhase::sourceVector"<<endl;
@@ -927,8 +939,11 @@ void SinglePhase::sourceVector(PetscScalar * Si, PetscScalar * Ui, PetscScalar *
 		for(int k=0;k<_nVar;k++)
 			cout<<Si[k]<<", ";
 		cout<<endl;
+		if(_timeScheme==Implicit)
+			displayMatrix(_GravityImplicitationMatrix, _nVar, "Gravity implicitation matrix");
 	}
 }
+
 void SinglePhase::pressureLossVector(PetscScalar * pressureLoss, double K, PetscScalar * Ui, PetscScalar * Vi, PetscScalar * Uj, PetscScalar * Vj)
 {
 	double norm_u=0, u_n=0, rho;

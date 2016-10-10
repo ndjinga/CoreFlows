@@ -79,11 +79,11 @@ public :
 	 *  */
 	void setInletPressureBoundaryCondition(string groupName, double pressure,double Temperature,double concentration, vector<double> reference_point){
 		/* On the boundary we have P-Pref=rho g\cdot(x-xref) hence P=Pref-g\cdot xref + g\cdot x */
-		pressure-=reference_point[0]*_gravity3d[0];
+		pressure-=reference_point[0]*_GravityField3d[0];
 		if(_Ndim>1){
-			pressure-=reference_point[1]*_gravity3d[1];
+			pressure-=reference_point[1]*_GravityField3d[1];
 			if(_Ndim>2)
-				pressure-=reference_point[2]*_gravity3d[2];
+				pressure-=reference_point[2]*_GravityField3d[2];
 		}
 
 		_limitField[groupName]=LimitField(InletPressure,pressure,vector<double>(0,0),vector<double>(0,0),vector<double>(0,0),Temperature,-1,-1,concentration);

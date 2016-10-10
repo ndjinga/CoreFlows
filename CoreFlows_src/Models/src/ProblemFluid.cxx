@@ -12,7 +12,7 @@ ProblemFluid::ProblemFluid(void){
 	_porosityFieldSet=false;
 	_pressureLossFieldSet=false;
 	_sectionFieldSet=false;
-	_gravity3d=vector<double>(3,0);
+	_GravityField3d=vector<double>(3,0);
 	_Uroe=NULL;_Udiff=NULL;_temp=NULL;_l=NULL;_vec_normal=NULL;;
 	_idm=NULL;_idn=NULL;
 	_saveVelocity=false;
@@ -625,10 +625,10 @@ double ProblemFluid::computeTimeStep(bool & stop){
 
 	if(_timeScheme == Implicit){
 		for(int imaille = 0; imaille<_Nmailles; imaille++)
-			MatSetValuesBlocked(_A, size, &imaille, size, &imaille, _Gravity, ADD_VALUES);
+			MatSetValuesBlocked(_A, size, &imaille, size, &imaille, _GravityImplicitationMatrix, ADD_VALUES);
 
 		if(_verbose && _nbTimeStep%_freqSave ==0)
-			displayMatrix(_Gravity,_nVar,"Gravity matrix:");
+			displayMatrix(_GravityImplicitationMatrix,_nVar,"Gravity matrix:");
 
 		MatAssemblyBegin(_A, MAT_FINAL_ASSEMBLY);
 		MatAssemblyEnd(_A, MAT_FINAL_ASSEMBLY);
@@ -1384,7 +1384,7 @@ void ProblemFluid::terminate(){
 
 	delete[] _AroePlus;
 	delete[] _Diffusion;
-	delete[] _Gravity;
+	delete[] _GravityImplicitationMatrix;
 	delete[] _AroeMinus;
 	delete[] _Aroe;
 	delete[] _absAroe;
