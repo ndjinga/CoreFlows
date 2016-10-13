@@ -18,6 +18,11 @@ if (CMAKE_BUILD_TYPE=Debug)										   #
  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")								   #
  SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")						   #
  SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")					   #
+					CONFIGURE_FILE(
+    ${PROJECT_SOURCE_DIR}/conf/env.sh
+    ${CMAKE_INSTALL_PREFIX}/env.sh
+    @ONLY
+)
 													   #
 endif ()												   #
 													   #
@@ -125,6 +130,14 @@ SET_TARGET_PROPERTIES(CoreFlowsMainExe PROPERTIES COMPILE_FLAGS "")					    #
 TARGET_LINK_LIBRARIES(CoreFlowsMainExe CoreFlows  ${_extra_lib_CoreFlows})				    #
 INSTALL(TARGETS CoreFlowsMainExe DESTINATION bin/Executable)						    #
 													    #
+
+configure_file(
+    ${PROJECT_SOURCE_DIR}/conf/env.sh
+    ${CMAKE_INSTALL_PREFIX}/env.sh
+    @ONLY
+)
+													    
+													    
 # ------------- --------------------------------------------------------------------------------------------#
 
 
