@@ -56,7 +56,7 @@ endif ()                                                                        
 
 ############# python tests
 
-set(python_env_for_tests "${CMAKE_BINARY_DIR}/swig:${CDMATH_DIR}/lib/:${CDMATH_DIR}/lib/cdmath:${CDMATH_DIR}/bin/cdmath")
+set(python_env_for_tests "${CMAKE_BINARY_DIR}/CoreFlows_src/swig:${CDMATH_DIR}/lib/:${CDMATH_DIR}/lib/cdmath:${CDMATH_DIR}/bin/cdmath")
 
 function(CreatePythonTest pythonFile)
     add_test(NAME ${pythonFile} COMMAND "${CMAKE_CURRENT_BINARY_DIR}/${pythonFile}")
