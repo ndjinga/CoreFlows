@@ -189,14 +189,19 @@ void ProblemCoreFlows::setInitialFieldConstant( int nDim, const vector<double> V
 		double zmin, double zmax, int nz, string bottomSide, string topSide)
 {
 	Mesh M;
-	if(nDim==1)
+	if(nDim==1){
+		//cout<<"coucou1 xmin="<<xmin<<", xmax= "<<xmax<< ", nx= "<<nx<<endl;
 		M=Mesh(xmin,xmax,nx);
+		//cout<<"coucou2"<<endl;
+	}
 	else if(nDim==2)
 		M=Mesh(xmin,xmax,nx,ymin,ymax,ny);
 	else if(nDim==3)
 		M=Mesh(xmin,xmax,nx,ymin,ymax,ny,zmin,zmax,nz);
-	else
+	else{
+		cout<<"ProblemCoreFlows::setInitialFieldConstant: Space dimension nDim should be between 1 and 3"<<endl;
 		throw CdmathException("Space dimension nDim should be between 1 and 3");
+	}
 
 	M.setGroupAtPlan(xmax,0,_precision,rightSide);
 	M.setGroupAtPlan(xmin,0,_precision,leftSide);
