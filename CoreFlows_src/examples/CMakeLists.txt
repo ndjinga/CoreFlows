@@ -25,8 +25,8 @@ install(DIRECTORY ${NICE_EXAMPLES_TO_INSTALL} DESTINATION share/examples)
 
 #####################################
 
-install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/resources  DESTINATION share/examples)
-install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Python  DESTINATION share/examples)
+#install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/resources  DESTINATION share/examples)
+#install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Python  DESTINATION share/examples)
 
 
 # this function creates a target and a ctest test
