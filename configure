@@ -5,7 +5,7 @@ import os
 import sys
 import subprocess
 import pdb
-
+    
 TrueFalseStr=("False","True")
 TrueFalse={'no':False, 'yes':True}
 
@@ -14,12 +14,19 @@ def GetCDMATHOptions(options):
     return res
 
 def GetPETSC_DIROptions(options):
-    res=" -DPETSC_DIR="+options.petsc_dir
+    res=' -DPETSC_DIR='+options.petsc_dir
     return res
 
+def GetDebugOptions(options):
+	if options.debug == True:
+	    res=" -DCMAKE_BUILD_TYPE=Debug "
+	else:
+		res=""
+	return res
+
 def GetPETSC_ARCHOptions(options):
-    res=" -DPETSC_ARCH="+options.petsc_arch
-    return res
+	res=' -DPETSC_ARCH="'+options.petsc_arch+'"'
+	return res
 
 def GetInstallPrefix(options):
     res=" -DCMAKE_INSTALL_PREFIX="+options.install_prefix
@@ -27,6 +34,10 @@ def GetInstallPrefix(options):
 
 def GetPythonOptions(options):
     res=" -DCOREFLOWS_WITH_PYTHON="+TrueFalseStr[options.python]
+    return res
+
+def GetPackagesOptions(options):
+    res=" -DCOREFLOWS_WITH_PACKAGE="+TrueFalseStr[options.packages]
     return res
 
 def GetDocOptions(options):
@@ -58,18 +69,22 @@ def ForgeCMakeCommand(options):
     PETSC_ARCHOptions=GetPETSC_ARCHOptions(options)
     guiOptions=GetGuiOptions(options)
     docOptions=GetDocOptions(options)
+    packagesOptions=GetPackagesOptions(options)
+    debugOptions=GetDebugOptions(options)
     pythonOptions=GetPythonOptions(options)
     absolutePathToConfigure = os.path.abspath(sys.argv[0])
     absolutePathToProjectDir = os.path.dirname(absolutePathToConfigure)
     eclipseProjectoptions=GetEclipseOptions(options)
     cmake_options=(
             installPrefix+" "
+            +debugOptions
             +guiOptions+" "
             +pythonOptions+" "
             +CDMATHOptions+" "
             +PETSC_DIROptions+" "
             +PETSC_ARCHOptions+" "
             +docOptions+" "
+            +packagesOptions+" "
             +eclipseProjectoptions
             )
     cmake_executable=GetCmakeExecOption(options)
@@ -118,6 +133,12 @@ def main():
                  dest="python",
                  help="compile python interface for CoreFlows"
                  )
+    p.add_option('--with-packages',
+    			 action="store_true",
+                 default=False,
+                 dest="packages",
+                 help="generate CoreFlows packages"
+                 )
     p.add_option('--with-gui',
     			 action="store_true",
                  default=False,
@@ -130,6 +151,12 @@ def main():
                  dest="doc",
                  help="generate CoreFlows documentation"
                  )
+    p.add_option('--with-debug',
+    			 action="store_true",
+                 default=False,
+                 dest="debug",
+                 help="compile CoreFlows in debug mode"
+                 )
     p.add_option('--with-cmake-exec',
                  type="string",
                  metavar="<path>",
@@ -140,7 +167,7 @@ def main():
     options, arguments = p.parse_args()
     CheckOptions(p)
     cmake_cmd=ForgeCMakeCommand(options)
-#    print cmake_cmd
+    print cmake_cmd
     print "Configuring CoreFlows"
     returnCode=subprocess.call(cmake_cmd,shell=True)
     returnCode=0
