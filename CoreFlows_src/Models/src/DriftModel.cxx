@@ -116,7 +116,7 @@ bool DriftModel::iterateTimeStep(bool &converged)
 			if(_PetscIts>=_maxPetscIts)//solving the linear system failed
 			{
 				cout<<"Systeme lineaire : pas de convergence de Petsc. Itérations maximales "<<_maxPetscIts<<" atteintes"<<endl;
-				//_runLogFile<<"Systeme lineaire : pas de convergence de Petsc. Itérations maximales "<<_maxPetscIts<<" atteintes"<<endl;
+				//*_runLogFileogFile<<"Systeme lineaire : pas de convergence de Petsc. Itérations maximales "<<_maxPetscIts<<" atteintes"<<endl;
 				converged=false;
 				return false;
 			}
@@ -155,7 +155,7 @@ bool DriftModel::iterateTimeStep(bool &converged)
 		if(_nbPhases==2 && fabs(_err_press_max) > _precision)//la pression n'a pu être calculée en diphasique à partir des variables conservatives
 		{
 			cout<<"Warning consToPrim: nbiter max atteint, erreur relative pression= "<<_err_press_max<<" precision= " <<_precision<<endl;
-			//_runLogFile<<"Warning consToPrim: nbiter max atteint, erreur relative pression= "<<_err_press_max<<" precision= " <<_precision<<endl;
+			*_runLogFile<<"Warning consToPrim: nbiter max atteint, erreur relative pression= "<<_err_press_max<<" precision= " <<_precision<<endl;
 			converged=false;
 			return false;
 		}
@@ -171,12 +171,12 @@ bool DriftModel::iterateTimeStep(bool &converged)
 			if(_minm1<-_precision || _minm2<-_precision)
 			{
 				cout<<"!!!!!!!!! WARNING masse partielle negative sur " << _nbMaillesNeg << " faces, min m1= "<< _minm1 << " , minm2= "<< _minm2<< " precision "<<_precision<<endl;
-				//_runLogFile<<"!!!!!!!!! WARNING masse partielle negative sur " << _nbMaillesNeg << " faces, min m1= "<< _minm1 << " , minm2= "<< _minm2<< " precision "<<_precision<<endl;
+				*_runLogFile<<"!!!!!!!!! WARNING masse partielle negative sur " << _nbMaillesNeg << " faces, min m1= "<< _minm1 << " , minm2= "<< _minm2<< " precision "<<_precision<<endl;
 			}
 
 			if (_nbVpCplx>0){
 				cout << "!!!!!!!!!!!!!!!!!!!!!!!! Complex eigenvalues on " << _nbVpCplx << " cells, max imag= " << _part_imag_max << endl;
-				//_runLogFile << "!!!!!!!!!!!!!!!!!!!!!!!! Complex eigenvalues on " << _nbVpCplx << " cells, max imag= " << _part_imag_max << endl;
+				*_runLogFile << "!!!!!!!!!!!!!!!!!!!!!!!! Complex eigenvalues on " << _nbVpCplx << " cells, max imag= " << _part_imag_max << endl;
 			}
 		}
 		_minm1=1e30;
@@ -571,7 +571,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 			}
 		}
 		_externalStates[_nVar-1] = _externalStates[1]*_fluides[0]->getInternalEnergy(_limitField[nameOfGroup].T,rho_v)
-																																																																											 +(_externalStates[0]-_externalStates[1])*_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + _externalStates[0]*v2/2;
+																																																																													 +(_externalStates[0]-_externalStates[1])*_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + _externalStates[0]*v2/2;
 		_idm[0] = 0;
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
@@ -1601,8 +1601,8 @@ void DriftModel::primToConsJacobianMatrix(double *V)
 		for(int idim=0;idim<_Ndim;idim++)
 			_primToConsJacoMat[(_nVar-1)*_nVar+2+idim]=rho*vitesse[idim];
 		_primToConsJacoMat[(_nVar-1)*_nVar+_nVar-1]=rho*(cv_v*concentration + cv_l*(1-concentration))
-																																	-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
-																																			+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
+																																			-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
+																																					+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
 	}
 	else if(dynamic_cast<StiffenedGasDellacherie*>(_fluides[0])!=NULL
 			&& dynamic_cast<StiffenedGasDellacherie*>(_fluides[1])!=NULL)
@@ -1660,8 +1660,8 @@ void DriftModel::primToConsJacobianMatrix(double *V)
 		for(int idim=0;idim<_Ndim;idim++)
 			_primToConsJacoMat[(_nVar-1)*_nVar+2+idim]=rho*vitesse[idim];
 		_primToConsJacoMat[(_nVar-1)*_nVar+_nVar-1]=rho*(cp_v*concentration + cp_l*(1-concentration))
-																																	-rho*rho*H*(cp_v*   concentration /(rho_v*(h_v-q_v))
-																																			+cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
+																																			-rho*rho*H*(cp_v*   concentration /(rho_v*(h_v-q_v))
+																																					+cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
 	}
 	else
 		throw CdmathException("SinglePhase::primToConsJacobianMatrix: eos should be StiffenedGas or StiffenedGasDellacherie");
@@ -1811,7 +1811,7 @@ void DriftModel::getMixturePressureAndTemperature(double c_v, double rhom, doubl
 		StiffenedGas* fluide1=dynamic_cast<StiffenedGas*>(_fluides[1]);
 
 		temperature= (rhom_em-m_v*fluide0->getInternalEnergy(0)-m_l*fluide1->getInternalEnergy(0))
-																																																																									/(m_v*fluide0->constante("cv")+m_l*fluide1->constante("cv"));
+																																																																											/(m_v*fluide0->constante("cv")+m_l*fluide1->constante("cv"));
 
 		double e_v=fluide0->getInternalEnergy(temperature);
 		double e_l=fluide1->getInternalEnergy(temperature);
@@ -2960,8 +2960,8 @@ void DriftModel::getDensityDerivatives(double concentration, double pression, do
 				+(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(e_l-q_l))
 		);
 		_drhoE_sur_dT=rho*(cv_v*concentration + cv_l*(1-concentration))
-																									-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
-																											+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
+																											-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
+																													+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
 	}
 	else if(dynamic_cast<StiffenedGasDellacherie*>(_fluides[0])!=NULL
 			&& dynamic_cast<StiffenedGasDellacherie*>(_fluides[1])!=NULL)
@@ -3000,8 +3000,8 @@ void DriftModel::getDensityDerivatives(double concentration, double pression, do
 				+gamma_l*(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(h_l-q_l))
 		)-1;
 		_drhoE_sur_dT=rho*(cp_v*concentration + cp_l*(1-concentration))
-		           	    						   -rho*rho*H*( cp_v*   concentration /(rho_v*(h_v-q_v))
-		           	    								   +cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
+		           	    								   -rho*rho*H*( cp_v*   concentration /(rho_v*(h_v-q_v))
+		           	    										   +cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
 	}
 	else
 		throw CdmathException("SinglePhase::primToConsJacobianMatrix: eos should be StiffenedGas or StiffenedGasDellacherie");

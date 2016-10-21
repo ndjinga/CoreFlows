@@ -709,7 +709,7 @@ protected :
 	double _erreur_rel;//norme(Un+1-Un)
 	string _fileName;//name of the calculation
 	int _freqSave;
-	//ofstream _runLogFile;//for creation of a log file to save the history of the simulation
+	ofstream * _runLogFile;//for creation of a log file to save the history of the simulation
 
 	//Heat transfert variables
 	Field _heatPowerField, _rodTemperatureField;
