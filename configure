@@ -62,6 +62,12 @@ def CheckOptions(parser):
         if options.__dict__[stringToCheck] is None:
             parser.error("cannot determine "+stringToCheck)
 
+def printDocumentationInstructions(options):
+	if options.doc:
+		print "Then use\n\t$ make doc\nto create the documentation."
+	return
+
+
 def ForgeCMakeCommand(options):
     installPrefix=GetInstallPrefix(options)
     CDMATHOptions=GetCDMATHOptions(options)
@@ -173,6 +179,7 @@ def main():
     returnCode=0
     if returnCode == 0:
         print("\n\nNow issue:\n\t$ make\nfor compiling the code.")
+        printDocumentationInstructions(options)
     else:
         print("error: cmake did not run correctly.")
 

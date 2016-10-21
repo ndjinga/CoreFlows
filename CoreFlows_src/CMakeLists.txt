@@ -81,7 +81,7 @@ if (COREFLOWS_WITH_DOCUMENTATION)                                               
     ${PROJECT_BINARY_DIR}/Doxyfile                                                                          #
     ${CoreFlows_Documentation}                                                                              #
       )                                                                                                     #
-  add_custom_target (doc ALL COMMAND ${DOXYGEN_EXECUTABLE}                                                  #
+  add_custom_target (doc COMMAND ${DOXYGEN_EXECUTABLE}                                                  #
   SOURCES ${PROJECT_BINARY_DIR}/Doxyfile)			                                            #
   install (DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc/html DESTINATION share/doc/CoreFlows)                  #
   INSTALL(FILES ${CoreFlows_SOURCE_DIR}/Documentation/CoreFlows.pdf DESTINATION share/doc/CoreFlows)	    #
