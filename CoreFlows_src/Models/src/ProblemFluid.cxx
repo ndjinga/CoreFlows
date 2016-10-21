@@ -30,11 +30,11 @@ ProblemFluid::ProblemFluid(void){
 void ProblemFluid::initialize()
 {
 	if(!_initialDataSet){
-		//_runLogFile<<"ProblemFluid::initialize() set initial data first"<<endl;
+		*_runLogFile<<"ProblemFluid::initialize() set initial data first"<<endl;
 		throw CdmathException("ProblemFluid::initialize() set initial data first");
 	}
 	cout << "Number of Phases = " << _nbPhases << " mesh dimension = "<<_Ndim<<" number of variables = "<<_nVar<<endl;
-	//_runLogFile << "Number of Phases = " << _nbPhases << " spaceDim= "<<_Ndim<<" number of variables= "<<_nVar<<endl;
+	*_runLogFile << "Number of Phases = " << _nbPhases << " spaceDim= "<<_Ndim<<" number of variables= "<<_nVar<<endl;
 
 	/********* local arrays ****************/
 	_AroePlus = new PetscScalar[_nVar*_nVar];
@@ -219,7 +219,7 @@ bool ProblemFluid::iterateTimeStep(bool &converged)
 		if(_PetscIts>=_maxPetscIts)//solving the linear system failed
 		{
 			cout<<"Systeme lineaire : pas de convergence de Petsc. Itérations maximales "<<_maxPetscIts<<" atteintes"<<endl;
-			//_runLogFile<<"Systeme lineaire : pas de convergence de Petsc. Itérations maximales "<<_maxPetscIts<<" atteintes"<<endl;
+			*_runLogFile<<"Systeme lineaire : pas de convergence de Petsc. Itérations maximales "<<_maxPetscIts<<" atteintes"<<endl;
 			converged=false;
 			return false;
 		}
@@ -258,7 +258,7 @@ bool ProblemFluid::iterateTimeStep(bool &converged)
 	if(_nbPhases==2 && fabs(_err_press_max) > _precision)//la pression n'a pu être calculée en diphasique à partir des variables conservatives
 	{
 		cout<<"Warning consToPrim: nbiter max atteint, erreur relative pression= "<<_err_press_max<<" precision= " <<_precision<<endl;
-		//_runLogFile<<"Warning consToPrim: nbiter max atteint, erreur relative pression= "<<_err_press_max<<" precision= " <<_precision<<endl;
+		*_runLogFile<<"Warning consToPrim: nbiter max atteint, erreur relative pression= "<<_err_press_max<<" precision= " <<_precision<<endl;
 		converged=false;
 		return false;
 	}
@@ -274,12 +274,12 @@ bool ProblemFluid::iterateTimeStep(bool &converged)
 		if(_minm1<-_precision || _minm2<-_precision)
 		{
 			cout<<"!!!!!!!!! WARNING masse partielle negative sur " << _nbMaillesNeg << " faces, min m1= "<< _minm1 << " , minm2= "<< _minm2<< " precision "<<_precision<<endl;
-			//_runLogFile<<"!!!!!!!!! WARNING masse partielle negative sur " << _nbMaillesNeg << " faces, min m1= "<< _minm1 << " , minm2= "<< _minm2<< " precision "<<_precision<<endl;
+			*_runLogFile<<"!!!!!!!!! WARNING masse partielle negative sur " << _nbMaillesNeg << " faces, min m1= "<< _minm1 << " , minm2= "<< _minm2<< " precision "<<_precision<<endl;
 		}
 
 		if (_nbVpCplx>0){
 			cout << "!!!!!!!!!!!!!!!!!!!!!!!! Complex eigenvalues on " << _nbVpCplx << " cells, max imag= " << _part_imag_max << endl;
-			//_runLogFile << "!!!!!!!!!!!!!!!!!!!!!!!! Complex eigenvalues on " << _nbVpCplx << " cells, max imag= " << _part_imag_max << endl;
+			*_runLogFile << "!!!!!!!!!!!!!!!!!!!!!!!! Complex eigenvalues on " << _nbVpCplx << " cells, max imag= " << _part_imag_max << endl;
 		}
 	}
 	_minm1=1e30;
@@ -519,12 +519,12 @@ double ProblemFluid::computeTimeStep(bool & stop){
 
 				if(_system)
 					displayMatrix(_AroePlusImplicit, _nVar, "-_AroePlusImplicit: ");
-				}
+			}
 		}
 		else if( Fj.getNumberOfCells()>2 && _Ndim==1 ){//inner face with more than two neighbours
 			if(_verbose && _nbTimeStep%_freqSave ==0)
 				cout<<"lattice mesh junction at face "<<j<<" nbvoismax= "<<_neibMaxNb<<endl;
-			//_runLogFile<<"Warning: treatment of a junction node"<<endl;
+			*_runLogFile<<"Warning: treatment of a junction node"<<endl;
 
 			if(!_sectionFieldSet)
 				throw CdmathException("ProblemFluid::ComputeTimeStep(): pipe network requires section field");
@@ -612,7 +612,7 @@ double ProblemFluid::computeTimeStep(bool & stop){
 
 						if(_system)
 							displayMatrix(_AroePlusImplicit, _nVar, "-_AroePlusImplicit: ");
-											}
+					}
 				}
 			}
 		}
@@ -642,12 +642,12 @@ double ProblemFluid::computeTimeStep(bool & stop){
 	stop=false;
 
 
-/*
+	/*
 	if(_nbTimeStep+1<_cfl)
 		return (_nbTimeStep+1)*_minl/_maxvp;
 	else
-*/
-		return _cfl*_minl/_maxvp;
+	 */
+	return _cfl*_minl/_maxvp;
 }
 
 void ProblemFluid::computeNewtonVariation()
@@ -687,21 +687,21 @@ void ProblemFluid::computeNewtonVariation()
 		VecAXPY(_b, -1/_dt, _conservativeVars);
 		MatShift(_A, 1/_dt);
 
-		#if PETSC_VERSION_GREATER_3_5
-			KSPSetOperators(_ksp, _A, _A);
-		#else
-			KSPSetOperators(_ksp, _A, _A,SAME_NONZERO_PATTERN);
-		#endif
+#if PETSC_VERSION_GREATER_3_5
+		KSPSetOperators(_ksp, _A, _A);
+#else
+		KSPSetOperators(_ksp, _A, _A,SAME_NONZERO_PATTERN);
+#endif
 
-			if(_verbose)
-			{
-				cout << "Matrice du système linéaire après contribution delta t" << endl;
-				MatView(_A,PETSC_VIEWER_STDOUT_SELF);
-				cout << endl;
-				cout << "Second membre du système linéaire après contribution delta t" << endl;
-				VecView(_b, PETSC_VIEWER_STDOUT_SELF);
-				cout << endl;
-			}
+		if(_verbose)
+		{
+			cout << "Matrice du système linéaire après contribution delta t" << endl;
+			MatView(_A,PETSC_VIEWER_STDOUT_SELF);
+			cout << endl;
+			cout << "Second membre du système linéaire après contribution delta t" << endl;
+			VecView(_b, PETSC_VIEWER_STDOUT_SELF);
+			cout << endl;
+		}
 
 		if(_conditionNumber)
 			KSPSetComputeEigenvalues(_ksp,PETSC_TRUE);
@@ -826,7 +826,7 @@ void ProblemFluid::validateTimeStep()
 		}
 		cout<<"Alpha min = " << alphamin << ", Alpha max = " << alphamax<<", Tmax= "<<Tmax<<" K"<<endl;
 		cout<<endl;
-		//_runLogFile<<"Alpha min = " << alphamin << " Alpha max = " << alphamax<<endl;
+		*_runLogFile<<"Alpha min = " << alphamin << " Alpha max = " << alphamax<<", Tmax= "<<Tmax<<" K"<<endl;
 	}
 
 	_time+=_dt;
@@ -1267,7 +1267,7 @@ void ProblemFluid::updateConservatives()
 				cout << _Ui[q]  << "\t";
 			cout << endl;
 		}
-}
+	}
 	VecAssemblyEnd(_conservativeVars);
 
 	if(_system)
@@ -1311,7 +1311,7 @@ vector< complex<double> > ProblemFluid::getRacines(vector< double > pol_car){
 	}
 	else {
 		cout << " Pb, found only " << size_vp << " eigenvalues over " << degre_polynom << endl;
-		//_runLogFile << " Pb, found only " << size_vp << " eigenvalues over " << degre_polynom << endl;
+		*_runLogFile << " Pb, found only " << size_vp << " eigenvalues over " << degre_polynom << endl;
 		cout<<"Coefficients polynome caracteristique: "<<endl;
 		for(int ct =0; ct<degre_polynom+1; ct++)
 			cout<<pol_car[ct]<< " , " <<endl;

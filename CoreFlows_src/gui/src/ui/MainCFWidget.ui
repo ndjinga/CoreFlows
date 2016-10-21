@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1221</width>
-    <height>832</height>
+    <height>851</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -29,7 +29,7 @@
    <string notr="true"/>
   </property>
   <property name="currentIndex">
-   <number>8</number>
+   <number>5</number>
   </property>
   <widget class="QWidget" name="tabModel">
    <attribute name="title">
@@ -4638,7 +4638,7 @@
              </property>
              <property name="maximumSize">
               <size>
-               <width>246</width>
+               <width>242</width>
                <height>30</height>
               </size>
              </property>
@@ -5251,7 +5251,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>336</width>
+                <width>334</width>
                 <height>30</height>
                </size>
               </property>
@@ -5326,7 +5326,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>336</width>
+                <width>334</width>
                 <height>30</height>
                </size>
               </property>
@@ -5387,7 +5387,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>336</width>
+                <width>334</width>
                 <height>30</height>
                </size>
               </property>
@@ -5472,7 +5472,7 @@
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>222</width>
+                 <width>218</width>
                  <height>30</height>
                 </size>
                </property>
@@ -5567,7 +5567,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>336</width>
+                <width>334</width>
                 <height>30</height>
                </size>
               </property>
@@ -5657,7 +5657,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>336</width>
+                <width>334</width>
                 <height>30</height>
                </size>
               </property>
@@ -5732,7 +5732,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>336</width>
+                <width>334</width>
                 <height>30</height>
                </size>
               </property>
@@ -5793,7 +5793,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>336</width>
+                <width>334</width>
                 <height>30</height>
                </size>
               </property>
@@ -5878,7 +5878,7 @@
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>222</width>
+                 <width>218</width>
                  <height>30</height>
                 </size>
                </property>
@@ -5973,7 +5973,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>336</width>
+                <width>334</width>
                 <height>30</height>
                </size>
               </property>
@@ -6063,7 +6063,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>336</width>
+                <width>334</width>
                 <height>30</height>
                </size>
               </property>
@@ -6138,7 +6138,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>336</width>
+                <width>334</width>
                 <height>30</height>
                </size>
               </property>
@@ -6199,7 +6199,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>336</width>
+                <width>334</width>
                 <height>30</height>
                </size>
               </property>
@@ -6284,7 +6284,7 @@
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>222</width>
+                 <width>218</width>
                  <height>30</height>
                 </size>
                </property>
@@ -6379,7 +6379,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>336</width>
+                <width>334</width>
                 <height>30</height>
                </size>
               </property>
@@ -6469,7 +6469,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>336</width>
+                <width>334</width>
                 <height>30</height>
                </size>
               </property>
@@ -6544,7 +6544,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>336</width>
+                <width>334</width>
                 <height>30</height>
                </size>
               </property>
@@ -6605,7 +6605,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>336</width>
+                <width>334</width>
                 <height>30</height>
                </size>
               </property>
@@ -6693,7 +6693,7 @@
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>222</width>
+                 <width>218</width>
                  <height>30</height>
                 </size>
                </property>
@@ -6788,7 +6788,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>336</width>
+                <width>334</width>
                 <height>30</height>
                </size>
               </property>
@@ -6875,7 +6875,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>336</width>
+                <width>334</width>
                 <height>30</height>
                </size>
               </property>
@@ -6950,7 +6950,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>336</width>
+                <width>334</width>
                 <height>30</height>
                </size>
               </property>
@@ -7011,7 +7011,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>336</width>
+                <width>334</width>
                 <height>30</height>
                </size>
               </property>
@@ -7099,7 +7099,7 @@
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>222</width>
+                 <width>218</width>
                  <height>30</height>
                 </size>
                </property>
@@ -7194,7 +7194,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>336</width>
+                <width>334</width>
                 <height>30</height>
                </size>
               </property>
@@ -7281,7 +7281,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>336</width>
+                <width>334</width>
                 <height>30</height>
                </size>
               </property>
@@ -7356,7 +7356,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>336</width>
+                <width>334</width>
                 <height>30</height>
                </size>
               </property>
@@ -7417,7 +7417,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>336</width>
+                <width>334</width>
                 <height>30</height>
                </size>
               </property>
@@ -7505,7 +7505,7 @@
                </property>
                <property name="maximumSize">
                 <size>
-                 <width>222</width>
+                 <width>218</width>
                  <height>30</height>
                 </size>
                </property>
@@ -7600,7 +7600,7 @@
               </property>
               <property name="maximumSize">
                <size>
-                <width>336</width>
+                <width>334</width>
                 <height>30</height>
                </size>
               </property>
@@ -9066,6 +9066,9 @@
                    <property name="maximum">
                     <double>1000000000.000000000000000</double>
                    </property>
+                   <property name="value">
+                    <double>100000.000000000000000</double>
+                   </property>
                   </widget>
                  </item>
                  <item>
@@ -9994,7 +9997,7 @@
          </property>
          <property name="maximumSize">
           <size>
-           <width>378</width>
+           <width>376</width>
            <height>30</height>
           </size>
          </property>
@@ -11138,7 +11141,7 @@
          </property>
          <property name="maximumSize">
           <size>
-           <width>368</width>
+           <width>366</width>
            <height>31</height>
           </size>
          </property>

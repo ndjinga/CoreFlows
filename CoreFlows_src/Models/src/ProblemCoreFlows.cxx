@@ -57,8 +57,9 @@ ProblemCoreFlows::ProblemCoreFlows()
 	_system = false;
 	_conditionNumber=false;
 	_maxvp=0;
+	_runLogFile=new ofstream;
 
-	 //extracting current directory
+	//extracting current directory
 	char result[ PATH_MAX ];
 	getcwd(result, PATH_MAX );
 	_path=string( result );
@@ -110,7 +111,7 @@ void ProblemCoreFlows::setInitialField(const Field &VV)
 	_mesh=_VV.getMesh();
 	_Nmailles = _mesh.getNumberOfCells();
 	_perimeters=Field("Perimeters", CELLS, _mesh,1);
-	
+
 	// find _minl and maimum nb of neibourghs
 	_minl  = INFINITY;
 	int nbNeib,indexFace;
@@ -189,14 +190,19 @@ void ProblemCoreFlows::setInitialFieldConstant( int nDim, const vector<double> V
 		double zmin, double zmax, int nz, string bottomSide, string topSide)
 {
 	Mesh M;
-	if(nDim==1)
+	if(nDim==1){
+		//cout<<"coucou1 xmin="<<xmin<<", xmax= "<<xmax<< ", nx= "<<nx<<endl;
 		M=Mesh(xmin,xmax,nx);
+		//cout<<"coucou2"<<endl;
+	}
 	else if(nDim==2)
 		M=Mesh(xmin,xmax,nx,ymin,ymax,ny);
 	else if(nDim==3)
 		M=Mesh(xmin,xmax,nx,ymin,ymax,ny,zmin,zmax,nz);
-	else
+	else{
+		cout<<"ProblemCoreFlows::setInitialFieldConstant: Space dimension nDim should be between 1 and 3"<<endl;
 		throw CdmathException("Space dimension nDim should be between 1 and 3");
+	}
 
 	M.setGroupAtPlan(xmax,0,_precision,rightSide);
 	M.setGroupAtPlan(xmin,0,_precision,leftSide);
@@ -309,7 +315,7 @@ void ProblemCoreFlows::setLinearSolver(linearSolver kspType, preconditioner pcTy
 		_ksptype = (char*)&KSPBCGS;
 	else {
 		cout << "only 'GRMES' or 'BICGSTAB' is acceptable as a linear solver !!!" << endl;
-		//_runLogFile << "only 'GRMES' or 'BICGSTAB' is acceptable as a linear solver !!!" << endl;
+		*_runLogFile << "only 'GRMES' or 'BICGSTAB' is acceptable as a linear solver !!!" << endl;
 		throw CdmathException("only 'GRMES' or 'BICGSTAB' algorithm is acceptable !!!");
 	}
 	// set preconditioner
@@ -321,7 +327,7 @@ void ProblemCoreFlows::setLinearSolver(linearSolver kspType, preconditioner pcTy
 		_pctype = (char*)&PCILU;
 	} else {
 		cout << "only 'NONE' or 'LU' or 'ILU' preconditioners are acceptable !!!" << endl;
-		//_runLogFile << "only 'NONE' or 'LU' or 'ILU' preconditioners are acceptable !!!" << endl;
+		*_runLogFile << "only 'NONE' or 'LU' or 'ILU' preconditioners are acceptable !!!" << endl;
 		throw CdmathException("only 'NONE' or 'LU' or 'ILU' preconditioners are acceptable !!!" );
 	}
 };
@@ -342,8 +348,7 @@ bool ProblemCoreFlows::run()
 
 	cout<< "Running test case "<< _fileName<<endl;
 
-	ofstream _runLogFile; /* to study */
-	 _runLogFile.open((_fileName+".log").c_str(), ios::out | ios::trunc);;//for creation of a log file to save the history of the simulation
+	_runLogFile->open((_fileName+".log").c_str(), ios::out | ios::trunc);;//for creation of a log file to save the history of the simulation
 
 	// Time step loop
 	while(!stop && !_isStationary &&_time<_timeMax && _nbTimeStep<_maxNbOfTimeStep)
@@ -354,7 +359,7 @@ bool ProblemCoreFlows::run()
 		_dt=computeTimeStep(stop);
 		if (stop){
 			cout << "Failed computing time step "<<_nbTimeStep<<", time = " << _time <<", dt= "<<_dt<<", stopping calculation"<< endl;
-			_runLogFile << "Failed computing time step "<<_nbTimeStep<<", time = " << _time <<", dt= "<<_dt<<", stopping calculation"<< endl;
+			*_runLogFile << "Failed computing time step "<<_nbTimeStep<<", time = " << _time <<", dt= "<<_dt<<", stopping calculation"<< endl;
 			break;
 		}
 		// Loop on the time interval tries
@@ -364,7 +369,7 @@ bool ProblemCoreFlows::run()
 			// Prepare the next time step
 			if (stop){
 				cout << "Failed initializing time step "<<_nbTimeStep<<", time = " << _time <<", dt= "<<_dt<<", stopping calculation"<< endl;
-				_runLogFile << "Failed initializing time step "<<_nbTimeStep<<", time = " << _time <<", dt= "<<_dt<<", stopping calculation"<< endl;
+				*_runLogFile << "Failed initializing time step "<<_nbTimeStep<<", time = " << _time <<", dt= "<<_dt<<", stopping calculation"<< endl;
 				break;
 			}
 			// Solve the next time step
@@ -375,13 +380,13 @@ bool ProblemCoreFlows::run()
 				abortTimeStep();
 				if(_dt>_precision){
 					cout << "Failed solving time step "<<_nbTimeStep<<", time = " << _time <<" _dt= "<<_dt<<", cfl= "<<_cfl<<", trying again with cfl/2"<< endl;
-					_runLogFile << "Failed solving time step "<<_nbTimeStep<<", time = " << _time <<" _dt= "<<_dt<<", cfl= "<<_cfl<<", trying again with cfl/2"<< endl;
+					*_runLogFile << "Failed solving time step "<<_nbTimeStep<<", time = " << _time <<" _dt= "<<_dt<<", cfl= "<<_cfl<<", trying again with cfl/2"<< endl;
 					_dt*=0.5;
 					_cfl*=0.5;
 				}
 				else{
 					cout << "Failed solving time step "<<_nbTimeStep<<", _time = " << _time<<" _dt= "<<_dt<<", cfl= "<<_cfl <<", stopping calculation"<< endl;
-					_runLogFile << "Failed solving time step "<<_nbTimeStep<<", _time = " << _time<<" _dt= "<<_dt<<", cfl= "<<_cfl <<", stopping calculation"<< endl;
+					*_runLogFile << "Failed solving time step "<<_nbTimeStep<<", _time = " << _time<<" _dt= "<<_dt<<", cfl= "<<_cfl <<", stopping calculation"<< endl;
 					stop=true; // Impossible to solve the next time step, the Problem has given up
 					break;
 				}
@@ -391,31 +396,31 @@ bool ProblemCoreFlows::run()
 				validateTimeStep();
 				if (_nbTimeStep%_freqSave ==0){
 					cout << "Time step = "<< _nbTimeStep << ", dt = "<< _dt <<", time = "<<_time << ", ||Un+1-Un||= "<<_erreur_rel<<endl;
-					_runLogFile << "Time step = "<< _nbTimeStep << ", dt = "<< _dt <<", time = "<<_time << ", ||Un+1-Un||= "<<_erreur_rel<<endl;
+					*_runLogFile << "Time step = "<< _nbTimeStep << ", dt = "<< _dt <<", time = "<<_time << ", ||Un+1-Un||= "<<_erreur_rel<<endl;
 				}
 			}
 		}
 	}
 	if(_isStationary){
 		cout << "Stationary state reached" <<endl;
-		_runLogFile << "Stationary state reached" <<endl;
+		*_runLogFile << "Stationary state reached" <<endl;
 	}
 	else if(_time>=_timeMax){
 		cout<<"Maximum time "<<_timeMax<<" reached"<<endl;
-		_runLogFile<<"Maximum time "<<_timeMax<<" reached"<<endl;
+		*_runLogFile<<"Maximum time "<<_timeMax<<" reached"<<endl;
 	}
 	else if(_nbTimeStep>=_maxNbOfTimeStep){
 		cout<<"Maximum number of time steps "<<_maxNbOfTimeStep<<" reached"<<endl;
-		_runLogFile<<"Maximum number of time steps "<<_maxNbOfTimeStep<<" reached"<<endl;
+		*_runLogFile<<"Maximum number of time steps "<<_maxNbOfTimeStep<<" reached"<<endl;
 	}
 	else{
 		cout<<"Error problem wants to stop!"<<endl;
-		_runLogFile<<"Error problem wants to stop!"<<endl;
+		*_runLogFile<<"Error problem wants to stop!"<<endl;
 	}
 	cout << "End of calculation time t= " << _time << " at time step number "<< _nbTimeStep << endl;
-	_runLogFile << "End of calculation time t= " << _time << " at time step number "<< _nbTimeStep << endl;
-	
-	_runLogFile.close();
+	*_runLogFile << "End of calculation time t= " << _time << " at time step number "<< _nbTimeStep << endl;
+
+	_runLogFile->close();
 	return !stop;
 }
 
@@ -436,11 +441,11 @@ void ProblemCoreFlows::displayMatrix(double *matrix, int size, string name)
 void ProblemCoreFlows::displayVector(double *vector, int size, string name)
 {
 	cout<<name<<endl;
-		for(int q=0; q<size; q++)
-		{
-			cout << vector[q] << "\t";
-		}
-		cout << endl;
+	for(int q=0; q<size; q++)
+	{
+		cout << vector[q] << "\t";
+	}
+	cout << endl;
 }
 void ProblemCoreFlows::setFileName(string fileName){
 	_fileName = fileName;
@@ -472,20 +477,20 @@ bool ProblemCoreFlows::solveTimeStep(){
 	if(!converged){
 		if(_NEWTON_its >= _maxNewtonIts){
 			cout << "Maximum number of Newton iterations "<<_maxNewtonIts<<" reached"<< endl;
-			//_runLogFile << "Maximum number of Newton iterations "<<_maxNewtonIts<<" reached"<< endl;
+			*_runLogFile << "Maximum number of Newton iterations "<<_maxNewtonIts<<" reached"<< endl;
 		}
 		else if(!ok){
 			cout<<"iterateTimeStep: solving Newton iteration "<<_NEWTON_its<<" Failed"<<endl;
-			//_runLogFile<<"iterateTimeStep: solving Newton iteration "<<_NEWTON_its<<" Failed"<<endl;
+			*_runLogFile<<"iterateTimeStep: solving Newton iteration "<<_NEWTON_its<<" Failed"<<endl;
 		}
 	}
 	else if(_timeScheme == Implicit && _nbTimeStep%_freqSave ==0)
 	{
 		cout<<endl;
 		cout << "Nombre d'iterations de Newton "<< _NEWTON_its << ", Nombre max d'iterations "<< _ksptype << " : " << _MaxIterLinearSolver << endl;
-		//_runLogFile <<endl;
-		//_runLogFile << "Nombre d'iterations de Newton "<< _NEWTON_its << " Variation ||Un+1-Un||= "<< _erreur_rel<<endl;
-		//_runLogFile << "Nombre max d'iterations "<< _ksptype << " : " << _MaxIterLinearSolver << endl;
+		*_runLogFile <<endl;
+		*_runLogFile << "Nombre d'iterations de Newton "<< _NEWTON_its << " Variation ||Un+1-Un||= "<< _erreur_rel<<endl;
+		*_runLogFile << "Nombre max d'iterations "<< _ksptype << " : " << _MaxIterLinearSolver << endl;
 		_MaxIterLinearSolver = 0;
 	}
 
@@ -499,4 +504,5 @@ ProblemCoreFlows::~ProblemCoreFlows()
 	if(petscInitialized)
 		PetscFinalize();
 	 */
+	delete _runLogFile;
 }

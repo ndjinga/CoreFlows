@@ -175,14 +175,20 @@ class MainCFWidget(QtGui.QTabWidget):
         VV_Constant[3] = dictCF["InitialVelocity_2d"]
         if dictCF["spaceDim"] >2 :
           VV_Constant[4] = dictCF["InitialVelocity_3d"]
-      VV_Constant[nVar] = dictCF["InitialTemperature"]
+      VV_Constant[nVar-1] = dictCF["InitialTemperature"]
     else :
       raise NameError('Model not yet handled', dictCF["ModelName"])  
 
-    print "Setting  initial data"
+    print "Setting initial data"
     ############ setting initial data ################################
     if dictCF["spaceDim"] ==1 :
+      print "spaceDim= ", dictCF["spaceDim"]
+      print "VV_Constant= ", VV_Constant
+      print "Xinf= ", dictCF["Xinf"]
+      print "Xsup= ", dictCF["Xsup"]
+      print "Nx= ", dictCF["Nx"]
       myProblem.setInitialFieldConstant( dictCF["spaceDim"], VV_Constant, dictCF["Xinf"], dictCF["Xsup"], dictCF["Nx"],"Left","Right");
+      print "Initial field set"
     elif dictCF["spaceDim"] ==2 :
       myProblem.setInitialFieldConstant( dictCF["spaceDim"], VV_Constant, dictCF["Xinf"], dictCF["Xsup"], dictCF["Nx"],"Left","Right", dictCF["Yinf"], dictCF["Ysup"], dictCF["Ny"],"Bottom","Top");
     elif dictCF["spaceDim"] ==3 :
@@ -224,6 +230,8 @@ class MainCFWidget(QtGui.QTabWidget):
     myProblem.setFreqSave(dictCF["FreqSave"]);
     myProblem.setFileName(dictCF["ResultFileName"]);
     myProblem.saveConservativeField(True);
+    #myProblem.setVerbose(True);
+    myProblem.usePrimitiveVarsInNewton(True);
     if(dictCF["spaceDim"]>1):
       myProblem.saveVelocity();
       pass
