@@ -13,9 +13,9 @@ SET(_extra_lib_CoreFlows CoreFlows ${PETSC_LIBRARIES} ${CDMATH_LIBRARIES})
 
 
 if(CMAKE_COMPILER_IS_GNUCXX)
-    if (CMAKE_BUILD_TYPE=Debug)
+    if (CMAKE_BUILD_TYPE STREQUAL Debug)
     include(CodeCoverage)
-    setup_target_for_coverage(CoreFlows_coverage CoreFlowsCPPTests coverage)
+    setup_target_for_coverage(cov ctest coverage)
     endif()
 endif()
 
@@ -23,11 +23,7 @@ endif()
 file(GLOB NICE_EXAMPLES_TO_INSTALL resources Python )
 install(DIRECTORY ${NICE_EXAMPLES_TO_INSTALL} DESTINATION share/examples)
 
-#####################################
-
-#install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/resources  DESTINATION share/examples)
-#install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Python  DESTINATION share/examples)
-
+##################################### test generation with ctest
 
 # this function creates a target and a ctest test
 function(CreateTestExec SourceTestFile libList)

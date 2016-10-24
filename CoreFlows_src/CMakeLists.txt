@@ -5,7 +5,7 @@ project (CoreFlows C CXX)
 set (COREFLOWS_VERSION_MAJOR 0)
 set (COREFLOWS_VERSION_MINOR 1)
 
-option (CMAKE_BUILD_TYPE "Debug or Release compilation" Debug)
+option (CMAKE_BUILD_TYPE "Debug or Release compilation" Release)
 option (COREFLOWS_WITH_DOCUMENTATION "Generate documentation for CoreFlows use." OFF)
 option (COREFLOWS_WITH_PYTHON "Compile Python interface for COREFLOWS." OFF)
 option (COREFLOWS_WITH_GUI "Compile Graphic user Interface for COREFLOWS." OFF)
@@ -13,16 +13,11 @@ option (COREFLOWS_WITH_PACKAGE "Generate RPM, Debian and tarball packages." OFF)
 
 enable_testing()											   #
 # Debug mode activates testing and profiling ---------------------------------------------------------------#
-if (CMAKE_BUILD_TYPE=Debug)										   #
+if (CMAKE_BUILD_TYPE STREQUAL Debug)										   #
 													   #
- SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg")								   #
- SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg")						   #
- SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg")					   #
-					CONFIGURE_FILE(
-    ${PROJECT_SOURCE_DIR}/conf/env.sh
-    ${CMAKE_INSTALL_PREFIX}/env.sh
-    @ONLY
-)
+ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg --coverage")								   #
+ SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg -lcov")						   #
+ SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg -lcov")					   #
 													   #
 endif ()												   #
 													   #
