@@ -16,8 +16,8 @@ enable_testing()											   #
 if (CMAKE_BUILD_TYPE STREQUAL Debug)										   #
 													   #
  SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg --coverage")								   #
- SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg -lcov")						   #
- SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg -lcov")					   #
+ SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg --coverage")						   #
+ SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg --coverage")					   #
 													   #
 endif ()												   #
 													   #
