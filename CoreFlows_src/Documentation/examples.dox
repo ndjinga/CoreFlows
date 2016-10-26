@@ -52,6 +52,8 @@
 	+ \ref Drift1DVidResPy
 	+ \ref Drift2DBoilC
 	+ \ref Drift2DBoilPy
+	+ \ref Drift2DInclGravC
+	+ \ref Drift2DInclGravBarsC
 	+ \ref Drift2DPressLossPy
 	+ \ref Drift2DPorJumpPy
 	+ \ref Drift2DBoilBarPy

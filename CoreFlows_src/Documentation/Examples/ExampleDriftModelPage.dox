@@ -50,32 +50,38 @@
 \section  Drift2DBoilPy Drift Model 2D Inclined Boiling Channel (Python)
 \include DriftModel_2DInclinedBoilingChannel.py
 
-\section  Drift2DBoilBarPy Drift Model 2D Vertical Boiling Channel with barrier (Python)
+\section  Drift2DInclGravC Drift Model 2D Inclined Channel with Gravity (C)
+\include DriftModel_2DInclinedChannelGravity.cxx
+
+\section  Drift2DBoilBarPy Drift Model 2D Vertical Boiling Channel with a barrier (Python)
 \include DriftModel_2DBoilingChannelBarrier.py
 
-@image html PowerFieldCloison.png "Mesh and heat power field for the 2D Vertical Boiling Channel with barrier"
+@image html PowerFieldCloison.png "Mesh and heat power field for the 2D Vertical Boiling Channel with a barrier"
 
-@image html DriftModel_2DCanalCloisonVit0.1Conc.png "Stationary concentration field and streamlines, 2D Vertical Boiling Channel with barrier"
-@image html DriftModel_2DCanalCloisonVit0.1Vy.png "Stationary velocity field and streamlines, 2D Vertical Boiling Channel with barrier"
+@image html DriftModel_2DCanalCloisonVit0.1Conc.png "Stationary concentration field and streamlines, 2D Vertical Boiling Channel with a barrier"
+@image html DriftModel_2DCanalCloisonVit0.1Vy.png "Stationary velocity field and streamlines, 2D Vertical Boiling Channel with a barrier"
 
-\section  Drift2DBoilBarIncPy Drift Model 2D Inclined Boiling Channel with barrier (Python)
+\section  Drift2DBoilBarIncPy Drift Model 2D Inclined Boiling Channel with a barrier (Python)
 \include DriftModel_2DInclinedBoilingChannelBarrier.py
 
-@image html MaillagePuissanceThermiqueIncline.png  "Mesh and heat power field for the 2D inclined Vertical Boiling Channel with barrier"
+@image html MaillagePuissanceThermiqueIncline.png  "Mesh and heat power field for the 2D inclined Vertical Boiling Channel with a barrier"
 
-@image html CanalCloisonInclinedUpwindWBConcentration.png "Stationary concentration field and streamlines 2D inclined  Vertical Boiling Channel with barrier"
+@image html CanalCloisonInclinedUpwindWBConcentration.png "Stationary concentration field and streamlines 2D inclined  Vertical Boiling Channel with a barrier"
 
-\section DriftWirePy Drift Model boiling wire with 2 Branches (Python)
+\section  Drift2DInclGravBarsC Drift Model 2D Inclined Channel with Gravity and three barriers (C)
+\include DriftModel_2DInclinedChannelGravityBarriers.cxx
+
+\section DriftWirePy Drift Model boiling wire with two Branches (Python)
 \include DriftModel_2BranchesBoilingChannels.py
 
-\section  Drift3DBoilBarPy Drift Model 3D Vertical Boiling Channel with barrier (Python)
+\section  Drift3DBoilBarPy Drift Model 3D Vertical Boiling Channel with two barriers (Python)
 \include DriftModel_3DBoilingChannelBarrier.py
 
-@image html DomainePuissanceThermiqueVueAvant.png "Front view of the power field for the 3D Vertical Boiling Channel with barrier"
+@image html DomainePuissanceThermiqueVueAvant.png "Front view of the power field for the 3D Vertical Boiling Channel with two barrier"
 
-@image html DomainePuissanceThermiqueVueArriere.png "Rear view of the power field for the 3D Vertical Boiling Channel with barrier"
+@image html DomainePuissanceThermiqueVueArriere.png "Rear view of the power field for the 3D Vertical Boiling Channel with two barrier"
 
-@image html step_73.png "Streamlines at time step 7300 for the 3D Vertical Boiling Channel with barrier"
+@image html step_73.png "Streamlines at time step 7300 for the 3D Vertical Boiling Channel with two barrier"
 
 \section  Drift2DVidResPy Drift Model 2D tank drainage problem (Python)
 \include DriftModel_2DVidangeReservoir.py
