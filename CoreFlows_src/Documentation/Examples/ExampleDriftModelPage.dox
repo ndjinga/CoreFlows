@@ -53,7 +53,16 @@
 \section  Drift2DInclGravC Drift Model 2D Inclined Channel with Gravity (C)
 \include DriftModel_2DInclinedChannelGravity.cxx
 
-\section  Drift2DBoilBarPy Drift Model 2D Vertical Boiling Channel with a barrier (Python)
+\section  Drift2DInclGravPy Drift Model 2D Inclined Channel with Gravity (Py)
+\include DriftModel_2DInclinedChannelGravity.py
+
+\section  Drift2DInclGravBarsC Drift Model 2D Inclined Channel with Gravity and three barriers (C)
+\include DriftModel_2DInclinedChannelGravityBarriers.cxx
+
+\section  Drift2DInclGravBarsPy Drift Model 2D Inclined Channel with Gravity and three barriers (Py)
+\include DriftModel_2DInclinedChannelGravityBarriers.py
+
+\section  Drift2DBoilBarVertPy Drift Model 2D Vertical Boiling Channel with a barrier (Python)
 \include DriftModel_2DBoilingChannelBarrier.py
 
 @image html PowerFieldCloison.png "Mesh and heat power field for the 2D Vertical Boiling Channel with a barrier"
