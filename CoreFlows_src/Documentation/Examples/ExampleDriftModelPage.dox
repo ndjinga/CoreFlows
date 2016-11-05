@@ -56,6 +56,13 @@
 \section  Drift2DInclGravPy Drift Model 2D Inclined Channel with Gravity (Py)
 \include DriftModel_2DInclinedChannelGravity.py
 
+@image html ChannelSquaresStruct.png "Structured mesh with square cells for the 2D Vertical Inclined channel with gravity"
+
+\section  Drift2DInclGravTriPy Drift Model 2D Inclined Channel with Gravity on a triangular mesh (Py)
+\include DriftModel_2DInclinedChannelGravityTriangles.py
+
+@image html ChannelTrianglesStruct.png "Structured mesh with triangular cells for the 2D Vertical Inclined channel with gravity"
+
 \section  Drift2DInclGravBarsC Drift Model 2D Inclined Channel with Gravity and three barriers (C)
 \include DriftModel_2DInclinedChannelGravityBarriers.cxx
 

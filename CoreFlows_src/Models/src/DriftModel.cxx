@@ -400,7 +400,7 @@ void DriftModel::convectionState( const long &i, const long &j, const bool &IsBo
 	}
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
-		cout<<"etat de roe"<<endl;
+		cout<<"Convection interfacial state"<<endl;
 		for(int k=0;k<_nVar;k++)
 			cout<< _Uroe[k]<<" , "<<endl;
 	}
@@ -526,7 +526,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 	}
 
 	if (_limitField[nameOfGroup].bcType==Wall){
-		//Pour la convection, inversion du sens de la vitesse
+		//Pour la convection, inversion du sens de la vitesse normale
 		for(k=0; k<_Ndim; k++)
 			_externalStates[(k+2)]-= 2*q_n*normale[k];
 

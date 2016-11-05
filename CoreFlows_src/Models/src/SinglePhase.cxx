@@ -349,6 +349,13 @@ void SinglePhase::convectionState( const long &i, const long &j, const bool &IsB
 	//on se donne l enthalpie ici
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 		cout << "Enthalpie totale de Roe H  gauche " << i << ": " << xi << ", droite " << j << ": " << xj << "->" << _Uroe[_nVar-1] << endl;
+
+	if(_verbose && _nbTimeStep%_freqSave ==0)
+	{
+		cout<<"Convection interfacial state"<<endl;
+		for(int k=0;k<_nVar;k++)
+			cout<< _Uroe[k]<<" , "<<endl;
+	}
 }
 
 void SinglePhase::diffusionStateAndMatrices(const long &i,const long &j, const bool &IsBord){
@@ -442,7 +449,7 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 	}
 
 	if (_limitField[nameOfGroup].bcType==Wall){
-		//Pour la convection, inversion du sens de la vitesse
+		//Pour la convection, inversion du sens de la vitesse normale
 		for(k=0; k<_Ndim; k++)
 			_externalStates[(k+1)]-= 2*q_n*normale[k];
 
