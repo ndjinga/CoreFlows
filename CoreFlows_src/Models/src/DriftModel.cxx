@@ -19,6 +19,7 @@ DriftModel::DriftModel(pressureEstimate pEstimate, int dim, bool useDellacherieE
 
 	if( pEstimate==around1bar300K){//EOS at 1 bar and 373K
 		cout<<"Fluid is water-Gas mixture around saturation point 1 bar and 373 K (100°C)"<<endl;
+		*_runLogFile<<"Fluid is water-Gas mixture around saturation point 1 bar and 373 K (100°C)"<<endl;
 		_Tsat=373;//saturation temperature at 1 bar
 		double esatv=2.505e6;//Gas internal energy at saturation at 1 bar
 		double cv_v=1555;//Gas specific heat capacity at saturation at 1 bar
@@ -34,6 +35,7 @@ DriftModel::DriftModel(pressureEstimate pEstimate, int dim, bool useDellacherieE
 	}
 	else{//EOS at 155 bars and 618K
 		cout<<"Fluid is water-Gas mixture around saturation point 155 bars and 618 K (345°C)"<<endl;
+		*_runLogFile<<"Fluid is water-Gas mixture around saturation point 155 bars and 618 K (345°C)"<<endl;
 		_Tsat=618;//saturation temperature at 155 bars
 		_hsatl=1.63e6;//water enthalpy at saturation at 155 bars
 		_hsatv=2.6e6;//Gas enthalpy at saturation at 155 bars
@@ -58,12 +60,16 @@ DriftModel::DriftModel(pressureEstimate pEstimate, int dim, bool useDellacherieE
 	}
 	_latentHeat=_hsatv-_hsatl;
 	cout<<"Liquid saturation enthalpy "<< _hsatl<<" J/Kg"<<endl;
+	*_runLogFile<<"Liquid saturation enthalpy "<< _hsatl<<" J/Kg"<<endl;
 	cout<<"Vapour saturation enthalpy "<< _hsatv<<" J/Kg"<<endl;
+	*_runLogFile<<"Vapour saturation enthalpy "<< _hsatv<<" J/Kg"<<endl;
 	cout<<"Latent heat "<< _latentHeat<<endl;
+	*_runLogFile<<"Latent heat "<< _latentHeat<<endl;
 }
 
 void DriftModel::initialize(){
 	cout<<"Initialising the drift model"<<endl;
+	*_runLogFile<<"Initialising the drift model"<<endl;
 
 	_Uroe = new double[_nVar];
 	_gravite = vector<double>(_nVar,0);
@@ -341,6 +347,7 @@ void DriftModel::convectionState( const long &i, const long &j, const bool &IsBo
 	if(_Ui[0]<0||_Uj[0]<0)
 	{
 		cout<<"!!!!!!!!!!!!!!!!!!!!!!!!densite de melange negative, arret de calcul!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
+		*_runLogFile<<"!!!!!!!!!!!!!!!!!!!!!!!!densite de melange negative, arret de calcul!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
 		throw CdmathException("densite negative, arret de calcul");
 	}
 	PetscScalar ri, rj, xi, xj, pi, pj;
@@ -552,6 +559,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 		{
 			cout<<"rhov= "<<rho_v<<", rhol= "<<rho_l<<endl;
 			cout<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
+			*_runLogFile<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
 			throw CdmathException("DriftModel::setBoundaryState: Inlet, impossible to compute mixture density, division by zero");
 		}
 
@@ -605,6 +613,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 			{
 				cout<<"rhov= "<<rho_v<<", rhol= "<<rho_l<<endl;
 				cout<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
+				*_runLogFile<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
 				throw CdmathException("DriftModel::setBoundaryState: Inlet, impossible to compute mixture density, division by zero");
 			}
 
@@ -671,6 +680,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 		{
 			cout<<"rhov= "<<rho_v<<", rhol= "<<rho_l<<endl;
 			cout<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
+			*_runLogFile<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
 			throw CdmathException("DriftModel::jacobian: Inlet, impossible to compute mixture density, division by zero");
 		}
 
@@ -720,6 +730,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 		{
 			cout<<"rhov= "<<rho_v<<", rhol= "<<rho_l<<endl;
 			cout<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
+			*_runLogFile<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
 			throw CdmathException("DriftModel::jacobian: Inlet, impossible to compute mixture density, division by zero");
 		}
 
@@ -746,6 +757,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 	else {
 		cout<<"Boundary condition not set for boundary named "<<nameOfGroup<<endl;
 		cout<<"Accepted boundary condition are Neumann, Wall, Inlet, and Outlet"<<endl;
+		*_runLogFile<<"Boundary condition not set for boundary named "<<nameOfGroup<<"Accepted boundary condition are Neumann, Wall, Inlet, and Outlet"<<endl;
 		throw CdmathException("Unknown boundary condition");
 	}
 }
@@ -798,9 +810,10 @@ void DriftModel::convectionMatrices()
 			cout<<"Roe state rhom="<<rhom<<" cm= "<<cm<<" Hm= "<<Hm<<" Tm= "<<Tm<<" pression "<<pression<<endl;
 
 		getMixturePressureDerivatives( m_v, m_l, pression, Tm);//EOS is involved to express pressure jump and sound speed
-		if(_kappa*hm+_khi+cm*_ksi<0)
+		if(_kappa*hm+_khi+cm*_ksi<0){
+			*_runLogFile<<"Calcul matrice de Roe: vitesse du son complexe"<<endl;
 			throw CdmathException("Calcul matrice de Roe: vitesse du son complexe");
-
+		}
 		double am=sqrt(_kappa*hm+_khi+cm*_ksi);//vitesse du son du melange
 		if(_verbose && _nbTimeStep%_freqSave ==0)
 			cout<<"DriftModel::convectionMatrices, sound speed am= "<<am<<endl;
@@ -1223,6 +1236,7 @@ void DriftModel::jacobian(const int &j, string nameOfGroup,double * normale)
 			{
 				cout<<"rhov= "<<rho_v<<", rhol= "<<rho_l<<endl;
 				cout<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
+				*_runLogFile<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
 				throw CdmathException("DriftModel::jacobian: Inlet, impossible to compute mixture density, division by zero");
 			}
 
@@ -1295,6 +1309,7 @@ void DriftModel::jacobian(const int &j, string nameOfGroup,double * normale)
 		{
 			cout<<"rhov= "<<rho_v<<", rhol= "<<rho_l<<endl;
 			cout<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
+			*_runLogFile<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
 			throw CdmathException("DriftModel::jacobian: InletPressure, impossible to compute mixture density, division by zero");
 		}
 
@@ -1330,6 +1345,7 @@ void DriftModel::jacobian(const int &j, string nameOfGroup,double * normale)
 		{
 			cout<<"rhov= "<<rho_v<<", rhol= "<<rho_l<<endl;
 			cout<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
+			*_runLogFile<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
 			throw CdmathException("DriftModel::jacobian: Outlet, impossible to compute mixture density, division by zero");
 		}
 
@@ -1465,6 +1481,7 @@ Vector DriftModel::computeExtendedPrimState(double *V)
 	if(fabs(rho_l*C+rho_v*(1-C))<_precision)
 	{
 		cout<<"rhov= "<<rho_v<<", rhol= "<<rho_l<<", concentration= "<<C<<endl;
+		*_runLogFile<<"DriftModel::computeExtendedPrimState: impossible to compute void fraction, division by zero"<<endl;
 		throw CdmathException("DriftModel::computeExtendedPrimState: impossible to compute void fraction, division by zero");
 	}
 
@@ -1505,6 +1522,8 @@ void DriftModel::primToCons(const double *P, const int &i, double *W, const int 
 	{
 		cout<<"rhov= "<<rho_v<<", rhol= "<<rho_l<<endl;
 		cout<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
+		*_runLogFile<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
+		*_runLogFile<<"DriftModel::primToCons: impossible to compute mixture density, division by zero"<<endl;
 		throw CdmathException("DriftModel::primToCons: impossible to compute mixture density, division by zero");
 	}
 	W[j*(_nVar)]  =(rho_v*rho_l/(concentration*rho_l+(1-concentration)*rho_v))*_porosityField(j);//phi*rho
@@ -1725,9 +1744,13 @@ void DriftModel::consToPrim(const double *Wcons, double* Wprim,double porosity)
 
 	if (pression<0){
 		cout << "pressure = "<< pression << " < 0 " << endl;
+		*_runLogFile << "pressure = "<< pression << " < 0 " << endl;
 		cout<<"Vecteur conservatif"<<endl;
-		for(int k=0;k<_nVar;k++)
+		*_runLogFile<<"Vecteur conservatif"<<endl;
+		for(int k=0;k<_nVar;k++){
 			cout<<Wcons[k]<<endl;
+			*_runLogFile<<Wcons[k]<<endl;
+		}
 		throw CdmathException("DriftModel::consToPrim: negative pressure");
 	}
 
@@ -1787,8 +1810,10 @@ double DriftModel::getMixturePressure(double c_v, double rhom, double temperatur
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 		cout<<"DriftModel::getMixturePressure: a= "<<a<<", b= "<<b<<", c= "<<c<<", delta= "<<delta<<endl;
 
-	if(delta<0)
+	if(delta<0){
+		*_runLogFile<<"DriftModel::getMixturePressure: cannot compute pressure, delta<0"<<endl;
 		throw CdmathException("DriftModel::getMixturePressure: cannot compute pressure, delta<0");
+	}
 	else
 		return (-b+sqrt(delta))/(2*a);
 }
@@ -1822,8 +1847,10 @@ void DriftModel::getMixturePressureAndTemperature(double c_v, double rhom, doubl
 
 		delta= b*b-4*a*c;
 
-		if(delta<0)
+		if(delta<0){
+			*_runLogFile<<"DriftModel::getMixturePressureAndTemperature: cannot compute pressure, delta<0"<<endl;
 			throw CdmathException("DriftModel::getMixturePressureAndTemperature: cannot compute pressure, delta<0");
+		}
 		else
 			pression= (-b+sqrt(delta))/(2*a);
 
@@ -1851,7 +1878,10 @@ void DriftModel::getMixturePressureAndTemperature(double c_v, double rhom, doubl
 		delta= b*b-4*a*c;
 
 		if(delta<0)
+		{
+			*_runLogFile<<"DriftModel::getMixturePressureAndTemperature: cannot compute pressure, delta<0"<<endl;
 			throw CdmathException("DriftModel::getMixturePressureAndTemperature: cannot compute pressure, delta<0");
+		}
 		else
 			pression= (-b+sqrt(delta))/(2*a);
 
@@ -2002,8 +2032,10 @@ void DriftModel::entropicShift(double* n)//TO do: make sure _Vi and _Vj are well
 	getMixturePressureDerivatives( m_v, m_l, pression, Tm);
 
 	if(_kappa*hm+_khi+cm*_ksi<0)
+	{
+		*_runLogFile<<"DriftModel::entropicShift : vitesse du son cellule gauche complexe"<<endl;
 		throw CdmathException("Valeurs propres jacobienne: vitesse du son complexe");
-
+	}
 	double aml=sqrt(_kappa*hm+_khi+cm*_ksi);//vitesse du son du melange
 	//cout<<"_khi= "<<_khi<<", _kappa= "<< _kappa << ", _ksi= "<<_ksi <<", am= "<<am<<endl;
 
@@ -2022,8 +2054,10 @@ void DriftModel::entropicShift(double* n)//TO do: make sure _Vi and _Vj are well
 
 	getMixturePressureDerivatives( m_v, m_l, pression, Tm);
 
-	if(_kappa*hm+_khi+cm*_ksi<0)
+	if(_kappa*hm+_khi+cm*_ksi<0){
+		*_runLogFile<<"DriftModel::entropicShift: vitesse du son cellule droite complexe"<<endl;
 		throw CdmathException("Valeurs propres jacobienne: vitesse du son complexe");
+	}
 
 	double amr=sqrt(_kappa*hm+_khi+cm*_ksi);//vitesse du son du melange
 	//cout<<"_khi= "<<_khi<<", _kappa= "<< _kappa << ", _ksi= "<<_ksi <<", am= "<<am<<endl;
@@ -2186,8 +2220,10 @@ void DriftModel::staggeredVFFCMatricesConservativeVariables(double u_mn)
 			/***********Calcul des valeurs propres ********/
 			vector<complex<double> > vp_dist(3,0);
 			getMixturePressureDerivatives( mj_v, mj_l, pj, Tmj);
-			if(_kappa*hmj+_khi+cmj*_ksi<0)
-				throw CdmathException("Calcul VFFC staggered: vitesse du son complexe");
+			if(_kappa*hmj+_khi+cmj*_ksi<0){
+				*_runLogFile<<"staggeredVFFCMatricesConservativeVariables: vitesse du son complexe"<<endl;
+				throw CdmathException("staggeredVFFCMatricesConservativeVariables: vitesse du son complexe");
+			}
 			double amj=sqrt(_kappa*hmj+_khi+cmj*_ksi);//vitesse du son du melange
 
 			if(_verbose && _nbTimeStep%_freqSave ==0)
@@ -2263,7 +2299,10 @@ void DriftModel::staggeredVFFCMatricesConservativeVariables(double u_mn)
 			vector<complex<double> > vp_dist(3,0);
 			getMixturePressureDerivatives( mi_v, mi_l, pi, Tmi);
 			if(_kappa*hmi+_khi+cmi*_ksi<0)
-				throw CdmathException("Calcul VFFC staggered: vitesse du son complexe");
+			{
+				*_runLogFile<<"staggeredVFFCMatricesConservativeVariables: vitesse du son complexe"<<endl;
+				throw CdmathException("staggeredVFFCMatricesConservativeVariables: vitesse du son complexe");
+			}
 			double ami=sqrt(_kappa*hmi+_khi+cmi*_ksi);//vitesse du son du melange
 			if(_verbose && _nbTimeStep%_freqSave ==0)
 				cout<<"_khi= "<<_khi<<", _kappa= "<< _kappa << ", _ksi= "<<_ksi <<", ami= "<<ami<<endl;
@@ -2414,7 +2453,10 @@ void DriftModel::staggeredVFFCMatricesPrimitiveVariables(double u_mn)
 				vector<complex<double> > vp_dist(3,0);
 				getMixturePressureDerivatives( mj_v, mj_l, pj, Tmj);
 				if(_kappa*hmj+_khi+cmj*_ksi<0)
-					throw CdmathException("Calcul VFFC staggeredVFFCMatrices: vitesse du son complexe");
+				{
+					*_runLogFile<<"staggeredVFFCMatricesPrimitiveVariables: vitesse du son complexe"<<endl;
+					throw CdmathException("staggeredVFFCMatricesPrimitiveVariables: vitesse du son complexe");
+				}
 				double amj=sqrt(_kappa*hmj+_khi+cmj*_ksi);//vitesse du son du melange
 
 				if(_verbose && _nbTimeStep%_freqSave ==0)
@@ -2491,7 +2533,10 @@ void DriftModel::staggeredVFFCMatricesPrimitiveVariables(double u_mn)
 				vector<complex<double> > vp_dist(3,0);
 				getMixturePressureDerivatives( mi_v, mi_l, pi, Tmi);
 				if(_kappa*hmi+_khi+cmi*_ksi<0)
-					throw CdmathException("Calcul VFFC staggered: vitesse du son complexe");
+				{
+					*_runLogFile<<"staggeredVFFCMatricesPrimitiveVariables: vitesse du son complexe"<<endl;
+					throw CdmathException("staggeredVFFCMatricesPrimitiveVariables: vitesse du son complexe");
+				}
 				double ami=sqrt(_kappa*hmi+_khi+cmi*_ksi);//vitesse du son du melange
 				if(_verbose && _nbTimeStep%_freqSave ==0)
 					cout<<"_khi= "<<_khi<<", _kappa= "<< _kappa << ", _ksi= "<<_ksi <<", ami= "<<ami<<endl;
@@ -2582,7 +2627,10 @@ void DriftModel::staggeredVFFCMatricesPrimitiveVariables(double u_mn)
 				vector<complex<double> > vp_dist(3,0);
 				getMixturePressureDerivatives( mj_v, mj_l, pj, Tmj);
 				if(_kappa*hmj+_khi+cmj*_ksi<0)
-					throw CdmathException("Calcul VFFC staggeredVFFCMatrices: vitesse du son complexe");
+				{
+					*_runLogFile<<"staggeredVFFCMatricesPrimitiveVariables: vitesse du son complexe"<<endl;
+					throw CdmathException("staggeredVFFCMatricesPrimitiveVariables: vitesse du son complexe");
+				}
 				double amj=sqrt(_kappa*hmj+_khi+cmj*_ksi);//vitesse du son du melange
 
 				if(_verbose && _nbTimeStep%_freqSave ==0)
@@ -2659,7 +2707,10 @@ void DriftModel::staggeredVFFCMatricesPrimitiveVariables(double u_mn)
 				vector<complex<double> > vp_dist(3,0);
 				getMixturePressureDerivatives( mi_v, mi_l, pi, Tmi);
 				if(_kappa*hmi+_khi+cmi*_ksi<0)
-					throw CdmathException("Calcul VFFC staggered: vitesse du son complexe");
+				{
+					*_runLogFile<<"staggeredVFFCMatricesPrimitiveVariables: vitesse du son complexe"<<endl;
+					throw CdmathException("staggeredVFFCMatricesPrimitiveVariables: vitesse du son complexe");
+				}
 				double ami=sqrt(_kappa*hmi+_khi+cmi*_ksi);//vitesse du son du melange
 				if(_verbose && _nbTimeStep%_freqSave ==0)
 					cout<<"_khi= "<<_khi<<", _kappa= "<< _kappa << ", _ksi= "<<_ksi <<", ami= "<<ami<<endl;

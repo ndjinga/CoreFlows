@@ -1316,6 +1316,7 @@ vector< complex<double> > ProblemFluid::getRacines(vector< double > pol_car){
 		for(int ct =0; ct<degre_polynom+1; ct++)
 			cout<<pol_car[ct]<< " , " <<endl;
 
+		*_runLogFile<<"getRacines computation failed"<<endl;
 		throw CdmathException("getRacines computation failed");
 	}
 

@@ -101,10 +101,15 @@ void ProblemCoreFlows::setNumericalScheme(SpaceScheme spaceScheme, TimeScheme ti
 void ProblemCoreFlows::setInitialField(const Field &VV)
 {
 
-	if(_Ndim != VV.getSpaceDimension())
+	if(_Ndim != VV.getSpaceDimension()){
+		*_runLogFile<<"ProblemCoreFlows::setInitialField: mesh has incorrect space dimension"<<endl;
 		throw CdmathException("ProblemCoreFlows::setInitialField: mesh has incorrect space dimension");
+	}
 	if(_nVar!=VV.getNumberOfComponents())
+	{
+		*_runLogFile<<"ProblemCoreFlows::setInitialField: Initial field has incorrect number of components"<<endl;
 		throw CdmathException("ProblemCoreFlows::setInitialField: Initial field has incorrect number of components");
+	}
 
 	_VV=VV;
 	_time=_VV.getTime();
@@ -201,6 +206,7 @@ void ProblemCoreFlows::setInitialFieldConstant( int nDim, const vector<double> V
 		M=Mesh(xmin,xmax,nx,ymin,ymax,ny,zmin,zmax,nz);
 	else{
 		cout<<"ProblemCoreFlows::setInitialFieldConstant: Space dimension nDim should be between 1 and 3"<<endl;
+		*_runLogFile<<"ProblemCoreFlows::setInitialFieldConstant: Space dimension nDim should be between 1 and 3"<<endl;
 		throw CdmathException("Space dimension nDim should be between 1 and 3");
 	}
 
@@ -220,8 +226,10 @@ void ProblemCoreFlows::setInitialFieldConstant( int nDim, const vector<double> V
 void ProblemCoreFlows::setInitialFieldStepFunction(const Mesh M, const Vector VV_Left, const Vector VV_Right, double disc_pos, int direction)
 {
 	if  (VV_Right.getNumberOfRows()!=VV_Left.getNumberOfRows())
+	{
+		*_runLogFile<<"ProblemCoreFlows::setStepFunctionInitialField: Vectors VV_Left and VV_Right have different sizes"<<endl;
 		throw CdmathException( "ProblemCoreFlows::setStepFunctionInitialField: Vectors VV_Left and VV_Right have different sizes");
-
+	}
 	Field VV("Primitive", CELLS, M, VV_Left.getNumberOfRows());
 
 	double component_value;
@@ -349,6 +357,7 @@ bool ProblemCoreFlows::run()
 	cout<< "Running test case "<< _fileName<<endl;
 
 	_runLogFile->open((_fileName+".log").c_str(), ios::out | ios::trunc);;//for creation of a log file to save the history of the simulation
+	*_runLogFile<< "Running test case "<< _fileName<<endl;
 
 	// Time step loop
 	while(!stop && !_isStationary &&_time<_timeMax && _nbTimeStep<_maxNbOfTimeStep)
@@ -463,15 +472,16 @@ bool ProblemCoreFlows::solveTimeStep(){
 		if(_timeScheme == Implicit && _nbTimeStep%_freqSave ==0)//To monitor the convergence of the newton scheme
 		{
 			cout << "\n Newton iteration " << _NEWTON_its<< ", "<< _ksptype << " iterations : " << " : " << _PetscIts<< " maximum variation ||Uk+1-Uk||: " << _erreur_rel << endl;
+			*_runLogFile<< "\n Newton iteration " << _NEWTON_its<< ", "<< _ksptype << " iterations : " << " : " << _PetscIts<< " maximum variation ||Uk+1-Uk||: " << _erreur_rel << endl;
+
 			if(_conditionNumber)
 			{
 				PetscReal sv_max, sv_min;
 				KSPComputeExtremeSingularValues(_ksp, &sv_max, &sv_min);
 				cout<<" singular value max = " << sv_max <<" singular value min = " << sv_min <<" condition number = " << sv_max/sv_min <<endl;
+				*_runLogFile<<" singular value max = " << sv_max <<" singular value min = " << sv_min <<" condition number = " << sv_max/sv_min <<endl;
 			}
 		}
-
-
 		_NEWTON_its++;
 	}
 	if(!converged){

@@ -25,6 +25,7 @@ FiveEqsTwoFluid::FiveEqsTwoFluid(pressureEstimate pEstimate, int dim){
 	if (pEstimate==around1bar300K)//EOS at 1 bar and 373K
 	{
 		cout<<"Fluid is water-Gas mixture around saturation point 1 bar and 373 K (100°C)"<<endl;
+		*_runLogFile<<"Fluid is water-Gas mixture around saturation point 1 bar and 373 K (100°C)"<<endl;
 		_fluides[0] = new StiffenedGas(1.34,1555,373,2.5e6);  //ideal gas law for Gas at pressure 1 bar and temperature 100°C: eref1=2.5e6
 		_fluides[1] = new StiffenedGas(958,1e5,373,4.2e5,1543,3769);  //stiffened gas law for water at pressure 1 bar and temperature 100°C: eref2=5e5
 		_Tsat=373;//saturation temperature at 1 bar
@@ -34,6 +35,7 @@ FiveEqsTwoFluid::FiveEqsTwoFluid(pressureEstimate pEstimate, int dim){
 	else//EOS at 155 bars and 618K
 	{
 		cout<<"Fluid is water-Gas mixture around saturation point 155 bars and 618 K (345°C)"<<endl;
+		*_runLogFile<<"Fluid is water-Gas mixture around saturation point 155 bars and 618 K (345°C)"<<endl;
 		_fluides[0] = new StiffenedGas(102,1.55e7,618,2.44e6, 433,3633);  //stiffened gas law for Gas at pressure 155 bar and temperature 345°C: eref1=2.4e6
 		_fluides[1] = new StiffenedGas(594,1.55e7,618,1.6e6, 621,3100);  //stiffened gas law for water at pressure 155 bar and temperature 345°C: eref2=1.6e6
 		_Tsat=618;//saturation temperature at 155 bars
@@ -47,6 +49,7 @@ FiveEqsTwoFluid::FiveEqsTwoFluid(pressureEstimate pEstimate, int dim){
 void FiveEqsTwoFluid::initialize()
 {
 	cout<<"Initialising the five equation two fluid model"<<endl;
+	*_runLogFile<<"Initialising the five equation two fluid model"<<endl;
 
 	if(static_cast<StiffenedGas*>(_fluides[0])==NULL || static_cast<StiffenedGas*>(_fluides[1])==NULL)
 		throw CdmathException("FiveEqsTwoFluid::initialize: both phase must have stiffened gas EOS");
@@ -902,6 +905,7 @@ void FiveEqsTwoFluid::convectionMatrices()
 			&info);
 	if(info <0){
 		cout<<"FiveEqsTwoFluid::convectionMatrices: error dgeev_ : argument "<<-info<<" invalid"<<endl;
+		*_runLogFile<<"FiveEqsTwoFluid::convectionMatrices: error dgeev_ : argument "<<-info<<" invalid"<<endl;
 		throw CdmathException("FiveEqsTwoFluid::convectionMatrices: dgeev_ unsuccessful computation of the eigenvalues ");
 	}
 	else if(info <0)
@@ -1830,6 +1834,7 @@ void FiveEqsTwoFluid::consToPrim(const double *Wcons, double* Wprim,double poros
 	double delta= b*b-4*a*c;
 	if(delta<0){
 		cout<<"delta= "<<delta<<" <0"<<endl;
+		*_runLogFile<<"delta= "<<delta<<" <0"<<endl;
 		throw CdmathException("FiveEqsTwoFluid::consToPrim: Failed to compute pressure");
 	}
 	double pression=(-b+sqrt(delta))/(2*a);
@@ -1840,6 +1845,7 @@ void FiveEqsTwoFluid::consToPrim(const double *Wcons, double* Wprim,double poros
 			cout<<Wcons[k]<<", ";
 		}
 		cout<<endl;
+		*_runLogFile << "FiveEqsTwoFluid::consToPrim: Failed to compute pressure = "<< pression << " < 1 Pa " << endl;
 		throw CdmathException("FiveEqsTwoFluid::consToPrim: Failed to compute pressure");
 	}
 
@@ -1961,9 +1967,11 @@ void FiveEqsTwoFluid::entropicShift(double* n)
 			&LDVL,egVectorR,
 			&LDVR, WORK,&LWORK,
 			&info);
-	if (info != 0)
+	if (info != 0){
+		*_runLogFile<<"FiveEqsTwoFluid::JacoMat: dgeev_ unsuccessful computation of the eigenvalues of Jacobian Matrix (left)"<<endl;
 		throw CdmathException(
 				"FiveEqsTwoFluid::JacoMat: dgeev_ unsuccessful computation of the eigenvalues of Jacobian Matrix (left)");
+	}
 
 	std::vector< std::complex<double> > eigValuesLeft(_nVar,0.);
 	for(int j=0; j<_nVar; j++){
@@ -1980,8 +1988,11 @@ void FiveEqsTwoFluid::entropicShift(double* n)
 			&LDVR, WORK,&LWORK,
 			&info);
 	if (info != 0)
+		{
+		*_runLogFile<<"FiveEqsTwoFluid::entropicShift: dgeev_ unsuccessful computation of the eigenvalues of Jacobian Matrix (right)"<<endl;
 		throw CdmathException(
 				"FiveEqsTwoFluid::entropicShift: dgeev_ unsuccessful computation of the eigenvalues of Jacobian Matrix (right)");
+		}
 
 	std::vector< std::complex<double> > eigValuesRight(_nVar,0.);
 	for(int j=0; j<_nVar; j++){

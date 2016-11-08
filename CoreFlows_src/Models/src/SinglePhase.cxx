@@ -18,20 +18,24 @@ SinglePhase::SinglePhase(phaseType fluid, pressureEstimate pEstimate, int dim, b
 	if(pEstimate==around1bar300K){//EOS at 1 bar and 300K
 		if(fluid==Gas){
 			cout<<"Fluid is air around 1 bar and 300 K (27°C)"<<endl;
+			*_runLogFile<<"Fluid is air around 1 bar and 300 K (27°C)"<<endl;
 			_fluides[0] = new StiffenedGas(1.4,743,300,2.22e5);  //ideal gas law for nitrogen at pressure 1 bar and temperature 27°C, e=2.22e5, c_v=743
 		}
 		else{
 			cout<<"Fluid is water around 1 bar and 300 K (27°C)"<<endl;
+			*_runLogFile<<"Fluid is water around 1 bar and 300 K (27°C)"<<endl;
 			_fluides[0] = new StiffenedGas(996,1e5,300,1.12e5,1501,4130);  //stiffened gas law for water at pressure 1 bar and temperature 27°C, e=1.12e5, c_v=4130
 		}
 	}
 	else{//EOS at 155 bars and 618K 
 		if(fluid==Gas){
 			cout<<"Fluid is Gas around saturation point 155 bars and 618 K (345°C)"<<endl;
+			*_runLogFile<<"Fluid is Gas around saturation point 155 bars and 618 K (345°C)"<<endl;
 			_fluides[0] = new StiffenedGas(102,1.55e7,618,2.44e6, 433,3633);  //stiffened gas law for Gas at pressure 155 bar and temperature 345°C
 		}
 		else{//To do : change to normal regime: 155 bars and 573K
 			cout<<"Fluid is water around saturation point 155 bars and 618 K (345°C)"<<endl;
+			*_runLogFile<<"Fluid is water around saturation point 155 bars and 618 K (345°C)"<<endl;
 			if(useDellacherieEOS)
 				_fluides[0]= new StiffenedGasDellacherie(2.35,1e9,-1.167e6,1816,618,1.6e6); //stiffened gas law for water from S. Dellacherie
 			else
@@ -41,6 +45,7 @@ SinglePhase::SinglePhase(phaseType fluid, pressureEstimate pEstimate, int dim, b
 }
 void SinglePhase::initialize(){
 	cout<<"Initialising the Navier-Stokes model"<<endl;
+	*_runLogFile<<"Initialising the Navier-Stokes model"<<endl;
 
 	_Uroe = new double[_nVar];
 	_gravite = vector<double>(_nVar,0);
@@ -308,6 +313,7 @@ void SinglePhase::convectionState( const long &i, const long &j, const bool &IsB
 	if(_Ui[0]<0||_Uj[0]<0)
 	{
 		cout<<"!!!!!!!!!!!!!!!!!!!!!!!!densite negative, arret de calcul!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
+		*_runLogFile<<"!!!!!!!!!!!!!!!!!!!!!!!!densite negative, arret de calcul!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
 		throw CdmathException("densite negative, arret de calcul");
 	}
 	PetscScalar ri, rj, xi, xj, pi, pj;
@@ -623,6 +629,7 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 	}else {
 		cout<<"Boundary condition not set for boundary named "<<nameOfGroup<<endl;
 		cout<<"Accepted boundary condition are Neumann, Wall, Inlet, and Outlet"<<endl;
+		*_runLogFile<<"Boundary condition not set for boundary named. Accepted boundary condition are Neumann, Wall, Inlet, and Outlet"<<endl;
 		throw CdmathException("Unknown boundary condition");
 	}
 }
@@ -1400,6 +1407,7 @@ void SinglePhase::consToPrim(const double *Wcons, double* Wprim,double porosity)
 	Wprim[0] =  _fluides[0]->getPressure(rhoe,rho);//pressure p
 	if (Wprim[0]<0){
 		cout << "pressure = "<< Wprim[0] << " < 0 " << endl;
+		*_runLogFile<< "pressure = "<< Wprim[0] << " < 0 " << endl;
 		throw CdmathException("SinglePhase::consToPrim: negative pressure");
 	}
 	for(int k=1;k<=_Ndim;k++)
