@@ -39,7 +39,7 @@ int main(int argc, char** argv)
 	{
 		double x=M.getFace(i).x();
 		double y=M.getFace(i).y();
-		if ((y> yinf+(ysup-yinf)/4) && (abs(x-xcloison1)< eps or abs(x-xcloison2)< eps) )
+		if (((y> yinf+(ysup-yinf)/4) && (abs(x-xcloison1)< eps or abs(x-xcloison2)< eps) ) || abs(x-xinf)< eps || abs(x-xsup)< eps)
 			barrierField[i]=1;
 		else
 			barrierField[i]=0;
@@ -97,7 +97,7 @@ int main(int argc, char** argv)
 	myProblem.setNonLinearFormulation(VFFC);
 
 	// name of result file
-	string fileName = "2DInclinedChannelGravity";
+	string fileName = "2DInclinedChannelGravityBarriers";
 
 	// computation parameters
 	unsigned MaxNbOfTimeStep = 3 ;

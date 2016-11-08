@@ -1620,7 +1620,7 @@ Vector SinglePhase::staggeredVFFCFlux()
 		for(int idim=0;idim<_Ndim;idim++)
 			uijn+=_vec_normal[idim]*_Uroe[1+idim];//URoe = rho, u, H
 
-		if(uijn>=0)
+		if(uijn>_precision)
 		{
 			for(int idim=0;idim<_Ndim;idim++)
 				phiqn+=_vec_normal[idim]*_Ui[1+idim];//phi rho u n
@@ -1629,7 +1629,7 @@ Vector SinglePhase::staggeredVFFCFlux()
 				Fij(1+idim)=phiqn*_Vi[1+idim]+_Vj[0]*_vec_normal[idim]*_porosityj;
 			Fij(_nVar-1)=phiqn/_Ui[0]*(_Ui[_nVar-1]+_Vj[0]*sqrt(_porosityj/_porosityi));
 		}
-		else
+		else if(uijn<-_precision)
 		{
 			for(int idim=0;idim<_Ndim;idim++)
 				phiqn+=_vec_normal[idim]*_Uj[1+idim];//phi rho u n
@@ -1637,6 +1637,23 @@ Vector SinglePhase::staggeredVFFCFlux()
 			for(int idim=0;idim<_Ndim;idim++)
 				Fij(1+idim)=phiqn*_Vj[1+idim]+_Vi[0]*_vec_normal[idim]*_porosityi;
 			Fij(_nVar-1)=phiqn/_Uj[0]*(_Uj[_nVar-1]+_Vi[0]*sqrt(_porosityi/_porosityj));
+		}
+		else//case nil velocity on the interface, apply Rusanov scheme
+		{
+			Vector Ui(_nVar), Uj(_nVar), Vi(_nVar), Vj(_nVar), Fi(_nVar), Fj(_nVar);
+			Vector normale(_Ndim);
+			for(int i1=0;i1<_Ndim;i1++)
+				normale(i1)=_vec_normal[i1];
+			for(int i1=0;i1<_nVar;i1++)
+			{
+				Ui(i1)=_Ui[i1];
+				Uj(i1)=_Uj[i1];
+				Vi(i1)=_Vi[i1];
+				Vj(i1)=_Vj[i1];
+			}
+			Fi=convectionFlux(Ui,Vi,normale,_porosityi);
+			Fj=convectionFlux(Uj,Vj,normale,_porosityj);
+			Fij=(Fi+Fj)/2+_maxvp*(Ui-Uj)/2;
 		}
 		return Fij;
 	}

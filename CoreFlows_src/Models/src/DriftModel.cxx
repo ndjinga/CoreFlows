@@ -2142,7 +2142,7 @@ Vector DriftModel::staggeredVFFCFlux()
 		for(int idim=0;idim<_Ndim;idim++)
 			uijn+=_vec_normal[idim]*_Uroe[2+idim];//URoe = rho, cm, u, H
 
-		if(uijn>=0)
+		if(uijn>_precision)
 		{
 			for(int idim=0;idim<_Ndim;idim++)
 				phiqn+=_vec_normal[idim]*_Ui[2+idim];//phi rho u n
@@ -2152,7 +2152,7 @@ Vector DriftModel::staggeredVFFCFlux()
 				Fij(2+idim)=phiqn*_Vi[2+idim]+_Vj[1]*_vec_normal[idim]*_porosityj;
 			Fij(_nVar-1)=phiqn/_Ui[0]*(_Ui[_nVar-1]+_Vj[1]*sqrt(_porosityj/_porosityi));
 		}
-		else
+		else if(uijn<-_precision)
 		{
 			for(int idim=0;idim<_Ndim;idim++)
 				phiqn+=_vec_normal[idim]*_Uj[2+idim];//phi rho u n
@@ -2161,6 +2161,23 @@ Vector DriftModel::staggeredVFFCFlux()
 			for(int idim=0;idim<_Ndim;idim++)
 				Fij(2+idim)=phiqn*_Vj[2+idim]+_Vi[1]*_vec_normal[idim]*_porosityi;
 			Fij(_nVar-1)=phiqn/_Uj[0]*(_Uj[_nVar-1]+_Vi[1]*sqrt(_porosityi/_porosityj));
+		}
+		else//case nil velocity on the interface, apply Rusanov scheme
+		{
+			Vector Ui(_nVar), Uj(_nVar), Vi(_nVar), Vj(_nVar), Fi(_nVar), Fj(_nVar);
+			Vector normale(_Ndim);
+			for(int i1=0;i1<_Ndim;i1++)
+				normale(i1)=_vec_normal[i1];
+			for(int i1=0;i1<_nVar;i1++)
+			{
+				Ui(i1)=_Ui[i1];
+				Uj(i1)=_Uj[i1];
+				Vi(i1)=_Vi[i1];
+				Vj(i1)=_Vj[i1];
+			}
+			Fi=convectionFlux(Ui,Vi,normale,_porosityi);
+			Fj=convectionFlux(Uj,Vj,normale,_porosityj);
+			Fij=(Fi+Fj)/2+_maxvp*(Ui-Uj)/2;
 		}
 		return Fij;
 	}
@@ -2212,7 +2229,7 @@ void DriftModel::staggeredVFFCMatricesConservativeVariables(double u_mn)
 
 		double Hm=Emi+pj/rhomi;
 
-		if(u_mn>=0)
+		if(u_mn>_precision)
 		{
 			if(_verbose && _nbTimeStep%_freqSave ==0)
 				cout<<"VFFC Staggered state rhomi="<<rhomi<<" cmi= "<<cmi<<" Hm= "<<Hm<<" Tmi= "<<Tmi<<" pj= "<<pj<<endl;
@@ -2290,7 +2307,7 @@ void DriftModel::staggeredVFFCMatricesConservativeVariables(double u_mn)
 				_AroeMinus[(2+_Ndim)*_nVar+2+i]=-_kappa*uj_n*_Vi[2+i];
 			_AroeMinus[(2+_Ndim)*_nVar+2+_Ndim]=_kappa*ui_n;
 		}
-		else
+		else if(u_mn<-_precision)
 		{
 			if(_verbose && _nbTimeStep%_freqSave ==0)
 				cout<<"VFFC Staggered state rhomj="<<rhomj<<" cmj= "<<cmj<<" Hm= "<<Hm<<" Tmj= "<<Tmj<<" pi= "<<pi<<endl;
@@ -2367,6 +2384,21 @@ void DriftModel::staggeredVFFCMatricesConservativeVariables(double u_mn)
 			for(int i=0;i<_Ndim;i++)
 				_AroeMinus[(2+_Ndim)*_nVar+2+i]=Hm*_vec_normal[i];
 			_AroeMinus[(2+_Ndim)*_nVar+2+_Ndim]=uj_n;
+		}
+		else//case nil velocity on the interface, apply Rusanov scheme
+		{
+			double cm=_Uroe[1];
+			double Hm=_Uroe[_nVar-1];
+			double umn=0,u_2=0;
+			Vector vitesse(_Ndim);
+			for(int idim=0;idim<_Ndim;idim++)
+				{
+				vitesse[idim]=_Uroe[2+idim];
+				umn += _Uroe[2+idim]*_vec_normal[idim];//vitesse normale
+				u_2 += _Uroe[2+idim]*_Uroe[2+idim];
+				}
+			double ecin=0.5*u_2;
+			RoeMatrixConservativeVariables( cm, umn, ecin, Hm,vitesse);
 		}
 	}
 	if(_timeScheme==Implicit)

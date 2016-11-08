@@ -37,7 +37,7 @@ def DriftModel_2DInclinedBoilingChannel():
 	for i in range (nbFaces):
 		x=M.getFace(i).x();
 		y=M.getFace(i).y();
-		if (y> yinf+(ysup-yinf)/4) and (abs(x-xcloison1)< eps or abs(x-xcloison2)< eps) :
+		if ((y> yinf+(ysup-yinf)/4) and (abs(x-xcloison1)< eps or abs(x-xcloison2)< eps)) or abs(x-xinf)< eps or abs(x-xsup)< eps :
 			barrierField[i]=1
 		else:
 			barrierField[i]=0
