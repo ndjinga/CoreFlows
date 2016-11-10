@@ -1119,6 +1119,19 @@ void ProblemFluid::addSourceTermToSecondMember
 				_Si[k]=(_phi[k]-_l[k])*mesureFace/_perimeters(i);///nbVoisinsi;
 				_Sj[k]=(_phi[k]+_l[k])*mesureFace/_perimeters(j);///nbVoisinsj;
 			}
+			if (_verbose && _nbTimeStep%_freqSave ==0)
+			{
+				cout << "Contribution après décentrement de la face (i,j) au terme source Si de la cellule i= " << i<<endl;
+				for(int q=0; q<_nVar; q++)
+					cout << _Si[q] << endl;
+				cout << "Contribution après décentrement de la face (i,j) au terme source Sj de la cellule j= " << j<<endl;
+				for(int q=0; q<_nVar; q++)
+					cout << _Sj[q] << endl;
+				cout << endl;
+				cout<<"ratio surface sur volume i="<<mesureFace/_perimeters(i)<<" perimeter = "<< _perimeters(i)<<endl;
+				cout<<"ratio surface sur volume j="<<mesureFace/_perimeters(j)<<" perimeter = "<< _perimeters(j)<<endl;
+				cout << endl;
+			}
 		}
 		else{
 			for(int k=0; k<_nVar;k++){
@@ -1128,19 +1141,6 @@ void ProblemFluid::addSourceTermToSecondMember
 		}
 		_idn[0] = j;
 		VecSetValuesBlocked(_b, 1, _idn, _Sj, ADD_VALUES);
-		if (_verbose && _nbTimeStep%_freqSave ==0)
-		{
-			cout << "Contribution après décentrement de la face (i,j) au terme source Si de la cellule i= " << i<<endl;
-			for(int q=0; q<_nVar; q++)
-				cout << _Si[q] << endl;
-			cout << "Contribution après décentrement de la face (i,j) au terme source Sj de la cellule j= " << j<<endl;
-			for(int q=0; q<_nVar; q++)
-				cout << _Sj[q] << endl;
-			cout << endl;
-			cout<<"ratio surface sur volume i="<<mesureFace/_perimeters(i)<<" perimeter = "<< _perimeters(i)<<endl;
-			cout<<"ratio surface sur volume j="<<mesureFace/_perimeters(j)<<" perimeter = "<< _perimeters(j)<<endl;
-			cout << endl;
-		}
 	}else{
 		if(_wellBalancedCorrection){
 			for(int k=0; k<_nVar;k++)
@@ -1163,17 +1163,9 @@ void ProblemFluid::addSourceTermToSecondMember
 	}
 	_idm[0] = i;
 	VecSetValuesBlocked(_b, 1, _idm, _Si, ADD_VALUES);
+
 	if(_verbose && _nbTimeStep%_freqSave ==0 && _wellBalancedCorrection)
-	{
-		cout<<" _signAroe =  " << endl;
-		for (int k=0; k<_nVar; k++){
-			for (int l=0; l<_nVar; l++){
-				cout<<_signAroe[k*_nVar+l] <<", ";
-			}
-			cout<< endl;
-		}
-		cout<< endl;
-	}
+		displayMatrix( _signAroe,_nVar,"Signe matrice de Roe");
 }
 
 void ProblemFluid::updatePrimitives()

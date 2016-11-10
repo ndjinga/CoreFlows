@@ -926,17 +926,21 @@ void SinglePhase::sourceVector(PetscScalar * Si, PetscScalar * Ui, PetscScalar *
 
 	if(_timeScheme==Implicit)
 	{
-		for(int i=0; i<_nVar*_nVar;i++)
-			_GravityImplicitationMatrix[i] = 0;
+		for(int k=0; k<_nVar*_nVar;k++)
+			_GravityImplicitationMatrix[k] = 0;
 		if(!_usePrimitiveVarsInNewton)
-			for(int i=0; i<_nVar;i++)
-				_GravityImplicitationMatrix[i*_nVar]=-_gravite[i];
+			for(int k=0; k<_nVar;k++)
+				_GravityImplicitationMatrix[k*_nVar]=-_gravite[k];
 		else
-			for(int i=0; i<_nVar;i++)
+		{
+			double pression=Vi[0];
+			getDensityDerivatives( pression, T, norm_u*norm_u);
+			for(int k=0; k<_nVar;k++)
 			{
-				_GravityImplicitationMatrix[i*_nVar+0]      =-_gravite[i]*_drho_sur_dp;
-				_GravityImplicitationMatrix[i*_nVar+_nVar-1]=-_gravite[i]*_drho_sur_dT;
+				_GravityImplicitationMatrix[k*_nVar+0]      =-_gravite[k]*_drho_sur_dp;
+				_GravityImplicitationMatrix[k*_nVar+_nVar-1]=-_gravite[k]*_drho_sur_dT;
 			}
+		}
 	}
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
@@ -1530,8 +1534,10 @@ void SinglePhase::RoeMatrixConservativeVariables(double u_n, double H,Vector vel
 }
 void SinglePhase::convectionMatrixPrimitiveVariables( double rho, double u_n, double H,Vector vitesse)
 {
+	//Not used. Suppress or use in alternative implicitation in primitive variable of the staggered-roe scheme
 	//On remplit la matrice de Roe en variables primitives : F(V_L)-F(V_R)=Aroe (V_L-V_R)
 	//EOS is more involved with primitive variables
+	// call to getDensityDerivatives(double concentration, double pression, double temperature,double v2) needed
 	_AroeImplicit[0*_nVar+0]=_drho_sur_dp*u_n;
 	for(int i=0;i<_Ndim;i++)
 		_AroeImplicit[0*_nVar+1+i]=rho*_vec_normal[i];
@@ -1599,6 +1605,8 @@ void SinglePhase::staggeredRoeUpwindingMatrixConservativeVariables( double u_n, 
 }
 void SinglePhase::staggeredRoeUpwindingMatrixPrimitiveVariables(double rho, double u_n,double H, Vector vitesse)
 {
+	//Not used. Suppress or use in alternative implicitation in primitive variable of the staggered-roe scheme
+	//Calcul de décentrement de type décalé pour formulation Roe
 	_AroeImplicit[0*_nVar+0]=_drho_sur_dp*u_n;
 	for(int i=0;i<_Ndim;i++)
 		_AroeImplicit[0*_nVar+1+i]=rho*_vec_normal[i];
