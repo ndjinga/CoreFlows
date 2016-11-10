@@ -946,6 +946,7 @@ void DriftModel::convectionMatrices()
 	}
 	else
 		throw CdmathException("DriftModel::convectionMatrices: well balanced option not treated");
+	displayMatrix(_signAroe, _nVar,"Signe de la matrice de Roe");
 }
 
 void DriftModel::addDiffusionToSecondMember
@@ -2075,7 +2076,9 @@ void DriftModel::entropicShift(double* n)//TO do: make sure _Vi and _Vj are well
 }
 
 Vector DriftModel::convectionFlux(Vector U,Vector V, Vector normale, double porosity){
-	if(_verbose){
+	if(_verbose && _nbTimeStep%_freqSave ==0)
+	{
+		cout<<"DriftModel::convectionFlux start"<<endl;
 		cout<<"Ucons"<<endl;
 		cout<<U<<endl;
 		cout<<"Vprim"<<endl;
@@ -2114,7 +2117,9 @@ Vector DriftModel::convectionFlux(Vector U,Vector V, Vector normale, double poro
 		F(2+i)=m_v*vitesse_vn*vitesse_v(i)+m_l*vitesse_ln*vitesse_l(i)+pression*normale(i)*porosity;
 	F(2+_Ndim)=m_v*(e_v+0.5*vitesse_v*vitesse_v+pression/rho_v)*vitesse_vn+m_l*(e_l+0.5*vitesse_l*vitesse_l+pression/rho_l)*vitesse_ln;
 
-	if(_verbose){
+	if(_verbose && _nbTimeStep%_freqSave ==0)
+	{
+		cout<<"DriftModel::convectionFlux end"<<endl;
 		cout<<"Flux F(U,V)"<<endl;
 		cout<<F<<endl;
 	}
@@ -2125,7 +2130,7 @@ Vector DriftModel::convectionFlux(Vector U,Vector V, Vector normale, double poro
 Vector DriftModel::staggeredVFFCFlux()
 {
 	if(_verbose && _nbTimeStep%_freqSave ==0)
-		cout<<"DriftModel::staggeredVFFCFlux()"<<endl;
+		cout<<"DriftModel::staggeredVFFCFlux()start"<<endl;
 
 	if(_spaceScheme!=staggered || _nonLinearFormulation!=VFFC)
 		throw CdmathException("DriftModel::staggeredVFFCFlux: staggeredVFFCFlux method should be called only for VFFC formulation and staggered upwinding");
@@ -2173,6 +2178,11 @@ Vector DriftModel::staggeredVFFCFlux()
 			Fi=convectionFlux(Ui,Vi,normale,_porosityi);
 			Fj=convectionFlux(Uj,Vj,normale,_porosityj);
 			Fij=(Fi+Fj)/2+_maxvploc*(Ui-Uj)/2;
+		}
+		if(_verbose && _nbTimeStep%_freqSave ==0)
+		{
+			cout<<"DriftModel::staggeredVFFCFlux() end uijn="<<uijn<<endl;
+			cout<<Fij<<endl;
 		}
 		return Fij;
 	}
@@ -2430,6 +2440,12 @@ void DriftModel::staggeredVFFCMatricesConservativeVariables(double u_mn)
 			}
 		}
 	}
+	for(int i=0; i<_nVar*_nVar;i++)
+	{
+		_Aroe[i]=_AroePlus[i]+_AroeMinus[i];
+		_absAroe[i]=_AroePlus[i]-_AroeMinus[i];
+	}
+
 	if(_timeScheme==Implicit)
 		for(int i=0; i<_nVar*_nVar;i++)
 		{

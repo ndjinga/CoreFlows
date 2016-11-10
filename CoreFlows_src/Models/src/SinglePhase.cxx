@@ -1459,7 +1459,9 @@ void SinglePhase::entropicShift(double* n)//TO do: make sure _Vi and _Vj are wel
 }
 
 Vector SinglePhase::convectionFlux(Vector U,Vector V, Vector normale, double porosity){
-	if(_verbose){
+	if(_verbose && _nbTimeStep%_freqSave ==0)
+	{
+		cout<<"SinglePhase::convectionFlux start"<<endl;
 		cout<<"Ucons"<<endl;
 		cout<<U<<endl;
 		cout<<"Vprim"<<endl;
@@ -1487,7 +1489,9 @@ Vector SinglePhase::convectionFlux(Vector U,Vector V, Vector normale, double por
 		F(1+i)=phirho*vitessen*vitesse(i)+pression*normale(i)*porosity;
 	F(1+_Ndim)=phirho*(e_int+0.5*vitesse*vitesse+pression/rho)*vitessen;
 
-	if(_verbose){
+	if(_verbose && _nbTimeStep%_freqSave ==0)
+	{
+		cout<<"SinglePhase::convectionFlux end"<<endl;
 		cout<<"Flux F(U,V)"<<endl;
 		cout<<F<<endl;
 	}
@@ -1616,7 +1620,7 @@ void SinglePhase::staggeredRoeUpwindingMatrixPrimitiveVariables(double rho, doub
 Vector SinglePhase::staggeredVFFCFlux()
 {
 	if(_verbose && _nbTimeStep%_freqSave ==0)
-		cout<<"SinglePhase::staggeredVFFCFlux()"<<endl;
+		cout<<"SinglePhase::staggeredVFFCFlux() start"<<endl;
 
 	if(_spaceScheme!=staggered || _nonLinearFormulation!=VFFC)
 		throw CdmathException("SinglePhase::staggeredVFFCFlux: staggeredVFFCFlux method should be called only for VFFC formulation and staggered upwinding");
@@ -1662,6 +1666,11 @@ Vector SinglePhase::staggeredVFFCFlux()
 			Fi=convectionFlux(Ui,Vi,normale,_porosityi);
 			Fj=convectionFlux(Uj,Vj,normale,_porosityj);
 			Fij=(Fi+Fj)/2+_maxvploc*(Ui-Uj)/2;
+		}
+		if(_verbose && _nbTimeStep%_freqSave ==0)
+		{
+			cout<<"SinglePhase::staggeredVFFCFlux() endf uijn="<<uijn<<endl;
+			cout<<Fij<<endl;
 		}
 		return Fij;
 	}
