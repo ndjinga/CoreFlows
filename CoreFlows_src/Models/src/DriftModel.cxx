@@ -489,26 +489,20 @@ void DriftModel::diffusionStateAndMatrices(const long &i,const long &j, const bo
 		double ev0=_fluides[0]->getInternalEnergy(0,rho_v);//Corriger
 		double el0=_fluides[1]->getInternalEnergy(0,rho_l);//Corriger
 		double Rhomem=RhomEm-0.5*q_2/(_Udiff[0]*_Udiff[0]);
-		int i = (_nVar-1)*_nVar;
+		int q = (_nVar-1)*_nVar;
 		//Formules a verifier
-		_Diffusion[i]=lambda*((Rhomem-m_v*ev0-m_l*el0)*C_l/((m_v*C_v+m_l*C_l)*(m_v*C_v+m_l*C_l))+el0/(m_v*C_v+m_l*C_l)-q_2/(2*_Udiff[0]*_Udiff[0]*(m_v*C_v+m_l*C_l)));
-		_Diffusion[i+1]=lambda*((Rhomem-m_v*ev0-m_l*el0)*(C_v-C_l)/((m_v*C_v+m_l*C_l)*(m_v*C_v+m_l*C_l))+(ev0+el0)/(m_v*C_v+m_l*C_l));
+		_Diffusion[q]=lambda*((Rhomem-m_v*ev0-m_l*el0)*C_l/((m_v*C_v+m_l*C_l)*(m_v*C_v+m_l*C_l))+el0/(m_v*C_v+m_l*C_l)-q_2/(2*_Udiff[0]*_Udiff[0]*(m_v*C_v+m_l*C_l)));
+		_Diffusion[q+1]=lambda*((Rhomem-m_v*ev0-m_l*el0)*(C_v-C_l)/((m_v*C_v+m_l*C_l)*(m_v*C_v+m_l*C_l))+(ev0+el0)/(m_v*C_v+m_l*C_l));
 		for(int k=2;k<(_nVar-1);k++)
 		{
-			_Diffusion[i+k]= lambda*_Udiff[k]/(_Udiff[0]*(m_v*C_v+m_l*C_l));
+			_Diffusion[q+k]= lambda*_Udiff[k]/(_Udiff[0]*(m_v*C_v+m_l*C_l));
 		}
 		_Diffusion[_nVar*_nVar-1]=-lambda/(m_v*C_v+m_l*C_l);
 		/*Affichages */
 		if(_verbose && _nbTimeStep%_freqSave ==0)
 		{
 			cout << "Matrice de diffusion D, pour le couple (" << i << "," << j<< "):" << endl;
-			for(int i=0; i<_nVar; i++)
-			{
-				for(int j=0; j<_nVar; j++)
-					cout << _Diffusion[i*_nVar+j]<<", ";
-				cout << endl;
-			}
-			cout << endl;
+			displayMatrix( _Diffusion,_nVar," Matrice de diffusion ");
 		}
 	}
 }
@@ -946,7 +940,9 @@ void DriftModel::convectionMatrices()
 	}
 	else
 		throw CdmathException("DriftModel::convectionMatrices: well balanced option not treated");
-	displayMatrix(_signAroe, _nVar,"Signe de la matrice de Roe");
+
+	if(_verbose && _nbTimeStep%_freqSave ==0 && _timeScheme==Implicit)
+		displayMatrix(_signAroe, _nVar,"Signe de la matrice de Roe");
 }
 
 void DriftModel::addDiffusionToSecondMember
