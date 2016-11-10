@@ -1445,9 +1445,9 @@ void SinglePhase::entropicShift(double* n)//TO do: make sure _Vi and _Vj are wel
 	double cl = _fluides[0]->vitesseSonEnthalpie(_Vi[_Ndim+1]-ul_2/2);//vitesse du son a l'interface
 	double cr = _fluides[0]->vitesseSonEnthalpie(_Vj[_Ndim+1]-ur_2/2);//vitesse du son a l'interface
 
-	_entropicShift[0]=abs(ul_n-cl - (ur_n-cr));
-	_entropicShift[1]=abs(ul_n     - ur_n);
-	_entropicShift[2]=abs(ul_n+cl - (ur_n+cr));
+	_entropicShift[0]=fabs(ul_n-cl - (ur_n-cr));
+	_entropicShift[1]=fabs(ul_n     - ur_n);
+	_entropicShift[2]=fabs(ul_n+cl - (ur_n+cr));
 
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
@@ -1558,7 +1558,7 @@ void SinglePhase::convectionMatrixPrimitiveVariables( double rho, double u_n, do
 void SinglePhase::staggeredRoeUpwindingMatrixConservativeVariables( double u_n, double H,Vector velocity, double k, double K)
 {
 	//Calcul de décentrement de type décalé pour formulation de Roe
-	if(abs(u_n)>0)
+	if(fabs(u_n)>_precision)
 	{
 		//premiere ligne (masse)
 		_absAroe[0]=0;
@@ -1600,7 +1600,7 @@ void SinglePhase::staggeredRoeUpwindingMatrixConservativeVariables( double u_n, 
 		for(int i=0; i<_nVar*_nVar;i++)
 			_absAroe[i] =0;
 		for(int i=0; i<_nVar;i++)
-			_absAroe[i+i*_nVar] =_maxvp;
+			_absAroe[i+i*_nVar] =_maxvploc;
 	}
 }
 void SinglePhase::staggeredRoeUpwindingMatrixPrimitiveVariables(double rho, double u_n,double H, Vector vitesse)
