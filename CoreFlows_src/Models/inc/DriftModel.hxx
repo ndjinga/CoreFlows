@@ -36,20 +36,12 @@ public :
 	void testConservation();
 	void save();
 
-	/** \fn saveVoidFraction
-	 * \brief saves the void fraction field in a separate file
-	 * @param boolean saveField
+	/** \fn saveAllFields
+	 * \brief saves every interesting field in a separate file
+	 * @param boolean saveAllFields
 	 * */
-	void saveVoidFraction(bool saveField=true){
-		_saveVoidFraction=saveField;
-	}
-
-	/** \fn saveEnthalpy
-	 * \brief saves the enthalpy field in a separate file
-	 * @param boolean saveEnthalpy
-	 * */
-	void saveEnthalpy(bool saveEnthalpy=true){
-		_saveEnthalpy=saveEnthalpy;
+	void saveAllFields(bool saveAllFields=true){
+		_saveAllFields=saveAllFields;
 	}
 
 	// Boundary conditions
@@ -133,8 +125,8 @@ protected :
 	double _drhocv_sur_dcv, _drhocv_sur_dp, _drhocv_sur_dT;//derivatives of the gas partial density rho cv wrt cv, p, T
 	double _drhoE_sur_dcv,  _drhoE_sur_dp,  _drhoE_sur_dT;//derivatives of the total energy rho E wrt cv, p, T
 
-	Field _Vitesse, _VoidFraction, _Enthalpy;
-	bool _saveVoidFraction,_saveEnthalpy;
+	Field _Vitesse, _VitesseX, _VitesseY, _VitesseZ, _VoidFraction, _Concentration, _Pressure, _Enthalpy, _DensiteLiquide, _DensiteVapeur, _EnthalpieLiquide, _EnthalpieVapeur;
+	bool _saveAllFields;
 	/** \fn convectionState
 	 * \brief calcule l'etat de Roe de deux etats
 	 * @param i,j sont des entiers qui correspondent aux numeros des cellules à gauche et à droite de l'interface

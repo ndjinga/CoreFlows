@@ -78,9 +78,6 @@ def DriftModel_1DPressureLoss():
 	myProblem.setFileName(fileName);
 	myProblem.setNewtonSolver(precision,20);
 	myProblem.saveConservativeField(True);
-	if(spaceDim>1):
-		myProblem.saveVelocity();
-		pass
  
     # evolution
 	myProblem.initialize();

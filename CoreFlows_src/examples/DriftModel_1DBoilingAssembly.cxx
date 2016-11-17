@@ -84,7 +84,7 @@ int main(int argc, char** argv)
 	myProblem.setTimeMax(maxTime);
 	myProblem.setFreqSave(freqSave);
 	myProblem.setFileName(fileName);
-	myProblem.saveVoidFraction(true);
+	myProblem.saveAllFields(true);
 	bool ok;
 
 	// evolution

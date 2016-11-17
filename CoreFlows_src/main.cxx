@@ -79,8 +79,6 @@ int main()
 	myProblem.setFreqSave(freqSave);
 	myProblem.setFileName(fileName);
 	myProblem.usePrimitiveVarsInNewton(true);
-	myProblem.saveVoidFraction(true);
-	myProblem.saveEnthalpy(true);
 
 	// evolution
 	myProblem.initialize();

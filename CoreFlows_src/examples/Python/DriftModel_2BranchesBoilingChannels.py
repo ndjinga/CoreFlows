@@ -75,10 +75,7 @@ def DriftModel_2BranchesBoilingChannels():
 	myProblem.setFreqSave(freqSave);
 	myProblem.setFileName(fileName);
 	myProblem.setNewtonSolver(precision,20);
-	#myProblem.saveConservativeField(True);
-	if(spaceDim>1):
-		myProblem.saveVelocity();
-		pass
+	myProblem.saveConservativeField(True);
  
     # evolution
 	myProblem.initialize();
