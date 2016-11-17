@@ -1658,7 +1658,7 @@ Vector SinglePhase::staggeredVFFCFlux()
 				Fij(1+idim)=phiqn*_Vj[1+idim]+_Vi[0]*_vec_normal[idim]*_porosityi;
 			Fij(_nVar-1)=phiqn/_Uj[0]*(_Uj[_nVar-1]+_Vi[0]*sqrt(_porosityi/_porosityj));
 		}
-		else//case nil velocity on the interface, apply Rusanov scheme
+		else//case nil velocity on the interface, apply centered scheme
 		{
 			Vector Ui(_nVar), Uj(_nVar), Vi(_nVar), Vj(_nVar), Fi(_nVar), Fj(_nVar);
 			Vector normale(_Ndim);
@@ -1673,7 +1673,7 @@ Vector SinglePhase::staggeredVFFCFlux()
 			}
 			Fi=convectionFlux(Ui,Vi,normale,_porosityi);
 			Fj=convectionFlux(Uj,Vj,normale,_porosityj);
-			Fij=(Fi+Fj)/2+_maxvploc*(Ui-Uj)/2;
+			Fij=(Fi+Fj)/2;//+_maxvploc*(Ui-Uj)/2;
 		}
 		if(_verbose && _nbTimeStep%_freqSave ==0)
 		{
@@ -1705,19 +1705,28 @@ void SinglePhase::staggeredVFFCMatricesConservativeVariables(double un)//vitesse
 			uj_n += _Vj[1+i]*_vec_normal[i];
 		}
 
+		double rhoi,pj, Ei, rhoj;
+		double cj, Kj, kj;//dérivées de la pression
+		rhoi=_Ui[0]/_porosityi;
+		Ei= _Ui[_Ndim+1]/(rhoi*_porosityi);
+		pj=_Vj[0];
+		rhoj=_Uj[0]/_porosityj;
+		H =Ei+pj/rhoi;
+		cj = _fluides[0]->vitesseSonTemperature(_Vj[_Ndim+1],rhoj);
+		kj = _fluides[0]->constante("gamma") - 1;//A generaliser pour porosite et stephane gas law
+		Kj = uj_2*kj/2; //g-1/2 *|u|²
+
+		double pi, Ej;
+		double ci, Ki, ki;//dérivées de la pression
+		Ej= _Uj[_Ndim+1]/rhoj;
+		pi=_Vi[0];
+		H =Ej+pi/rhoj;
+		ci = _fluides[0]->vitesseSonTemperature(_Vi[_Ndim+1],rhoi);
+		ki = _fluides[0]->constante("gamma") - 1;//A generaliser pour porosite et stephane gas law
+		Ki = ui_2*ki/2; //g-1/2 *|u|²
+
 		if(un>_precision)
 		{
-			double rhoi,pj, Ei, rhoj;
-			double cj, Kj, kj;//dérivées de la pression
-			rhoi=_Ui[0]/_porosityi;
-			Ei= _Ui[_Ndim+1]/(rhoi*_porosityi);
-			pj=_Vj[0];
-			rhoj=_Uj[0]/_porosityj;
-			H =Ei+pj/rhoi;
-			cj = _fluides[0]->vitesseSonTemperature(_Vj[_Ndim+1],rhoj);
-			kj = _fluides[0]->constante("gamma") - 1;//A generaliser pour porosite et stephane gas law
-			Kj = uj_2*kj/2; //g-1/2 *|u|²
-
 			/***********Calcul des valeurs propres ********/
 			vector<complex<double> > vp_dist(3,0);
 			vp_dist[0]=ui_n-cj;vp_dist[1]=ui_n;vp_dist[2]=ui_n+cj;
@@ -1785,17 +1794,6 @@ void SinglePhase::staggeredVFFCMatricesConservativeVariables(double un)//vitesse
 		}
 		else if(un<-_precision)
 		{
-			double rhoi,pi, Ej, rhoj;
-			double ci, Ki, ki;//dérivées de la pression
-			rhoj=_Uj[0]/_porosityj;
-			Ej= _Uj[_Ndim+1]/rhoj;
-			pi=_Vi[0];
-			rhoi=_Ui[0]/_porosityi;
-			H =Ej+pi/rhoj;
-			ci = _fluides[0]->vitesseSonTemperature(_Vi[_Ndim+1],rhoi);
-			ki = _fluides[0]->constante("gamma") - 1;//A generaliser pour porosite et stephane gas law
-			Ki = ui_2*ki/2; //g-1/2 *|u|²
-
 			/***********Calcul des valeurs propres ********/
 			vector<complex<double> > vp_dist(3,0);
 			vp_dist[0]=uj_n-ci;vp_dist[1]=uj_n;vp_dist[2]=uj_n+ci;
@@ -1861,7 +1859,7 @@ void SinglePhase::staggeredVFFCMatricesConservativeVariables(double un)//vitesse
 				_AroeMinus[_nVar*(_nVar-1)+idim+1]=H*_vec_normal[idim] ;
 			_AroeMinus[_nVar*_nVar -1] = uj_n;
 		}
-		else//case nil velocity on the interface, apply Rusanov scheme
+		else//case nil velocity on the interface, apply centered scheme
 		{
 			double u_n=0, u_2=0;//vitesse normale et carré du module
 			for(int i=0;i<_Ndim;i++)
@@ -1880,21 +1878,63 @@ void SinglePhase::staggeredVFFCMatricesConservativeVariables(double un)//vitesse
 			k = _fluides[0]->constante("gamma") - 1;//A generaliser pour porosite et stephane gas law
 			K = u_2*k/2; //g-1/2 *|u|²
 
-			RoeMatrixConservativeVariables( u_n, H,vitesse,k,K);
 			_maxvploc=fabs(u_n)+c;
 			if(_maxvploc>_maxvp)
 				_maxvp=_maxvploc;
 
-			for(int i=0; i<_nVar*_nVar;i++)
+			/******** Construction de la matrice A^+ *********/
+			//premiere ligne (masse)
+			_AroePlus[0]=0;
+			for(int idim=0; idim<_Ndim;idim++)
+				_AroePlus[1+idim]=0;
+			_AroePlus[_nVar-1]=0;
+
+			//lignes intermadiaires(qdm)
+			for(int idim=0; idim<_Ndim;idim++)
 			{
-				_AroeMinus[i] = _Aroe[i]/2;
-				_AroePlus[i]  = _Aroe[i]/2;
+				//premiere colonne
+				_AroePlus[(1+idim)*_nVar]=- ui_n*_Vi[1+idim];
+				//colonnes intermediaires
+				for(int jdim=0; jdim<_Ndim;jdim++)
+					_AroePlus[(1+idim)*_nVar + jdim + 1] = _Vi[1+idim]*_vec_normal[jdim]-0.5*ki*_vec_normal[idim]*_Vi[1+jdim];
+				//matrice identite
+				_AroePlus[(1+idim)*_nVar + idim + 1] += 0.5*ui_n;
+				//derniere colonne
+				_AroePlus[(1+idim)*_nVar + _nVar-1]=0.5*ki*_vec_normal[idim];
 			}
-			for(int i=0; i<_nVar;i++)
+
+			//derniere ligne (energie)
+			_AroePlus[_nVar*(_nVar-1)] = 0;
+			for(int idim=0; idim<_Ndim;idim++)
+				_AroePlus[_nVar*(_nVar-1)+idim+1]=0 ;
+			_AroePlus[_nVar*_nVar -1] = 0;
+
+			/******** Construction de la matrice A^- *********/
+			//premiere ligne (masse)
+			_AroeMinus[0]=0;
+			for(int idim=0; idim<_Ndim;idim++)
+				_AroeMinus[1+idim]=0;
+			_AroeMinus[_nVar-1]=0;
+
+			//lignes intermadiaires(qdm)
+			for(int idim=0; idim<_Ndim;idim++)
 			{
-				_AroeMinus[i+i*_nVar] += -_maxvploc/2;
-				_AroePlus[ i+i*_nVar] += +_maxvploc/2;
+				//premiere colonne
+				_AroeMinus[(1+idim)*_nVar]=Kj*_vec_normal[idim] - uj_n*_Vj[1+idim];
+				//colonnes intermediaires
+				for(int jdim=0; jdim<_Ndim;jdim++)
+					_AroeMinus[(1+idim)*_nVar + jdim + 1] = -0.5*kj*_vec_normal[idim]*_Vj[1+jdim];
+				//matrice identite
+				_AroeMinus[(1+idim)*_nVar + idim + 1] += 0.5*uj_n;
+				//derniere colonne
+				_AroeMinus[(1+idim)*_nVar + _nVar-1]=0.5*kj*_vec_normal[idim];
 			}
+
+			//derniere ligne (energie)
+			_AroeMinus[_nVar*(_nVar-1)] = 0;
+			for(int idim=0; idim<_Ndim;idim++)
+				_AroeMinus[_nVar*(_nVar-1)+idim+1]= 0;
+			_AroeMinus[_nVar*_nVar -1] = 0;
 		}
 	}
 	if(_timeScheme==Implicit)
@@ -2294,7 +2334,7 @@ void SinglePhase::staggeredVFFCMatricesPrimitiveVariables(double un)//vitesse no
 			else
 				throw CdmathException("SinglePhase::staggeredVFFCMatricesPrimitiveVariables: eos should be StiffenedGas or StiffenedGasDellacherie");
 		}
-		else//case nil velocity on the interface, apply Rusanov scheme
+		else//case nil velocity on the interface, apply centered scheme
 		{
 			double u_2=0;// carré du module
 			for(int i=0;i<_Ndim;i++)
