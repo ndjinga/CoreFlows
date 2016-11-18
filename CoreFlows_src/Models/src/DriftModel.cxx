@@ -35,13 +35,13 @@ DriftModel::DriftModel(pressureEstimate pEstimate, int dim, bool useDellacherieE
 	else{//EOS at 155 bars and 618K
 		cout<<"Fluid is water-Gas mixture around saturation point 155 bars and 618 K (345°C)"<<endl;
 		*_runLogFile<<"Fluid is water-Gas mixture around saturation point 155 bars and 618 K (345°C)"<<endl;
-		_Tsat=618;//saturation temperature at 155 bars
 		_hsatl=1.63e6;//water enthalpy at saturation at 155 bars
 		_hsatv=2.6e6;//Gas enthalpy at saturation at 155 bars
 		if(useDellacherieEOS)
 		{
-			_fluides[0] = new StiffenedGasDellacherie(1.43,0  ,2.030255e6  ,1040.14,_Tsat,2.597e6); //stiffened gas law for Gas from S. Dellacherie//dernier paramètre non utilise, sert juste a eviter d'avoir deux constructeurs de même signature
-			_fluides[1] = new StiffenedGasDellacherie(2.35,1e9,-1.167056e6,1816.2,_Tsat,1.6299e6); //stiffened gas law for water from S. Dellacherie// dernier paramètre non utilise, sert juste a eviter d'avoir deux constructeurs de même signature
+			_Tsat=656;//saturation temperature used in Dellacherie EOS
+			_fluides[0] = new StiffenedGasDellacherie(1.43,0  ,2.030255e6  ,1040.14); //stiffened gas law for Gas from S. Dellacherie
+			_fluides[1] = new StiffenedGasDellacherie(2.35,1e9,-1.167056e6,1816.2); //stiffened gas law for water from S. Dellacherie
 		}
 		else
 		{
@@ -53,6 +53,7 @@ DriftModel::DriftModel(pressureEstimate pEstimate, int dim, bool useDellacherieE
 			double cv_l=3100;//water specific heat capacity at saturation at 155 bar
 			double rho_sat_v=102;//Gas density at saturation at 155 bar
 			double rho_sat_l=594;//water density at saturation at 155 bar
+			_Tsat=618;//saturation temperature at 155 bars
 			_fluides[0] = new StiffenedGas(rho_sat_v,1.55e7,_Tsat,esatv, sound_speed_v,cv_v); //stiffened gas law for Gas at pressure 155 bar and temperature 345°C
 			_fluides[1] = new StiffenedGas(rho_sat_l,1.55e7,_Tsat,esatl, sound_speed_l,cv_l); //stiffened gas law for water at pressure 155 bar
 		}
@@ -587,7 +588,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 			}
 		}
 		_externalStates[_nVar-1] = _externalStates[1]*_fluides[0]->getInternalEnergy(_limitField[nameOfGroup].T,rho_v)
-																																																																																																							 +(_externalStates[0]-_externalStates[1])*_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + _externalStates[0]*v2/2;
+																																																																																																									 +(_externalStates[0]-_externalStates[1])*_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + _externalStates[0]*v2/2;
 		_idm[0] = 0;
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
@@ -1619,8 +1620,8 @@ void DriftModel::primToConsJacobianMatrix(double *V)
 		for(int idim=0;idim<_Ndim;idim++)
 			_primToConsJacoMat[(_nVar-1)*_nVar+2+idim]=rho*vitesse[idim];
 		_primToConsJacoMat[(_nVar-1)*_nVar+_nVar-1]=rho*(cv_v*concentration + cv_l*(1-concentration))
-																																																													-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
-																																																															+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
+																																																															-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
+																																																																	+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
 	}
 	else if(dynamic_cast<StiffenedGasDellacherie*>(_fluides[0])!=NULL
 			&& dynamic_cast<StiffenedGasDellacherie*>(_fluides[1])!=NULL)
@@ -1678,8 +1679,8 @@ void DriftModel::primToConsJacobianMatrix(double *V)
 		for(int idim=0;idim<_Ndim;idim++)
 			_primToConsJacoMat[(_nVar-1)*_nVar+2+idim]=rho*vitesse[idim];
 		_primToConsJacoMat[(_nVar-1)*_nVar+_nVar-1]=rho*(cp_v*concentration + cp_l*(1-concentration))
-																																																													-rho*rho*H*(cp_v*   concentration /(rho_v*(h_v-q_v))
-																																																															+cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
+																																																															-rho*rho*H*(cp_v*   concentration /(rho_v*(h_v-q_v))
+																																																																	+cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
 	}
 	else
 		throw CdmathException("SinglePhase::primToConsJacobianMatrix: eos should be StiffenedGas or StiffenedGasDellacherie");
@@ -1835,7 +1836,7 @@ void DriftModel::getMixturePressureAndTemperature(double c_v, double rhom, doubl
 		StiffenedGas* fluide1=dynamic_cast<StiffenedGas*>(_fluides[1]);
 
 		temperature= (rhom_em-m_v*fluide0->getInternalEnergy(0)-m_l*fluide1->getInternalEnergy(0))
-																																																																																																					/(m_v*fluide0->constante("cv")+m_l*fluide1->constante("cv"));
+																																																																																																							/(m_v*fluide0->constante("cv")+m_l*fluide1->constante("cv"));
 
 		double e_v=fluide0->getInternalEnergy(temperature);
 		double e_l=fluide1->getInternalEnergy(temperature);
@@ -3185,8 +3186,8 @@ void DriftModel::getDensityDerivatives(double concentration, double pression, do
 				+(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(e_l-q_l))
 		);
 		_drhoE_sur_dT=rho*(cv_v*concentration + cv_l*(1-concentration))
-																																																					-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
-																																																							+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
+																																																							-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
+																																																									+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
 	}
 	else if(dynamic_cast<StiffenedGasDellacherie*>(_fluides[0])!=NULL
 			&& dynamic_cast<StiffenedGasDellacherie*>(_fluides[1])!=NULL)
@@ -3225,8 +3226,8 @@ void DriftModel::getDensityDerivatives(double concentration, double pression, do
 				+gamma_l*(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(h_l-q_l))
 		)-1;
 		_drhoE_sur_dT=rho*(cp_v*concentration + cp_l*(1-concentration))
-		           	    																																		   -rho*rho*H*( cp_v*   concentration /(rho_v*(h_v-q_v))
-		           	    																																				   +cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
+		           	    																																				   -rho*rho*H*( cp_v*   concentration /(rho_v*(h_v-q_v))
+		           	    																																						   +cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
 	}
 	else
 		throw CdmathException("SinglePhase::primToConsJacobianMatrix: eos should be StiffenedGas or StiffenedGasDellacherie");
@@ -3246,12 +3247,6 @@ void DriftModel::save(){
 	prim+=_fileName;
 	cons+=_fileName;
 	allFields+=_fileName;
-	if(_isStationary)
-	{
-		prim+="_Stat";
-		cons+="_Stat";
-		allFields+="_Stat";
-	}
 
 	PetscInt Ii;
 	for (long i = 0; i < _Nmailles; i++){
@@ -3570,6 +3565,66 @@ void DriftModel::save(){
 						_VitesseZ.writeCSV(allFields+"_VelocityZ");
 				}
 				break;
+			}
+			if(_isStationary)
+			{
+				prim+="_Stat";
+				cons+="_Stat";
+				allFields+="_Stat";
+				switch(_saveFormat)
+				{
+				case VTK :
+					_VoidFraction.writeVTK(allFields+"_VoidFraction",false);
+					_Enthalpy.writeVTK(allFields+"_Enthalpy",false);
+					_Concentration.writeVTK(allFields+"_Concentration",false);
+					_Pressure.writeVTK(allFields+"_Pressure",false);
+					_DensiteLiquide.writeVTK(allFields+"_LiquidDensity",false);
+					_DensiteVapeur.writeVTK(allFields+"_SteamDensityy",false);
+					_EnthalpieLiquide.writeVTK(allFields+"_LiquidEnthalpy",false);
+					_EnthalpieVapeur.writeVTK(allFields+"_SteamEnthalpy",false);
+					_VitesseX.writeVTK(allFields+"_VelocityX",false);
+					if(_Ndim>1)
+					{
+						_VitesseY.writeVTK(allFields+"_VelocityY",false);
+						if(_Ndim>2)
+							_VitesseZ.writeVTK(allFields+"_VelocityZ",false);
+					}
+					break;
+				case MED :
+					_VoidFraction.writeMED(allFields+"_VoidFraction",false);
+					_Enthalpy.writeMED(allFields+"_Enthalpy",false);
+					_Concentration.writeMED(allFields+"_Concentration",false);
+					_Pressure.writeMED(allFields+"_Pressure",false);
+					_DensiteLiquide.writeMED(allFields+"_LiquidDensity",false);
+					_DensiteVapeur.writeMED(allFields+"_SteamDensityy",false);
+					_EnthalpieLiquide.writeMED(allFields+"_LiquidEnthalpy",false);
+					_EnthalpieVapeur.writeMED(allFields+"_SteamEnthalpy",false);
+					_VitesseX.writeMED(allFields+"_VelocityX",false);
+					if(_Ndim>1)
+					{
+						_VitesseY.writeMED(allFields+"_VelocityY",false);
+						if(_Ndim>2)
+							_VitesseZ.writeMED(allFields+"_VelocityZ",false);
+					}
+					break;
+				case CSV :
+					_VoidFraction.writeCSV(allFields+"_VoidFraction");
+					_Enthalpy.writeVTK(allFields+"_Enthalpy");
+					_Concentration.writeCSV(allFields+"_Concentration");
+					_Pressure.writeCSV(allFields+"_Pressure");
+					_DensiteLiquide.writeCSV(allFields+"_LiquidDensity");
+					_DensiteVapeur.writeCSV(allFields+"_SteamDensityy");
+					_EnthalpieLiquide.writeCSV(allFields+"_LiquidEnthalpy");
+					_EnthalpieVapeur.writeCSV(allFields+"_SteamEnthalpy");
+					_VitesseX.writeCSV(allFields+"_VelocityX");
+					if(_Ndim>1)
+					{
+						_VitesseY.writeCSV(allFields+"_VelocityY");
+						if(_Ndim>2)
+							_VitesseZ.writeCSV(allFields+"_VelocityZ");
+					}
+					break;
+				}
 			}
 		}
 	}

@@ -37,7 +37,7 @@ SinglePhase::SinglePhase(phaseType fluid, pressureEstimate pEstimate, int dim, b
 			cout<<"Fluid is water around saturation point 155 bars and 618 K (345°C)"<<endl;
 			*_runLogFile<<"Fluid is water around saturation point 155 bars and 618 K (345°C)"<<endl;
 			if(useDellacherieEOS)
-				_fluides[0]= new StiffenedGasDellacherie(2.35,1e9,-1.167e6,1816,618,1.6e6); //stiffened gas law for water from S. Dellacherie
+				_fluides[0]= new StiffenedGasDellacherie(2.35,1e9,-1.167e6,1816); //stiffened gas law for water from S. Dellacherie
 			else
 				_fluides[0]= new StiffenedGas(594.,1.55e7,618.,1.6e6, 621.,3100.);  //stiffened gas law for water at pressure 155 bar, and temperature 345°C
 		}
