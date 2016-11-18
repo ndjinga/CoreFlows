@@ -67,6 +67,7 @@ CreateTestExecAndInstall(DriftModel_1DDepressurisation.cxx  "${libs_for_tests}" 
 CreateTestExecAndInstall(DriftModel_1DPorosityJump.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(DriftModel_1DPressureLoss.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(DriftModel_1DRiemannProblem.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(DriftModel_1DVidangeReservoir.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(DriftModel_2DInclinedBoilingChannel.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(DriftModel_2DInclinedChannelGravity.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(DriftModel_2DInclinedChannelGravityBarriers.cxx  "${libs_for_tests}" )

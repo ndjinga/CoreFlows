@@ -15,7 +15,6 @@ DriftModel::DriftModel(pressureEstimate pEstimate, int dim, bool useDellacherieE
 	_dragCoeffs=vector<double>(2,0);
 	_fluides.resize(2);
 	_saveAllFields=false;
-	_useDellacherieEOS=useDellacherieEOS;
 
 	if( pEstimate==around1bar300K){//EOS at 1 bar and 373K
 		cout<<"Fluid is water-Gas mixture around saturation point 1 bar and 373 K (100°C)"<<endl;
@@ -32,12 +31,15 @@ DriftModel::DriftModel(pressureEstimate pEstimate, int dim, bool useDellacherieE
 		_fluides[1] = new StiffenedGas(rho_sat_l,1e5,_Tsat,esatl,sound_speed_l,cv_l);  //stiffened gas law for water at pressure 1 bar and temperature 100°C
 		_hsatl=4.175e5;//water enthalpy at saturation at 1 bar
 		_hsatv=2.675e6;//Gas enthalpy at saturation at 1 bar
-	}
+
+		_useDellacherieEOS=false;
+}
 	else{//EOS at 155 bars and 618K
 		cout<<"Fluid is water-Gas mixture around saturation point 155 bars and 618 K (345°C)"<<endl;
 		*_runLogFile<<"Fluid is water-Gas mixture around saturation point 155 bars and 618 K (345°C)"<<endl;
 		_hsatl=1.63e6;//water enthalpy at saturation at 155 bars
 		_hsatv=2.6e6;//Gas enthalpy at saturation at 155 bars
+		_useDellacherieEOS=useDellacherieEOS;
 		if(useDellacherieEOS)
 		{
 			_Tsat=656;//saturation temperature used in Dellacherie EOS
@@ -88,6 +90,7 @@ void DriftModel::initialize(){
 		_Enthalpy=Field("Enthalpy",CELLS,_mesh,1);
 		_Concentration=Field("Concentration",CELLS,_mesh,1);
 		_Pressure=Field("Pressure",CELLS,_mesh,1);
+		_Temperature=Field("Temperature",CELLS,_mesh,1);
 		_DensiteLiquide=Field("Liquid density",CELLS,_mesh,1);
 		_DensiteVapeur=Field("Steam density",CELLS,_mesh,1);
 		_EnthalpieLiquide=Field("Liquid enthalpy",CELLS,_mesh,1);
@@ -3415,6 +3418,7 @@ void DriftModel::save(){
 			_Enthalpy(i)=(m_v*h_v+m_l*h_l)/rhom;
 			_Concentration(i)=cv;
 			_Pressure(i)=p;
+			_Temperature(i)=Tm;
 			_DensiteLiquide(i)=rho_l;
 			_DensiteVapeur(i)=rho_v;
 			_EnthalpieLiquide(i)=h_l;
@@ -3431,6 +3435,7 @@ void DriftModel::save(){
 		_Enthalpy.setTime(_time,_nbTimeStep);
 		_Concentration.setTime(_time,_nbTimeStep);
 		_Pressure.setTime(_time,_nbTimeStep);
+		_Temperature.setTime(_time,_nbTimeStep);
 		_DensiteLiquide.setTime(_time,_nbTimeStep);
 		_DensiteVapeur.setTime(_time,_nbTimeStep);
 		_EnthalpieLiquide.setTime(_time,_nbTimeStep);
@@ -3450,6 +3455,7 @@ void DriftModel::save(){
 				_Enthalpy.writeVTK(allFields+"_Enthalpy");
 				_Concentration.writeVTK(allFields+"_Concentration");
 				_Pressure.writeVTK(allFields+"_Pressure");
+				_Temperature.writeVTK(allFields+"_Temperature");
 				_DensiteLiquide.writeVTK(allFields+"_LiquidDensity");
 				_DensiteVapeur.writeVTK(allFields+"_SteamDensityy");
 				_EnthalpieLiquide.writeVTK(allFields+"_LiquidEnthalpy");
@@ -3467,6 +3473,7 @@ void DriftModel::save(){
 				_Enthalpy.writeMED(allFields+"_Enthalpy");
 				_Concentration.writeMED(allFields+"_Concentration");
 				_Pressure.writeMED(allFields+"_Pressure");
+				_Temperature.writeMED(allFields+"_Temperature");
 				_DensiteLiquide.writeMED(allFields+"_LiquidDensity");
 				_DensiteVapeur.writeMED(allFields+"_SteamDensityy");
 				_EnthalpieLiquide.writeMED(allFields+"_LiquidEnthalpy");
@@ -3484,6 +3491,7 @@ void DriftModel::save(){
 				_Enthalpy.writeCSV(allFields+"_Enthalpy");
 				_Concentration.writeCSV(allFields+"_Concentration");
 				_Pressure.writeCSV(allFields+"_Pressure");
+				_Temperature.writeCSV(allFields+"_Temperature");
 				_DensiteLiquide.writeCSV(allFields+"_LiquidDensity");
 				_DensiteVapeur.writeCSV(allFields+"_SteamDensityy");
 				_EnthalpieLiquide.writeCSV(allFields+"_LiquidEnthalpy");
@@ -3506,6 +3514,7 @@ void DriftModel::save(){
 				_Enthalpy.writeVTK(allFields+"_Enthalpy",false);
 				_Concentration.writeVTK(allFields+"_Concentration",false);
 				_Pressure.writeVTK(allFields+"_Pressure",false);
+				_Temperature.writeVTK(allFields+"_Temperature",false);
 				_DensiteLiquide.writeVTK(allFields+"_LiquidDensity",false);
 				_DensiteVapeur.writeVTK(allFields+"_SteamDensityy",false);
 				_EnthalpieLiquide.writeVTK(allFields+"_LiquidEnthalpy",false);
@@ -3523,6 +3532,7 @@ void DriftModel::save(){
 				_Enthalpy.writeMED(allFields+"_Enthalpy",false);
 				_Concentration.writeMED(allFields+"_Concentration",false);
 				_Pressure.writeMED(allFields+"_Pressure",false);
+				_Temperature.writeMED(allFields+"_Temperature",false);
 				_DensiteLiquide.writeMED(allFields+"_LiquidDensity",false);
 				_DensiteVapeur.writeMED(allFields+"_SteamDensityy",false);
 				_EnthalpieLiquide.writeMED(allFields+"_LiquidEnthalpy",false);
@@ -3540,6 +3550,7 @@ void DriftModel::save(){
 				_Enthalpy.writeVTK(allFields+"_Enthalpy");
 				_Concentration.writeCSV(allFields+"_Concentration");
 				_Pressure.writeCSV(allFields+"_Pressure");
+				_Temperature.writeCSV(allFields+"_Temperature");
 				_DensiteLiquide.writeCSV(allFields+"_LiquidDensity");
 				_DensiteVapeur.writeCSV(allFields+"_SteamDensityy");
 				_EnthalpieLiquide.writeCSV(allFields+"_LiquidEnthalpy");
@@ -3565,6 +3576,7 @@ void DriftModel::save(){
 					_Enthalpy.writeVTK(allFields+"_Enthalpy",false);
 					_Concentration.writeVTK(allFields+"_Concentration",false);
 					_Pressure.writeVTK(allFields+"_Pressure",false);
+					_Temperature.writeVTK(allFields+"_Temperature",false);
 					_DensiteLiquide.writeVTK(allFields+"_LiquidDensity",false);
 					_DensiteVapeur.writeVTK(allFields+"_SteamDensityy",false);
 					_EnthalpieLiquide.writeVTK(allFields+"_LiquidEnthalpy",false);
@@ -3582,6 +3594,7 @@ void DriftModel::save(){
 					_Enthalpy.writeMED(allFields+"_Enthalpy",false);
 					_Concentration.writeMED(allFields+"_Concentration",false);
 					_Pressure.writeMED(allFields+"_Pressure",false);
+					_Temperature.writeMED(allFields+"_Temperature",false);
 					_DensiteLiquide.writeMED(allFields+"_LiquidDensity",false);
 					_DensiteVapeur.writeMED(allFields+"_SteamDensityy",false);
 					_EnthalpieLiquide.writeMED(allFields+"_LiquidEnthalpy",false);
@@ -3599,6 +3612,7 @@ void DriftModel::save(){
 					_Enthalpy.writeVTK(allFields+"_Enthalpy");
 					_Concentration.writeCSV(allFields+"_Concentration");
 					_Pressure.writeCSV(allFields+"_Pressure");
+					_Temperature.writeCSV(allFields+"_Temperature");
 					_DensiteLiquide.writeCSV(allFields+"_LiquidDensity");
 					_DensiteVapeur.writeCSV(allFields+"_SteamDensityy");
 					_EnthalpieLiquide.writeCSV(allFields+"_LiquidEnthalpy");

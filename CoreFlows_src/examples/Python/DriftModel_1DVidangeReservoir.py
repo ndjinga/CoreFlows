@@ -23,7 +23,6 @@ def DriftModel_1DVidangeReservoir():
 	inletTemperature=300;
 	outletPressure=1e5;
 
-    # set the limit field for each boundary
 	initialConcTop=1;
 	initialConcBottom=0.0001;
 	initialVelocityX=[0];
