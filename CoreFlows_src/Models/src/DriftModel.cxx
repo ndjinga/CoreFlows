@@ -5,6 +5,7 @@
  *      Author: Michael Ndjinga
  */
 #include "DriftModel.hxx"
+#include <assert.h>
 
 using namespace std;
 
@@ -34,7 +35,7 @@ DriftModel::DriftModel(pressureEstimate pEstimate, int dim, bool useDellacherieE
 	}
 	else{//EOS at 155 bars and 618K
 		cout<<"Fluid is water-Gas mixture around saturation point 155 bars and 618 K (345°C)"<<endl;
-		_Tsat=618;//saturation temperature at 155 bars
+		_Tsat=656;//saturation temperature at 155 bars
 		_hsatl=1.63e6;//water enthalpy at saturation at 155 bars
 		_hsatv=2.6e6;//Gas enthalpy at saturation at 155 bars
 		if(useDellacherieEOS)
