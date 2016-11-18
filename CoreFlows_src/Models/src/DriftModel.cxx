@@ -3420,11 +3420,6 @@ void DriftModel::save(){
 					VecGetValues(_primitiveVars,1,&Ii,&vz);
 				}
 			}
-			for (int j = 0; j < _Ndim; j++)//On récupère les composantes de vitesse
-			{
-				int Ii = i*_nVar +2+j;
-				VecGetValues(_primitiveVars,1,&Ii,&_Vitesse(i,j));
-			}
 
 			rho_v=_fluides[0]->getDensity(p,Tm);
 			rho_l=_fluides[1]->getDensity(p,Tm);
