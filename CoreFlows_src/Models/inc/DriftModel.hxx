@@ -59,6 +59,53 @@ public :
 	void setInletBoundaryCondition(string groupName,double Temperature,double concentration, double v_x=0, double v_y=0, double v_z=0){
 		_limitField[groupName]=LimitField(Inlet,-1,vector<double>(1,v_x),vector<double>(1,v_y),vector<double>(1,v_z),Temperature,-1,-1,concentration);
 	};
+
+	// Boundary conditions
+	/** \fn setIntletBoundaryCondition
+	 * \brief adds a new boundary condition of type Inlet
+	 * \details
+	 * \param [in] string : the name of the boundary
+	 * \param [in] double : the value of the enthalpy at the boundary
+	 * \param [in] double : the value of the concentration at the boundary
+	 * \param [in] double : the value of the x component of the velocity at the boundary
+	 * \param [in] double : the value of the y component of the velocity at the boundary
+	 * \param [in] double : the value of the z component of the velocity at the boundary
+	 * \param [out] void
+	 *  */
+	void setInletEnthalpyBoundaryCondition(string groupName,double enthalpie,double concentration, double v_x=0, double v_y=0, double v_z=0){
+		if(!_useDellacherieEOS)
+		{
+			cout<<"!!!!!!!!!!!!!!!!!!!!!!!! ProblemFluid::setInletEnthalpyBoundaryCondition only available for Dellacherie EOS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
+			*_runLogFile<<"!!!!!!!!!!!!!!!!!!!!!!!!ProblemFluid::setInletEnthalpyBoundaryCondition only available for Dellacherie EOS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
+			throw CdmathException("ProblemFluid::setInletEnthalpyBoundaryCondition only available for Dellacherie EOS");
+		}
+		else{
+			double Temperature;
+
+			if(concentration<_precision)
+				Temperature =_fluides[1]->getTemperatureFromEnthalpy(enthalpie, 0);
+			else if (concentration>1-_precision)
+				Temperature =_fluides[0]->getTemperatureFromEnthalpy(enthalpie, 0);
+			else
+				Temperature =_Tsat;
+
+			_limitField[groupName]=LimitField(Inlet,-1,vector<double>(1,v_x),vector<double>(1,v_y),vector<double>(1,v_z),Temperature,-1,-1,concentration);
+		}
+	};
+
+	/** \fn setIntletPressureBoundaryCondition
+	 * \brief adds a new boundary condition of type InletPressure
+	 * \details
+	 * \param [in] string : the name of the boundary
+	 * \param [in] double : the value of the pressure at the boundary
+	 * \param [in] double : the value of the temperature at the boundary
+	 * \param [in] double : the value of the concentration at the boundary
+	 * \param [out] void
+	 *  */
+	void setInletPressureBoundaryCondition(string groupName, double pressure,double Temperature,double concentration){
+		_limitField[groupName]=LimitField(InletPressure,pressure,vector<double>(0,0),vector<double>(0,0),vector<double>(0,0),Temperature,-1,-1,concentration);
+	};
+
 	/** \fn setIntletPressureBoundaryCondition
 	 * \brief adds a new boundary condition of type InletPressure taking into account the hydrostatic pressure variations
 	 * \details The pressure is not constant on the boundary but varies linearly with a slope given by the gravity vector
@@ -80,18 +127,7 @@ public :
 
 		_limitField[groupName]=LimitField(InletPressure,pressure,vector<double>(0,0),vector<double>(0,0),vector<double>(0,0),Temperature,-1,-1,concentration);
 	};
-	/** \fn setIntletPressureBoundaryCondition
-	 * \brief adds a new boundary condition of type InletPressure
-	 * \details
-	 * \param [in] string : the name of the boundary
-	 * \param [in] double : the value of the pressure at the boundary
-	 * \param [in] double : the value of the temperature at the boundary
-	 * \param [in] double : the value of the concentration at the boundary
-	 * \param [out] void
-	 *  */
-	void setInletPressureBoundaryCondition(string groupName, double pressure,double Temperature,double concentration){
-		_limitField[groupName]=LimitField(InletPressure,pressure,vector<double>(0,0),vector<double>(0,0),vector<double>(0,0),Temperature,-1,-1,concentration);
-	};
+
 	/** \fn setWallBoundaryCondition
 	 * \brief adds a new boundary condition of type Wall
 	 * \details
@@ -127,6 +163,8 @@ protected :
 
 	Field _Vitesse, _VitesseX, _VitesseY, _VitesseZ, _VoidFraction, _Concentration, _Pressure, _Enthalpy, _DensiteLiquide, _DensiteVapeur, _EnthalpieLiquide, _EnthalpieVapeur;
 	bool _saveAllFields;
+	bool _useDellacherieEOS;
+
 	/** \fn convectionState
 	 * \brief calcule l'etat de Roe de deux etats
 	 * @param i,j sont des entiers qui correspondent aux numeros des cellules à gauche et à droite de l'interface
@@ -329,7 +367,7 @@ protected :
 	 * @param m_l is the vapour partial density: alpha_l rho_l)
 	 * @param pressure is the mixture pressure
 	 * @param temperature is the mixture temperature
-	*/
+	 */
 	void getMixturePressureDerivatives(double m_v, double m_l, double pression, double Tm);
 	/** \fn getDensityDerivatives
 	 * \brief Computes the partial derivatives of rho, rho c_v and rho E with regard to the primitive variables c_v, p, T
@@ -337,7 +375,7 @@ protected :
 	 * @param pressure
 	 * @param temperature
 	 * @param square of the velocity vector
-	*/
+	 */
 	void getDensityDerivatives(double concentration, double pressure, double temperature, double v2);
 };
 #endif /* DRIFTMODEL_HXX_*/

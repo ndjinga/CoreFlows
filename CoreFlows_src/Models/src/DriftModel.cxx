@@ -15,6 +15,7 @@ DriftModel::DriftModel(pressureEstimate pEstimate, int dim, bool useDellacherieE
 	_dragCoeffs=vector<double>(2,0);
 	_fluides.resize(2);
 	_saveAllFields=false;
+	_useDellacherieEOS=useDellacherieEOS;
 
 	if( pEstimate==around1bar300K){//EOS at 1 bar and 373K
 		cout<<"Fluid is water-Gas mixture around saturation point 1 bar and 373 K (100°C)"<<endl;
@@ -99,7 +100,6 @@ void DriftModel::initialize(){
 				_VitesseZ=Field("Velocity z",CELLS,_mesh,1);
 		}
 	}
-
 
 	if(_entropicCorrection)
 		_entropicShift=vector<double>(3);//at most 3 distinct eigenvalues
@@ -1565,8 +1565,7 @@ void DriftModel::primToConsJacobianMatrix(double *V)
 	for(int k=0;k<_nVar*_nVar; k++)
 		_primToConsJacoMat[k]=0;
 
-	if(		dynamic_cast<StiffenedGas*>(_fluides[0])!=NULL
-			&& dynamic_cast<StiffenedGas*>(_fluides[1])!=NULL)
+	if(		!_useDellacherieEOS)
 	{
 		StiffenedGas* fluide0=dynamic_cast<StiffenedGas*>(_fluides[0]);
 		StiffenedGas* fluide1=dynamic_cast<StiffenedGas*>(_fluides[1]);
@@ -1624,8 +1623,7 @@ void DriftModel::primToConsJacobianMatrix(double *V)
 																																																															-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
 																																																																	+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
 	}
-	else if(dynamic_cast<StiffenedGasDellacherie*>(_fluides[0])!=NULL
-			&& dynamic_cast<StiffenedGasDellacherie*>(_fluides[1])!=NULL)
+	else if(_useDellacherieEOS)
 	{
 		StiffenedGasDellacherie* fluide0=dynamic_cast<StiffenedGasDellacherie*>(_fluides[0]);
 		StiffenedGasDellacherie* fluide1=dynamic_cast<StiffenedGasDellacherie*>(_fluides[1]);
@@ -1782,8 +1780,7 @@ double DriftModel::getMixturePressure(double c_v, double rhom, double temperatur
 	double c_l=1-c_v;
 	double a=1., b, c;
 
-	if(		dynamic_cast<StiffenedGas*>(_fluides[0])!=NULL
-			&& dynamic_cast<StiffenedGas*>(_fluides[1])!=NULL)
+	if(	!_useDellacherieEOS)
 	{
 		StiffenedGas* fluide0=dynamic_cast<StiffenedGas*>(_fluides[0]);
 		StiffenedGas* fluide1=dynamic_cast<StiffenedGas*>(_fluides[1]);
@@ -1793,8 +1790,7 @@ double DriftModel::getMixturePressure(double c_v, double rhom, double temperatur
 		c=	gamma_v*Pinf_v*gamma_l*Pinf_l
 				-rhom*(c_l*(gamma_l-1)*(e_l-q_l)*gamma_v*Pinf_v + c_v*(gamma_v-1)*(e_v-q_v)*gamma_l*Pinf_l);
 	}
-	else if(dynamic_cast<StiffenedGasDellacherie*>(_fluides[0])!=NULL
-			&& dynamic_cast<StiffenedGasDellacherie*>(_fluides[1])!=NULL)
+	else if(_useDellacherieEOS)
 	{
 		StiffenedGasDellacherie* fluide0=dynamic_cast<StiffenedGasDellacherie*>(_fluides[0]);
 		StiffenedGasDellacherie* fluide1=dynamic_cast<StiffenedGasDellacherie*>(_fluides[1]);
@@ -1830,8 +1826,7 @@ void DriftModel::getMixturePressureAndTemperature(double c_v, double rhom, doubl
 	double c_l=1-c_v, m_v=c_v*rhom, m_l=rhom-m_v;
 	double a, b, c, delta;
 
-	if(		dynamic_cast<StiffenedGas*>(_fluides[0])!=NULL
-			&& dynamic_cast<StiffenedGas*>(_fluides[1])!=NULL)
+	if(	!_useDellacherieEOS)
 	{
 		StiffenedGas* fluide0=dynamic_cast<StiffenedGas*>(_fluides[0]);
 		StiffenedGas* fluide1=dynamic_cast<StiffenedGas*>(_fluides[1]);
@@ -1856,8 +1851,7 @@ void DriftModel::getMixturePressureAndTemperature(double c_v, double rhom, doubl
 			pression= (-b+sqrt(delta))/(2*a);
 
 	}
-	else if(dynamic_cast<StiffenedGasDellacherie*>(_fluides[0])!=NULL
-			&& dynamic_cast<StiffenedGasDellacherie*>(_fluides[1])!=NULL)
+	else if(_useDellacherieEOS)
 	{
 		StiffenedGasDellacherie* fluide0=dynamic_cast<StiffenedGasDellacherie*>(_fluides[0]);
 		StiffenedGasDellacherie* fluide1=dynamic_cast<StiffenedGasDellacherie*>(_fluides[1]);
@@ -1908,8 +1902,7 @@ double DriftModel::getMixtureTemperature(double c_v, double rhom, double pressio
 	double q_l=_fluides[1]->constante("q");
 	double c_l=1-c_v;
 
-	if(		dynamic_cast<StiffenedGas*>(_fluides[0])!=NULL
-			&& dynamic_cast<StiffenedGas*>(_fluides[1])!=NULL)
+	if(	!_useDellacherieEOS)
 	{
 		double cv_v = _fluides[0]->constante("cv");
 		double cv_l = _fluides[1]->constante("cv");
@@ -1925,8 +1918,7 @@ double DriftModel::getMixtureTemperature(double c_v, double rhom, double pressio
 				+c_v*(pression+gamma_l*Pinf_l)*(gamma_v-1)*cv_v;
 		return numerator/denominator;
 	}
-	else if(dynamic_cast<StiffenedGasDellacherie*>(_fluides[0])!=NULL
-			&& dynamic_cast<StiffenedGasDellacherie*>(_fluides[1])!=NULL)
+	else if(_useDellacherieEOS)
 	{
 		double cp_v = _fluides[0]->constante("cp");
 		double cp_l = _fluides[1]->constante("cp");
@@ -1958,8 +1950,7 @@ void DriftModel::getMixturePressureDerivatives(double m_v, double m_l, double pr
 	double q_l=_fluides[1]->constante("q");
 	double temp1, temp2, denom;
 
-	if(	   dynamic_cast<StiffenedGas*>(_fluides[0])!=NULL
-			&& dynamic_cast<StiffenedGas*>(_fluides[1])!=NULL)
+	if(	   !_useDellacherieEOS)
 	{//Classical stiffened gas with linear law e(T)
 		double cv_v = _fluides[0]->constante("cv");
 		double cv_l = _fluides[1]->constante("cv");
@@ -1977,8 +1968,7 @@ void DriftModel::getMixturePressureDerivatives(double m_v, double m_l, double pr
 		_kappa=temp2/denom;
 	}
 
-	else if(   dynamic_cast<StiffenedGasDellacherie*>(_fluides[0])!=NULL
-			&& dynamic_cast<StiffenedGasDellacherie*>(_fluides[1])!=NULL)
+	else if( _useDellacherieEOS)
 	{//S. Dellacherie stiffened gas with linear law h(T)
 		double cp_v = _fluides[0]->constante("cp");
 		double cp_l = _fluides[1]->constante("cp");
@@ -2558,8 +2548,7 @@ void DriftModel::staggeredVFFCMatricesPrimitiveVariables(double u_mn)
 
 		if(fabs(u_mn)>_precision)//non zero velocity on the interface
 		{
-			if(		dynamic_cast<StiffenedGas*>(_fluides[0])!=NULL
-					&& dynamic_cast<StiffenedGas*>(_fluides[1])!=NULL)
+			if(		!_useDellacherieEOS)
 			{
 				StiffenedGas* fluide0=dynamic_cast<StiffenedGas*>(_fluides[0]);
 				StiffenedGas* fluide1=dynamic_cast<StiffenedGas*>(_fluides[1]);
@@ -2730,8 +2719,7 @@ void DriftModel::staggeredVFFCMatricesPrimitiveVariables(double u_mn)
 					_AroeMinusImplicit[(2+_Ndim)*_nVar+2+_Ndim]=uj_n*(rhomj*(cv_v*cmj+cv_l*(1-cmj))-Emj*rhomj*rhomj*(cv_v*cmj/(rho_vj*(e_vj-q_v))+cv_l*(1-cmj)/(rho_lj*(e_lj-q_l))));
 				}
 			}
-			else if(dynamic_cast<StiffenedGasDellacherie*>(_fluides[0])!=NULL
-					&& dynamic_cast<StiffenedGasDellacherie*>(_fluides[1])!=NULL)
+			else if(_useDellacherieEOS)
 			{
 				StiffenedGasDellacherie* fluide0=dynamic_cast<StiffenedGasDellacherie*>(_fluides[0]);
 				StiffenedGasDellacherie* fluide1=dynamic_cast<StiffenedGasDellacherie*>(_fluides[1]);
@@ -3150,8 +3138,7 @@ void DriftModel::getDensityDerivatives(double concentration, double pression, do
 
 	double rho=concentration*rho_v+(1-concentration)*rho_l;;
 
-	if(		dynamic_cast<StiffenedGas*>(_fluides[0])!=NULL
-			&& dynamic_cast<StiffenedGas*>(_fluides[1])!=NULL)
+	if(	!_useDellacherieEOS)
 	{
 		StiffenedGas* fluide0=dynamic_cast<StiffenedGas*>(_fluides[0]);
 		StiffenedGas* fluide1=dynamic_cast<StiffenedGas*>(_fluides[1]);
@@ -3190,8 +3177,7 @@ void DriftModel::getDensityDerivatives(double concentration, double pression, do
 																																																							-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
 																																																									+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
 	}
-	else if(dynamic_cast<StiffenedGasDellacherie*>(_fluides[0])!=NULL
-			&& dynamic_cast<StiffenedGasDellacherie*>(_fluides[1])!=NULL)
+	else if(_useDellacherieEOS)
 	{
 		StiffenedGasDellacherie* fluide0=dynamic_cast<StiffenedGasDellacherie*>(_fluides[0]);
 		StiffenedGasDellacherie* fluide1=dynamic_cast<StiffenedGasDellacherie*>(_fluides[1]);
