@@ -100,6 +100,7 @@ void DriftModel::initialize(){
 		}
 	}
 
+
 	if(_entropicCorrection)
 		_entropicShift=vector<double>(3);//at most 3 distinct eigenvalues
 
