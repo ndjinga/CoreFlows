@@ -15,7 +15,6 @@ DriftModel::DriftModel(pressureEstimate pEstimate, int dim, bool useDellacherieE
 	_dragCoeffs=vector<double>(2,0);
 	_fluides.resize(2);
 	_saveAllFields=false;
-	_useDellacherieEOS=useDellacherieEOS;
 
 	if( pEstimate==around1bar300K){//EOS at 1 bar and 373K
 		cout<<"Fluid is water-Gas mixture around saturation point 1 bar and 373 K (100°C)"<<endl;
@@ -32,12 +31,15 @@ DriftModel::DriftModel(pressureEstimate pEstimate, int dim, bool useDellacherieE
 		_fluides[1] = new StiffenedGas(rho_sat_l,1e5,_Tsat,esatl,sound_speed_l,cv_l);  //stiffened gas law for water at pressure 1 bar and temperature 100°C
 		_hsatl=4.175e5;//water enthalpy at saturation at 1 bar
 		_hsatv=2.675e6;//Gas enthalpy at saturation at 1 bar
-	}
+
+		_useDellacherieEOS=false;
+}
 	else{//EOS at 155 bars and 618K
 		cout<<"Fluid is water-Gas mixture around saturation point 155 bars and 618 K (345°C)"<<endl;
 		*_runLogFile<<"Fluid is water-Gas mixture around saturation point 155 bars and 618 K (345°C)"<<endl;
 		_hsatl=1.63e6;//water enthalpy at saturation at 155 bars
 		_hsatv=2.6e6;//Gas enthalpy at saturation at 155 bars
+		_useDellacherieEOS=useDellacherieEOS;
 		if(useDellacherieEOS)
 		{
 			_Tsat=656;//saturation temperature used in Dellacherie EOS
