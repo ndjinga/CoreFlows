@@ -28,7 +28,7 @@ def DriftModel_1DRiemannProblem():
 	inletConc_Right=0;
 	inletVelocity_Right=1;
 	inletTemperature_Right=565;
-	outletPressure_Right=155e5;
+	outletPressure_Right=155.1e5;
 
 	myProblem = cf.DriftModel(cf.around155bars600K,spaceDim);
 	nVar =  myProblem.getNumberOfVariables();

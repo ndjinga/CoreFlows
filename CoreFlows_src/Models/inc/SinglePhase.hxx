@@ -112,6 +112,7 @@ protected :
 	Field _Vitesse;
 	double  _drho_sur_dp,   _drho_sur_dT;//derivatives of the density rho wrt cv, p, T
 	double  _drhoE_sur_dp,  _drhoE_sur_dT;//derivatives of the total energy rho E wrt cv, p, T
+	bool _useDellacherieEOS;
 
 	//!calcule l'etat de Roe de deux etats
 	void convectionState( const long &i, const long &j, const bool &IsBord);

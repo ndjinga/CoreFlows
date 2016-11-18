@@ -36,7 +36,7 @@ StiffenedGas::StiffenedGas(double rho_ref, double p_ref, double T_ref, double e_
 	cout<<"Linearised internal energy law e(T)=  e_ref+ cv_ref (T-Tref), around temperature Tref= "<< _Tref<<" K, internal energy e_ref= "<<_e_ref<<" J/Kg, specific heat cv_ref= "<< _Cv<<" J/Kg/K"<<endl;
 }
 // Loi d'etat stiffened gas S. Dellacherie
-StiffenedGasDellacherie::StiffenedGasDellacherie( double gamma, double p0, double q, double cv_ref, double T_ref, double h_ref)
+StiffenedGasDellacherie::StiffenedGasDellacherie( double gamma, double p0, double q, double cv_ref)
 {
 	if(gamma -1<=0)
 		throw CdmathException("StiffenedGas::StiffenedGas: gamma<1");
@@ -45,8 +45,8 @@ StiffenedGasDellacherie::StiffenedGasDellacherie( double gamma, double p0, doubl
 	_Cp=_gamma*_Cv;
 	_p0=p0;
 	_q=q;
-	_Tref=T_ref;
-	_h_ref=h_ref;
+	_Tref=0;
+	_h_ref=q;
 
 	cout<<"S. Dellacherie Stiffened gas EOS P=(gamma - 1)/gamma * rho (h(T)-q) - p0 with parameters"<< " p0=" << _p0 << " gamma= " << _gamma<< " q= " << _q<< endl;
 	cout<<"Linearised internal energy law h(T)=  h_ref+ cp_ref (T-Tref) around temperature "<< _Tref<<" K, enthalpy "<<_h_ref<<"  J/Kg,, specific heat cp_ref= "<< _Cp<<" J/Kg/K"<<endl;

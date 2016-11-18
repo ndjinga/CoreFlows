@@ -15,6 +15,8 @@ SinglePhase::SinglePhase(phaseType fluid, pressureEstimate pEstimate, int dim, b
 	_nbPhases  = 1;
 	_dragCoeffs=vector<double>(1,0);
 	_fluides.resize(1);
+	_useDellacherieEOS=useDellacherieEOS;
+
 	if(pEstimate==around1bar300K){//EOS at 1 bar and 300K
 		if(fluid==Gas){
 			cout<<"Fluid is air around 1 bar and 300 K (27°C)"<<endl;
@@ -36,8 +38,8 @@ SinglePhase::SinglePhase(phaseType fluid, pressureEstimate pEstimate, int dim, b
 		else{//To do : change to normal regime: 155 bars and 573K
 			cout<<"Fluid is water around saturation point 155 bars and 618 K (345°C)"<<endl;
 			*_runLogFile<<"Fluid is water around saturation point 155 bars and 618 K (345°C)"<<endl;
-			if(useDellacherieEOS)
-				_fluides[0]= new StiffenedGasDellacherie(2.35,1e9,-1.167e6,1816,618,1.6e6); //stiffened gas law for water from S. Dellacherie
+			if(_useDellacherieEOS)
+				_fluides[0]= new StiffenedGasDellacherie(2.35,1e9,-1.167e6,1816); //stiffened gas law for water from S. Dellacherie
 			else
 				_fluides[0]= new StiffenedGas(594.,1.55e7,618.,1.6e6, 621.,3100.);  //stiffened gas law for water at pressure 155 bar, and temperature 345°C
 		}
@@ -1347,7 +1349,7 @@ void SinglePhase::primToConsJacobianMatrix(double *V)
 	for(int k=0;k<_nVar*_nVar; k++)
 		_primToConsJacoMat[k]=0;
 
-	if(		dynamic_cast<StiffenedGas*>(_fluides[0])!=NULL)
+	if(		!_useDellacherieEOS)
 	{
 		StiffenedGas* fluide0=dynamic_cast<StiffenedGas*>(_fluides[0]);
 		double e=fluide0->getInternalEnergy(temperature);
@@ -1367,7 +1369,7 @@ void SinglePhase::primToConsJacobianMatrix(double *V)
 			_primToConsJacoMat[(_nVar-1)*_nVar+1+idim]=rho*vitesse[idim];
 		_primToConsJacoMat[(_nVar-1)*_nVar+_nVar-1]=rho*cv*(1-E/(e-q));
 	}
-	else if(		dynamic_cast<StiffenedGasDellacherie*>(_fluides[0])!=NULL)
+	else if(	_useDellacherieEOS)
 	{
 		StiffenedGasDellacherie* fluide0=dynamic_cast<StiffenedGasDellacherie*>(_fluides[0]);
 		double h=fluide0->getEnthalpy(temperature);
@@ -2013,7 +2015,7 @@ void SinglePhase::staggeredVFFCMatricesPrimitiveVariables(double un)//vitesse no
 
 		if(fabs(un)>_precision)//non zero velocity on the interface
 		{
-			if(		dynamic_cast<StiffenedGas*>(_fluides[0])!=NULL)
+			if(	!_useDellacherieEOS)
 			{
 				StiffenedGas* fluide0=dynamic_cast<StiffenedGas*>(_fluides[0]);
 				double cv=fluide0->constante("cv");
@@ -2171,7 +2173,7 @@ void SinglePhase::staggeredVFFCMatricesPrimitiveVariables(double un)//vitesse no
 					_AroeMinusImplicit[_nVar*_nVar -1] = rhoj*uj_n*(1-Ej/(ej-q))*cv;
 				}
 			}
-			else if(dynamic_cast<StiffenedGasDellacherie*>(_fluides[0])!=NULL )
+			else if(_useDellacherieEOS )
 			{
 				StiffenedGasDellacherie* fluide0=dynamic_cast<StiffenedGasDellacherie*>(_fluides[0]);
 				double cp=fluide0->constante("cp");
@@ -2447,7 +2449,7 @@ void SinglePhase::getDensityDerivatives( double pressure, double temperature, do
 	double gamma=_fluides[0]->constante("gamma");
 	double q=_fluides[0]->constante("q");
 
-	if(		dynamic_cast<StiffenedGas*>(_fluides[0])!=NULL)
+	if(	!_useDellacherieEOS)
 	{
 		StiffenedGas* fluide0=dynamic_cast<StiffenedGas*>(_fluides[0]);
 		double e = fluide0->getInternalEnergy(temperature);
@@ -2459,7 +2461,7 @@ void SinglePhase::getDensityDerivatives( double pressure, double temperature, do
 		_drhoE_sur_dp=E/((gamma-1)*(e-q));
 		_drhoE_sur_dT=rho*cv*(1-E/(e-q));
 	}
-	else if(dynamic_cast<StiffenedGasDellacherie*>(_fluides[0])!=NULL )
+	else if(_useDellacherieEOS )
 	{
 		StiffenedGasDellacherie* fluide0=dynamic_cast<StiffenedGasDellacherie*>(_fluides[0]);
 		double h=fluide0->getEnthalpy(temperature);

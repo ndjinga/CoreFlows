@@ -1031,7 +1031,7 @@ void ProblemFluid::addSourceTermToSecondMember
 		bool isBord, int ij, double mesureFace)//To do : generalise to unstructured meshes
 {
 	if(_verbose && _nbTimeStep%_freqSave ==0)
-		cout<<"addSourceTerm cell i= "<<i<< " cell j= "<< j<< " isbord "<<isBord<<endl;
+		cout<<"ProblemFluid::addSourceTerm cell i= "<<i<< " cell j= "<< j<< " isbord "<<isBord<<endl;
 
 	_idm[0] = i*_nVar;
 	for(int k=1; k<_nVar;k++)
@@ -1121,10 +1121,10 @@ void ProblemFluid::addSourceTermToSecondMember
 			}
 			if (_verbose && _nbTimeStep%_freqSave ==0)
 			{
-				cout << "Contribution après décentrement de la face (i,j) au terme source Si de la cellule i= " << i<<endl;
+				cout << "Contribution au terme source Si de la cellule i= " << i<<" venant  (après décentrement) de la face (i,j), j="<<j<<endl;
 				for(int q=0; q<_nVar; q++)
 					cout << _Si[q] << endl;
-				cout << "Contribution après décentrement de la face (i,j) au terme source Sj de la cellule j= " << j<<endl;
+				cout << "Contribution au terme source Sj de la cellule j= " << j<<" venant  (après décentrement) de la face (i,j), i="<<i<<endl;
 				for(int q=0; q<_nVar; q++)
 					cout << _Sj[q] << endl;
 				cout << endl;
@@ -1138,6 +1138,16 @@ void ProblemFluid::addSourceTermToSecondMember
 				_Si[k]=_Si[k]/nbVoisinsi+_pressureLossVector[k]/2+_porosityGradientSourceVector[k]/2;//mesureFace/_perimeters(i)
 				_Sj[k]=_Sj[k]/nbVoisinsj+_pressureLossVector[k]/2+_porosityGradientSourceVector[k]/2;//mesureFace/_perimeters(j)
 			}
+			if (_verbose && _nbTimeStep%_freqSave ==0)
+			{
+				cout << "Contribution au terme source Si de la cellule i= " << i<<" venant  de la face (i,j), j="<<j<<endl;
+				for(int q=0; q<_nVar; q++)
+					cout << _Si[q] << endl;
+				cout << "Contribution au terme source Sj de la cellule j= " << j<<" venant  de la face (i,j), i="<<i <<endl;
+				for(int q=0; q<_nVar; q++)
+					cout << _Sj[q] << endl;
+				cout << endl;
+			}
 		}
 		_idn[0] = j;
 		VecSetValuesBlocked(_b, 1, _idn, _Sj, ADD_VALUES);
@@ -1150,7 +1160,7 @@ void ProblemFluid::addSourceTermToSecondMember
 				_Si[k]=(_phi[k]-_l[k])*mesureFace/_perimeters(i);///nbVoisinsi;
 			if (_verbose && _nbTimeStep%_freqSave ==0)
 			{
-				cout << "Contribution après décentrement de la face (i,bord) au terme source Si de la cellule i= " << i<<endl;
+				cout << "Contribution au terme source Si de la cellule i= " << i<<" venant  (après décentrement) de la face (i,bord)"<<endl;
 				for(int q=0; q<_nVar; q++)
 					cout << _Si[q] << endl;
 				cout<<"ratio surface sur volume i="<<mesureFace/_perimeters(i)<<" perimeter = "<< _perimeters(i)<<endl;
@@ -1158,8 +1168,17 @@ void ProblemFluid::addSourceTermToSecondMember
 			}
 		}
 		else
+		{
 			for(int k=0; k<_nVar;k++)
 				_Si[k]=_Si[k]/nbVoisinsi+_pressureLossVector[k]/2+_porosityGradientSourceVector[k]/2;//mesureFace/_perimeters(i);//
+			if (_verbose && _nbTimeStep%_freqSave ==0)
+			{
+				cout << "Contribution au terme source Si de la cellule i= " << i<<" venant de la face (i,bord) "<<endl;
+				for(int q=0; q<_nVar; q++)
+					cout << _Si[q] << endl;
+				cout << endl;
+			}
+		}
 	}
 	_idm[0] = i;
 	VecSetValuesBlocked(_b, 1, _idm, _Si, ADD_VALUES);

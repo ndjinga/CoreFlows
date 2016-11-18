@@ -11,65 +11,76 @@ using namespace std;
 
 int main()
 {
-	//setting mesh and groups
-	cout << "Building a regular grid " << endl;
-	double xinf=0.0;
-	double xsup=4.2;
-	int nx=2;
-	Mesh M(xinf,xsup,nx);
-	double eps=1.E-8;
-	M.setGroupAtPlan(xsup,0,eps,"Outlet");
-	M.setGroupAtPlan(xinf,0,eps,"Inlet");
-	int spaceDim = M.getSpaceDimension();
+	int spaceDim = 2;
 
-	// setting boundary conditions 
-	double inletConc=0;
-	double inletVelocityX=1;
-	double inletTemperature=565;
+	// set the limit field for each boundary
+	double wallVelocityX=0;
+	double wallVelocityY=0;
+	double wallTemperature=563;
+
+	double inletConcentration=0;
+	double inletVelocityX=0;
+	double inletVelocityY=1;
+	double inletTemperature=563;
+
 	double outletPressure=155e5;
 
-	// setting physical parameters 
+	// physical constants
+	vector<double> gravite(spaceDim,0.) ;
+	gravite[1]=-8.5;
+	gravite[0]=5;
 	double heatPower=1e8;
 
 	DriftModel  myProblem(around155bars600K,spaceDim);
-	int nbPhase = myProblem.getNumberOfPhases();
 	int nVar = myProblem.getNumberOfVariables();
 
+	//Prepare for the mesh
+	double xinf=0.0;
+	double xsup=1.0;
+	double yinf=0.0;
+	double ysup=1.0;
+	int nx=1;
+	int ny=1;
+
 	// Prepare for the initial condition
-	Vector VV_Constant(nVar);
+	vector<double> VV_Constant(nVar);
 	// constant vector
-	VV_Constant(0) = 0.;
-	VV_Constant(1) = 155e5;
-	for (int idim=0; idim<spaceDim;idim++)
-		VV_Constant(2+idim) = 1;
-	VV_Constant(nVar-1) = 565;
+	VV_Constant[0] = 0;
+	VV_Constant[1] = 155e5;
+	VV_Constant[2] = 0;
+	VV_Constant[3] = 1;
+	VV_Constant[4] = 563;
 
 	//Initial field creation
-	cout << "Setting initial data " << endl;
-	myProblem.setInitialFieldConstant(M,VV_Constant);
+	cout << "Building initial data" << endl;
+	myProblem.setInitialFieldConstant(spaceDim,VV_Constant,xinf,xsup,nx,"wall","wall",yinf,ysup,ny,"inlet","outlet");
 
 	//set the boundary conditions
-	myProblem.setInletBoundaryCondition("Inlet",inletTemperature,inletConc,inletVelocityX);
-	myProblem.setOutletBoundaryCondition("Outlet", outletPressure,vector<double>(1,xsup));
+	vector<double>pressure_reference_point(2);
+	pressure_reference_point[0]=xsup;
+	pressure_reference_point[1]=ysup;
+	myProblem.setOutletBoundaryCondition("outlet", outletPressure,pressure_reference_point);
+	myProblem.setInletBoundaryCondition("inlet", inletTemperature, inletConcentration, inletVelocityX, inletVelocityY);
+	myProblem.setWallBoundaryCondition("wall", wallTemperature, wallVelocityX, wallVelocityY);
 
-	// physical parameters
+	// set physical parameters
 	myProblem.setHeatSource(heatPower);
-
+	myProblem.setGravity(gravite);
 
 	// set the numerical method
-	myProblem.setNumericalScheme(upwind, Explicit);
+	myProblem.setNumericalScheme(staggered, Implicit);
 	myProblem.setWellBalancedCorrection(true);
-	myProblem.setNonLinearFormulation(VFFC);
+	myProblem.setNonLinearFormulation(VFFC); 
 
-	// name the result file
-	string fileName = "Driftmodel1DBoilingChannel";
+	// name of result file
+	string fileName = "2DInclinedBoilingChannel";
 
-	// setting numerical parameters
-	unsigned MaxNbOfTimeStep =1 ;
+	// computation parameters
+	unsigned MaxNbOfTimeStep = 1 ;
 	int freqSave = 1;
-	double cfl = 1;
-	double maxTime = 1;
-	double precision = 1e-7;
+	double cfl = 0.5;
+	double maxTime = 5;
+	double precision = 1e-6;
 
 	myProblem.setCFL(cfl);
 	myProblem.setPrecision(precision);
@@ -77,10 +88,8 @@ int main()
 	myProblem.setTimeMax(maxTime);
 	myProblem.setFreqSave(freqSave);
 	myProblem.setFileName(fileName);
-	myProblem.usePrimitiveVarsInNewton(true);
-	myProblem.saveAllFields(true);
-	myProblem.displayConditionNumber();
-	myProblem.setSaveFileFormat(CSV);
+	myProblem.saveVelocity();
+	myProblem.setNewtonSolver(precision, 1);
 
 	// evolution
 	myProblem.initialize();
@@ -91,7 +100,7 @@ int main()
 	else
 		cout << "Simulation "<<fileName<<"  failed ! " << endl;
 
-	cout << "------------ End of calculation -----------" << endl;
+	cout << "------------ End of calculation !!! -----------" << endl;
 	myProblem.terminate();
 
 	return ok;

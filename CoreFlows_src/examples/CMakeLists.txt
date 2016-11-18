@@ -62,6 +62,7 @@ CreateTestExecAndInstall(CoupledTransportDiffusionEquations_1DHeatedChannel.cxx 
 CreateTestExecAndInstall(DiffusionEquation_1DHeatedRod.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(DriftModel_1DBoilingAssembly.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(DriftModel_1DBoilingChannel.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(DriftModel_1DChannelGravity.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(DriftModel_1DDepressurisation.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(DriftModel_1DPorosityJump.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(DriftModel_1DPressureLoss.cxx  "${libs_for_tests}" )

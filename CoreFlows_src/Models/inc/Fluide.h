@@ -118,7 +118,7 @@ class StiffenedGasDellacherie:public Fluide{
  public:
   StiffenedGasDellacherie():Fluide(){_h_ref=0;};
   /* Loi des gaz raidis avec coefficients imposés suivant S. Dellacherie*/
-  StiffenedGasDellacherie( double gamma, double p0, double q, double cv, double T_ref, double h_ref);
+  StiffenedGasDellacherie( double gamma, double p0, double q, double cv);
 
   double getInternalEnergy(double T, double rho);
   double getEnthalpy(double T, double rho=0);
