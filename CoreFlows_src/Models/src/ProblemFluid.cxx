@@ -844,6 +844,9 @@ void ProblemFluid::addConvectionToSecondMember
 		const int &j, bool isBord
 )
 {
+	if(_verbose && _nbTimeStep%_freqSave ==0)
+		cout<<"ProblemFluid::addConvectionToSecondMember start"<<endl;
+
 	//extraction des valeurs
 	for(int k=0; k<_nVar; k++)
 		_idm[k] = _nVar*i + k;
@@ -1014,36 +1017,11 @@ void ProblemFluid::addConvectionToSecondMember
 	}
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
-		cout << "A^-, (" << i << "," << j<< "):" << endl;
-		for(int i1=0; i1<_nVar; i1++)
-		{
-			for(int j1=0; j1<_nVar; j1++)
-				cout<< _AroeMinus[i1*_nVar+j1]<<", ";
-			cout << endl;
-		}
-		cout << endl;
-		cout << "A^+, (" << i << "," << j<< "):" << endl;
-		for(int i1=0; i1<_nVar; i1++)
-		{
-			for(int j1=0; j1<_nVar; j1++)
-				cout<<  _AroePlus[i1*_nVar+j1]<<", ";
-			cout << endl;
-		}
-		cout << endl;
-		cout << "|A|,(" << i << "," << j<< "):" << endl;
-		for(int i1=0; i1<_nVar; i1++)
-		{
-			for(int j1=0; j1<_nVar; j1++)
-				cout<<  _absAroe[i1*_nVar+j1]<<", ";
-			cout << endl;
-		}
-		cout << "sign(A),(" << i << "," << j<< "):" << endl;
-		for(int i1=0; i1<_nVar; i1++)
-		{
-			for(int j1=0; j1<_nVar; j1++)
-				cout<<  _signAroe[i1*_nVar+j1]<<", ";
-			cout << endl;
-		}
+		cout<<"ProblemFluid::addConvectionToSecondMember end : matrices de décentrement cellules i= " << i << ", et j= " << j<< "):"<<endl;
+		displayMatrix(_absAroe, _nVar,"Valeur absolue matrice de Roe");
+		displayMatrix(_AroeMinus, _nVar,"Matrice _AroeMinus");
+		displayMatrix(_AroePlus, _nVar,"Matrice _AroePlus");
+		displayMatrix(_signAroe, _nVar,"Signe de la matrice de Roe");
 	}
 }
 
@@ -1141,6 +1119,19 @@ void ProblemFluid::addSourceTermToSecondMember
 				_Si[k]=(_phi[k]-_l[k])*mesureFace/_perimeters(i);///nbVoisinsi;
 				_Sj[k]=(_phi[k]+_l[k])*mesureFace/_perimeters(j);///nbVoisinsj;
 			}
+			if (_verbose && _nbTimeStep%_freqSave ==0)
+			{
+				cout << "Contribution après décentrement de la face (i,j) au terme source Si de la cellule i= " << i<<endl;
+				for(int q=0; q<_nVar; q++)
+					cout << _Si[q] << endl;
+				cout << "Contribution après décentrement de la face (i,j) au terme source Sj de la cellule j= " << j<<endl;
+				for(int q=0; q<_nVar; q++)
+					cout << _Sj[q] << endl;
+				cout << endl;
+				cout<<"ratio surface sur volume i="<<mesureFace/_perimeters(i)<<" perimeter = "<< _perimeters(i)<<endl;
+				cout<<"ratio surface sur volume j="<<mesureFace/_perimeters(j)<<" perimeter = "<< _perimeters(j)<<endl;
+				cout << endl;
+			}
 		}
 		else{
 			for(int k=0; k<_nVar;k++){
@@ -1150,19 +1141,6 @@ void ProblemFluid::addSourceTermToSecondMember
 		}
 		_idn[0] = j;
 		VecSetValuesBlocked(_b, 1, _idn, _Sj, ADD_VALUES);
-		if (_verbose && _nbTimeStep%_freqSave ==0)
-		{
-			cout << "Contribution après décentrement de la face (i,j) au terme source Si de la cellule i= " << i<<endl;
-			for(int q=0; q<_nVar; q++)
-				cout << _Si[q] << endl;
-			cout << "Contribution après décentrement de la face (i,j) au terme source Sj de la cellule j= " << j<<endl;
-			for(int q=0; q<_nVar; q++)
-				cout << _Sj[q] << endl;
-			cout << endl;
-			cout<<"ratio surface sur volume i="<<mesureFace/_perimeters(i)<<" perimeter = "<< _perimeters(i)<<endl;
-			cout<<"ratio surface sur volume j="<<mesureFace/_perimeters(j)<<" perimeter = "<< _perimeters(j)<<endl;
-			cout << endl;
-		}
 	}else{
 		if(_wellBalancedCorrection){
 			for(int k=0; k<_nVar;k++)
@@ -1185,17 +1163,9 @@ void ProblemFluid::addSourceTermToSecondMember
 	}
 	_idm[0] = i;
 	VecSetValuesBlocked(_b, 1, _idm, _Si, ADD_VALUES);
+
 	if(_verbose && _nbTimeStep%_freqSave ==0 && _wellBalancedCorrection)
-	{
-		cout<<" _signAroe =  " << endl;
-		for (int k=0; k<_nVar; k++){
-			for (int l=0; l<_nVar; l++){
-				cout<<_signAroe[k*_nVar+l] <<", ";
-			}
-			cout<< endl;
-		}
-		cout<< endl;
-	}
+		displayMatrix( _signAroe,_nVar,"Signe matrice de Roe");
 }
 
 void ProblemFluid::updatePrimitives()
@@ -1316,6 +1286,7 @@ vector< complex<double> > ProblemFluid::getRacines(vector< double > pol_car){
 		for(int ct =0; ct<degre_polynom+1; ct++)
 			cout<<pol_car[ct]<< " , " <<endl;
 
+		*_runLogFile<<"getRacines computation failed"<<endl;
 		throw CdmathException("getRacines computation failed");
 	}
 
@@ -1330,6 +1301,18 @@ void ProblemFluid::AbsMatriceRoe(vector< complex<double> > valeurs_propres_dist)
 	for( int i=0 ; i<nbVp_dist ; i++)
 		y[i] = Poly.abs_generalise(valeurs_propres_dist[i]);
 	Poly.abs_par_interp_directe(nbVp_dist,valeurs_propres_dist, _Aroe, _nVar,_precision, _absAroe,y);
+	if(_verbose && _nbTimeStep%_freqSave ==0)
+	{
+		cout<< endl<<"ProblemFluid::AbsMatriceRoe: Valeurs propres :" << nbVp_dist<<endl;
+		for(int ct =0; ct<nbVp_dist; ct++)
+			cout<< "("<<valeurs_propres_dist[ct].real()<< ", " <<valeurs_propres_dist[ct].imag() <<")  ";
+		cout<< endl;
+		cout<<"ProblemFluid::AbsMatriceRoe: Valeurs à atteindre pour l'interpolation"<<endl;
+		for(int ct =0; ct<nbVp_dist; ct++)
+			cout<< "("<<y[ct].real()<< ", " <<y[ct].imag() <<")  ";
+		cout<< endl;
+		displayMatrix(_absAroe,_nVar,"Valeur absolue de la matrice de Roe");
+	}
 }
 
 void ProblemFluid::SigneMatriceRoe(vector< complex<double> > valeurs_propres_dist)
@@ -1349,20 +1332,15 @@ void ProblemFluid::SigneMatriceRoe(vector< complex<double> > valeurs_propres_dis
 	Poly.abs_par_interp_directe(nbVp_dist,valeurs_propres_dist, _Aroe, _nVar,_precision, _signAroe,y);
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
-		cout<< endl<<" SigneMatriceRoe: Valeurs propres :" << nbVp_dist<<endl;
+		cout<< endl<<"ProblemFluid::SigneMatriceRoe: Valeurs propres :" << nbVp_dist<<endl;
 		for(int ct =0; ct<nbVp_dist; ct++)
 			cout<< "("<<valeurs_propres_dist[ct].real()<< ", " <<valeurs_propres_dist[ct].imag() <<")  ";
 		cout<< endl;
-		cout<<" SigneMatriceRoe: Valeurs à atteindre pour l'interpolation"<<endl;
+		cout<<"ProblemFluid::SigneMatriceRoe: Valeurs à atteindre pour l'interpolation"<<endl;
 		for(int ct =0; ct<nbVp_dist; ct++)
 			cout<< "("<<y[ct].real()<< ", " <<y[ct].imag() <<")  ";
 		cout<< endl;
-		cout<<"Signe matrice de Roe"<<endl;
-		for(int i=0; i<_nVar;i++){
-			for(int j=0; j<_nVar;j++)
-				cout<<_signAroe[i*_nVar+j]<<" , ";
-			cout<<endl;
-		}
+		displayMatrix(_signAroe,_nVar,"Signe matrice de Roe");
 	}
 }
 void ProblemFluid::InvMatriceRoe(vector< complex<double> > valeurs_propres_dist)
@@ -1378,6 +1356,18 @@ void ProblemFluid::InvMatriceRoe(vector< complex<double> > valeurs_propres_dist)
 			y[i] = 1./_precision;
 	}
 	Poly.abs_par_interp_directe(nbVp_dist,valeurs_propres_dist, _Aroe, _nVar,_precision, _invAroe,y);
+	if(_verbose && _nbTimeStep%_freqSave ==0)
+	{
+		cout<< endl<<"ProblemFluid::InvMatriceRoe : Valeurs propres :" << nbVp_dist<<endl;
+		for(int ct =0; ct<nbVp_dist; ct++)
+			cout<< "("<<valeurs_propres_dist[ct].real()<< ", " <<valeurs_propres_dist[ct].imag() <<")  ";
+		cout<< endl;
+		cout<<"ProblemFluid::InvMatriceRoe : Valeurs à atteindre pour l'interpolation"<<endl;
+		for(int ct =0; ct<nbVp_dist; ct++)
+			cout<< "("<<y[ct].real()<< ", " <<y[ct].imag() <<")  ";
+		cout<< endl;
+		displayMatrix(_invAroe,_nVar,"Inverse matrice de Roe");
+	}
 }
 
 void ProblemFluid::terminate(){

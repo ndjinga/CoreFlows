@@ -54,7 +54,7 @@ def SinglePhase_1DRiemannProblem():
 	myProblem.setNeumannBoundaryCondition("RightBoundary");
 
     # set the numerical method
-	myProblem.setNumericalScheme(cf.upwind, cf.Explicit);
+	myProblem.setNumericalScheme(cf.staggered, cf.Implicit);
     
     # name of result file
 	fileName = "1DRiemannProblem";
@@ -73,10 +73,7 @@ def SinglePhase_1DRiemannProblem():
 	myProblem.setFreqSave(freqSave);
 	myProblem.setFileName(fileName);
 	myProblem.setNewtonSolver(precision,20);
-	#myProblem.saveConservativeField(True);
-	if(spaceDim>1):
-		myProblem.saveVelocity();
-		pass
+	myProblem.usePrimitiveVarsInNewton(True)
  
     # evolution
 	myProblem.initialize();

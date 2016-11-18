@@ -15,22 +15,21 @@ int main()
 	cout << "Building a regular grid " << endl;
 	double xinf=0.0;
 	double xsup=4.2;
-	int nx=2;//50;
+	int nx=2;
 	Mesh M(xinf,xsup,nx);
 	double eps=1.E-8;
 	M.setGroupAtPlan(xsup,0,eps,"Outlet");
 	M.setGroupAtPlan(xinf,0,eps,"Inlet");
 	int spaceDim = M.getSpaceDimension();
 
-	// setting boundary conditions
+	// setting boundary conditions 
 	double inletConc=0;
 	double inletVelocityX=1;
 	double inletTemperature=565;
 	double outletPressure=155e5;
 
-	// setting physical parameters
-	double heatPower=0e8;
-	vector<double>gravite(1,-10);
+	// setting physical parameters 
+	double heatPower=1e8;
 
 	DriftModel  myProblem(around155bars600K,spaceDim);
 	int nbPhase = myProblem.getNumberOfPhases();
@@ -55,7 +54,7 @@ int main()
 
 	// physical parameters
 	myProblem.setHeatSource(heatPower);
-	myProblem.setGravity(gravite);
+
 
 	// set the numerical method
 	myProblem.setNumericalScheme(upwind, Explicit);
@@ -68,7 +67,7 @@ int main()
 	// setting numerical parameters
 	unsigned MaxNbOfTimeStep =1 ;
 	int freqSave = 1;
-	double cfl = 100;
+	double cfl = 1;
 	double maxTime = 1;
 	double precision = 1e-7;
 
@@ -79,8 +78,9 @@ int main()
 	myProblem.setFreqSave(freqSave);
 	myProblem.setFileName(fileName);
 	myProblem.usePrimitiveVarsInNewton(true);
-	myProblem.saveVoidFraction(true);
-	myProblem.saveEnthalpy(true);
+	myProblem.saveAllFields(true);
+	myProblem.displayConditionNumber();
+	myProblem.setSaveFileFormat(CSV);
 
 	// evolution
 	myProblem.initialize();

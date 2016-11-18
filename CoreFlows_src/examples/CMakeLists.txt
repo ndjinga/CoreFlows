@@ -13,9 +13,9 @@ SET(_extra_lib_CoreFlows CoreFlows ${PETSC_LIBRARIES} ${CDMATH_LIBRARIES})
 
 
 if(CMAKE_COMPILER_IS_GNUCXX)
-    if (CMAKE_BUILD_TYPE=Debug)
+    if (CMAKE_BUILD_TYPE STREQUAL Debug)
     include(CodeCoverage)
-    setup_target_for_coverage(CoreFlows_coverage CoreFlowsCPPTests coverage)
+    setup_target_for_coverage(cov ctest coverage)
     endif()
 endif()
 
@@ -23,11 +23,7 @@ endif()
 file(GLOB NICE_EXAMPLES_TO_INSTALL resources Python )
 install(DIRECTORY ${NICE_EXAMPLES_TO_INSTALL} DESTINATION share/examples)
 
-#####################################
-
-#install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/resources  DESTINATION share/examples)
-#install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/Python  DESTINATION share/examples)
-
+##################################### test generation with ctest
 
 # this function creates a target and a ctest test
 function(CreateTestExec SourceTestFile libList)
@@ -71,6 +67,8 @@ CreateTestExecAndInstall(DriftModel_1DPorosityJump.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(DriftModel_1DPressureLoss.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(DriftModel_1DRiemannProblem.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(DriftModel_2DInclinedBoilingChannel.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(DriftModel_2DInclinedChannelGravity.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(DriftModel_2DInclinedChannelGravityBarriers.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(DriftModel_3DCanalCloison.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(FiveEqsTwoFluid_1DBoilingChannel.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(FiveEqsTwoFluid_1DDepressurisation.cxx  "${libs_for_tests}" )
@@ -79,7 +77,7 @@ CreateTestExecAndInstall(FiveEqsTwoFluid_2DInclinedBoilingChannel.cxx  "${libs_f
 CreateTestExecAndInstall(FiveEqsTwoFluid_2DInclinedSedimentation.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(IsothermalTwoFluid_1DDepressurisation.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(IsothermalTwoFluid_1DRiemannProblem.cxx  "${libs_for_tests}" )
-CreateTestExecAndInstall(IsothermalTwoFluid_1DSedimentation.cxx  "${libs_for_tests}" )
+#CreateTestExecAndInstall(IsothermalTwoFluid_1DSedimentation.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(IsothermalTwoFluid_2DInclinedSedimentation.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(IsothermalTwoFluid_2DVidangeReservoir.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(SinglePhase_1DDepressurisation.cxx  "${libs_for_tests}" )

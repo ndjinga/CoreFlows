@@ -67,11 +67,8 @@ def DriftModel_1DBoilingChannel():
 	myProblem.setTimeMax(maxTime);
 	myProblem.setFreqSave(freqSave);
 	myProblem.setFileName(fileName);
-	myProblem.saveEnthalpy(True);
+	myProblem.saveAllFields(True);
 	myProblem.usePrimitiveVarsInNewton(True);
-	if(spaceDim>1):
-		myProblem.saveVelocity();
-		pass
  
     # evolution
 	myProblem.initialize();

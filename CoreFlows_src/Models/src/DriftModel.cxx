@@ -5,7 +5,6 @@
  *      Author: Michael Ndjinga
  */
 #include "DriftModel.hxx"
-#include <assert.h>
 
 using namespace std;
 
@@ -15,11 +14,11 @@ DriftModel::DriftModel(pressureEstimate pEstimate, int dim, bool useDellacherieE
 	_nbPhases  = 2;
 	_dragCoeffs=vector<double>(2,0);
 	_fluides.resize(2);
-	_saveVoidFraction=false;
-	_saveEnthalpy=false;
+	_saveAllFields=false;
 
 	if( pEstimate==around1bar300K){//EOS at 1 bar and 373K
 		cout<<"Fluid is water-Gas mixture around saturation point 1 bar and 373 K (100°C)"<<endl;
+		*_runLogFile<<"Fluid is water-Gas mixture around saturation point 1 bar and 373 K (100°C)"<<endl;
 		_Tsat=373;//saturation temperature at 1 bar
 		double esatv=2.505e6;//Gas internal energy at saturation at 1 bar
 		double cv_v=1555;//Gas specific heat capacity at saturation at 1 bar
@@ -35,7 +34,8 @@ DriftModel::DriftModel(pressureEstimate pEstimate, int dim, bool useDellacherieE
 	}
 	else{//EOS at 155 bars and 618K
 		cout<<"Fluid is water-Gas mixture around saturation point 155 bars and 618 K (345°C)"<<endl;
-		_Tsat=656;//saturation temperature at 155 bars
+		*_runLogFile<<"Fluid is water-Gas mixture around saturation point 155 bars and 618 K (345°C)"<<endl;
+		_Tsat=618;//saturation temperature at 155 bars
 		_hsatl=1.63e6;//water enthalpy at saturation at 155 bars
 		_hsatv=2.6e6;//Gas enthalpy at saturation at 155 bars
 		if(useDellacherieEOS)
@@ -59,12 +59,16 @@ DriftModel::DriftModel(pressureEstimate pEstimate, int dim, bool useDellacherieE
 	}
 	_latentHeat=_hsatv-_hsatl;
 	cout<<"Liquid saturation enthalpy "<< _hsatl<<" J/Kg"<<endl;
+	*_runLogFile<<"Liquid saturation enthalpy "<< _hsatl<<" J/Kg"<<endl;
 	cout<<"Vapour saturation enthalpy "<< _hsatv<<" J/Kg"<<endl;
+	*_runLogFile<<"Vapour saturation enthalpy "<< _hsatv<<" J/Kg"<<endl;
 	cout<<"Latent heat "<< _latentHeat<<endl;
+	*_runLogFile<<"Latent heat "<< _latentHeat<<endl;
 }
 
 void DriftModel::initialize(){
 	cout<<"Initialising the drift model"<<endl;
+	*_runLogFile<<"Initialising the drift model"<<endl;
 
 	_Uroe = new double[_nVar];
 	_gravite = vector<double>(_nVar,0);
@@ -75,10 +79,26 @@ void DriftModel::initialize(){
 
 	if(_saveVelocity)
 		_Vitesse=Field("Velocity",CELLS,_mesh,3);//Forcement en dimension 3 (3 composantes) pour le posttraitement des lignes de courant
-	if(_saveVoidFraction)
+
+	if(_saveAllFields)
+	{
 		_VoidFraction=Field("Void fraction",CELLS,_mesh,1);
-	if(_saveEnthalpy)
 		_Enthalpy=Field("Enthalpy",CELLS,_mesh,1);
+		_Concentration=Field("Concentration",CELLS,_mesh,1);
+		_Pressure=Field("Pressure",CELLS,_mesh,1);
+		_DensiteLiquide=Field("Liquid density",CELLS,_mesh,1);
+		_DensiteVapeur=Field("Steam density",CELLS,_mesh,1);
+		_EnthalpieLiquide=Field("Liquid enthalpy",CELLS,_mesh,1);
+		_EnthalpieVapeur=Field("Steam enthalpy",CELLS,_mesh,1);
+		_VitesseX=Field("Velocity x",CELLS,_mesh,1);
+		if(_Ndim>1)
+		{
+			_VitesseY=Field("Velocity y",CELLS,_mesh,1);
+			if(_Ndim>2)
+				_VitesseZ=Field("Velocity z",CELLS,_mesh,1);
+		}
+	}
+
 
 	if(_entropicCorrection)
 		_entropicShift=vector<double>(3);//at most 3 distinct eigenvalues
@@ -342,6 +362,7 @@ void DriftModel::convectionState( const long &i, const long &j, const bool &IsBo
 	if(_Ui[0]<0||_Uj[0]<0)
 	{
 		cout<<"!!!!!!!!!!!!!!!!!!!!!!!!densite de melange negative, arret de calcul!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
+		*_runLogFile<<"!!!!!!!!!!!!!!!!!!!!!!!!densite de melange negative, arret de calcul!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
 		throw CdmathException("densite negative, arret de calcul");
 	}
 	PetscScalar ri, rj, xi, xj, pi, pj;
@@ -401,7 +422,7 @@ void DriftModel::convectionState( const long &i, const long &j, const bool &IsBo
 	}
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
-		cout<<"etat de roe"<<endl;
+		cout<<"Convection interfacial state"<<endl;
 		for(int k=0;k<_nVar;k++)
 			cout<< _Uroe[k]<<" , "<<endl;
 	}
@@ -483,26 +504,20 @@ void DriftModel::diffusionStateAndMatrices(const long &i,const long &j, const bo
 		double ev0=_fluides[0]->getInternalEnergy(0,rho_v);//Corriger
 		double el0=_fluides[1]->getInternalEnergy(0,rho_l);//Corriger
 		double Rhomem=RhomEm-0.5*q_2/(_Udiff[0]*_Udiff[0]);
-		int i = (_nVar-1)*_nVar;
+		int q = (_nVar-1)*_nVar;
 		//Formules a verifier
-		_Diffusion[i]=lambda*((Rhomem-m_v*ev0-m_l*el0)*C_l/((m_v*C_v+m_l*C_l)*(m_v*C_v+m_l*C_l))+el0/(m_v*C_v+m_l*C_l)-q_2/(2*_Udiff[0]*_Udiff[0]*(m_v*C_v+m_l*C_l)));
-		_Diffusion[i+1]=lambda*((Rhomem-m_v*ev0-m_l*el0)*(C_v-C_l)/((m_v*C_v+m_l*C_l)*(m_v*C_v+m_l*C_l))+(ev0+el0)/(m_v*C_v+m_l*C_l));
+		_Diffusion[q]=lambda*((Rhomem-m_v*ev0-m_l*el0)*C_l/((m_v*C_v+m_l*C_l)*(m_v*C_v+m_l*C_l))+el0/(m_v*C_v+m_l*C_l)-q_2/(2*_Udiff[0]*_Udiff[0]*(m_v*C_v+m_l*C_l)));
+		_Diffusion[q+1]=lambda*((Rhomem-m_v*ev0-m_l*el0)*(C_v-C_l)/((m_v*C_v+m_l*C_l)*(m_v*C_v+m_l*C_l))+(ev0+el0)/(m_v*C_v+m_l*C_l));
 		for(int k=2;k<(_nVar-1);k++)
 		{
-			_Diffusion[i+k]= lambda*_Udiff[k]/(_Udiff[0]*(m_v*C_v+m_l*C_l));
+			_Diffusion[q+k]= lambda*_Udiff[k]/(_Udiff[0]*(m_v*C_v+m_l*C_l));
 		}
 		_Diffusion[_nVar*_nVar-1]=-lambda/(m_v*C_v+m_l*C_l);
 		/*Affichages */
 		if(_verbose && _nbTimeStep%_freqSave ==0)
 		{
 			cout << "Matrice de diffusion D, pour le couple (" << i << "," << j<< "):" << endl;
-			for(int i=0; i<_nVar; i++)
-			{
-				for(int j=0; j<_nVar; j++)
-					cout << _Diffusion[i*_nVar+j]<<", ";
-				cout << endl;
-			}
-			cout << endl;
+			displayMatrix( _Diffusion,_nVar," Matrice de diffusion ");
 		}
 	}
 }
@@ -527,7 +542,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 	}
 
 	if (_limitField[nameOfGroup].bcType==Wall){
-		//Pour la convection, inversion du sens de la vitesse
+		//Pour la convection, inversion du sens de la vitesse normale
 		for(k=0; k<_Ndim; k++)
 			_externalStates[(k+2)]-= 2*q_n*normale[k];
 
@@ -553,6 +568,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 		{
 			cout<<"rhov= "<<rho_v<<", rhol= "<<rho_l<<endl;
 			cout<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
+			*_runLogFile<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
 			throw CdmathException("DriftModel::setBoundaryState: Inlet, impossible to compute mixture density, division by zero");
 		}
 
@@ -572,7 +588,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 			}
 		}
 		_externalStates[_nVar-1] = _externalStates[1]*_fluides[0]->getInternalEnergy(_limitField[nameOfGroup].T,rho_v)
-																																																																													 +(_externalStates[0]-_externalStates[1])*_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + _externalStates[0]*v2/2;
+																																																																																																							 +(_externalStates[0]-_externalStates[1])*_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + _externalStates[0]*v2/2;
 		_idm[0] = 0;
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
@@ -606,6 +622,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 			{
 				cout<<"rhov= "<<rho_v<<", rhol= "<<rho_l<<endl;
 				cout<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
+				*_runLogFile<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
 				throw CdmathException("DriftModel::setBoundaryState: Inlet, impossible to compute mixture density, division by zero");
 			}
 
@@ -672,6 +689,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 		{
 			cout<<"rhov= "<<rho_v<<", rhol= "<<rho_l<<endl;
 			cout<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
+			*_runLogFile<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
 			throw CdmathException("DriftModel::jacobian: Inlet, impossible to compute mixture density, division by zero");
 		}
 
@@ -721,6 +739,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 		{
 			cout<<"rhov= "<<rho_v<<", rhol= "<<rho_l<<endl;
 			cout<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
+			*_runLogFile<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
 			throw CdmathException("DriftModel::jacobian: Inlet, impossible to compute mixture density, division by zero");
 		}
 
@@ -747,6 +766,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 	else {
 		cout<<"Boundary condition not set for boundary named "<<nameOfGroup<<endl;
 		cout<<"Accepted boundary condition are Neumann, Wall, Inlet, and Outlet"<<endl;
+		*_runLogFile<<"Boundary condition not set for boundary named "<<nameOfGroup<<"Accepted boundary condition are Neumann, Wall, Inlet, and Outlet"<<endl;
 		throw CdmathException("Unknown boundary condition");
 	}
 }
@@ -770,7 +790,7 @@ void DriftModel::convectionMatrices()
 
 	if(_spaceScheme==staggered && _nonLinearFormulation==VFFC)//special case where we need no Roe matrix
 	{
-		staggeredVFFCMatricesConservativeVariables(umn);
+		staggeredVFFCMatricesConservativeVariables(umn);//Computation of classical upwinding matrices
 		if(_timeScheme==Implicit && _usePrimitiveVarsInNewton)//For use in implicit matrix
 			staggeredVFFCMatricesPrimitiveVariables(umn);
 	}
@@ -799,9 +819,10 @@ void DriftModel::convectionMatrices()
 			cout<<"Roe state rhom="<<rhom<<" cm= "<<cm<<" Hm= "<<Hm<<" Tm= "<<Tm<<" pression "<<pression<<endl;
 
 		getMixturePressureDerivatives( m_v, m_l, pression, Tm);//EOS is involved to express pressure jump and sound speed
-		if(_kappa*hm+_khi+cm*_ksi<0)
+		if(_kappa*hm+_khi+cm*_ksi<0){
+			*_runLogFile<<"Calcul matrice de Roe: vitesse du son complexe"<<endl;
 			throw CdmathException("Calcul matrice de Roe: vitesse du son complexe");
-
+		}
 		double am=sqrt(_kappa*hm+_khi+cm*_ksi);//vitesse du son du melange
 		if(_verbose && _nbTimeStep%_freqSave ==0)
 			cout<<"DriftModel::convectionMatrices, sound speed am= "<<am<<endl;
@@ -833,6 +854,7 @@ void DriftModel::convectionMatrices()
 		else if( _spaceScheme ==staggered){
 			//Calcul de décentrement de type décalé pour formulation Roe
 			staggeredRoeUpwindingMatrixConservativeVariables( cm, umn, ecin, Hm, vitesse);
+			staggeredRoeUpwindingMatrixPrimitiveVariables( cm, umn, ecin, Hm, vitesse);
 		}
 		else if(_spaceScheme == upwind || _spaceScheme ==pressureCorrection || _spaceScheme ==lowMach || (_spaceScheme==staggered)){
 			if(_entropicCorrection)
@@ -862,11 +884,6 @@ void DriftModel::convectionMatrices()
 		else
 			throw CdmathException("DriftModel::convectionMatrices: scheme not treated");
 
-		for(int i=0; i<_nVar*_nVar;i++)
-		{
-			_AroeMinus[i] = (_Aroe[i]-_absAroe[i])/2;
-			_AroePlus[i]  = (_Aroe[i]+_absAroe[i])/2;
-		}
 		for(int i=0; i<_nVar*_nVar;i++)
 		{
 			_AroeMinus[i] = (_Aroe[i]-_absAroe[i])/2;
@@ -939,6 +956,9 @@ void DriftModel::convectionMatrices()
 	}
 	else
 		throw CdmathException("DriftModel::convectionMatrices: well balanced option not treated");
+
+	if(_verbose && _nbTimeStep%_freqSave ==0 && _timeScheme==Implicit)
+		displayMatrix(_signAroe, _nVar,"Signe de la matrice de Roe");
 }
 
 void DriftModel::addDiffusionToSecondMember
@@ -1067,18 +1087,21 @@ void DriftModel::sourceVector(PetscScalar * Si,PetscScalar * Ui,PetscScalar * Vi
 
 	if(_timeScheme==Implicit)
 	{
-		for(int i=0; i<_nVar*_nVar;i++)
-			_GravityImplicitationMatrix[i] = 0;
+		for(int k=0; k<_nVar*_nVar;k++)
+			_GravityImplicitationMatrix[k] = 0;
 		if(!_usePrimitiveVarsInNewton)
-			for(int i=0; i<_nVar;i++)
-				_GravityImplicitationMatrix[i*_nVar]=-_gravite[i];
+			for(int k=0; k<_nVar;k++)
+				_GravityImplicitationMatrix[k*_nVar]=-_gravite[k];
 		else
-			for(int i=0; i<_nVar;i++)
+		{
+			getDensityDerivatives( cv, P, T ,norm_u*norm_u);
+			for(int k=0; k<_nVar;k++)
 			{
-				_GravityImplicitationMatrix[i*_nVar+0]      =-_gravite[i]*_drho_sur_dcv;
-				_GravityImplicitationMatrix[i*_nVar+1]      =-_gravite[i]*_drho_sur_dp;
-				_GravityImplicitationMatrix[i*_nVar+_nVar-1]=-_gravite[i]*_drho_sur_dT;
+				_GravityImplicitationMatrix[k*_nVar+0]      =-_gravite[k]*_drho_sur_dcv;
+				_GravityImplicitationMatrix[k*_nVar+1]      =-_gravite[k]*_drho_sur_dp;
+				_GravityImplicitationMatrix[k*_nVar+_nVar-1]=-_gravite[k]*_drho_sur_dT;
 			}
+		}
 	}
 
 	if(_verbose && _nbTimeStep%_freqSave ==0)
@@ -1127,22 +1150,11 @@ void DriftModel::pressureLossVector(PetscScalar * pressureLoss, double K, PetscS
 	}
 	pressureLoss[_nVar-1]=-K*phirho*norm_u*norm_u*norm_u;
 
-	if(_verbose && _nbTimeStep%_freqSave ==0)
-	{
-		cout<<"pressure loss vector phirho= "<< phirho<<" norm_u= "<<norm_u<<endl;
-		cout<<"velocity Vi "<<endl;
-		for(int i=0;i<_Ndim;i++)
-			cout<< Vi[2+i]<<", ";
-		cout<<endl;
-		cout<<"velocity Vj= "<<endl;
-		for(int i=0;i<_Ndim;i++)
-			cout<< Vj[2+i]<<", ";
-		cout<<endl;
-	}
 
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
 		cout<<"DriftModel::pressureLossVector K= "<<K<<endl;
+		cout<<"pressure loss vector phirho= "<< phirho<<" norm_u= "<<norm_u<<endl;
 		cout<<"Ui="<<endl;
 		for(int k=0;k<_nVar;k++)
 			cout<<Ui[k]<<", ";
@@ -1224,6 +1236,7 @@ void DriftModel::jacobian(const int &j, string nameOfGroup,double * normale)
 			{
 				cout<<"rhov= "<<rho_v<<", rhol= "<<rho_l<<endl;
 				cout<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
+				*_runLogFile<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
 				throw CdmathException("DriftModel::jacobian: Inlet, impossible to compute mixture density, division by zero");
 			}
 
@@ -1296,6 +1309,7 @@ void DriftModel::jacobian(const int &j, string nameOfGroup,double * normale)
 		{
 			cout<<"rhov= "<<rho_v<<", rhol= "<<rho_l<<endl;
 			cout<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
+			*_runLogFile<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
 			throw CdmathException("DriftModel::jacobian: InletPressure, impossible to compute mixture density, division by zero");
 		}
 
@@ -1331,6 +1345,7 @@ void DriftModel::jacobian(const int &j, string nameOfGroup,double * normale)
 		{
 			cout<<"rhov= "<<rho_v<<", rhol= "<<rho_l<<endl;
 			cout<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
+			*_runLogFile<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
 			throw CdmathException("DriftModel::jacobian: Outlet, impossible to compute mixture density, division by zero");
 		}
 
@@ -1466,6 +1481,7 @@ Vector DriftModel::computeExtendedPrimState(double *V)
 	if(fabs(rho_l*C+rho_v*(1-C))<_precision)
 	{
 		cout<<"rhov= "<<rho_v<<", rhol= "<<rho_l<<", concentration= "<<C<<endl;
+		*_runLogFile<<"DriftModel::computeExtendedPrimState: impossible to compute void fraction, division by zero"<<endl;
 		throw CdmathException("DriftModel::computeExtendedPrimState: impossible to compute void fraction, division by zero");
 	}
 
@@ -1506,6 +1522,8 @@ void DriftModel::primToCons(const double *P, const int &i, double *W, const int 
 	{
 		cout<<"rhov= "<<rho_v<<", rhol= "<<rho_l<<endl;
 		cout<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
+		*_runLogFile<<"concentration*rho_l+(1-concentration)*rho_v= "<<concentration*rho_l+(1-concentration)*rho_v<<endl;
+		*_runLogFile<<"DriftModel::primToCons: impossible to compute mixture density, division by zero"<<endl;
 		throw CdmathException("DriftModel::primToCons: impossible to compute mixture density, division by zero");
 	}
 	W[j*(_nVar)]  =(rho_v*rho_l/(concentration*rho_l+(1-concentration)*rho_v))*_porosityField(j);//phi*rho
@@ -1602,8 +1620,8 @@ void DriftModel::primToConsJacobianMatrix(double *V)
 		for(int idim=0;idim<_Ndim;idim++)
 			_primToConsJacoMat[(_nVar-1)*_nVar+2+idim]=rho*vitesse[idim];
 		_primToConsJacoMat[(_nVar-1)*_nVar+_nVar-1]=rho*(cv_v*concentration + cv_l*(1-concentration))
-																																			-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
-																																					+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
+																																																													-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
+																																																															+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
 	}
 	else if(dynamic_cast<StiffenedGasDellacherie*>(_fluides[0])!=NULL
 			&& dynamic_cast<StiffenedGasDellacherie*>(_fluides[1])!=NULL)
@@ -1661,8 +1679,8 @@ void DriftModel::primToConsJacobianMatrix(double *V)
 		for(int idim=0;idim<_Ndim;idim++)
 			_primToConsJacoMat[(_nVar-1)*_nVar+2+idim]=rho*vitesse[idim];
 		_primToConsJacoMat[(_nVar-1)*_nVar+_nVar-1]=rho*(cp_v*concentration + cp_l*(1-concentration))
-																																			-rho*rho*H*(cp_v*   concentration /(rho_v*(h_v-q_v))
-																																					+cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
+																																																													-rho*rho*H*(cp_v*   concentration /(rho_v*(h_v-q_v))
+																																																															+cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
 	}
 	else
 		throw CdmathException("SinglePhase::primToConsJacobianMatrix: eos should be StiffenedGas or StiffenedGasDellacherie");
@@ -1726,9 +1744,13 @@ void DriftModel::consToPrim(const double *Wcons, double* Wprim,double porosity)
 
 	if (pression<0){
 		cout << "pressure = "<< pression << " < 0 " << endl;
+		*_runLogFile << "pressure = "<< pression << " < 0 " << endl;
 		cout<<"Vecteur conservatif"<<endl;
-		for(int k=0;k<_nVar;k++)
+		*_runLogFile<<"Vecteur conservatif"<<endl;
+		for(int k=0;k<_nVar;k++){
 			cout<<Wcons[k]<<endl;
+			*_runLogFile<<Wcons[k]<<endl;
+		}
 		throw CdmathException("DriftModel::consToPrim: negative pressure");
 	}
 
@@ -1788,8 +1810,10 @@ double DriftModel::getMixturePressure(double c_v, double rhom, double temperatur
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 		cout<<"DriftModel::getMixturePressure: a= "<<a<<", b= "<<b<<", c= "<<c<<", delta= "<<delta<<endl;
 
-	if(delta<0)
+	if(delta<0){
+		*_runLogFile<<"DriftModel::getMixturePressure: cannot compute pressure, delta<0"<<endl;
 		throw CdmathException("DriftModel::getMixturePressure: cannot compute pressure, delta<0");
+	}
 	else
 		return (-b+sqrt(delta))/(2*a);
 }
@@ -1812,7 +1836,7 @@ void DriftModel::getMixturePressureAndTemperature(double c_v, double rhom, doubl
 		StiffenedGas* fluide1=dynamic_cast<StiffenedGas*>(_fluides[1]);
 
 		temperature= (rhom_em-m_v*fluide0->getInternalEnergy(0)-m_l*fluide1->getInternalEnergy(0))
-																																																																											/(m_v*fluide0->constante("cv")+m_l*fluide1->constante("cv"));
+																																																																																																					/(m_v*fluide0->constante("cv")+m_l*fluide1->constante("cv"));
 
 		double e_v=fluide0->getInternalEnergy(temperature);
 		double e_l=fluide1->getInternalEnergy(temperature);
@@ -1823,8 +1847,10 @@ void DriftModel::getMixturePressureAndTemperature(double c_v, double rhom, doubl
 
 		delta= b*b-4*a*c;
 
-		if(delta<0)
+		if(delta<0){
+			*_runLogFile<<"DriftModel::getMixturePressureAndTemperature: cannot compute pressure, delta<0"<<endl;
 			throw CdmathException("DriftModel::getMixturePressureAndTemperature: cannot compute pressure, delta<0");
+		}
 		else
 			pression= (-b+sqrt(delta))/(2*a);
 
@@ -1852,7 +1878,10 @@ void DriftModel::getMixturePressureAndTemperature(double c_v, double rhom, doubl
 		delta= b*b-4*a*c;
 
 		if(delta<0)
+		{
+			*_runLogFile<<"DriftModel::getMixturePressureAndTemperature: cannot compute pressure, delta<0"<<endl;
 			throw CdmathException("DriftModel::getMixturePressureAndTemperature: cannot compute pressure, delta<0");
+		}
 		else
 			pression= (-b+sqrt(delta))/(2*a);
 
@@ -2003,8 +2032,10 @@ void DriftModel::entropicShift(double* n)//TO do: make sure _Vi and _Vj are well
 	getMixturePressureDerivatives( m_v, m_l, pression, Tm);
 
 	if(_kappa*hm+_khi+cm*_ksi<0)
+	{
+		*_runLogFile<<"DriftModel::entropicShift : vitesse du son cellule gauche complexe"<<endl;
 		throw CdmathException("Valeurs propres jacobienne: vitesse du son complexe");
-
+	}
 	double aml=sqrt(_kappa*hm+_khi+cm*_ksi);//vitesse du son du melange
 	//cout<<"_khi= "<<_khi<<", _kappa= "<< _kappa << ", _ksi= "<<_ksi <<", am= "<<am<<endl;
 
@@ -2023,8 +2054,10 @@ void DriftModel::entropicShift(double* n)//TO do: make sure _Vi and _Vj are well
 
 	getMixturePressureDerivatives( m_v, m_l, pression, Tm);
 
-	if(_kappa*hm+_khi+cm*_ksi<0)
+	if(_kappa*hm+_khi+cm*_ksi<0){
+		*_runLogFile<<"DriftModel::entropicShift: vitesse du son cellule droite complexe"<<endl;
 		throw CdmathException("Valeurs propres jacobienne: vitesse du son complexe");
+	}
 
 	double amr=sqrt(_kappa*hm+_khi+cm*_ksi);//vitesse du son du melange
 	//cout<<"_khi= "<<_khi<<", _kappa= "<< _kappa << ", _ksi= "<<_ksi <<", am= "<<am<<endl;
@@ -2047,7 +2080,9 @@ void DriftModel::entropicShift(double* n)//TO do: make sure _Vi and _Vj are well
 }
 
 Vector DriftModel::convectionFlux(Vector U,Vector V, Vector normale, double porosity){
-	if(_verbose){
+	if(_verbose && _nbTimeStep%_freqSave ==0)
+	{
+		cout<<"DriftModel::convectionFlux start"<<endl;
 		cout<<"Ucons"<<endl;
 		cout<<U<<endl;
 		cout<<"Vprim"<<endl;
@@ -2086,7 +2121,9 @@ Vector DriftModel::convectionFlux(Vector U,Vector V, Vector normale, double poro
 		F(2+i)=m_v*vitesse_vn*vitesse_v(i)+m_l*vitesse_ln*vitesse_l(i)+pression*normale(i)*porosity;
 	F(2+_Ndim)=m_v*(e_v+0.5*vitesse_v*vitesse_v+pression/rho_v)*vitesse_vn+m_l*(e_l+0.5*vitesse_l*vitesse_l+pression/rho_l)*vitesse_ln;
 
-	if(_verbose){
+	if(_verbose && _nbTimeStep%_freqSave ==0)
+	{
+		cout<<"DriftModel::convectionFlux end"<<endl;
 		cout<<"Flux F(U,V)"<<endl;
 		cout<<F<<endl;
 	}
@@ -2097,7 +2134,7 @@ Vector DriftModel::convectionFlux(Vector U,Vector V, Vector normale, double poro
 Vector DriftModel::staggeredVFFCFlux()
 {
 	if(_verbose && _nbTimeStep%_freqSave ==0)
-		cout<<"DriftModel::staggeredVFFCFlux()"<<endl;
+		cout<<"DriftModel::staggeredVFFCFlux()start"<<endl;
 
 	if(_spaceScheme!=staggered || _nonLinearFormulation!=VFFC)
 		throw CdmathException("DriftModel::staggeredVFFCFlux: staggeredVFFCFlux method should be called only for VFFC formulation and staggered upwinding");
@@ -2109,7 +2146,7 @@ Vector DriftModel::staggeredVFFCFlux()
 		for(int idim=0;idim<_Ndim;idim++)
 			uijn+=_vec_normal[idim]*_Uroe[2+idim];//URoe = rho, cm, u, H
 
-		if(uijn>=0)
+		if(uijn>_precision)
 		{
 			for(int idim=0;idim<_Ndim;idim++)
 				phiqn+=_vec_normal[idim]*_Ui[2+idim];//phi rho u n
@@ -2119,7 +2156,7 @@ Vector DriftModel::staggeredVFFCFlux()
 				Fij(2+idim)=phiqn*_Vi[2+idim]+_Vj[1]*_vec_normal[idim]*_porosityj;
 			Fij(_nVar-1)=phiqn/_Ui[0]*(_Ui[_nVar-1]+_Vj[1]*sqrt(_porosityj/_porosityi));
 		}
-		else
+		else if(uijn<-_precision)
 		{
 			for(int idim=0;idim<_Ndim;idim++)
 				phiqn+=_vec_normal[idim]*_Uj[2+idim];//phi rho u n
@@ -2128,6 +2165,28 @@ Vector DriftModel::staggeredVFFCFlux()
 			for(int idim=0;idim<_Ndim;idim++)
 				Fij(2+idim)=phiqn*_Vj[2+idim]+_Vi[1]*_vec_normal[idim]*_porosityi;
 			Fij(_nVar-1)=phiqn/_Uj[0]*(_Uj[_nVar-1]+_Vi[1]*sqrt(_porosityi/_porosityj));
+		}
+		else//case nil velocity on the interface, apply centered scheme
+		{
+			Vector Ui(_nVar), Uj(_nVar), Vi(_nVar), Vj(_nVar), Fi(_nVar), Fj(_nVar);
+			Vector normale(_Ndim);
+			for(int i1=0;i1<_Ndim;i1++)
+				normale(i1)=_vec_normal[i1];
+			for(int i1=0;i1<_nVar;i1++)
+			{
+				Ui(i1)=_Ui[i1];
+				Uj(i1)=_Uj[i1];
+				Vi(i1)=_Vi[i1];
+				Vj(i1)=_Vj[i1];
+			}
+			Fi=convectionFlux(Ui,Vi,normale,_porosityi);
+			Fj=convectionFlux(Uj,Vj,normale,_porosityj);
+			Fij=(Fi+Fj)/2;//+_maxvploc*(Ui-Uj)/2;
+		}
+		if(_verbose && _nbTimeStep%_freqSave ==0)
+		{
+			cout<<"DriftModel::staggeredVFFCFlux() end uijn="<<uijn<<endl;
+			cout<<Fij<<endl;
 		}
 		return Fij;
 	}
@@ -2179,7 +2238,7 @@ void DriftModel::staggeredVFFCMatricesConservativeVariables(double u_mn)
 
 		double Hm=Emi+pj/rhomi;
 
-		if(u_mn>=0)
+		if(u_mn>_precision)
 		{
 			if(_verbose && _nbTimeStep%_freqSave ==0)
 				cout<<"VFFC Staggered state rhomi="<<rhomi<<" cmi= "<<cmi<<" Hm= "<<Hm<<" Tmi= "<<Tmi<<" pj= "<<pj<<endl;
@@ -2187,8 +2246,10 @@ void DriftModel::staggeredVFFCMatricesConservativeVariables(double u_mn)
 			/***********Calcul des valeurs propres ********/
 			vector<complex<double> > vp_dist(3,0);
 			getMixturePressureDerivatives( mj_v, mj_l, pj, Tmj);
-			if(_kappa*hmj+_khi+cmj*_ksi<0)
-				throw CdmathException("Calcul VFFC staggered: vitesse du son complexe");
+			if(_kappa*hmj+_khi+cmj*_ksi<0){
+				*_runLogFile<<"staggeredVFFCMatricesConservativeVariables: vitesse du son complexe"<<endl;
+				throw CdmathException("staggeredVFFCMatricesConservativeVariables: vitesse du son complexe");
+			}
 			double amj=sqrt(_kappa*hmj+_khi+cmj*_ksi);//vitesse du son du melange
 
 			if(_verbose && _nbTimeStep%_freqSave ==0)
@@ -2255,7 +2316,7 @@ void DriftModel::staggeredVFFCMatricesConservativeVariables(double u_mn)
 				_AroeMinus[(2+_Ndim)*_nVar+2+i]=-_kappa*uj_n*_Vi[2+i];
 			_AroeMinus[(2+_Ndim)*_nVar+2+_Ndim]=_kappa*ui_n;
 		}
-		else
+		else if(u_mn<-_precision)
 		{
 			if(_verbose && _nbTimeStep%_freqSave ==0)
 				cout<<"VFFC Staggered state rhomj="<<rhomj<<" cmj= "<<cmj<<" Hm= "<<Hm<<" Tmj= "<<Tmj<<" pi= "<<pi<<endl;
@@ -2264,7 +2325,10 @@ void DriftModel::staggeredVFFCMatricesConservativeVariables(double u_mn)
 			vector<complex<double> > vp_dist(3,0);
 			getMixturePressureDerivatives( mi_v, mi_l, pi, Tmi);
 			if(_kappa*hmi+_khi+cmi*_ksi<0)
-				throw CdmathException("Calcul VFFC staggered: vitesse du son complexe");
+			{
+				*_runLogFile<<"staggeredVFFCMatricesConservativeVariables: vitesse du son complexe"<<endl;
+				throw CdmathException("staggeredVFFCMatricesConservativeVariables: vitesse du son complexe");
+			}
 			double ami=sqrt(_kappa*hmi+_khi+cmi*_ksi);//vitesse du son du melange
 			if(_verbose && _nbTimeStep%_freqSave ==0)
 				cout<<"_khi= "<<_khi<<", _kappa= "<< _kappa << ", _ksi= "<<_ksi <<", ami= "<<ami<<endl;
@@ -2330,14 +2394,111 @@ void DriftModel::staggeredVFFCMatricesConservativeVariables(double u_mn)
 				_AroeMinus[(2+_Ndim)*_nVar+2+i]=Hm*_vec_normal[i];
 			_AroeMinus[(2+_Ndim)*_nVar+2+_Ndim]=uj_n;
 		}
+		else//case nil velocity on the interface, apply centered scheme
+		{
+			double rhom=_Uroe[0];
+			double cm=_Uroe[1];
+			double Hm=_Uroe[_nVar-1];
+			double m_v=cm*rhom, m_l=rhom-m_v;
+			double Tm;
+			double umn=0,u_2=0;
+			Vector vitesse(_Ndim);
+			for(int idim=0;idim<_Ndim;idim++)
+			{
+				vitesse[idim]=_Uroe[2+idim];
+				umn += _Uroe[2+idim]*_vec_normal[idim];//vitesse normale
+				u_2 += _Uroe[2+idim]*_Uroe[2+idim];
+			}
+			double hm=Hm-0.5*u_2;
+
+			if(cm<_precision)//pure liquid
+				Tm=_fluides[1]->getTemperatureFromEnthalpy(hm,rhom);
+			else if(cm>1-_precision)
+				Tm=_fluides[0]->getTemperatureFromEnthalpy(hm,rhom);
+			else//Hypothèse de saturation
+				Tm=_Tsat;
+
+			double pression= getMixturePressure(cm, rhom, Tm);
+
+			getMixturePressureDerivatives( m_v, m_l, pression, Tm);//EOS is involved to express pressure jump and sound speed
+			if(_kappa*hm+_khi+cm*_ksi<0){
+				*_runLogFile<<"Calcul matrice de Roe: vitesse du son complexe"<<endl;
+				throw CdmathException("Calcul matrice de Roe: vitesse du son complexe");
+			}
+			double am=sqrt(_kappa*hm+_khi+cm*_ksi);//vitesse du son du melange
+			//			double ecin=0.5*u_2;
+			//			RoeMatrixConservativeVariables( cm, umn, ecin, Hm,vitesse);
+			_maxvploc=fabs(umn)+am;
+			if(_maxvploc>_maxvp)
+				_maxvp=_maxvploc;
+
+			/******** Construction de la matrice A^+ *********/
+			getMixturePressureDerivatives( mi_v, mi_l, pi, Tmi);
+			_AroePlus[0*_nVar+0]=0;
+			_AroePlus[0*_nVar+1]=0;
+			for(int i=0;i<_Ndim;i++)
+				_AroePlus[0*_nVar+2+i]=0;
+			_AroePlus[0*_nVar+2+_Ndim]=0;
+			_AroePlus[1*_nVar+0]=0;
+			_AroePlus[1*_nVar+1]=0;
+			for(int i=0;i<_Ndim;i++)
+				_AroePlus[1*_nVar+2+i]=0;
+			_AroePlus[1*_nVar+2+_Ndim]=0;
+			for(int i=0;i<_Ndim;i++)
+			{
+				_AroePlus[(2+i)*_nVar+0]=0.5*(_khi+_kappa*ecini)*_vec_normal[i]-0.5*ui_n*_Vi[2+i];
+				_AroePlus[(2+i)*_nVar+1]=0.5*_ksi*_vec_normal[i];
+				for(int j=0;j<_Ndim;j++)
+					_AroePlus[(2+i)*_nVar+2+j]=0.5*_Vi[2+i]*_vec_normal[j]-0.5*_kappa*_vec_normal[i]*_Vi[2+j];
+				_AroePlus[(2+i)*_nVar+2+i]+=0.5*ui_n;
+				_AroePlus[(2+i)*_nVar+2+_Ndim]=0.5*_kappa*_vec_normal[i];
+			}
+			_AroePlus[(2+_Ndim)*_nVar+0]=0;
+			_AroePlus[(2+_Ndim)*_nVar+1]=0;
+			for(int i=0;i<_Ndim;i++)
+				_AroePlus[(2+_Ndim)*_nVar+2+i]=0;
+			_AroePlus[(2+_Ndim)*_nVar+2+_Ndim]=0;
+
+			/******** Construction de la matrice A^- *********/
+			getMixturePressureDerivatives( mj_v, mj_l, pj, Tmj);
+			_AroeMinus[0*_nVar+0]=0;
+			_AroeMinus[0*_nVar+1]=0;
+			for(int i=0;i<_Ndim;i++)
+				_AroeMinus[0*_nVar+2+i]=0;
+			_AroeMinus[0*_nVar+2+_Ndim]=0;
+			_AroeMinus[1*_nVar+0]=0;
+			_AroeMinus[1*_nVar+1]=0;
+			for(int i=0;i<_Ndim;i++)
+				_AroeMinus[1*_nVar+2+i]=0;
+			_AroeMinus[1*_nVar+2+_Ndim]=0;
+			for(int i=0;i<_Ndim;i++)
+			{
+				_AroeMinus[(2+i)*_nVar+0]=0.5*(_khi+_kappa*ecinj)*_vec_normal[i]-0.5*uj_n*_Vj[2+i];
+				_AroeMinus[(2+i)*_nVar+1]=0.5*_ksi*_vec_normal[i];
+				for(int j=0;j<_Ndim;j++)
+					_AroeMinus[(2+i)*_nVar+2+j]=0.5*_Vj[2+i]*_vec_normal[j]-0.5*_kappa*_vec_normal[i]*_Vj[2+j];
+				_AroeMinus[(2+i)*_nVar+2+i]+=0.5*uj_n;
+				_AroeMinus[(2+i)*_nVar+2+_Ndim]=0.5*_kappa*_vec_normal[i];
+			}
+			_AroeMinus[(2+_Ndim)*_nVar+0]=0;
+			_AroeMinus[(2+_Ndim)*_nVar+1]=0;
+			for(int i=0;i<_Ndim;i++)
+				_AroeMinus[(2+_Ndim)*_nVar+2+i]=0;
+			_AroeMinus[(2+_Ndim)*_nVar+2+_Ndim]=0;
+		}
 	}
+	for(int i=0; i<_nVar*_nVar;i++)
+	{
+		_Aroe[i]=_AroePlus[i]+_AroeMinus[i];
+		_absAroe[i]=_AroePlus[i]-_AroeMinus[i];
+	}
+
 	if(_timeScheme==Implicit)
 		for(int i=0; i<_nVar*_nVar;i++)
 		{
 			_AroeMinusImplicit[i] = _AroeMinus[i];
 			_AroePlusImplicit[i]  = _AroePlus[i];
 		}
-
 }
 
 void DriftModel::staggeredVFFCMatricesPrimitiveVariables(double u_mn)
@@ -2349,6 +2510,7 @@ void DriftModel::staggeredVFFCMatricesPrimitiveVariables(double u_mn)
 		throw CdmathException("DriftModel::staggeredVFFCMatricesPrimitiveVariables: staggeredVFFCMatricesPrimitiveVariables method should be called only for VFFC formulation and staggered upwinding");
 	else//_spaceScheme==staggered && _nonLinearFormulation==VFFC
 	{
+		//Calls to getDensityDerivatives needed
 		double ui_n=0, ui_2=0, uj_n=0, uj_2=0;//vitesse normale et carré du module
 		double H;//enthalpie totale (expression particulière)
 		consToPrim(_Ui,_Vi,_porosityi);
@@ -2393,342 +2555,392 @@ void DriftModel::staggeredVFFCMatricesPrimitiveVariables(double u_mn)
 		double q_v=_fluides[0]->constante("q");
 		double q_l=_fluides[1]->constante("q");
 
-		if(		dynamic_cast<StiffenedGas*>(_fluides[0])!=NULL
-				&& dynamic_cast<StiffenedGas*>(_fluides[1])!=NULL)
+		if(fabs(u_mn)>_precision)//non zero velocity on the interface
 		{
-			StiffenedGas* fluide0=dynamic_cast<StiffenedGas*>(_fluides[0]);
-			StiffenedGas* fluide1=dynamic_cast<StiffenedGas*>(_fluides[1]);
-			double cv_v=fluide0->constante("cv");
-			double cv_l=fluide1->constante("cv");
-
-			double e_vi=_fluides[0]->getInternalEnergy(Tmi,rho_vi);
-			double e_li=_fluides[1]->getInternalEnergy(Tmi,rho_li);
-			double e_vj=_fluides[0]->getInternalEnergy(Tmj,rho_vj);
-			double e_lj=_fluides[1]->getInternalEnergy(Tmj,rho_lj);
-
-			if(u_mn>=0)
+			if(		dynamic_cast<StiffenedGas*>(_fluides[0])!=NULL
+					&& dynamic_cast<StiffenedGas*>(_fluides[1])!=NULL)
 			{
-				if(_verbose && _nbTimeStep%_freqSave ==0)
-					cout<<"VFFC Staggered state rhomi="<<rhomi<<" cmi= "<<cmi<<" Emi= "<<Emi<<" Tmi= "<<Tmi<<" pj= "<<pj<<endl;
+				StiffenedGas* fluide0=dynamic_cast<StiffenedGas*>(_fluides[0]);
+				StiffenedGas* fluide1=dynamic_cast<StiffenedGas*>(_fluides[1]);
+				double cv_v=fluide0->constante("cv");
+				double cv_l=fluide1->constante("cv");
 
-				/***********Calcul des valeurs propres ********/
-				vector<complex<double> > vp_dist(3,0);
-				getMixturePressureDerivatives( mj_v, mj_l, pj, Tmj);
-				if(_kappa*hmj+_khi+cmj*_ksi<0)
-					throw CdmathException("Calcul VFFC staggeredVFFCMatrices: vitesse du son complexe");
-				double amj=sqrt(_kappa*hmj+_khi+cmj*_ksi);//vitesse du son du melange
+				double e_vi=_fluides[0]->getInternalEnergy(Tmi,rho_vi);
+				double e_li=_fluides[1]->getInternalEnergy(Tmi,rho_li);
+				double e_vj=_fluides[0]->getInternalEnergy(Tmj,rho_vj);
+				double e_lj=_fluides[1]->getInternalEnergy(Tmj,rho_lj);
 
-				if(_verbose && _nbTimeStep%_freqSave ==0)
-					cout<<"_khi= "<<_khi<<", _kappa= "<< _kappa << ", _ksi= "<<_ksi <<", amj= "<<amj<<endl;
-
-				//On remplit les valeurs propres
-				vp_dist[0]=ui_n+amj;
-				vp_dist[1]=ui_n-amj;
-				vp_dist[2]=ui_n;
-
-				_maxvploc=fabs(ui_n)+amj;
-				if(_maxvploc>_maxvp)
-					_maxvp=_maxvploc;
-
-				/******** Construction de la matrice A^+ *********/
-				_AroePlusImplicit[0*_nVar+0]=-rhomi*rhomi*ui_n*(1/rho_vi-1/rho_li);
-				_AroePlusImplicit[0*_nVar+1]= rhomi*rhomi*ui_n*(cmi/(rho_vi*rho_vi*(gamma_v-1)*(e_vi-q_v))+(1-cmi)/(rho_li*rho_li*(gamma_l-1)*(e_li-q_l)));
-				for(int i=0;i<_Ndim;i++)
-					_AroePlusImplicit[0*_nVar+2+i]=rhomi*_vec_normal[i];
-				_AroePlusImplicit[0*_nVar+2+_Ndim]=-rhomi*rhomi*ui_n*(cv_v*cmi/(rho_vi*(e_vi-q_v))+cv_l*(1-cmi)/(rho_li*(e_li-q_l)));
-				_AroePlusImplicit[1*_nVar+0]=rhomi*ui_n-cmi*rhomi*rhomi*ui_n*(1/rho_vi-1/rho_li);
-				_AroePlusImplicit[1*_nVar+1]=-cmi*rhomi*rhomi*ui_n*(cmi/(rho_vi*rho_vi*(gamma_v-1)*(e_vi-q_v))+(1-cmi)/(rho_li*rho_li*(gamma_l-1)*(e_li-q_l)));
-				for(int i=0;i<_Ndim;i++)
-					_AroePlusImplicit[1*_nVar+2+i]=cmi*rhomi*_vec_normal[i];
-				_AroePlusImplicit[1*_nVar+2+_Ndim]=-cmi*rhomi*rhomi*ui_n*(cv_v*cmi/(rho_vi*(e_vi-q_v))+cv_l*(1-cmi)/(rho_li*(e_li-q_l)));
-				for(int i=0;i<_Ndim;i++)
+				if(u_mn>_precision)
 				{
-					_AroePlusImplicit[(2+i)*_nVar+0]=-rhomi*rhomi*ui_n*(1/rho_vi-1/rho_li)*_Vi[2+i];
-					_AroePlusImplicit[(2+i)*_nVar+1]=rhomi*rhomi*ui_n*(cmi/(rho_vi*rho_vi*(gamma_v-1)*(e_vi-q_v))+(1-cmi)/(rho_li*rho_li*(gamma_l-1)*(e_li-q_l)))*_Vi[2+i];
-					for(int j=0;j<_Ndim;j++)
-						_AroePlusImplicit[(2+i)*_nVar+2+j]=rhomi*_Vi[2+i]*_vec_normal[j];
-					_AroePlusImplicit[(2+i)*_nVar+2+i]+=rhomi*ui_n;
-					_AroePlusImplicit[(2+i)*_nVar+2+_Ndim]=-rhomi*rhomi*ui_n*(cv_v*cmi/(rho_vi*(e_vi-q_v))+(1-cmi)/(rho_li*(e_li-q_l)))*_Vi[2+i];
+					if(_verbose && _nbTimeStep%_freqSave ==0)
+						cout<<"VFFC Staggered state rhomi="<<rhomi<<" cmi= "<<cmi<<" Emi= "<<Emi<<" Tmi= "<<Tmi<<" pj= "<<pj<<endl;
+
+					/***********Calcul des valeurs propres ********/
+					vector<complex<double> > vp_dist(3,0);
+					getMixturePressureDerivatives( mj_v, mj_l, pj, Tmj);
+					if(_kappa*hmj+_khi+cmj*_ksi<0)
+					{
+						*_runLogFile<<"staggeredVFFCMatricesPrimitiveVariables: vitesse du son complexe"<<endl;
+						throw CdmathException("staggeredVFFCMatricesPrimitiveVariables: vitesse du son complexe");
+					}
+					double amj=sqrt(_kappa*hmj+_khi+cmj*_ksi);//vitesse du son du melange
+
+					if(_verbose && _nbTimeStep%_freqSave ==0)
+						cout<<"_khi= "<<_khi<<", _kappa= "<< _kappa << ", _ksi= "<<_ksi <<", amj= "<<amj<<endl;
+
+					//On remplit les valeurs propres
+					vp_dist[0]=ui_n+amj;
+					vp_dist[1]=ui_n-amj;
+					vp_dist[2]=ui_n;
+
+					_maxvploc=fabs(ui_n)+amj;
+					if(_maxvploc>_maxvp)
+						_maxvp=_maxvploc;
+
+					/******** Construction de la matrice A^+ *********/
+					_AroePlusImplicit[0*_nVar+0]=-rhomi*rhomi*ui_n*(1/rho_vi-1/rho_li);
+					_AroePlusImplicit[0*_nVar+1]= rhomi*rhomi*ui_n*(cmi/(rho_vi*rho_vi*(gamma_v-1)*(e_vi-q_v))+(1-cmi)/(rho_li*rho_li*(gamma_l-1)*(e_li-q_l)));
+					for(int i=0;i<_Ndim;i++)
+						_AroePlusImplicit[0*_nVar+2+i]=rhomi*_vec_normal[i];
+					_AroePlusImplicit[0*_nVar+2+_Ndim]=-rhomi*rhomi*ui_n*(cv_v*cmi/(rho_vi*(e_vi-q_v))+cv_l*(1-cmi)/(rho_li*(e_li-q_l)));
+					_AroePlusImplicit[1*_nVar+0]=rhomi*ui_n-cmi*rhomi*rhomi*ui_n*(1/rho_vi-1/rho_li);
+					_AroePlusImplicit[1*_nVar+1]=-cmi*rhomi*rhomi*ui_n*(cmi/(rho_vi*rho_vi*(gamma_v-1)*(e_vi-q_v))+(1-cmi)/(rho_li*rho_li*(gamma_l-1)*(e_li-q_l)));
+					for(int i=0;i<_Ndim;i++)
+						_AroePlusImplicit[1*_nVar+2+i]=cmi*rhomi*_vec_normal[i];
+					_AroePlusImplicit[1*_nVar+2+_Ndim]=-cmi*rhomi*rhomi*ui_n*(cv_v*cmi/(rho_vi*(e_vi-q_v))+cv_l*(1-cmi)/(rho_li*(e_li-q_l)));
+					for(int i=0;i<_Ndim;i++)
+					{
+						_AroePlusImplicit[(2+i)*_nVar+0]=-rhomi*rhomi*ui_n*(1/rho_vi-1/rho_li)*_Vi[2+i];
+						_AroePlusImplicit[(2+i)*_nVar+1]=rhomi*rhomi*ui_n*(cmi/(rho_vi*rho_vi*(gamma_v-1)*(e_vi-q_v))+(1-cmi)/(rho_li*rho_li*(gamma_l-1)*(e_li-q_l)))*_Vi[2+i];
+						for(int j=0;j<_Ndim;j++)
+							_AroePlusImplicit[(2+i)*_nVar+2+j]=rhomi*_Vi[2+i]*_vec_normal[j];
+						_AroePlusImplicit[(2+i)*_nVar+2+i]+=rhomi*ui_n;
+						_AroePlusImplicit[(2+i)*_nVar+2+_Ndim]=-rhomi*rhomi*ui_n*(cv_v*cmi/(rho_vi*(e_vi-q_v))+(1-cmi)/(rho_li*(e_li-q_l)))*_Vi[2+i];
+					}
+					_AroePlusImplicit[(2+_Ndim)*_nVar+0]=ui_n*(rhomi*(e_vi-e_li)-Emi*rhomi*rhomi*(1/rho_vi-1/rho_li));
+					_AroePlusImplicit[(2+_Ndim)*_nVar+1]=rhomi*rhomi*Emi*(cmi/(rho_vi*rho_vi*(gamma_v-1)*(e_vi-q_v))+(1-cmi)/(rho_li*rho_li*(gamma_l-1)*(e_li-q_l)));
+					for(int i=0;i<_Ndim;i++)
+						_AroePlusImplicit[(2+_Ndim)*_nVar+2+i]=(rhomi*Emi+pj)*_vec_normal[i] + ui_n*rhomi*_Vi[2+i];
+					_AroePlusImplicit[(2+_Ndim)*_nVar+2+_Ndim]=ui_n*(rhomi*(cv_v*cmi+cv_l*(1-cmi))-Emi*rhomi*rhomi*(cv_v*cmi/(rho_vi*(e_vi-q_v))+cv_l*(1-cmi)/(rho_li*(e_li-q_l))));
+
+
+					/******** Construction de la matrice A^- *********/
+					_AroeMinusImplicit[0*_nVar+0]=0;
+					_AroeMinusImplicit[0*_nVar+1]=0;
+					for(int i=0;i<_Ndim;i++)
+						_AroeMinusImplicit[0*_nVar+2+i]=0;
+					_AroeMinusImplicit[0*_nVar+2+_Ndim]=0;
+					_AroeMinusImplicit[1*_nVar+0]=0;
+					_AroeMinusImplicit[1*_nVar+1]=0;
+					for(int i=0;i<_Ndim;i++)
+						_AroeMinusImplicit[1*_nVar+2+i]=0;
+					_AroeMinusImplicit[1*_nVar+2+_Ndim]=0;
+					for(int i=0;i<_Ndim;i++)
+					{
+						_AroeMinusImplicit[(2+i)*_nVar+0]=0;
+						_AroeMinusImplicit[(2+i)*_nVar+1]=_vec_normal[i];
+						for(int j=0;j<_Ndim;j++)
+							_AroeMinusImplicit[(2+i)*_nVar+2+j]=0;
+						_AroeMinusImplicit[(2+i)*_nVar+2+i]+=0;
+						_AroeMinusImplicit[(2+i)*_nVar+2+_Ndim]=0;
+					}
+					_AroeMinusImplicit[(2+_Ndim)*_nVar+0]=0;
+					_AroeMinusImplicit[(2+_Ndim)*_nVar+1]=ui_n;
+					for(int i=0;i<_Ndim;i++)
+						_AroeMinusImplicit[(2+_Ndim)*_nVar+2+i]=0;
+					_AroeMinusImplicit[(2+_Ndim)*_nVar+2+_Ndim]=0;
 				}
-				_AroePlusImplicit[(2+_Ndim)*_nVar+0]=ui_n*(rhomi*(e_vi-e_li)-Emi*rhomi*rhomi*(1/rho_vi-1/rho_li));
-				_AroePlusImplicit[(2+_Ndim)*_nVar+1]=rhomi*rhomi*Emi*(cmi/(rho_vi*rho_vi*(gamma_v-1)*(e_vi-q_v))+(1-cmi)/(rho_li*rho_li*(gamma_l-1)*(e_li-q_l)));
-				for(int i=0;i<_Ndim;i++)
-					_AroePlusImplicit[(2+_Ndim)*_nVar+2+i]=(rhomi*Emi+pj)*_vec_normal[i] + ui_n*rhomi*_Vi[2+i];
-				_AroePlusImplicit[(2+_Ndim)*_nVar+2+_Ndim]=ui_n*(rhomi*(cv_v*cmi+cv_l*(1-cmi))-Emi*rhomi*rhomi*(cv_v*cmi/(rho_vi*(e_vi-q_v))+cv_l*(1-cmi)/(rho_li*(e_li-q_l))));
-
-
-				/******** Construction de la matrice A^- *********/
-				_AroeMinusImplicit[0*_nVar+0]=0;
-				_AroeMinusImplicit[0*_nVar+1]=0;
-				for(int i=0;i<_Ndim;i++)
-					_AroeMinusImplicit[0*_nVar+2+i]=0;
-				_AroeMinusImplicit[0*_nVar+2+_Ndim]=0;
-				_AroeMinusImplicit[1*_nVar+0]=0;
-				_AroeMinusImplicit[1*_nVar+1]=0;
-				for(int i=0;i<_Ndim;i++)
-					_AroeMinusImplicit[1*_nVar+2+i]=0;
-				_AroeMinusImplicit[1*_nVar+2+_Ndim]=0;
-				for(int i=0;i<_Ndim;i++)
+				else
 				{
-					_AroeMinusImplicit[(2+i)*_nVar+0]=0;
-					_AroeMinusImplicit[(2+i)*_nVar+1]=_vec_normal[i];
-					for(int j=0;j<_Ndim;j++)
-						_AroeMinusImplicit[(2+i)*_nVar+2+j]=0;
-					_AroeMinusImplicit[(2+i)*_nVar+2+i]+=0;
-					_AroeMinusImplicit[(2+i)*_nVar+2+_Ndim]=0;
+					if(_verbose && _nbTimeStep%_freqSave ==0)
+						cout<<"VFFC Staggered state rhomj="<<rhomj<<" cmj= "<<cmj<<" Emj= "<<Emj<<" Tmj= "<<Tmj<<" pi= "<<pi<<endl;
+
+					/***********Calcul des valeurs propres ********/
+					vector<complex<double> > vp_dist(3,0);
+					getMixturePressureDerivatives( mi_v, mi_l, pi, Tmi);
+					if(_kappa*hmi+_khi+cmi*_ksi<0)
+					{
+						*_runLogFile<<"staggeredVFFCMatricesPrimitiveVariables: vitesse du son complexe"<<endl;
+						throw CdmathException("staggeredVFFCMatricesPrimitiveVariables: vitesse du son complexe");
+					}
+					double ami=sqrt(_kappa*hmi+_khi+cmi*_ksi);//vitesse du son du melange
+					if(_verbose && _nbTimeStep%_freqSave ==0)
+						cout<<"_khi= "<<_khi<<", _kappa= "<< _kappa << ", _ksi= "<<_ksi <<", ami= "<<ami<<endl;
+
+					//On remplit les valeurs propres
+					vp_dist[0]=uj_n+ami;
+					vp_dist[1]=uj_n-ami;
+					vp_dist[2]=uj_n;
+
+					_maxvploc=fabs(uj_n)+ami;
+					if(_maxvploc>_maxvp)
+						_maxvp=_maxvploc;
+
+					/******** Construction de la matrice A^+ *********/
+					_AroePlusImplicit[0*_nVar+0]=0;
+					_AroePlusImplicit[0*_nVar+1]=0;
+					for(int i=0;i<_Ndim;i++)
+						_AroePlusImplicit[0*_nVar+2+i]=0;
+					_AroePlusImplicit[0*_nVar+2+_Ndim]=0;
+					_AroePlusImplicit[1*_nVar+0]=0;
+					_AroePlusImplicit[1*_nVar+1]=0;
+					for(int i=0;i<_Ndim;i++)
+						_AroePlusImplicit[1*_nVar+2+i]=0;
+					_AroePlusImplicit[1*_nVar+2+_Ndim]=0;
+					for(int i=0;i<_Ndim;i++)
+					{
+						_AroePlusImplicit[(2+i)*_nVar+0]=0;
+						_AroePlusImplicit[(2+i)*_nVar+1]=_vec_normal[i];
+						for(int j=0;j<_Ndim;j++)
+							_AroePlusImplicit[(2+i)*_nVar+2+j]=0;
+						_AroePlusImplicit[(2+i)*_nVar+2+i]+=0;
+						_AroePlusImplicit[(2+i)*_nVar+2+_Ndim]=0;
+					}
+					_AroePlusImplicit[(2+_Ndim)*_nVar+0]=0;
+					_AroePlusImplicit[(2+_Ndim)*_nVar+1]=ui_n;
+					for(int i=0;i<_Ndim;i++)
+						_AroePlusImplicit[(2+_Ndim)*_nVar+2+i]=0;
+					_AroePlusImplicit[(2+_Ndim)*_nVar+2+_Ndim]=0;
+
+					/******** Construction de la matrice A^- *********/
+					_AroeMinusImplicit[0*_nVar+0]=-rhomj*rhomj*uj_n*(1/rho_vj-1/rho_lj);
+					_AroeMinusImplicit[0*_nVar+1]= rhomj*rhomj*uj_n*(cmj/(rho_vj*rho_vj*(gamma_v-1)*(e_vj-q_v))+(1-cmj)/(rho_lj*rho_lj*(gamma_l-1)*(e_lj-q_l)));
+					for(int i=0;i<_Ndim;i++)
+						_AroeMinusImplicit[0*_nVar+2+i]=rhomj*_vec_normal[i];
+					_AroeMinusImplicit[0*_nVar+2+_Ndim]=-rhomj*rhomj*uj_n*(cv_v*cmj/(rho_vj*(e_vj-q_v))+cv_l*(1-cmj)/(rho_lj*(e_lj-q_l)));
+					_AroeMinusImplicit[1*_nVar+0]=rhomj*uj_n-cmj*rhomj*rhomj*uj_n*(1/rho_vj-1/rho_lj);
+					_AroeMinusImplicit[1*_nVar+1]=-cmj*rhomj*rhomj*uj_n*(cmj/(rho_vj*rho_vj*(gamma_v-1)*(e_vj-q_v))+(1-cmj)/(rho_lj*rho_lj*(gamma_l-1)*(e_lj-q_l)));
+					for(int i=0;i<_Ndim;i++)
+						_AroeMinusImplicit[1*_nVar+2+i]=cmj*rhomj*_vec_normal[i];
+					_AroeMinusImplicit[1*_nVar+2+_Ndim]=-cmj*rhomj*rhomj*uj_n*(cv_v*cmj/(rho_vj*(e_vj-q_v))+cv_l*(1-cmj)/(rho_lj*(e_lj-q_l)));
+					for(int i=0;i<_Ndim;i++)
+					{
+						_AroeMinusImplicit[(2+i)*_nVar+0]=-rhomj*rhomj*uj_n*(1/rho_vj-1/rho_lj)*_Vj[2+i];
+						_AroeMinusImplicit[(2+i)*_nVar+1]=rhomj*rhomj*uj_n*(cmj/(rho_vj*rho_vj*(gamma_v-1)*(e_vj-q_v))+(1-cmj)/(rho_lj*rho_lj*(gamma_l-1)*(e_lj-q_l)))*_Vj[2+i];
+						for(int j=0;j<_Ndim;j++)
+							_AroeMinusImplicit[(2+i)*_nVar+2+j]=rhomj*_Vj[2+i]*_vec_normal[j];
+						_AroeMinusImplicit[(2+i)*_nVar+2+i]+=rhomj*uj_n;
+						_AroeMinusImplicit[(2+i)*_nVar+2+_Ndim]=-rhomj*rhomj*uj_n*(cv_v*cmj/(rho_vj*(e_vj-q_v))+cv_l*(1-cmj)/(rho_lj*(e_lj-q_l)))*_Vj[2+i];
+					}
+					_AroeMinusImplicit[(2+_Ndim)*_nVar+0]=uj_n*(rhomj*(e_vj-e_lj)-Emj*rhomj*rhomj*(1/rho_vj-1/rho_lj));
+					_AroeMinusImplicit[(2+_Ndim)*_nVar+1]=rhomj*rhomj*Emj*(cmj/(rho_vj*rho_vj*(gamma_v-1)*(e_vj-q_v))+(1-cmj)/(rho_lj*rho_lj*(gamma_l-1)*(e_lj-q_l)));
+					for(int i=0;i<_Ndim;i++)
+						_AroeMinusImplicit[(2+_Ndim)*_nVar+2+i]=(rhomj*Emj+pi)*_vec_normal[i] + uj_n*rhomj*_Vj[2+i];
+					_AroeMinusImplicit[(2+_Ndim)*_nVar+2+_Ndim]=uj_n*(rhomj*(cv_v*cmj+cv_l*(1-cmj))-Emj*rhomj*rhomj*(cv_v*cmj/(rho_vj*(e_vj-q_v))+cv_l*(1-cmj)/(rho_lj*(e_lj-q_l))));
 				}
-				_AroeMinusImplicit[(2+_Ndim)*_nVar+0]=0;
-				_AroeMinusImplicit[(2+_Ndim)*_nVar+1]=ui_n;
-				for(int i=0;i<_Ndim;i++)
-					_AroeMinusImplicit[(2+_Ndim)*_nVar+2+i]=0;
-				_AroeMinusImplicit[(2+_Ndim)*_nVar+2+_Ndim]=0;
+			}
+			else if(dynamic_cast<StiffenedGasDellacherie*>(_fluides[0])!=NULL
+					&& dynamic_cast<StiffenedGasDellacherie*>(_fluides[1])!=NULL)
+			{
+				StiffenedGasDellacherie* fluide0=dynamic_cast<StiffenedGasDellacherie*>(_fluides[0]);
+				StiffenedGasDellacherie* fluide1=dynamic_cast<StiffenedGasDellacherie*>(_fluides[1]);
+				double cp_v=fluide0->constante("cp");
+				double cp_l=fluide1->constante("cp");
+
+				double h_vi=_fluides[0]->getEnthalpy(Tmi,rho_vi);
+				double h_li=_fluides[1]->getEnthalpy(Tmi,rho_li);
+				double h_vj=_fluides[0]->getEnthalpy(Tmj,rho_vj);
+				double h_lj=_fluides[1]->getEnthalpy(Tmj,rho_lj);
+				double Hmi=Emi+pi/rho_vi;
+				double Hmj=Emj+pj/rho_vj;
+
+				if(u_mn>_precision)
+				{
+					if(_verbose && _nbTimeStep%_freqSave ==0)
+						cout<<"VFFC Staggered state rhomi="<<rhomi<<" cmi= "<<cmi<<" Hmi= "<<Hmi<<" Tmi= "<<Tmi<<" pj= "<<pj<<endl;
+
+					/***********Calcul des valeurs propres ********/
+					vector<complex<double> > vp_dist(3,0);
+					getMixturePressureDerivatives( mj_v, mj_l, pj, Tmj);
+					if(_kappa*hmj+_khi+cmj*_ksi<0)
+					{
+						*_runLogFile<<"staggeredVFFCMatricesPrimitiveVariables: vitesse du son complexe"<<endl;
+						throw CdmathException("staggeredVFFCMatricesPrimitiveVariables: vitesse du son complexe");
+					}
+					double amj=sqrt(_kappa*hmj+_khi+cmj*_ksi);//vitesse du son du melange
+
+					if(_verbose && _nbTimeStep%_freqSave ==0)
+						cout<<"_khi= "<<_khi<<", _kappa= "<< _kappa << ", _ksi= "<<_ksi <<", amj= "<<amj<<endl;
+
+					//On remplit les valeurs propres
+					vp_dist[0]=ui_n+amj;
+					vp_dist[1]=ui_n-amj;
+					vp_dist[2]=ui_n;
+
+					_maxvploc=fabs(ui_n)+amj;
+					if(_maxvploc>_maxvp)
+						_maxvp=_maxvploc;
+
+					/******** Construction de la matrice A^+ *********/
+					_AroePlusImplicit[0*_nVar+0]=-rhomi*rhomi*ui_n*(1/rho_vi-1/rho_li);
+					_AroePlusImplicit[0*_nVar+1]= rhomi*rhomi*ui_n*(gamma_v*cmi/(rho_vi*rho_vi*(gamma_v-1)*(h_vi-q_v))+gamma_l*(1-cmi)/(rho_li*rho_li*(gamma_l-1)*(h_li-q_l)));
+					for(int i=0;i<_Ndim;i++)
+						_AroePlusImplicit[0*_nVar+2+i]=rhomi*_vec_normal[i];
+					_AroePlusImplicit[0*_nVar+2+_Ndim]=-rhomi*rhomi*ui_n*(cp_v*cmi/(rho_vi*(h_vi-q_v))+cp_l*(1-cmi)/(rho_li*(h_li-q_l)));
+					_AroePlusImplicit[1*_nVar+0]=rhomi*ui_n-cmi*rhomi*rhomi*ui_n*(1/rho_vi-1/rho_li);
+					_AroePlusImplicit[1*_nVar+1]=-cmi*rhomi*rhomi*ui_n*(gamma_v*cmi/(rho_vi*rho_vi*(gamma_v-1)*(h_vi-q_v))+gamma_l*(1-cmi)/(rho_li*rho_li*(gamma_l-1)*(h_li-q_l)));
+					for(int i=0;i<_Ndim;i++)
+						_AroePlusImplicit[1*_nVar+2+i]=cmi*rhomi*_vec_normal[i];
+					_AroePlusImplicit[1*_nVar+2+_Ndim]=-cmi*rhomi*rhomi*ui_n*(cp_v*cmi/(rho_vi*(h_vi-q_v))+cp_l*(1-cmi)/(rho_li*(h_li-q_l)));
+					for(int i=0;i<_Ndim;i++)
+					{
+						_AroePlusImplicit[(2+i)*_nVar+0]=-rhomi*rhomi*ui_n*(1/rho_vi-1/rho_li)*_Vi[2+i];
+						_AroePlusImplicit[(2+i)*_nVar+1]=rhomi*rhomi*ui_n*(gamma_v*cmi/(rho_vi*rho_vi*(gamma_v-1)*(h_vi-q_v))+gamma_l*(1-cmi)/(rho_li*rho_li*(gamma_l-1)*(h_li-q_l)))*_Vi[2+i];
+						for(int j=0;j<_Ndim;j++)
+							_AroePlusImplicit[(2+i)*_nVar+2+j]=rhomi*_Vi[2+i]*_vec_normal[j];
+						_AroePlusImplicit[(2+i)*_nVar+2+i]+=rhomi*ui_n;
+						_AroePlusImplicit[(2+i)*_nVar+2+_Ndim]=-rhomi*rhomi*ui_n*(cp_v*cmi/(rho_vi*(h_vi-q_v))+cp_l*(1-cmi)/(rho_li*(h_li-q_l)))*_Vi[2+i];
+					}
+					_AroePlusImplicit[(2+_Ndim)*_nVar+0]=ui_n*(rhomi*(h_vi-h_li)-Hmi*rhomi*rhomi*(1/rho_vi-1/rho_li));
+					_AroePlusImplicit[(2+_Ndim)*_nVar+1]=rhomi*rhomi*Hmi*(gamma_v*cmi/(rho_vi*rho_vi*(gamma_v-1)*(h_vi-q_v))+gamma_l*(1-cmi)/(rho_li*rho_li*(gamma_l-1)*(h_li-q_l)));
+					for(int i=0;i<_Ndim;i++)
+						_AroePlusImplicit[(2+_Ndim)*_nVar+2+i]=(rhomi*Emi+pj)*_vec_normal[i] + ui_n*rhomi*_Vi[2+i];
+					_AroePlusImplicit[(2+_Ndim)*_nVar+2+_Ndim]=ui_n*(rhomi*(cp_v*cmi+cp_l*(1-cmi))-Hmi*rhomi*rhomi*(cp_v*cmi/(rho_vi*(h_vi-q_v))+cp_l*(1-cmi)/(rho_li*(h_li-q_l))));
+
+
+					/******** Construction de la matrice A^- *********/
+					_AroeMinusImplicit[0*_nVar+0]=0;
+					_AroeMinusImplicit[0*_nVar+1]=0;
+					for(int i=0;i<_Ndim;i++)
+						_AroeMinusImplicit[0*_nVar+2+i]=0;
+					_AroeMinusImplicit[0*_nVar+2+_Ndim]=0;
+					_AroeMinusImplicit[1*_nVar+0]=0;
+					_AroeMinusImplicit[1*_nVar+1]=0;
+					for(int i=0;i<_Ndim;i++)
+						_AroeMinusImplicit[1*_nVar+2+i]=0;
+					_AroeMinusImplicit[1*_nVar+2+_Ndim]=0;
+					for(int i=0;i<_Ndim;i++)
+					{
+						_AroeMinusImplicit[(2+i)*_nVar+0]=0;
+						_AroeMinusImplicit[(2+i)*_nVar+1]=_vec_normal[i];
+						for(int j=0;j<_Ndim;j++)
+							_AroeMinusImplicit[(2+i)*_nVar+2+j]=0;
+						_AroeMinusImplicit[(2+i)*_nVar+2+i]+=0;
+						_AroeMinusImplicit[(2+i)*_nVar+2+_Ndim]=0;
+					}
+					_AroeMinusImplicit[(2+_Ndim)*_nVar+0]=0;
+					_AroeMinusImplicit[(2+_Ndim)*_nVar+1]=ui_n;
+					for(int i=0;i<_Ndim;i++)
+						_AroeMinusImplicit[(2+_Ndim)*_nVar+2+i]=0;
+					_AroeMinusImplicit[(2+_Ndim)*_nVar+2+_Ndim]=0;
+				}
+				else
+				{
+					if(_verbose && _nbTimeStep%_freqSave ==0)
+						cout<<"VFFC Staggered state rhomj="<<rhomj<<" cmj= "<<cmj<<" Hmj= "<<Hmj<<" Tmj= "<<Tmj<<" pi= "<<pi<<endl;
+
+					/***********Calcul des valeurs propres ********/
+					vector<complex<double> > vp_dist(3,0);
+					getMixturePressureDerivatives( mi_v, mi_l, pi, Tmi);
+					if(_kappa*hmi+_khi+cmi*_ksi<0)
+					{
+						*_runLogFile<<"staggeredVFFCMatricesPrimitiveVariables: vitesse du son complexe"<<endl;
+						throw CdmathException("staggeredVFFCMatricesPrimitiveVariables: vitesse du son complexe");
+					}
+					double ami=sqrt(_kappa*hmi+_khi+cmi*_ksi);//vitesse du son du melange
+					if(_verbose && _nbTimeStep%_freqSave ==0)
+						cout<<"_khi= "<<_khi<<", _kappa= "<< _kappa << ", _ksi= "<<_ksi <<", ami= "<<ami<<endl;
+
+					//On remplit les valeurs propres
+					vp_dist[0]=uj_n+ami;
+					vp_dist[1]=uj_n-ami;
+					vp_dist[2]=uj_n;
+
+					_maxvploc=fabs(uj_n)+ami;
+					if(_maxvploc>_maxvp)
+						_maxvp=_maxvploc;
+
+					/******** Construction de la matrice A^+ *********/
+					_AroePlusImplicit[0*_nVar+0]=0;
+					_AroePlusImplicit[0*_nVar+1]=0;
+					for(int i=0;i<_Ndim;i++)
+						_AroePlusImplicit[0*_nVar+2+i]=0;
+					_AroePlusImplicit[0*_nVar+2+_Ndim]=0;
+					_AroePlusImplicit[1*_nVar+0]=0;
+					_AroePlusImplicit[1*_nVar+1]=0;
+					for(int i=0;i<_Ndim;i++)
+						_AroePlusImplicit[1*_nVar+2+i]=0;
+					_AroePlusImplicit[1*_nVar+2+_Ndim]=0;
+					for(int i=0;i<_Ndim;i++)
+					{
+						_AroePlusImplicit[(2+i)*_nVar+0]=0;
+						_AroePlusImplicit[(2+i)*_nVar+1]=_vec_normal[i];
+						for(int j=0;j<_Ndim;j++)
+							_AroePlusImplicit[(2+i)*_nVar+2+j]=0;
+						_AroePlusImplicit[(2+i)*_nVar+2+i]+=0;
+						_AroePlusImplicit[(2+i)*_nVar+2+_Ndim]=0;
+					}
+					_AroePlusImplicit[(2+_Ndim)*_nVar+0]=0;
+					_AroePlusImplicit[(2+_Ndim)*_nVar+1]=ui_n;
+					for(int i=0;i<_Ndim;i++)
+						_AroePlusImplicit[(2+_Ndim)*_nVar+2+i]=0;
+					_AroePlusImplicit[(2+_Ndim)*_nVar+2+_Ndim]=0;
+
+					/******** Construction de la matrice A^- *********/
+					_AroeMinusImplicit[0*_nVar+0]=-rhomj*rhomj*uj_n*(1/rho_vj-1/rho_lj);
+					_AroeMinusImplicit[0*_nVar+1]= rhomj*rhomj*uj_n*(gamma_v*cmj/(rho_vj*rho_vj*(gamma_v-1)*(h_vj-q_v))+gamma_l*(1-cmj)/(rho_lj*rho_lj*(gamma_l-1)*(h_lj-q_l)));
+					for(int i=0;i<_Ndim;i++)
+						_AroeMinusImplicit[0*_nVar+2+i]=rhomj*_vec_normal[i];
+					_AroeMinusImplicit[0*_nVar+2+_Ndim]=-rhomj*rhomj*uj_n*(cp_v*cmj/(rho_vj*(h_vj-q_v))+cp_l*(1-cmj)/(rho_lj*(h_lj-q_l)));
+					_AroeMinusImplicit[1*_nVar+0]=rhomj*uj_n-cmj*rhomj*rhomj*uj_n*(1/rho_vj-1/rho_lj);
+					_AroeMinusImplicit[1*_nVar+1]=-cmj*rhomj*rhomj*uj_n*(gamma_v*cmj/(rho_vj*rho_vj*(gamma_v-1)*(h_vj-q_v))+gamma_l*(1-cmj)/(rho_lj*rho_lj*(gamma_l-1)*(h_lj-q_l)));
+					for(int i=0;i<_Ndim;i++)
+						_AroeMinusImplicit[1*_nVar+2+i]=cmj*rhomj*_vec_normal[i];
+					_AroeMinusImplicit[1*_nVar+2+_Ndim]=-cmj*rhomj*rhomj*uj_n*(cp_v*cmj/(rho_vj*(h_vj-q_v))+cp_l*(1-cmj)/(rho_lj*(h_lj-q_l)));
+					for(int i=0;i<_Ndim;i++)
+					{
+						_AroeMinusImplicit[(2+i)*_nVar+0]=-rhomj*rhomj*uj_n*(1/rho_vj-1/rho_lj)*_Vj[2+i];
+						_AroeMinusImplicit[(2+i)*_nVar+1]=rhomj*rhomj*uj_n*(gamma_v*cmj/(rho_vj*rho_vj*(gamma_v-1)*(h_vj-q_v))+gamma_l*(1-cmj)/(rho_lj*rho_lj*(gamma_l-1)*(h_lj-q_l)))*_Vj[2+i];
+						for(int j=0;j<_Ndim;j++)
+							_AroeMinusImplicit[(2+i)*_nVar+2+j]=rhomj*_Vj[2+i]*_vec_normal[j];
+						_AroeMinusImplicit[(2+i)*_nVar+2+i]+=rhomj*uj_n;
+						_AroeMinusImplicit[(2+i)*_nVar+2+_Ndim]=-rhomj*rhomj*uj_n*(cp_v*cmj/(rho_vj*(h_vj-q_v))+cp_l*(1-cmj)/(rho_lj*(h_lj-q_l)))*_Vj[2+i];
+					}
+					_AroeMinusImplicit[(2+_Ndim)*_nVar+0]=uj_n*(rhomj*(h_vj-h_lj)-Hmj*rhomj*rhomj*(1/rho_vj-1/rho_lj));
+					_AroeMinusImplicit[(2+_Ndim)*_nVar+1]=rhomj*rhomj*Hmj*(gamma_v*cmj/(rho_vj*rho_vj*(gamma_v-1)*(h_vj-q_v))+gamma_l*(1-cmj)/(rho_lj*rho_lj*(gamma_l-1)*(h_lj-q_l)));
+					for(int i=0;i<_Ndim;i++)
+						_AroeMinusImplicit[(2+_Ndim)*_nVar+2+i]=(rhomj*Emj+pi)*_vec_normal[i] + uj_n*rhomj*_Vj[2+i];
+					_AroeMinusImplicit[(2+_Ndim)*_nVar+2+_Ndim]=uj_n*(rhomj*(cp_v*cmj+cp_l*(1-cmj))-Hmj*rhomj*rhomj*(cp_v*cmj/(rho_vj*(h_vj-q_v))+cp_l*(1-cmj)/(rho_lj*(h_lj-q_l))));
+				}
 			}
 			else
-			{
-				if(_verbose && _nbTimeStep%_freqSave ==0)
-					cout<<"VFFC Staggered state rhomj="<<rhomj<<" cmj= "<<cmj<<" Emj= "<<Emj<<" Tmj= "<<Tmj<<" pi= "<<pi<<endl;
-
-				/***********Calcul des valeurs propres ********/
-				vector<complex<double> > vp_dist(3,0);
-				getMixturePressureDerivatives( mi_v, mi_l, pi, Tmi);
-				if(_kappa*hmi+_khi+cmi*_ksi<0)
-					throw CdmathException("Calcul VFFC staggered: vitesse du son complexe");
-				double ami=sqrt(_kappa*hmi+_khi+cmi*_ksi);//vitesse du son du melange
-				if(_verbose && _nbTimeStep%_freqSave ==0)
-					cout<<"_khi= "<<_khi<<", _kappa= "<< _kappa << ", _ksi= "<<_ksi <<", ami= "<<ami<<endl;
-
-				//On remplit les valeurs propres
-				vp_dist[0]=uj_n+ami;
-				vp_dist[1]=uj_n-ami;
-				vp_dist[2]=uj_n;
-
-				_maxvploc=fabs(uj_n)+ami;
-				if(_maxvploc>_maxvp)
-					_maxvp=_maxvploc;
-
-				/******** Construction de la matrice A^+ *********/
-				_AroePlusImplicit[0*_nVar+0]=0;
-				_AroePlusImplicit[0*_nVar+1]=0;
-				for(int i=0;i<_Ndim;i++)
-					_AroePlusImplicit[0*_nVar+2+i]=0;
-				_AroePlusImplicit[0*_nVar+2+_Ndim]=0;
-				_AroePlusImplicit[1*_nVar+0]=0;
-				_AroePlusImplicit[1*_nVar+1]=0;
-				for(int i=0;i<_Ndim;i++)
-					_AroePlusImplicit[1*_nVar+2+i]=0;
-				_AroePlusImplicit[1*_nVar+2+_Ndim]=0;
-				for(int i=0;i<_Ndim;i++)
-				{
-					_AroePlusImplicit[(2+i)*_nVar+0]=0;
-					_AroePlusImplicit[(2+i)*_nVar+1]=_vec_normal[i];
-					for(int j=0;j<_Ndim;j++)
-						_AroePlusImplicit[(2+i)*_nVar+2+j]=0;
-					_AroePlusImplicit[(2+i)*_nVar+2+i]+=0;
-					_AroePlusImplicit[(2+i)*_nVar+2+_Ndim]=0;
-				}
-				_AroePlusImplicit[(2+_Ndim)*_nVar+0]=0;
-				_AroePlusImplicit[(2+_Ndim)*_nVar+1]=ui_n;
-				for(int i=0;i<_Ndim;i++)
-					_AroePlusImplicit[(2+_Ndim)*_nVar+2+i]=0;
-				_AroePlusImplicit[(2+_Ndim)*_nVar+2+_Ndim]=0;
-
-				/******** Construction de la matrice A^- *********/
-				_AroeMinusImplicit[0*_nVar+0]=-rhomj*rhomj*uj_n*(1/rho_vj-1/rho_lj);
-				_AroeMinusImplicit[0*_nVar+1]= rhomj*rhomj*uj_n*(cmj/(rho_vj*rho_vj*(gamma_v-1)*(e_vj-q_v))+(1-cmj)/(rho_lj*rho_lj*(gamma_l-1)*(e_lj-q_l)));
-				for(int i=0;i<_Ndim;i++)
-					_AroeMinusImplicit[0*_nVar+2+i]=rhomj*_vec_normal[i];
-				_AroeMinusImplicit[0*_nVar+2+_Ndim]=-rhomj*rhomj*uj_n*(cv_v*cmj/(rho_vj*(e_vj-q_v))+cv_l*(1-cmj)/(rho_lj*(e_lj-q_l)));
-				_AroeMinusImplicit[1*_nVar+0]=rhomj*uj_n-cmj*rhomj*rhomj*uj_n*(1/rho_vj-1/rho_lj);
-				_AroeMinusImplicit[1*_nVar+1]=-cmj*rhomj*rhomj*uj_n*(cmj/(rho_vj*rho_vj*(gamma_v-1)*(e_vj-q_v))+(1-cmj)/(rho_lj*rho_lj*(gamma_l-1)*(e_lj-q_l)));
-				for(int i=0;i<_Ndim;i++)
-					_AroeMinusImplicit[1*_nVar+2+i]=cmj*rhomj*_vec_normal[i];
-				_AroeMinusImplicit[1*_nVar+2+_Ndim]=-cmj*rhomj*rhomj*uj_n*(cv_v*cmj/(rho_vj*(e_vj-q_v))+cv_l*(1-cmj)/(rho_lj*(e_lj-q_l)));
-				for(int i=0;i<_Ndim;i++)
-				{
-					_AroeMinusImplicit[(2+i)*_nVar+0]=-rhomj*rhomj*uj_n*(1/rho_vj-1/rho_lj)*_Vj[2+i];
-					_AroeMinusImplicit[(2+i)*_nVar+1]=rhomj*rhomj*uj_n*(cmj/(rho_vj*rho_vj*(gamma_v-1)*(e_vj-q_v))+(1-cmj)/(rho_lj*rho_lj*(gamma_l-1)*(e_lj-q_l)))*_Vj[2+i];
-					for(int j=0;j<_Ndim;j++)
-						_AroeMinusImplicit[(2+i)*_nVar+2+j]=rhomj*_Vj[2+i]*_vec_normal[j];
-					_AroeMinusImplicit[(2+i)*_nVar+2+i]+=rhomj*uj_n;
-					_AroeMinusImplicit[(2+i)*_nVar+2+_Ndim]=-rhomj*rhomj*uj_n*(cv_v*cmj/(rho_vj*(e_vj-q_v))+cv_l*(1-cmj)/(rho_lj*(e_lj-q_l)))*_Vj[2+i];
-				}
-				_AroeMinusImplicit[(2+_Ndim)*_nVar+0]=uj_n*(rhomj*(e_vj-e_lj)-Emj*rhomj*rhomj*(1/rho_vj-1/rho_lj));
-				_AroeMinusImplicit[(2+_Ndim)*_nVar+1]=rhomj*rhomj*Emj*(cmj/(rho_vj*rho_vj*(gamma_v-1)*(e_vj-q_v))+(1-cmj)/(rho_lj*rho_lj*(gamma_l-1)*(e_lj-q_l)));
-				for(int i=0;i<_Ndim;i++)
-					_AroeMinusImplicit[(2+_Ndim)*_nVar+2+i]=(rhomj*Emj+pi)*_vec_normal[i] + uj_n*rhomj*_Vj[2+i];
-				_AroeMinusImplicit[(2+_Ndim)*_nVar+2+_Ndim]=uj_n*(rhomj*(cv_v*cmj+cv_l*(1-cmj))-Emj*rhomj*rhomj*(cv_v*cmj/(rho_vj*(e_vj-q_v))+cv_l*(1-cmj)/(rho_lj*(e_lj-q_l))));
-			}
+				throw CdmathException("DriftModel::staggeredVFFCMatricesPrimitiveVariables: eos should be StiffenedGas or StiffenedGasDellacherie");
 		}
-		else if(dynamic_cast<StiffenedGasDellacherie*>(_fluides[0])!=NULL
-				&& dynamic_cast<StiffenedGasDellacherie*>(_fluides[1])!=NULL)
+		else//case nil velocity on the interface, apply centered scheme
 		{
-			StiffenedGasDellacherie* fluide0=dynamic_cast<StiffenedGasDellacherie*>(_fluides[0]);
-			StiffenedGasDellacherie* fluide1=dynamic_cast<StiffenedGasDellacherie*>(_fluides[1]);
-			double cp_v=fluide0->constante("cp");
-			double cp_l=fluide1->constante("cp");
-
-			double h_vi=_fluides[0]->getEnthalpy(Tmi,rho_vi);
-			double h_li=_fluides[1]->getEnthalpy(Tmi,rho_li);
-			double h_vj=_fluides[0]->getEnthalpy(Tmj,rho_vj);
-			double h_lj=_fluides[1]->getEnthalpy(Tmj,rho_lj);
-			double Hmi=Emi+pi/rho_vi;
-			double Hmj=Emj+pj/rho_vj;
-
-			if(u_mn>=0)
+			double rhom=_Uroe[0];
+			double cm=_Uroe[1];
+			double Tm;
+			double Hm=_Uroe[_nVar-1];
+			double umn=0,u_2=0;
+			Vector vitesse(_Ndim);
+			for(int idim=0;idim<_Ndim;idim++)
 			{
-				if(_verbose && _nbTimeStep%_freqSave ==0)
-					cout<<"VFFC Staggered state rhomi="<<rhomi<<" cmi= "<<cmi<<" Hmi= "<<Hmi<<" Tmi= "<<Tmi<<" pj= "<<pj<<endl;
-
-				/***********Calcul des valeurs propres ********/
-				vector<complex<double> > vp_dist(3,0);
-				getMixturePressureDerivatives( mj_v, mj_l, pj, Tmj);
-				if(_kappa*hmj+_khi+cmj*_ksi<0)
-					throw CdmathException("Calcul VFFC staggeredVFFCMatrices: vitesse du son complexe");
-				double amj=sqrt(_kappa*hmj+_khi+cmj*_ksi);//vitesse du son du melange
-
-				if(_verbose && _nbTimeStep%_freqSave ==0)
-					cout<<"_khi= "<<_khi<<", _kappa= "<< _kappa << ", _ksi= "<<_ksi <<", amj= "<<amj<<endl;
-
-				//On remplit les valeurs propres
-				vp_dist[0]=ui_n+amj;
-				vp_dist[1]=ui_n-amj;
-				vp_dist[2]=ui_n;
-
-				_maxvploc=fabs(ui_n)+amj;
-				if(_maxvploc>_maxvp)
-					_maxvp=_maxvploc;
-
-				/******** Construction de la matrice A^+ *********/
-				_AroePlusImplicit[0*_nVar+0]=-rhomi*rhomi*ui_n*(1/rho_vi-1/rho_li);
-				_AroePlusImplicit[0*_nVar+1]= rhomi*rhomi*ui_n*(gamma_v*cmi/(rho_vi*rho_vi*(gamma_v-1)*(h_vi-q_v))+gamma_l*(1-cmi)/(rho_li*rho_li*(gamma_l-1)*(h_li-q_l)));
-				for(int i=0;i<_Ndim;i++)
-					_AroePlusImplicit[0*_nVar+2+i]=rhomi*_vec_normal[i];
-				_AroePlusImplicit[0*_nVar+2+_Ndim]=-rhomi*rhomi*ui_n*(cp_v*cmi/(rho_vi*(h_vi-q_v))+cp_l*(1-cmi)/(rho_li*(h_li-q_l)));
-				_AroePlusImplicit[1*_nVar+0]=rhomi*ui_n-cmi*rhomi*rhomi*ui_n*(1/rho_vi-1/rho_li);
-				_AroePlusImplicit[1*_nVar+1]=-cmi*rhomi*rhomi*ui_n*(gamma_v*cmi/(rho_vi*rho_vi*(gamma_v-1)*(h_vi-q_v))+gamma_l*(1-cmi)/(rho_li*rho_li*(gamma_l-1)*(h_li-q_l)));
-				for(int i=0;i<_Ndim;i++)
-					_AroePlusImplicit[1*_nVar+2+i]=cmi*rhomi*_vec_normal[i];
-				_AroePlusImplicit[1*_nVar+2+_Ndim]=-cmi*rhomi*rhomi*ui_n*(cp_v*cmi/(rho_vi*(h_vi-q_v))+cp_l*(1-cmi)/(rho_li*(h_li-q_l)));
-				for(int i=0;i<_Ndim;i++)
-				{
-					_AroePlusImplicit[(2+i)*_nVar+0]=-rhomi*rhomi*ui_n*(1/rho_vi-1/rho_li)*_Vi[2+i];
-					_AroePlusImplicit[(2+i)*_nVar+1]=rhomi*rhomi*ui_n*(gamma_v*cmi/(rho_vi*rho_vi*(gamma_v-1)*(h_vi-q_v))+gamma_l*(1-cmi)/(rho_li*rho_li*(gamma_l-1)*(h_li-q_l)))*_Vi[2+i];
-					for(int j=0;j<_Ndim;j++)
-						_AroePlusImplicit[(2+i)*_nVar+2+j]=rhomi*_Vi[2+i]*_vec_normal[j];
-					_AroePlusImplicit[(2+i)*_nVar+2+i]+=rhomi*ui_n;
-					_AroePlusImplicit[(2+i)*_nVar+2+_Ndim]=-rhomi*rhomi*ui_n*(cp_v*cmi/(rho_vi*(h_vi-q_v))+cp_l*(1-cmi)/(rho_li*(h_li-q_l)))*_Vi[2+i];
-				}
-				_AroePlusImplicit[(2+_Ndim)*_nVar+0]=ui_n*(rhomi*(h_vi-h_li)-Hmi*rhomi*rhomi*(1/rho_vi-1/rho_li));
-				_AroePlusImplicit[(2+_Ndim)*_nVar+1]=rhomi*rhomi*Hmi*(gamma_v*cmi/(rho_vi*rho_vi*(gamma_v-1)*(h_vi-q_v))+gamma_l*(1-cmi)/(rho_li*rho_li*(gamma_l-1)*(h_li-q_l)));
-				for(int i=0;i<_Ndim;i++)
-					_AroePlusImplicit[(2+_Ndim)*_nVar+2+i]=(rhomi*Emi+pj)*_vec_normal[i] + ui_n*rhomi*_Vi[2+i];
-				_AroePlusImplicit[(2+_Ndim)*_nVar+2+_Ndim]=ui_n*(rhomi*(cp_v*cmi+cp_l*(1-cmi))-Hmi*rhomi*rhomi*(cp_v*cmi/(rho_vi*(h_vi-q_v))+cp_l*(1-cmi)/(rho_li*(h_li-q_l))));
-
-
-				/******** Construction de la matrice A^- *********/
-				_AroeMinusImplicit[0*_nVar+0]=0;
-				_AroeMinusImplicit[0*_nVar+1]=0;
-				for(int i=0;i<_Ndim;i++)
-					_AroeMinusImplicit[0*_nVar+2+i]=0;
-				_AroeMinusImplicit[0*_nVar+2+_Ndim]=0;
-				_AroeMinusImplicit[1*_nVar+0]=0;
-				_AroeMinusImplicit[1*_nVar+1]=0;
-				for(int i=0;i<_Ndim;i++)
-					_AroeMinusImplicit[1*_nVar+2+i]=0;
-				_AroeMinusImplicit[1*_nVar+2+_Ndim]=0;
-				for(int i=0;i<_Ndim;i++)
-				{
-					_AroeMinusImplicit[(2+i)*_nVar+0]=0;
-					_AroeMinusImplicit[(2+i)*_nVar+1]=_vec_normal[i];
-					for(int j=0;j<_Ndim;j++)
-						_AroeMinusImplicit[(2+i)*_nVar+2+j]=0;
-					_AroeMinusImplicit[(2+i)*_nVar+2+i]+=0;
-					_AroeMinusImplicit[(2+i)*_nVar+2+_Ndim]=0;
-				}
-				_AroeMinusImplicit[(2+_Ndim)*_nVar+0]=0;
-				_AroeMinusImplicit[(2+_Ndim)*_nVar+1]=ui_n;
-				for(int i=0;i<_Ndim;i++)
-					_AroeMinusImplicit[(2+_Ndim)*_nVar+2+i]=0;
-				_AroeMinusImplicit[(2+_Ndim)*_nVar+2+_Ndim]=0;
+				vitesse[idim]=_Uroe[2+idim];
+				umn += _Uroe[2+idim]*_vec_normal[idim];//vitesse normale
+				u_2 += _Uroe[2+idim]*_Uroe[2+idim];
 			}
-			else
-			{
-				if(_verbose && _nbTimeStep%_freqSave ==0)
-					cout<<"VFFC Staggered state rhomj="<<rhomj<<" cmj= "<<cmj<<" Hmj= "<<Hmj<<" Tmj= "<<Tmj<<" pi= "<<pi<<endl;
+			double hm=Hm-0.5*u_2;
 
-				/***********Calcul des valeurs propres ********/
-				vector<complex<double> > vp_dist(3,0);
-				getMixturePressureDerivatives( mi_v, mi_l, pi, Tmi);
-				if(_kappa*hmi+_khi+cmi*_ksi<0)
-					throw CdmathException("Calcul VFFC staggered: vitesse du son complexe");
-				double ami=sqrt(_kappa*hmi+_khi+cmi*_ksi);//vitesse du son du melange
-				if(_verbose && _nbTimeStep%_freqSave ==0)
-					cout<<"_khi= "<<_khi<<", _kappa= "<< _kappa << ", _ksi= "<<_ksi <<", ami= "<<ami<<endl;
+			if(cm<_precision)//pure liquid
+				Tm=_fluides[1]->getTemperatureFromEnthalpy(hm,rhom);
+			else if(cm>1-_precision)
+				Tm=_fluides[0]->getTemperatureFromEnthalpy(hm,rhom);
+			else//Hypothèse de saturation
+				Tm=_Tsat;
 
-				//On remplit les valeurs propres
-				vp_dist[0]=uj_n+ami;
-				vp_dist[1]=uj_n-ami;
-				vp_dist[2]=uj_n;
+			double pression= getMixturePressure(cm, rhom, Tm);
 
-				_maxvploc=fabs(uj_n)+ami;
-				if(_maxvploc>_maxvp)
-					_maxvp=_maxvploc;
-
-				/******** Construction de la matrice A^+ *********/
-				_AroePlusImplicit[0*_nVar+0]=0;
-				_AroePlusImplicit[0*_nVar+1]=0;
-				for(int i=0;i<_Ndim;i++)
-					_AroePlusImplicit[0*_nVar+2+i]=0;
-				_AroePlusImplicit[0*_nVar+2+_Ndim]=0;
-				_AroePlusImplicit[1*_nVar+0]=0;
-				_AroePlusImplicit[1*_nVar+1]=0;
-				for(int i=0;i<_Ndim;i++)
-					_AroePlusImplicit[1*_nVar+2+i]=0;
-				_AroePlusImplicit[1*_nVar+2+_Ndim]=0;
-				for(int i=0;i<_Ndim;i++)
-				{
-					_AroePlusImplicit[(2+i)*_nVar+0]=0;
-					_AroePlusImplicit[(2+i)*_nVar+1]=_vec_normal[i];
-					for(int j=0;j<_Ndim;j++)
-						_AroePlusImplicit[(2+i)*_nVar+2+j]=0;
-					_AroePlusImplicit[(2+i)*_nVar+2+i]+=0;
-					_AroePlusImplicit[(2+i)*_nVar+2+_Ndim]=0;
-				}
-				_AroePlusImplicit[(2+_Ndim)*_nVar+0]=0;
-				_AroePlusImplicit[(2+_Ndim)*_nVar+1]=ui_n;
-				for(int i=0;i<_Ndim;i++)
-					_AroePlusImplicit[(2+_Ndim)*_nVar+2+i]=0;
-				_AroePlusImplicit[(2+_Ndim)*_nVar+2+_Ndim]=0;
-
-				/******** Construction de la matrice A^- *********/
-				_AroeMinusImplicit[0*_nVar+0]=-rhomj*rhomj*uj_n*(1/rho_vj-1/rho_lj);
-				_AroeMinusImplicit[0*_nVar+1]= rhomj*rhomj*uj_n*(gamma_v*cmj/(rho_vj*rho_vj*(gamma_v-1)*(h_vj-q_v))+gamma_l*(1-cmj)/(rho_lj*rho_lj*(gamma_l-1)*(h_lj-q_l)));
-				for(int i=0;i<_Ndim;i++)
-					_AroeMinusImplicit[0*_nVar+2+i]=rhomj*_vec_normal[i];
-				_AroeMinusImplicit[0*_nVar+2+_Ndim]=-rhomj*rhomj*uj_n*(cp_v*cmj/(rho_vj*(h_vj-q_v))+cp_l*(1-cmj)/(rho_lj*(h_lj-q_l)));
-				_AroeMinusImplicit[1*_nVar+0]=rhomj*uj_n-cmj*rhomj*rhomj*uj_n*(1/rho_vj-1/rho_lj);
-				_AroeMinusImplicit[1*_nVar+1]=-cmj*rhomj*rhomj*uj_n*(gamma_v*cmj/(rho_vj*rho_vj*(gamma_v-1)*(h_vj-q_v))+gamma_l*(1-cmj)/(rho_lj*rho_lj*(gamma_l-1)*(h_lj-q_l)));
-				for(int i=0;i<_Ndim;i++)
-					_AroeMinusImplicit[1*_nVar+2+i]=cmj*rhomj*_vec_normal[i];
-				_AroeMinusImplicit[1*_nVar+2+_Ndim]=-cmj*rhomj*rhomj*uj_n*(cp_v*cmj/(rho_vj*(h_vj-q_v))+cp_l*(1-cmj)/(rho_lj*(h_lj-q_l)));
-				for(int i=0;i<_Ndim;i++)
-				{
-					_AroeMinusImplicit[(2+i)*_nVar+0]=-rhomj*rhomj*uj_n*(1/rho_vj-1/rho_lj)*_Vj[2+i];
-					_AroeMinusImplicit[(2+i)*_nVar+1]=rhomj*rhomj*uj_n*(gamma_v*cmj/(rho_vj*rho_vj*(gamma_v-1)*(h_vj-q_v))+gamma_l*(1-cmj)/(rho_lj*rho_lj*(gamma_l-1)*(h_lj-q_l)))*_Vj[2+i];
-					for(int j=0;j<_Ndim;j++)
-						_AroeMinusImplicit[(2+i)*_nVar+2+j]=rhomj*_Vj[2+i]*_vec_normal[j];
-					_AroeMinusImplicit[(2+i)*_nVar+2+i]+=rhomj*uj_n;
-					_AroeMinusImplicit[(2+i)*_nVar+2+_Ndim]=-rhomj*rhomj*uj_n*(cp_v*cmj/(rho_vj*(h_vj-q_v))+cp_l*(1-cmj)/(rho_lj*(h_lj-q_l)))*_Vj[2+i];
-				}
-				_AroeMinusImplicit[(2+_Ndim)*_nVar+0]=uj_n*(rhomj*(h_vj-h_lj)-Hmj*rhomj*rhomj*(1/rho_vj-1/rho_lj));
-				_AroeMinusImplicit[(2+_Ndim)*_nVar+1]=rhomj*rhomj*Hmj*(gamma_v*cmj/(rho_vj*rho_vj*(gamma_v-1)*(h_vj-q_v))+gamma_l*(1-cmj)/(rho_lj*rho_lj*(gamma_l-1)*(h_lj-q_l)));
-				for(int i=0;i<_Ndim;i++)
-					_AroeMinusImplicit[(2+_Ndim)*_nVar+2+i]=(rhomj*Emj+pi)*_vec_normal[i] + uj_n*rhomj*_Vj[2+i];
-				_AroeMinusImplicit[(2+_Ndim)*_nVar+2+_Ndim]=uj_n*(rhomj*(cp_v*cmj+cp_l*(1-cmj))-Hmj*rhomj*rhomj*(cp_v*cmj/(rho_vj*(h_vj-q_v))+cp_l*(1-cmj)/(rho_lj*(h_lj-q_l))));
-			}
+			_Vij[0]=cm;
+			_Vij[1]=pression;//pressure
+			_Vij[_nVar-1]=Tm;//Temperature
+			for(int idim=0;idim<_Ndim; idim++)
+				_Vij[2+idim]=_Uroe[2+idim];
+			primToConsJacobianMatrix(_Vij);
+			Polynoms Poly;
+			Poly.matrixProduct(_AroeMinus, _nVar, _nVar, _primToConsJacoMat, _nVar, _nVar, _AroeMinusImplicit);
+			Poly.matrixProduct(_AroePlus,  _nVar, _nVar, _primToConsJacoMat, _nVar, _nVar, _AroePlusImplicit);
 		}
-		else
-			throw CdmathException("DriftModel::staggeredVFFCMatricesPrimitiveVariables: eos should be StiffenedGas or StiffenedGasDellacherie");
 	}
 }
 
@@ -2817,47 +3029,87 @@ void DriftModel::RoeMatrixConservativeVariables(double cm, double umn,double eci
 void DriftModel::staggeredRoeUpwindingMatrixConservativeVariables(double cm, double umn,double ecin, double Hm, Vector vitesse)
 {
 	//Calcul de décentrement de type décalé pour formulation Roe
-	_absAroe[0*_nVar+0]=0;
-	_absAroe[0*_nVar+1]=0;
+	if(abs(umn)>_precision)//non zero velocity at the interface
+	{
+		_absAroe[0*_nVar+0]=0;
+		_absAroe[0*_nVar+1]=0;
+		for(int i=0;i<_Ndim;i++)
+			_absAroe[0*_nVar+2+i]=_vec_normal[i];
+		_absAroe[0*_nVar+2+_Ndim]=0;
+		_absAroe[1*_nVar+0]=-umn*cm;
+		_absAroe[1*_nVar+1]=umn;
+		for(int i=0;i<_Ndim;i++)
+			_absAroe[1*_nVar+2+i]=cm*_vec_normal[i];
+		_absAroe[1*_nVar+2+_Ndim]=0;
+		for(int i=0;i<_Ndim;i++)
+		{
+			_absAroe[(2+i)*_nVar+0]=-(_khi+_kappa*ecin)*_vec_normal[i]-umn*vitesse[i];
+			_absAroe[(2+i)*_nVar+1]=-_ksi*_vec_normal[i];
+			for(int j=0;j<_Ndim;j++)
+				_absAroe[(2+i)*_nVar+2+j]=vitesse[i]*_vec_normal[j]+_kappa*_vec_normal[i]*vitesse[j];
+			_absAroe[(2+i)*_nVar+2+i]+=umn;
+			_absAroe[(2+i)*_nVar+2+_Ndim]=-_kappa*_vec_normal[i];
+		}
+		_absAroe[(2+_Ndim)*_nVar+0]=(-_khi-_kappa*ecin-Hm)*umn;
+		_absAroe[(2+_Ndim)*_nVar+1]=-_ksi*umn;
+		for(int i=0;i<_Ndim;i++)
+			_absAroe[(2+_Ndim)*_nVar+2+i]=Hm*_vec_normal[i]+_kappa*umn*vitesse[i];
+		_absAroe[(2+_Ndim)*_nVar+2+_Ndim]=(-_kappa+1)*umn;
+
+		double signu;
+		if(umn>_precision)
+			signu=1;
+		else // umn<-_precision
+			signu=-1;
+
+		for(int i=0; i<_nVar*_nVar;i++)
+			_absAroe[i] *= signu;
+	}
+	else//umn=0>rusanov scheme
+	{
+		for(int i=0; i<_nVar*_nVar;i++)
+			_absAroe[i] =0;
+		for(int i=0; i<_nVar;i++)
+			_absAroe[i+i*_nVar] =_maxvploc;
+	}
+}
+
+void DriftModel::staggeredRoeUpwindingMatrixPrimitiveVariables(double concentration, double rhom, double umn, double Hm, Vector vitesse)
+{
+	//Not used. Suppress or use in alternative implicitation in primitive variable of the staggered-roe scheme
+	//Calcul de décentrement de type décalé pour formulation Roe
+	_absAroeImplicit[0*_nVar+0]= _drho_sur_dcv*umn;
+	_absAroeImplicit[0*_nVar+1]= _drho_sur_dp *umn;
 	for(int i=0;i<_Ndim;i++)
-		_absAroe[0*_nVar+2+i]=_vec_normal[i];
-	_absAroe[0*_nVar+2+_Ndim]=0;
-	_absAroe[1*_nVar+0]=-umn*cm;
-	_absAroe[1*_nVar+1]=umn;
+		_absAroeImplicit[0*_nVar+2+i]=rhom*_vec_normal[i];
+	_absAroeImplicit[0*_nVar+2+_Ndim]=_drho_sur_dT*umn;
+	_absAroeImplicit[1*_nVar+0]= _drhocv_sur_dcv*umn;
+	_absAroeImplicit[1*_nVar+1]= _drhocv_sur_dp *umn;
 	for(int i=0;i<_Ndim;i++)
-		_absAroe[1*_nVar+2+i]=cm*_vec_normal[i];
-	_absAroe[1*_nVar+2+_Ndim]=0;
+		_absAroeImplicit[1*_nVar+2+i]=rhom*concentration*_vec_normal[i];
+	_absAroeImplicit[1*_nVar+2+_Ndim]=_drhocv_sur_dT*umn;
 	for(int i=0;i<_Ndim;i++)
 	{
-		_absAroe[(2+i)*_nVar+0]=-(_khi+_kappa*ecin)*_vec_normal[i]-umn*vitesse[i];
-		_absAroe[(2+i)*_nVar+1]=-_ksi*_vec_normal[i];
+		_absAroeImplicit[(2+i)*_nVar+0]= _drho_sur_dcv*umn*vitesse[i];
+		_absAroeImplicit[(2+i)*_nVar+1]= _drho_sur_dp *umn*vitesse[i]-_vec_normal[i];
 		for(int j=0;j<_Ndim;j++)
-			_absAroe[(2+i)*_nVar+2+j]=vitesse[i]*_vec_normal[j]+_kappa*_vec_normal[i]*vitesse[j];
-		_absAroe[(2+i)*_nVar+2+i]+=umn;
-		_absAroe[(2+i)*_nVar+2+_Ndim]=-_kappa*_vec_normal[i];
+			_absAroeImplicit[(2+i)*_nVar+2+j]=rhom*vitesse[i]*_vec_normal[j];
+		_absAroeImplicit[(2+i)*_nVar+2+i]+=rhom*umn;
+		_absAroeImplicit[(2+i)*_nVar+2+_Ndim]=_drho_sur_dT*umn*vitesse[i];
 	}
-	_absAroe[(2+_Ndim)*_nVar+0]=(-_khi-_kappa*ecin-Hm)*umn;
-	_absAroe[(2+_Ndim)*_nVar+1]=-_ksi*umn;
+	_absAroeImplicit[(2+_Ndim)*_nVar+0]=  _drhoE_sur_dcv  *umn;
+	_absAroeImplicit[(2+_Ndim)*_nVar+1]=( _drhoE_sur_dp+1)*umn;
 	for(int i=0;i<_Ndim;i++)
-		_absAroe[(2+_Ndim)*_nVar+2+i]=Hm*_vec_normal[i]+_kappa*umn*vitesse[i];
-	_absAroe[(2+_Ndim)*_nVar+2+_Ndim]=(-_kappa+1)*umn;
-
-	double signu;
-	if(umn>0)
-		signu=1;
-	else if (umn<0)
-		signu=-1;
-	else
-		signu=0;
-
-	for(int i=0; i<_nVar*_nVar;i++)
-		_absAroe[i] *= signu;
+		_absAroeImplicit[(2+_Ndim)*_nVar+2+i]=rhom*(Hm*_vec_normal[i]+umn*vitesse[i]);
+	_absAroeImplicit[(2+_Ndim)*_nVar+2+_Ndim]=_drhoE_sur_dT*umn;
 }
 
 void DriftModel::convectionMatrixPrimitiveVariables(double concentration, double rhom, double umn, double Hm, Vector vitesse)
 {
+	//Not used. Suppress or use in alternative implicitation in primitive variable of the staggered-roe scheme
 	//On remplit la matrice de Roe en variables primitives : F(V_L)-F(V_R)=Aroe (V_L-V_R)
 	//EOS is more involved with primitive variables
+	//first call to getDensityDerivatives(double concentration, double pression, double temperature,double v2) needed
 	_AroeImplicit[0*_nVar+0]=_drho_sur_dcv*umn;
 	_AroeImplicit[0*_nVar+1]=_drho_sur_dp*umn;
 	for(int i=0;i<_Ndim;i++)
@@ -2884,33 +3136,6 @@ void DriftModel::convectionMatrixPrimitiveVariables(double concentration, double
 	_AroeImplicit[(2+_Ndim)*_nVar+2+_Ndim]=_drhoE_sur_dT*umn;
 }
 
-void DriftModel::staggeredRoeUpwindingMatrixPrimitiveVariables(double concentration, double rhom, double umn, double Hm, Vector vitesse)
-{
-	_absAroeImplicit[0*_nVar+0]= _drho_sur_dcv*umn;
-	_absAroeImplicit[0*_nVar+1]= _drho_sur_dp *umn;
-	for(int i=0;i<_Ndim;i++)
-		_absAroeImplicit[0*_nVar+2+i]=rhom*_vec_normal[i];
-	_absAroeImplicit[0*_nVar+2+_Ndim]=_drho_sur_dT*umn;
-	_absAroeImplicit[1*_nVar+0]= _drhocv_sur_dcv*umn;
-	_absAroeImplicit[1*_nVar+1]= _drhocv_sur_dp *umn;
-	for(int i=0;i<_Ndim;i++)
-		_absAroeImplicit[1*_nVar+2+i]=rhom*concentration*_vec_normal[i];
-	_absAroeImplicit[1*_nVar+2+_Ndim]=_drhocv_sur_dT*umn;
-	for(int i=0;i<_Ndim;i++)
-	{
-		_absAroeImplicit[(2+i)*_nVar+0]= _drho_sur_dcv*umn*vitesse[i];
-		_absAroeImplicit[(2+i)*_nVar+1]= _drho_sur_dp *umn*vitesse[i]-_vec_normal[i];
-		for(int j=0;j<_Ndim;j++)
-			_absAroeImplicit[(2+i)*_nVar+2+j]=rhom*vitesse[i]*_vec_normal[j];
-		_absAroeImplicit[(2+i)*_nVar+2+i]+=rhom*umn;
-		_absAroeImplicit[(2+i)*_nVar+2+_Ndim]=_drho_sur_dT*umn*vitesse[i];
-	}
-	_absAroeImplicit[(2+_Ndim)*_nVar+0]=  _drhoE_sur_dcv  *umn;
-	_absAroeImplicit[(2+_Ndim)*_nVar+1]=( _drhoE_sur_dp+1)*umn;
-	for(int i=0;i<_Ndim;i++)
-		_absAroeImplicit[(2+_Ndim)*_nVar+2+i]=rhom*(Hm*_vec_normal[i]+umn*vitesse[i]);
-	_absAroeImplicit[(2+_Ndim)*_nVar+2+_Ndim]=_drhoE_sur_dT*umn;
-}
 void DriftModel::getDensityDerivatives(double concentration, double pression, double temperature,double v2)
 {
 	//EOS is more involved with primitive variables
@@ -2961,8 +3186,8 @@ void DriftModel::getDensityDerivatives(double concentration, double pression, do
 				+(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(e_l-q_l))
 		);
 		_drhoE_sur_dT=rho*(cv_v*concentration + cv_l*(1-concentration))
-																											-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
-																													+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
+																																																					-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
+																																																							+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
 	}
 	else if(dynamic_cast<StiffenedGasDellacherie*>(_fluides[0])!=NULL
 			&& dynamic_cast<StiffenedGasDellacherie*>(_fluides[1])!=NULL)
@@ -3001,8 +3226,8 @@ void DriftModel::getDensityDerivatives(double concentration, double pression, do
 				+gamma_l*(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(h_l-q_l))
 		)-1;
 		_drhoE_sur_dT=rho*(cp_v*concentration + cp_l*(1-concentration))
-		           	    								   -rho*rho*H*( cp_v*   concentration /(rho_v*(h_v-q_v))
-		           	    										   +cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
+		           	    																																		   -rho*rho*H*( cp_v*   concentration /(rho_v*(h_v-q_v))
+		           	    																																				   +cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
 	}
 	else
 		throw CdmathException("SinglePhase::primToConsJacobianMatrix: eos should be StiffenedGas or StiffenedGasDellacherie");
@@ -3018,8 +3243,16 @@ void DriftModel::getDensityDerivatives(double concentration, double pression, do
 void DriftModel::save(){
 	string prim(_path+"/DriftModelPrim_");
 	string cons(_path+"/DriftModelCons_");
+	string allFields(_path+"/");
 	prim+=_fileName;
 	cons+=_fileName;
+	allFields+=_fileName;
+	if(_isStationary)
+	{
+		prim+="_Stat";
+		cons+="_Stat";
+		allFields+="_Stat";
+	}
 
 	PetscInt Ii;
 	for (long i = 0; i < _Nmailles; i++){
@@ -3030,13 +3263,11 @@ void DriftModel::save(){
 		}
 	}
 	if(_saveConservativeField){
-		double tmp;
 		for (long i = 0; i < _Nmailles; i++){
 			// j = 0 : total density; j = 1 : vapour density; j = _nVar - 1 : energy j = 2,..,_nVar-2: momentum
 			for (int j = 0; j < _nVar; j++){
 				Ii = i*_nVar +j;
-				VecGetValues(_conservativeVars,1,&Ii,&tmp);
-				_UU(i,j)=tmp;///_porosityField(i);
+				VecGetValues(_conservativeVars,1,&Ii,&_UU(i,j));
 			}
 		}
 		_UU.setTime(_time,_nbTimeStep);
@@ -3044,10 +3275,8 @@ void DriftModel::save(){
 	_VV.setTime(_time,_nbTimeStep);
 	// create mesh and component info
 	if (_nbTimeStep ==0){
-		string prim_suppress ="rm -rf "+prim+"_*";
-		string cons_suppress ="rm -rf "+cons+"_*";
-		system(prim_suppress.c_str());//Nettoyage des précédents calculs identiques
-		system(cons_suppress.c_str());//Nettoyage des précédents calculs identiques
+		string suppress_previous_runs ="rm -rf *"+_fileName+"_*";
+		system(suppress_previous_runs.c_str());//Nettoyage des précédents calculs identiques
 
 		if(_saveConservativeField){
 			_UU.setInfoOnComponent(0,"Total_Density");// (kg/m^3)
@@ -3168,9 +3397,9 @@ void DriftModel::save(){
 			}
 		}
 	}
-	if(_saveVoidFraction)
+	if(_saveAllFields)
 	{
-		double p,Tm,cv,rhom,rho_v,alpha_v;
+		double p,Tm,cv,alpha_v,rhom,rho_v,rho_l, m_v, m_l, h_v, h_l, vx,vy,vz;
 		int Ii;
 		for (long i = 0; i < _Nmailles; i++){
 			Ii = i*_nVar;
@@ -3181,75 +3410,110 @@ void DriftModel::save(){
 			VecGetValues(_primitiveVars,1,&Ii,&p);
 			Ii = i*_nVar +_nVar-1;
 			VecGetValues(_primitiveVars,1,&Ii,&Tm);
+			Ii = i*_nVar +2;
+			VecGetValues(_primitiveVars,1,&Ii,&vx);
+			if(_Ndim>1)
+			{
+				Ii = i*_nVar +3;
+				VecGetValues(_primitiveVars,1,&Ii,&vy);
+				if(_Ndim>2){
+					Ii = i*_nVar +4;
+					VecGetValues(_primitiveVars,1,&Ii,&vz);
+				}
+			}
 
 			rho_v=_fluides[0]->getDensity(p,Tm);
+			rho_l=_fluides[1]->getDensity(p,Tm);
 			alpha_v=cv*rhom/rho_v;
+			m_v=cv*rhom;
+			m_l=(1-cv)*rhom;
+			h_v=_fluides[0]->getEnthalpy(Tm,rho_v);
+			h_l=_fluides[1]->getEnthalpy(Tm,rho_l);
+
 			_VoidFraction(i)=alpha_v;
+			_Enthalpy(i)=(m_v*h_v+m_l*h_l)/rhom;
+			_Concentration(i)=cv;
+			_Pressure(i)=p;
+			_DensiteLiquide(i)=rho_l;
+			_DensiteVapeur(i)=rho_v;
+			_EnthalpieLiquide(i)=h_l;
+			_EnthalpieVapeur(i)=h_v;
+			_VitesseX(i)=vx;
+			if(_Ndim>1)
+			{
+				_VitesseY(i)=vy;
+				if(_Ndim>2)
+					_VitesseZ(i)=vz;
+			}
 		}
 		_VoidFraction.setTime(_time,_nbTimeStep);
-		if (_nbTimeStep ==0){
-			switch(_saveFormat)
-			{
-			case VTK :
-				_VoidFraction.writeVTK(prim+"_VoidFraction");
-				break;
-			case MED :
-				_VoidFraction.writeMED(prim+"_VoidFraction");
-				break;
-			case CSV :
-				_VoidFraction.writeCSV(prim+"_VoidFraction");
-				break;
-			}
-		}
-		else{
-			switch(_saveFormat)
-			{
-			case VTK :
-				_VoidFraction.writeVTK(prim+"_VoidFraction",false);
-				break;
-			case MED :
-				_VoidFraction.writeMED(prim+"_VoidFraction",false);
-				break;
-			case CSV :
-				_VoidFraction.writeCSV(prim+"_VoidFraction");
-				break;
-			}
-		}
-	}
-	if(_saveEnthalpy)
-	{
-		double p,Tm,cv,rhom,rho_v,rho_l,m_v,m_l;
-		int Ii;
-		for (long i = 0; i < _Nmailles; i++){
-			Ii = i*_nVar;
-			VecGetValues(_conservativeVars,1,&Ii,&rhom);
-			Ii = i*_nVar;
-			VecGetValues(_primitiveVars,1,&Ii,&cv);
-			Ii = i*_nVar +1;
-			VecGetValues(_primitiveVars,1,&Ii,&p);
-			Ii = i*_nVar +_nVar-1;
-			VecGetValues(_primitiveVars,1,&Ii,&Tm);
-
-			double rho_v=_fluides[0]->getDensity(p,Tm);
-			double rho_l=_fluides[1]->getDensity(p,Tm);
-			double m_v=cv*rhom;
-			double m_l=(1-cv)*rhom;
-			double h_v=_fluides[0]->getEnthalpy(Tm,rho_v);
-			double h_l=_fluides[1]->getEnthalpy(Tm,rho_l);
-			_Enthalpy(i)=(m_v*h_v+m_l*h_l)/rhom;
-		}
 		_Enthalpy.setTime(_time,_nbTimeStep);
+		_Concentration.setTime(_time,_nbTimeStep);
+		_Pressure.setTime(_time,_nbTimeStep);
+		_DensiteLiquide.setTime(_time,_nbTimeStep);
+		_DensiteVapeur.setTime(_time,_nbTimeStep);
+		_EnthalpieLiquide.setTime(_time,_nbTimeStep);
+		_EnthalpieVapeur.setTime(_time,_nbTimeStep);
+		_VitesseX.setTime(_time,_nbTimeStep);
+		if(_Ndim>1)
+		{
+			_VitesseY.setTime(_time,_nbTimeStep);
+			if(_Ndim>2)
+				_VitesseZ.setTime(_time,_nbTimeStep);
+		}
 		if (_nbTimeStep ==0){
 			switch(_saveFormat)
 			{
 			case VTK :
-				_Enthalpy.writeVTK(prim+"_Enthalpy");
+				_VoidFraction.writeVTK(allFields+"_VoidFraction");
+				_Enthalpy.writeVTK(allFields+"_Enthalpy");
+				_Concentration.writeVTK(allFields+"_Concentration");
+				_Pressure.writeVTK(allFields+"_Pressure");
+				_DensiteLiquide.writeVTK(allFields+"_LiquidDensity");
+				_DensiteVapeur.writeVTK(allFields+"_SteamDensityy");
+				_EnthalpieLiquide.writeVTK(allFields+"_LiquidEnthalpy");
+				_EnthalpieVapeur.writeVTK(allFields+"_SteamEnthalpy");
+				_VitesseX.writeVTK(allFields+"_VelocityX");
+				if(_Ndim>1)
+				{
+					_VitesseY.writeVTK(allFields+"_VelocityY");
+					if(_Ndim>2)
+						_VitesseZ.writeVTK(allFields+"_VelocityZ");
+				}
 				break;
 			case MED :
-				_Enthalpy.writeMED(prim+"_Enthalpy");
+				_VoidFraction.writeMED(allFields+"_VoidFraction");
+				_Enthalpy.writeMED(allFields+"_Enthalpy");
+				_Concentration.writeMED(allFields+"_Concentration");
+				_Pressure.writeMED(allFields+"_Pressure");
+				_DensiteLiquide.writeMED(allFields+"_LiquidDensity");
+				_DensiteVapeur.writeMED(allFields+"_SteamDensityy");
+				_EnthalpieLiquide.writeMED(allFields+"_LiquidEnthalpy");
+				_EnthalpieVapeur.writeMED(allFields+"_SteamEnthalpy");
+				_VitesseX.writeMED(allFields+"_VelocityX");
+				if(_Ndim>1)
+				{
+					_VitesseY.writeMED(allFields+"_VelocityY");
+					if(_Ndim>2)
+						_VitesseZ.writeMED(allFields+"_VelocityZ");
+				}
 				break;
 			case CSV :
-				_Enthalpy.writeCSV(prim+"_Enthalpy");
+				_VoidFraction.writeCSV(allFields+"_VoidFraction");
+				_Enthalpy.writeCSV(allFields+"_Enthalpy");
+				_Concentration.writeCSV(allFields+"_Concentration");
+				_Pressure.writeCSV(allFields+"_Pressure");
+				_DensiteLiquide.writeCSV(allFields+"_LiquidDensity");
+				_DensiteVapeur.writeCSV(allFields+"_SteamDensityy");
+				_EnthalpieLiquide.writeCSV(allFields+"_LiquidEnthalpy");
+				_EnthalpieVapeur.writeCSV(allFields+"_SteamEnthalpy");
+				_VitesseX.writeCSV(allFields+"_VelocityX");
+				if(_Ndim>1)
+				{
+					_VitesseY.writeCSV(allFields+"_VelocityY");
+					if(_Ndim>2)
+						_VitesseZ.writeCSV(allFields+"_VelocityZ");
+				}
 				break;
 			}
 		}
@@ -3257,13 +3521,55 @@ void DriftModel::save(){
 			switch(_saveFormat)
 			{
 			case VTK :
-				_Enthalpy.writeVTK(prim+"_Enthalpy",false);
+				_VoidFraction.writeVTK(allFields+"_VoidFraction",false);
+				_Enthalpy.writeVTK(allFields+"_Enthalpy",false);
+				_Concentration.writeVTK(allFields+"_Concentration",false);
+				_Pressure.writeVTK(allFields+"_Pressure",false);
+				_DensiteLiquide.writeVTK(allFields+"_LiquidDensity",false);
+				_DensiteVapeur.writeVTK(allFields+"_SteamDensityy",false);
+				_EnthalpieLiquide.writeVTK(allFields+"_LiquidEnthalpy",false);
+				_EnthalpieVapeur.writeVTK(allFields+"_SteamEnthalpy",false);
+				_VitesseX.writeVTK(allFields+"_VelocityX",false);
+				if(_Ndim>1)
+				{
+					_VitesseY.writeVTK(allFields+"_VelocityY",false);
+					if(_Ndim>2)
+						_VitesseZ.writeVTK(allFields+"_VelocityZ",false);
+				}
 				break;
 			case MED :
-				_Enthalpy.writeMED(prim+"_Enthalpy",false);
+				_VoidFraction.writeMED(allFields+"_VoidFraction",false);
+				_Enthalpy.writeMED(allFields+"_Enthalpy",false);
+				_Concentration.writeMED(allFields+"_Concentration",false);
+				_Pressure.writeMED(allFields+"_Pressure",false);
+				_DensiteLiquide.writeMED(allFields+"_LiquidDensity",false);
+				_DensiteVapeur.writeMED(allFields+"_SteamDensityy",false);
+				_EnthalpieLiquide.writeMED(allFields+"_LiquidEnthalpy",false);
+				_EnthalpieVapeur.writeMED(allFields+"_SteamEnthalpy",false);
+				_VitesseX.writeMED(allFields+"_VelocityX",false);
+				if(_Ndim>1)
+				{
+					_VitesseY.writeMED(allFields+"_VelocityY",false);
+					if(_Ndim>2)
+						_VitesseZ.writeMED(allFields+"_VelocityZ",false);
+				}
 				break;
 			case CSV :
-				_Enthalpy.writeCSV(prim+"_Enthalpy");
+				_VoidFraction.writeCSV(allFields+"_VoidFraction");
+				_Enthalpy.writeVTK(allFields+"_Enthalpy");
+				_Concentration.writeCSV(allFields+"_Concentration");
+				_Pressure.writeCSV(allFields+"_Pressure");
+				_DensiteLiquide.writeCSV(allFields+"_LiquidDensity");
+				_DensiteVapeur.writeCSV(allFields+"_SteamDensityy");
+				_EnthalpieLiquide.writeCSV(allFields+"_LiquidEnthalpy");
+				_EnthalpieVapeur.writeCSV(allFields+"_SteamEnthalpy");
+				_VitesseX.writeCSV(allFields+"_VelocityX");
+				if(_Ndim>1)
+				{
+					_VitesseY.writeCSV(allFields+"_VelocityY");
+					if(_Ndim>2)
+						_VitesseZ.writeCSV(allFields+"_VelocityZ");
+				}
 				break;
 			}
 		}

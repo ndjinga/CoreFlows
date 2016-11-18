@@ -71,8 +71,7 @@ int main(int argc, char** argv)
 	myProblem.setFreqSave(freqSave);
 	myProblem.setFileName(fileName);
 	myProblem.usePrimitiveVarsInNewton(true);
-	myProblem.saveVoidFraction(true);
-	myProblem.saveEnthalpy(true);
+	myProblem.saveAllFields(true);
 	myProblem.displayConditionNumber();
 	myProblem.setSaveFileFormat(CSV);
 

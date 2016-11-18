@@ -52,9 +52,14 @@
 	+ \ref Drift1DVidResPy
 	+ \ref Drift2DBoilC
 	+ \ref Drift2DBoilPy
+	+ \ref Drift2DInclGravC
+	+ \ref Drift2DInclGravPy
+	+ \ref Drift2DInclGravTriPy
+	+ \ref Drift2DInclGravBarsC
+	+ \ref Drift2DInclGravBarsPy
 	+ \ref Drift2DPressLossPy
 	+ \ref Drift2DPorJumpPy
-	+ \ref Drift2DBoilBarPy
+	+ \ref Drift2DBoilBarVertPy
 	+ \ref Drift2DBoilBarIncPy
 	+ \ref Drift2DVidResPy
 	+ \ref Drift2DVidResUnsPy

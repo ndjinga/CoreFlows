@@ -57,7 +57,8 @@ int main(int argc, char** argv)
 	// set the numerical method
 	myProblem.setNumericalScheme(upwind, Explicit);
 	myProblem.setWellBalancedCorrection(true);
-
+    myProblem.setNonLinearFormulation(VFFC) ;
+    
 	// name file save
 	string fileName = "1DPorosityJumpUpwindWB";
 

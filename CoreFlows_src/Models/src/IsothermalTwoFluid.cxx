@@ -18,6 +18,7 @@ IsothermalTwoFluid::IsothermalTwoFluid(pressureEstimate pEstimate, int dim){
 	if (pEstimate==around1bar300K)//EOS at 1 bar and 300K
 	{
 		cout<<"Fluid is air-water mixture around 1 bar and 300 K (27°C)"<<endl;
+		*_runLogFile<<"Fluid is air-water mixture around 1 bar and 300 K (27°C)"<<endl;
 		_Temperature=300;//Constant temperature of the model
 		_internalEnergy1=2.22e5;//nitrogen internal energy at 1bar, 300K
 		_internalEnergy2=1.12e5;//water internal energy at 1 bar, 300K
@@ -27,6 +28,7 @@ IsothermalTwoFluid::IsothermalTwoFluid(pressureEstimate pEstimate, int dim){
 	else//EOS at 155 bars and 618K
 	{
 		cout<<"Fluid is water-Gas mixture around saturation point 155 bars and 618 K (345°C)"<<endl;
+		*_runLogFile<<"Fluid is water-Gas mixture around saturation point 155 bars and 618 K (345°C)"<<endl;
 		_Temperature=618;//Constant temperature of the model
 		_internalEnergy1=2.44e6;//Gas internal energy at saturation at 155 bar
 		_internalEnergy2=1.6e6;//water internal energy at saturation at 155 bar
@@ -38,6 +40,7 @@ IsothermalTwoFluid::IsothermalTwoFluid(pressureEstimate pEstimate, int dim){
 
 void IsothermalTwoFluid::initialize(){
 	cout<<"Initialising the isothermal two-fluid model"<<endl;
+	*_runLogFile<<"Initialising the isothermal two-fluid model"<<endl;
 
 	_Uroe = new double[_nVar+1];
 
@@ -1399,6 +1402,7 @@ void IsothermalTwoFluid::consToPrim(const double *Wcons, double* Wprim,double po
 			cout<<Wcons[k]<<", ";
 		}
 		cout<<endl;
+		*_runLogFile<< "IsothermalTwoFluid::consToPrim: negative pressure = "<< Wprim[1] << " < 0 " << endl;
 		throw CdmathException("IsothermalTwoFluid::consToPrim: negative pressure");
 	}
 }
