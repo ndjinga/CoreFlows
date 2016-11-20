@@ -13,6 +13,7 @@ ProblemFluid::ProblemFluid(void){
 	_pressureLossFieldSet=false;
 	_sectionFieldSet=false;
 	_GravityField3d=vector<double>(3,0);
+	_gravityReferencePoint=vector<double>(3,0);
 	_Uroe=NULL;_Udiff=NULL;_temp=NULL;_l=NULL;_vec_normal=NULL;;
 	_idm=NULL;_idn=NULL;
 	_saveVelocity=false;

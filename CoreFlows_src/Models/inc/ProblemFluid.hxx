@@ -113,16 +113,10 @@ public :
 	 * \param [in] vector<double> : reference_point position on the boundary where the value Pressure will be imposed
 	 * \param [out] void
 	 *  */
-	void setOutletBoundaryCondition(string groupName,double Pressure, vector<double> reference_point){
-		/* On the boundary we have P-Pref=rho g\cdot(x-xref) hence P=Pref-g\cdot xref + g\cdot x */
-		Pressure-=reference_point[0]*_GravityField3d[0];
-		if(_Ndim>1){
-			Pressure-=reference_point[1]*_GravityField3d[1];
-			if(_Ndim>2)
-				Pressure-=reference_point[2]*_GravityField3d[2];
-		}
-
-		_limitField[groupName]=LimitField(Outlet,Pressure,vector<double>(_nbPhases,0),vector<double>(_nbPhases,0),vector<double>(_nbPhases,0),-1,-1,-1,-1);
+	void setOutletBoundaryCondition(string groupName,double referencePressure, vector<double> reference_point){
+		/* On the boundary we have P-Pref=rho g\cdot(x-xref) */
+		_gravityReferencePoint=reference_point;
+		_limitField[groupName]=LimitField(Outlet,referencePressure,vector<double>(_nbPhases,0),vector<double>(_nbPhases,0),vector<double>(_nbPhases,0),-1,-1,-1,-1);
 	};
 
 	/** \fn setViscosity
@@ -357,6 +351,8 @@ public :
 	 * \param [out] void
 	 *  */
 	void setNonLinearFormulation(NonLinearFormulation nonLinearFormulation){
+		//if(nonLinearFormulation != Roe && nonLinearFormulation != VFRoe && nonLinearFormulation != VFFC && nonLinearFormulation!=reducedRoe)
+		//	throw CdmathException("nonLinearFormulation should be either Roe, VFRoe or VFFC");//extra security for swig binding
 		_nonLinearFormulation=nonLinearFormulation;
 	}
 
@@ -410,7 +406,7 @@ protected :
 	vector<double> _conductivite;
 
 	// Source terms 
-	vector<double> _gravite, _GravityField3d, _dragCoeffs;
+	vector<double> _gravite, _GravityField3d, _gravityReferencePoint, _dragCoeffs;
 	double _latentHeat, _Tsat,_Psat,_dHsatl_over_dp;
 	Field _porosityField, _pressureLossField, _dp_over_dt, _sectionField;
 	bool _porosityFieldSet, _pressureLossFieldSet, _sectionFieldSet;

@@ -47,7 +47,7 @@ def DriftModel_2DPorosityJump():
         else:
             porosityField[i]=1;
         pass
-    porosityField.writeVTK("Porosity");
+    porosityField.writeVTK("PorosityField");
     
     myProblem = cf.DriftModel(cf.around155bars600K,spaceDim);
     nVar =myProblem.getNumberOfVariables();

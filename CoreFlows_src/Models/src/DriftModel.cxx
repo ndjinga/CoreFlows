@@ -725,11 +725,11 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 
 		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
 		Cell Cj=_mesh.getCell(j);
-		double hydroPress=Cj.x()*_GravityField3d[0];
+		double hydroPress=(Cj.x()-_gravityReferencePoint[0])*_GravityField3d[0];
 		if(_Ndim>1){
-			hydroPress+=Cj.y()*_GravityField3d[1];
+			hydroPress+=(Cj.y()-_gravityReferencePoint[1])*_GravityField3d[1];
 			if(_Ndim>2)
-				hydroPress+=Cj.z()*_GravityField3d[2];
+				hydroPress+=(Cj.z()-_gravityReferencePoint[2])*_GravityField3d[2];
 		}
 		hydroPress*=_externalStates[0]/porosityj;//multiplication by rho
 
@@ -3549,7 +3549,7 @@ void DriftModel::save(){
 				break;
 			case CSV :
 				_VoidFraction.writeCSV(allFields+"_VoidFraction");
-				_Enthalpy.writeVTK(allFields+"_Enthalpy");
+				_Enthalpy.writeCSV(allFields+"_Enthalpy");
 				_Concentration.writeCSV(allFields+"_Concentration");
 				_Pressure.writeCSV(allFields+"_Pressure");
 				_Temperature.writeCSV(allFields+"_Temperature");
@@ -3611,7 +3611,7 @@ void DriftModel::save(){
 					break;
 				case CSV :
 					_VoidFraction.writeCSV(allFields+"_VoidFraction");
-					_Enthalpy.writeVTK(allFields+"_Enthalpy");
+					_Enthalpy.writeCSV(allFields+"_Enthalpy");
 					_Concentration.writeCSV(allFields+"_Concentration");
 					_Pressure.writeCSV(allFields+"_Pressure");
 					_Temperature.writeCSV(allFields+"_Temperature");
