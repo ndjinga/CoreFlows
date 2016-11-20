@@ -447,6 +447,8 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 	for(k=0; k<_Ndim; k++)
 		q_n+=_externalStates[(k+1)]*normale[k];
 
+	double porosityj=_porosityField(j);
+
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
 		cout << "setBoundaryState for group "<< nameOfGroup << ", inner cell j= "<<j<< " face unit normal vector "<<endl;
@@ -477,7 +479,8 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 		double pression=_externalStates[0];
 		double T=_limitField[nameOfGroup].T;
 		double rho=_fluides[0]->getDensity(pression,T);
-		_externalStates[0]=rho;
+
+		_externalStates[0]=porosityj*rho;
 		_externalStates[1]=_externalStates[0]*_limitField[nameOfGroup].v_x[0];
 		v2 +=_limitField[nameOfGroup].v_x[0]*_limitField[nameOfGroup].v_x[0];
 		if(_Ndim>1)
@@ -518,7 +521,8 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 			double pression=_externalStates[0];
 			double T=_limitField[nameOfGroup].T;
 			double rho=_fluides[0]->getDensity(pression,T);
-			_externalStates[0]=rho;
+
+			_externalStates[0]=porosityj*rho;
 			_externalStates[1]=_externalStates[0]*(_limitField[nameOfGroup].v_x[0]);
 			v2 +=(_limitField[nameOfGroup].v_x[0])*(_limitField[nameOfGroup].v_x[0]);
 			if(_Ndim>1)
@@ -556,17 +560,17 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 			if(_Ndim>2)
 				hydroPress+=Cj.z()*_GravityField3d[2];
 		}
-		hydroPress*=_externalStates[0];//multiplication by rho the total density
+		hydroPress*=_externalStates[0]/porosityj;//multiplication by rho the total density
 
 		//Building the external state
 		VecGetValues(_primitiveVars, _nVar, _idm, _externalStates);
 		if(q_n<=0){
-			_externalStates[0]=_fluides[0]->getDensity(_limitField[nameOfGroup].p+hydroPress,_limitField[nameOfGroup].T);
+			_externalStates[0]=porosityj*_fluides[0]->getDensity(_limitField[nameOfGroup].p+hydroPress,_limitField[nameOfGroup].T);
 		}
 		else{
 			if(_nbTimeStep%_freqSave ==0)
 				cout<< "Warning : fluid going out through inletPressure boundary "<<nameOfGroup<<". Applying Neumann boundary condition for velocity and temperature"<<endl;
-			_externalStates[0]=_fluides[0]->getDensity(_limitField[nameOfGroup].p+hydroPress, _externalStates[_nVar-1]);
+			_externalStates[0]=porosityj*_fluides[0]->getDensity(_limitField[nameOfGroup].p+hydroPress, _externalStates[_nVar-1]);
 		}
 
 		for(k=0; k<_Ndim; k++)
@@ -599,7 +603,7 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 			if(_Ndim>2)
 				hydroPress+=Cj.z()*_GravityField3d[2];
 		}
-		hydroPress*=_externalStates[0];//multiplication by rho the total density
+		hydroPress*=_externalStates[0]/porosityj;//multiplication by rho the total density
 
 		if(_verbose && _nbTimeStep%_freqSave ==0)
 		{
@@ -612,7 +616,7 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 			_idm[k] = _idm[k-1] + 1;
 		VecGetValues(_primitiveVars, _nVar, _idm, _externalStates);
 
-		_externalStates[0]=_fluides[0]->getDensity(_limitField[nameOfGroup].p+hydroPress, _externalStates[_nVar-1]);
+		_externalStates[0]=porosityj*_fluides[0]->getDensity(_limitField[nameOfGroup].p+hydroPress, _externalStates[_nVar-1]);
 		for(k=0; k<_Ndim; k++)
 		{
 			v2+=_externalStates[(k+1)]*_externalStates[(k+1)];

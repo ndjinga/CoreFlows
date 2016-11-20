@@ -64,7 +64,7 @@ int main(int argc, char** argv) {
 	myProblem.setNonLinearFormulation(VFFC);
 
 	// name the result file
-	string fileName = "Driftmodel1DVidangeReservoir";
+	string fileName = "Driftmodel_1DVidangeReservoir";
 
 	// setting numerical parameters
 	unsigned MaxNbOfTimeStep = 1;

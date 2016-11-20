@@ -11,75 +11,73 @@ using namespace std;
 
 int main()
 {
-	//setting mesh and groups
-	cout << "Building a regular grid " << endl;
-	double xinf = 0.0;
-	double xsup = 4.2;
-	int nx = 2; //50;
-	Mesh M(xinf, xsup, nx);
-	double eps = 1.E-8;
-	M.setGroupAtPlan(xinf, 0, eps, "Outlet");
-	M.setGroupAtPlan(xsup, 0, eps, "Inlet");
-	int spaceDim = M.getSpaceDimension();
+	int spaceDim = 2;
 
-	// setting boundary conditions
-	double inletConc = 1;
-	double inletTemperature = 300;
-	double outletPressure = 1e5;
+	// set the limit field for each boundary
+	double wallVelocityX=0;
+	double wallVelocityY=0;
+	double wallTemperature=563;
 
-	double initialConcTop = 1;
-	double initialConcBottom = 0.0001;
-	double initialVelocityX = 1;
-	double initialPressure = 1e5;
-	double initialTemperature = 300;
+	double inletConcentration=0;
+	double inletVelocityX=0;
+	double inletVelocityY=1;
+	double inletTemperature=563;
 
-	// setting physical parameters
-	vector<double> gravite(spaceDim, 0.);
-	gravite[0] = -10;
+	double outletPressure=155e5;
 
-	DriftModel myProblem(around1bar300K, spaceDim, false);
-	int nbPhase = myProblem.getNumberOfPhases();
+	// physical constants
+	vector<double> gravite(spaceDim,0.) ;
+	gravite[1]=-8.5;
+	gravite[0]=5;
+
+	DriftModel  myProblem(around155bars600K,spaceDim);
 	int nVar = myProblem.getNumberOfVariables();
 
+	//Prepare for the mesh
+	double xinf=0.0;
+	double xsup=1.0;
+	double yinf=0.0;
+	double ysup=1.0;
+	int nx=1;
+	int ny=1;
+
 	// Prepare for the initial condition
-	Vector VV_top(nVar), VV_bottom(nVar);
-
-// top and bottom vectors
-	VV_top[0] = initialConcTop;
-	VV_top[1] = initialPressure;
-	VV_top[2] = initialVelocityX;
-	VV_top[3] = initialTemperature;
-
-	VV_bottom[0] = initialConcBottom;
-	VV_bottom[1] = initialPressure;
-	VV_bottom[2] = initialVelocityX;
-	VV_bottom[3] = initialTemperature;
+	vector<double> VV_Constant(nVar);
+	// constant vector
+	VV_Constant[0] = 0;
+	VV_Constant[1] = 155e5;
+	VV_Constant[2] = 0;
+	VV_Constant[3] = 1;
+	VV_Constant[4] = 563;
 
 	//Initial field creation
-	cout << "Setting initial data " << endl;
-	myProblem.setInitialFieldStepFunction(M, VV_bottom, VV_top, .8, 0);
+	cout << "Building initial data" << endl;
+	myProblem.setInitialFieldConstant(spaceDim,VV_Constant,xinf,xsup,nx,"wall","wall",yinf,ysup,ny,"inlet","outlet");
 
 	//set the boundary conditions
-	myProblem.setInletPressureBoundaryCondition("inlet", outletPressure,inletTemperature, inletConc, vector<double>(1, xinf));
-	myProblem.setOutletBoundaryCondition("Outlet", outletPressure,vector<double>(1, xsup));
+	vector<double>pressure_reference_point(2);
+	pressure_reference_point[0]=xsup;
+	pressure_reference_point[1]=ysup;
+	myProblem.setOutletBoundaryCondition("outlet", outletPressure,pressure_reference_point);
+	myProblem.setInletBoundaryCondition("inlet", inletTemperature, inletConcentration, inletVelocityX, inletVelocityY);
+	myProblem.setWallBoundaryCondition("wall", wallTemperature, wallVelocityX, wallVelocityY);
 
-	// physical parameters
+	// set physical parameters
 	myProblem.setGravity(gravite);
 
 	// set the numerical method
-	myProblem.setNumericalScheme(upwind, Explicit);
-	myProblem.setWellBalancedCorrection(true);
+	myProblem.setNumericalScheme(upwind, Implicit);
 	myProblem.setNonLinearFormulation(VFFC);
 
-	// name the result file
-	string fileName = "Driftmodel1DVidangeReservoir";
+	// name of result file
+	string fileName = "DriftModel_2DInclinedBoilingChannel";
 
-	// setting numerical parameters
-	unsigned MaxNbOfTimeStep = 1;
+	// computation parameters
+	unsigned MaxNbOfTimeStep = 1 ;
 	int freqSave = 1;
-	double cfl = 0.95;
-	double maxTime = 1;
-	double precision = 1e-5;
+	double cfl = 0.5;
+	double maxTime = 5;
+	double precision = 1e-4;
 
 	myProblem.setCFL(cfl);
 	myProblem.setPrecision(precision);
@@ -87,22 +85,19 @@ int main()
 	myProblem.setTimeMax(maxTime);
 	myProblem.setFreqSave(freqSave);
 	myProblem.setFileName(fileName);
-	myProblem.usePrimitiveVarsInNewton(true);
-	myProblem.saveAllFields(true);
-	myProblem.setVerbose(true);
-	myProblem.displayConditionNumber();
-	myProblem.setSaveFileFormat(CSV);
+	myProblem.saveVelocity();
+	myProblem.setNewtonSolver(precision,1);
 
 	// evolution
 	myProblem.initialize();
 
 	bool ok = myProblem.run();
 	if (ok)
-		cout << "Simulation " << fileName << " is successful !" << endl;
+		cout << "Simulation "<<fileName<<" is successful !" << endl;
 	else
-		cout << "Simulation " << fileName << "  failed ! " << endl;
+		cout << "Simulation "<<fileName<<"  failed ! " << endl;
 
-	cout << "------------ End of calculation -----------" << endl;
+	cout << "------------ End of calculation !!! -----------" << endl;
 	myProblem.terminate();
 
 	return ok;

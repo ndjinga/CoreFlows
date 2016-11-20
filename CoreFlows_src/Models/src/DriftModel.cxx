@@ -536,6 +536,8 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 	for(k=0; k<_Ndim; k++)
 		q_n+=_externalStates[(k+2)]*normale[k];
 
+	double porosityj=_porosityField(j);
+
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
 		cout << "setBoundaryState for group "<< nameOfGroup<< ", inner cell j= "<<j << " face unit normal vector "<<endl;
@@ -576,7 +578,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 			throw CdmathException("DriftModel::setBoundaryState: Inlet, impossible to compute mixture density, division by zero");
 		}
 
-		_externalStates[0]=rho_v*rho_l/(concentration*rho_l+(1-concentration)*rho_v);
+		_externalStates[0]=porosityj*rho_v*rho_l/(concentration*rho_l+(1-concentration)*rho_v);
 		_externalStates[1]=concentration*_externalStates[0];
 
 		_externalStates[2]=_externalStates[0]*_limitField[nameOfGroup].v_x[0];
@@ -630,7 +632,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 				throw CdmathException("DriftModel::setBoundaryState: Inlet, impossible to compute mixture density, division by zero");
 			}
 
-			_externalStates[0]=rho_v*rho_l/(concentration*rho_l+(1-concentration)*rho_v);
+			_externalStates[0]=porosityj*rho_v*rho_l/(concentration*rho_l+(1-concentration)*rho_v);
 			_externalStates[1]=concentration*_externalStates[0];
 			_externalStates[2]=_externalStates[0]*(_limitField[nameOfGroup].v_x[0]);
 			v2 +=(_limitField[nameOfGroup].v_x[0])*(_limitField[nameOfGroup].v_x[0]);
@@ -670,7 +672,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 			if(_Ndim>2)
 				hydroPress+=Cj.z()*_GravityField3d[2];
 		}
-		hydroPress*=_externalStates[0];//multiplication by rho
+		hydroPress*=_externalStates[0]/porosityj;//multiplication by rho
 
 		//Building the external state
 		VecGetValues(_primitiveVars, _nVar, _idm, _Vj);
@@ -697,7 +699,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 			throw CdmathException("DriftModel::jacobian: Inlet, impossible to compute mixture density, division by zero");
 		}
 
-		_externalStates[0]=rho_v*rho_l/(concentration*rho_l+(1-concentration)*rho_v);
+		_externalStates[0]=porosityj*rho_v*rho_l/(concentration*rho_l+(1-concentration)*rho_v);
 		_externalStates[1]=concentration*_externalStates[0];
 		double mv=_externalStates[1], ml=_externalStates[0]-_externalStates[1];
 		for(k=0; k<_Ndim; k++)
@@ -729,7 +731,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 			if(_Ndim>2)
 				hydroPress+=Cj.z()*_GravityField3d[2];
 		}
-		hydroPress*=_externalStates[0];//multiplication by rho
+		hydroPress*=_externalStates[0]/porosityj;//multiplication by rho
 
 		//Building the external state
 		VecGetValues(_primitiveVars, _nVar, _idm, _Vj);
@@ -747,7 +749,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 			throw CdmathException("DriftModel::jacobian: Inlet, impossible to compute mixture density, division by zero");
 		}
 
-		_externalStates[0]=rho_v*rho_l/(concentration*rho_l+(1-concentration)*rho_v);
+		_externalStates[0]=porosityj*rho_v*rho_l/(concentration*rho_l+(1-concentration)*rho_v);
 		_externalStates[1]=concentration*_externalStates[0];
 		double mv=_externalStates[1], ml=_externalStates[0]-_externalStates[1];
 		for(k=0; k<_Ndim; k++)

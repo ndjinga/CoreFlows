@@ -65,7 +65,7 @@ int main(int argc, char** argv)
 	myProblem.setWellBalancedCorrection(true);
 
 	// name of result file
-	string fileName = "2DInclinedBoilingChannel";
+	string fileName = "DriftModel_2DInclinedBoilingChannel";
 
 	// computation parameters
 	unsigned MaxNbOfTimeStep = 3 ;

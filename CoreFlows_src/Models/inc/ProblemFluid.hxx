@@ -166,7 +166,10 @@ public :
 		if(_nbPhases!= dragCoeffs.size())
 			throw CdmathException("ProblemFluid::setDragCoeffs: incorrect vector size vs number of phases");
 		for(int i=0;i<_nbPhases;i++)
+		{
 			_fluides[i]->setDragCoeffs(dragCoeffs[i]);
+			_dragCoeffs[i]=dragCoeffs[i];
+		}
 	};
 
 	/** \fn getNumberOfPhases

@@ -55,7 +55,7 @@ int main(int argc, char** argv)
 	myProblem.setNonLinearFormulation(VFRoe);
 
 	// name the result file
-	string fileName = "Driftmodel1DChannelGravity";
+	string fileName = "Driftmodel_1DChannelGravity";
 
 	// setting numerical parameters
 	unsigned MaxNbOfTimeStep =3 ;
