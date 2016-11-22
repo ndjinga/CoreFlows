@@ -2972,19 +2972,26 @@ void DriftModel::applyVFRoeLowMachCorrections()
 			for(int i=0;i<_Ndim;i++)
 				uij_n += _Uroe[1+i]*_vec_normal[i];
 
-			if(uij_n>=0){
+			if(uij_n>_precision){
 				_Vij[0]=_Vi[0];
 				_Vij[1]=_Vj[1];
 				for(int i=0;i<_Ndim;i++)
 					_Vij[2+i]=_Vi[2+i];
 				_Vij[_nVar-1]=_Vi[_nVar-1];
 			}
-			else{
+			else if(uij_n<-_precision){
 				_Vij[0]=_Vj[0];
 				_Vij[1]=_Vi[1];
 				for(int i=0;i<_Ndim;i++)
 					_Vij[2+i]=_Vj[2+i];
 				_Vij[_nVar-1]=_Vj[_nVar-1];
+			}
+			else{
+				_Vij[0]=(_Vi[0]+_Vj[0])/2;
+				_Vij[1]=(_Vi[1]+_Vj[1])/2;
+				for(int i=0;i<_Ndim;i++)
+					_Vij[2+i]=(_Vi[2+i]+_Vj[2+i])/2;
+				_Vij[_nVar-1]=(_Vi[_nVar-1]+_Vj[_nVar-1])/2;
 			}
 		}
 		primToCons(_Vij,0,_Uij,0);
