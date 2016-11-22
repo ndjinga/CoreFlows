@@ -932,13 +932,13 @@ void DriftModel::convectionMatrices()
 	}
 
 	/*******Calcul de la matrice signe pour VFFC, VFRoe et décentrement des termes source***/
-	if(_entropicCorrection || (_spaceScheme ==pressureCorrection))
+	if(_entropicCorrection)
 	{
 		InvMatriceRoe( vp_dist);
 		Polynoms Poly;
 		Poly.matrixProduct(_absAroe, _nVar, _nVar, _invAroe, _nVar, _nVar, _signAroe);
 	}
-	else if (_spaceScheme==upwind || (_spaceScheme ==lowMach))//upwind sans entropic
+	else if (_spaceScheme==upwind || (_spaceScheme ==lowMach) || (_spaceScheme ==pressureCorrection))//upwind sans entropic
 		SigneMatriceRoe( vp_dist);
 	else if(_spaceScheme== centered)//centre  sans entropic
 		for(int i=0; i<_nVar*_nVar;i++)
@@ -2952,7 +2952,6 @@ void DriftModel::applyVFRoeLowMachCorrections()
 			double 	c = _maxvploc;//mixture sound speed
 			double M=sqrt(u_2)/c;//Mach number
 			_Vij[1]=M*_Vij[1]+(1-M)*(_Vi[1]+_Vj[1])/2;
-			primToCons(_Vij,0,_Uij,0);
 		}
 		else if(_spaceScheme==pressureCorrection)
 		{
@@ -2965,7 +2964,7 @@ void DriftModel::applyVFRoeLowMachCorrections()
 				uj_n += _Vj[2+i]*_vec_normal[i];
 			}
 			norm_uij=sqrt(norm_uij);
-			_Vij[1]=(_Vi[1]+_Vj[1])/2 + uij_n/norm_uij*(_Vj[1]-_Vi[1])/4 - _Uroe[0]*norm_uij*(uj_n-ui_n)/4;
+			_Vij[1]=(_Vi[1]+_Vj[1])/2 ;//+ uij_n/norm_uij*(_Vj[1]-_Vi[1])/4 - _Uroe[0]*norm_uij*(uj_n-ui_n)/4;
 		}
 		else if(_spaceScheme==staggered)
 		{
@@ -2987,8 +2986,8 @@ void DriftModel::applyVFRoeLowMachCorrections()
 					_Vij[2+i]=_Vj[2+i];
 				_Vij[_nVar-1]=_Vj[_nVar-1];
 			}
-			primToCons(_Vij,0,_Uij,0);
 		}
+		primToCons(_Vij,0,_Uij,0);
 	}
 }
 void DriftModel::RoeMatrixConservativeVariables(double cm, double umn,double ecin, double Hm,Vector vitesse)
