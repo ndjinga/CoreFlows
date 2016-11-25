@@ -103,11 +103,13 @@ void ProblemCoreFlows::setInitialField(const Field &VV)
 
 	if(_Ndim != VV.getSpaceDimension()){
 		*_runLogFile<<"ProblemCoreFlows::setInitialField: mesh has incorrect space dimension"<<endl;
+		_runLogFile->close();
 		throw CdmathException("ProblemCoreFlows::setInitialField: mesh has incorrect space dimension");
 	}
 	if(_nVar!=VV.getNumberOfComponents())
 	{
 		*_runLogFile<<"ProblemCoreFlows::setInitialField: Initial field has incorrect number of components"<<endl;
+		_runLogFile->close();
 		throw CdmathException("ProblemCoreFlows::setInitialField: Initial field has incorrect number of components");
 	}
 
@@ -207,6 +209,7 @@ void ProblemCoreFlows::setInitialFieldConstant( int nDim, const vector<double> V
 	else{
 		cout<<"ProblemCoreFlows::setInitialFieldConstant: Space dimension nDim should be between 1 and 3"<<endl;
 		*_runLogFile<<"ProblemCoreFlows::setInitialFieldConstant: Space dimension nDim should be between 1 and 3"<<endl;
+		_runLogFile->close();
 		throw CdmathException("Space dimension nDim should be between 1 and 3");
 	}
 
@@ -228,6 +231,7 @@ void ProblemCoreFlows::setInitialFieldStepFunction(const Mesh M, const Vector VV
 	if  (VV_Right.getNumberOfRows()!=VV_Left.getNumberOfRows())
 	{
 		*_runLogFile<<"ProblemCoreFlows::setStepFunctionInitialField: Vectors VV_Left and VV_Right have different sizes"<<endl;
+		_runLogFile->close();
 		throw CdmathException( "ProblemCoreFlows::setStepFunctionInitialField: Vectors VV_Left and VV_Right have different sizes");
 	}
 	Field VV("Primitive", CELLS, M, VV_Left.getNumberOfRows());
@@ -241,8 +245,10 @@ void ProblemCoreFlows::setInitialFieldStepFunction(const Mesh M, const Vector VV
 			component_value=M.getCell(j).y();
 		else if(direction==2)
 			component_value=M.getCell(j).z();
-		else
+		else{
+			_runLogFile->close();
 			throw CdmathException( "ProblemCoreFlows::setStepFunctionInitialField: direction should be an integer between 0 and 2");
+		}
 
 		for (int i=0; i< VV.getNumberOfComponents(); i++)
 			if (component_value< disc_pos )
@@ -265,7 +271,10 @@ void ProblemCoreFlows::setInitialFieldStepFunction( int nDim, const vector<doubl
 	else if(nDim==3)
 		M=Mesh(xmin,xmax,nx,ymin,ymax,ny,zmin,zmax,nz);
 	else
+	{
+		_runLogFile->close();
 		throw CdmathException("Space dimension nDim should be between 1 and 3");
+	}
 
 	M.setGroupAtPlan(xmax,0,_precision,rightSide);
 	M.setGroupAtPlan(xmin,0,_precision,leftSide);
@@ -324,6 +333,7 @@ void ProblemCoreFlows::setLinearSolver(linearSolver kspType, preconditioner pcTy
 	else {
 		cout << "only 'GRMES' or 'BICGSTAB' is acceptable as a linear solver !!!" << endl;
 		*_runLogFile << "only 'GRMES' or 'BICGSTAB' is acceptable as a linear solver !!!" << endl;
+		_runLogFile->close();
 		throw CdmathException("only 'GRMES' or 'BICGSTAB' algorithm is acceptable !!!");
 	}
 	// set preconditioner
@@ -336,6 +346,7 @@ void ProblemCoreFlows::setLinearSolver(linearSolver kspType, preconditioner pcTy
 	} else {
 		cout << "only 'NONE' or 'LU' or 'ILU' preconditioners are acceptable !!!" << endl;
 		*_runLogFile << "only 'NONE' or 'LU' or 'ILU' preconditioners are acceptable !!!" << endl;
+		_runLogFile->close();
 		throw CdmathException("only 'NONE' or 'LU' or 'ILU' preconditioners are acceptable !!!" );
 	}
 };
@@ -349,7 +360,10 @@ void ProblemCoreFlows::setLinearSolver(linearSolver kspType, preconditioner pcTy
 bool ProblemCoreFlows::run()
 {
 	if(!_initializedMemory)
+	{
+		_runLogFile->close();
 		throw CdmathException("ProblemCoreFlows::run() call initialize() first");
+	}
 	bool stop=false; // Does the Problem want to stop (error) ?
 	bool ok; // Is the time interval successfully solved ?
 	_isStationary=false;//in case of a second run with a different physics or cfl
