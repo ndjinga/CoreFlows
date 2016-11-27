@@ -598,7 +598,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 			}
 		}
 		_externalStates[_nVar-1] = _externalStates[1]*_fluides[0]->getInternalEnergy(_limitField[nameOfGroup].T,rho_v)
-																																																																																																													 +(_externalStates[0]-_externalStates[1])*_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + _externalStates[0]*v2/2;
+																																																																																																																			 +(_externalStates[0]-_externalStates[1])*_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + _externalStates[0]*v2/2;
 		_idm[0] = 0;
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
@@ -1650,8 +1650,8 @@ void DriftModel::primToConsJacobianMatrix(double *V)
 		for(int idim=0;idim<_Ndim;idim++)
 			_primToConsJacoMat[(_nVar-1)*_nVar+2+idim]=rho*vitesse[idim];
 		_primToConsJacoMat[(_nVar-1)*_nVar+_nVar-1]=rho*(cv_v*concentration + cv_l*(1-concentration))
-																																																																			-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
-																																																																					+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
+																																																																									-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
+																																																																											+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
 	}
 	else if(_useDellacherieEOS)
 	{
@@ -1708,8 +1708,8 @@ void DriftModel::primToConsJacobianMatrix(double *V)
 		for(int idim=0;idim<_Ndim;idim++)
 			_primToConsJacoMat[(_nVar-1)*_nVar+2+idim]=rho*vitesse[idim];
 		_primToConsJacoMat[(_nVar-1)*_nVar+_nVar-1]=rho*(cp_v*concentration + cp_l*(1-concentration))
-																																																																			-rho*rho*H*(cp_v*   concentration /(rho_v*(h_v-q_v))
-																																																																					+cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
+																																																																									-rho*rho*H*(cp_v*   concentration /(rho_v*(h_v-q_v))
+																																																																											+cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
 	}
 	else
 	{
@@ -1871,7 +1871,7 @@ void DriftModel::getMixturePressureAndTemperature(double c_v, double rhom, doubl
 		StiffenedGas* fluide1=dynamic_cast<StiffenedGas*>(_fluides[1]);
 
 		temperature= (rhom_em-m_v*fluide0->getInternalEnergy(0)-m_l*fluide1->getInternalEnergy(0))
-																																																																																																											/(m_v*fluide0->constante("cv")+m_l*fluide1->constante("cv"));
+																																																																																																																	/(m_v*fluide0->constante("cv")+m_l*fluide1->constante("cv"));
 
 		double e_v=fluide0->getInternalEnergy(temperature);
 		double e_l=fluide1->getInternalEnergy(temperature);
@@ -2475,8 +2475,6 @@ void DriftModel::staggeredVFFCMatricesConservativeVariables(double u_mn)
 				throw CdmathException("Calcul matrice de Roe: vitesse du son complexe");
 			}
 			double am=sqrt(_kappa*hm+_khi+cm*_ksi);//vitesse du son du melange
-			//			double ecin=0.5*u_2;
-			//			RoeMatrixConservativeVariables( cm, umn, ecin, Hm,vitesse);
 			_maxvploc=fabs(umn)+am;
 			if(_maxvploc>_maxvp)
 				_maxvp=_maxvploc;
@@ -2558,6 +2556,7 @@ void DriftModel::staggeredVFFCMatricesPrimitiveVariables(double u_mn)
 	if(_spaceScheme!=staggered || _nonLinearFormulation!=VFFC)
 	{
 		_runLogFile->close();
+		*_runLogFile<< "DriftModel::staggeredVFFCMatricesPrimitiveVariables: staggeredVFFCMatricesPrimitiveVariables method should be called only for VFFC formulation and staggered upwinding" << endl;
 		throw CdmathException("DriftModel::staggeredVFFCMatricesPrimitiveVariables: staggeredVFFCMatricesPrimitiveVariables method should be called only for VFFC formulation and staggered upwinding");
 	}
 	else//_spaceScheme==staggered && _nonLinearFormulation==VFFC
@@ -2702,7 +2701,7 @@ void DriftModel::staggeredVFFCMatricesPrimitiveVariables(double u_mn)
 						_AroeMinusImplicit[(2+_Ndim)*_nVar+2+i]=0;
 					_AroeMinusImplicit[(2+_Ndim)*_nVar+2+_Ndim]=0;
 				}
-				else
+				else if(u_mn<-_precision)
 				{
 					if(_verbose && _nbTimeStep%_freqSave ==0)
 						cout<<"VFFC Staggered state rhomj="<<rhomj<<" cmj= "<<cmj<<" Emj= "<<Emj<<" Tmj= "<<Tmj<<" pi= "<<pi<<endl;
@@ -2779,6 +2778,12 @@ void DriftModel::staggeredVFFCMatricesPrimitiveVariables(double u_mn)
 					for(int i=0;i<_Ndim;i++)
 						_AroeMinusImplicit[(2+_Ndim)*_nVar+2+i]=(rhomj*Emj+pi)*_vec_normal[i] + uj_n*rhomj*_Vj[2+i];
 					_AroeMinusImplicit[(2+_Ndim)*_nVar+2+_Ndim]=uj_n*(rhomj*(cv_v*cmj+cv_l*(1-cmj))-Emj*rhomj*rhomj*(cv_v*cmj/(rho_vj*(e_vj-q_v))+cv_l*(1-cmj)/(rho_lj*(e_lj-q_l))));
+				}
+				else
+				{
+					_runLogFile->close();
+					*_runLogFile<< "SinglePhase::staggeredVFFCMatricesPrimitiveVariables: velocity umn should be non zero" << endl;
+					throw CdmathException("SinglePhase::staggeredVFFCMatricesPrimitiveVariables: velocity umn should be non zero");
 				}
 			}
 			else if(_useDellacherieEOS)
@@ -2875,7 +2880,7 @@ void DriftModel::staggeredVFFCMatricesPrimitiveVariables(double u_mn)
 						_AroeMinusImplicit[(2+_Ndim)*_nVar+2+i]=0;
 					_AroeMinusImplicit[(2+_Ndim)*_nVar+2+_Ndim]=0;
 				}
-				else
+				else if(u_mn<-_precision)
 				{
 					if(_verbose && _nbTimeStep%_freqSave ==0)
 						cout<<"VFFC Staggered state rhomj="<<rhomj<<" cmj= "<<cmj<<" Hmj= "<<Hmj<<" Tmj= "<<Tmj<<" pi= "<<pi<<endl;
@@ -2953,43 +2958,22 @@ void DriftModel::staggeredVFFCMatricesPrimitiveVariables(double u_mn)
 						_AroeMinusImplicit[(2+_Ndim)*_nVar+2+i]=(rhomj*Emj+pi)*_vec_normal[i] + uj_n*rhomj*_Vj[2+i];
 					_AroeMinusImplicit[(2+_Ndim)*_nVar+2+_Ndim]=uj_n*(rhomj*(cp_v*cmj+cp_l*(1-cmj))-Hmj*rhomj*rhomj*(cp_v*cmj/(rho_vj*(h_vj-q_v))+cp_l*(1-cmj)/(rho_lj*(h_lj-q_l))));
 				}
+				else
+				{
+					_runLogFile->close();
+					*_runLogFile<< "SinglePhase::staggeredVFFCMatricesPrimitiveVariables: velocity umn should be non zero" << endl;
+					throw CdmathException("SinglePhase::staggeredVFFCMatricesPrimitiveVariables: velocity umn should be non zero");
+				}
 			}
 			else
 				throw CdmathException("DriftModel::staggeredVFFCMatricesPrimitiveVariables: eos should be StiffenedGas or StiffenedGasDellacherie");
 		}
 		else//case nil velocity on the interface, apply centered scheme
 		{
-			double rhom=_Uroe[0];
-			double cm=_Uroe[1];
-			double Tm;
-			double Hm=_Uroe[_nVar-1];
-			double umn=0,u_2=0;
-			Vector vitesse(_Ndim);
-			for(int idim=0;idim<_Ndim;idim++)
-			{
-				vitesse[idim]=_Uroe[2+idim];
-				umn += _Uroe[2+idim]*_vec_normal[idim];//vitesse normale
-				u_2 += _Uroe[2+idim]*_Uroe[2+idim];
-			}
-			double hm=Hm-0.5*u_2;
-
-			if(cm<_precision)//pure liquid
-				Tm=_fluides[1]->getTemperatureFromEnthalpy(hm,rhom);
-			else if(cm>1-_precision)
-				Tm=_fluides[0]->getTemperatureFromEnthalpy(hm,rhom);
-			else//Hypothèse de saturation
-				Tm=_Tsat;
-
-			double pression= getMixturePressure(cm, rhom, Tm);
-
-			_Vij[0]=cm;
-			_Vij[1]=pression;//pressure
-			_Vij[_nVar-1]=Tm;//Temperature
-			for(int idim=0;idim<_Ndim; idim++)
-				_Vij[2+idim]=_Uroe[2+idim];
-			primToConsJacobianMatrix(_Vij);
 			Polynoms Poly;
+			primToConsJacobianMatrix(_Vj);
 			Poly.matrixProduct(_AroeMinus, _nVar, _nVar, _primToConsJacoMat, _nVar, _nVar, _AroeMinusImplicit);
+			primToConsJacobianMatrix(_Vi);
 			Poly.matrixProduct(_AroePlus,  _nVar, _nVar, _primToConsJacoMat, _nVar, _nVar, _AroePlusImplicit);
 		}
 	}
@@ -3242,8 +3226,8 @@ void DriftModel::getDensityDerivatives(double concentration, double pression, do
 				+(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(e_l-q_l))
 		);
 		_drhoE_sur_dT=rho*(cv_v*concentration + cv_l*(1-concentration))
-																																																											-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
-																																																													+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
+																																																																	-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
+																																																																			+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
 	}
 	else if(_useDellacherieEOS)
 	{
@@ -3281,8 +3265,8 @@ void DriftModel::getDensityDerivatives(double concentration, double pression, do
 				+gamma_l*(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(h_l-q_l))
 		)-1;
 		_drhoE_sur_dT=rho*(cp_v*concentration + cp_l*(1-concentration))
-		           	    																																								   -rho*rho*H*( cp_v*   concentration /(rho_v*(h_v-q_v))
-		           	    																																										   +cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
+		           	    																																														   -rho*rho*H*( cp_v*   concentration /(rho_v*(h_v-q_v))
+		           	    																																																   +cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
 	}
 	else
 		throw CdmathException("SinglePhase::primToConsJacobianMatrix: eos should be StiffenedGas or StiffenedGasDellacherie");

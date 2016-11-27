@@ -2215,6 +2215,12 @@ void SinglePhase::staggeredVFFCMatricesPrimitiveVariables(double un)//vitesse no
 						_AroeMinusImplicit[_nVar*(_nVar-1)+idim+1]=(rhoj*Ej+pi)*_vec_normal[idim]+rhoj*uj_n*_Vj[1+idim];
 					_AroeMinusImplicit[_nVar*_nVar -1] = rhoj*uj_n*(1-Ej/(ej-q))*cv;
 				}
+				else
+				{
+					_runLogFile->close();
+					*_runLogFile<< "SinglePhase::staggeredVFFCMatricesPrimitiveVariables: velocity un should be non zero" << endl;
+					throw CdmathException("SinglePhase::staggeredVFFCMatricesPrimitiveVariables: velocity un should be non zero");
+				}
 			}
 			else if(_useDellacherieEOS )
 			{
@@ -2375,6 +2381,12 @@ void SinglePhase::staggeredVFFCMatricesPrimitiveVariables(double un)//vitesse no
 						_AroeMinusImplicit[_nVar*(_nVar-1)+idim+1]=(rhoj*Ej+pi)*_vec_normal[idim]+rhoj*uj_n*_Vj[1+idim];
 					_AroeMinusImplicit[_nVar*_nVar -1] = rhoj*uj_n*(1-Hj/(hj-q))*cp;
 				}
+				else
+				{
+					_runLogFile->close();
+					*_runLogFile<< "SinglePhase::staggeredVFFCMatricesPrimitiveVariables: velocity un should be non zero" << endl;
+					throw CdmathException("SinglePhase::staggeredVFFCMatricesPrimitiveVariables: velocity un should be non zero");
+				}
 			}
 			else
 			{
@@ -2385,18 +2397,10 @@ void SinglePhase::staggeredVFFCMatricesPrimitiveVariables(double un)//vitesse no
 		}
 		else//case nil velocity on the interface, apply centered scheme
 		{
-			double u_2=0;// carré du module
-			for(int i=0;i<_Ndim;i++)
-			{
-				u_2 += _Uroe[1+i]*_Uroe[1+i];
-			}
-			_Vij[0]=_fluides[0]->getPressureFromEnthalpy(_Uroe[_nVar-1]-u_2/2, _Uroe[0]);//pressure
-			_Vij[_nVar-1]=_fluides[0]->getTemperatureFromPressure( _Vij[0], _Uroe[0]);//Temperature
-			for(int idim=0;idim<_Ndim; idim++)
-				_Vij[1+idim]=_Uroe[1+idim];
-			primToConsJacobianMatrix(_Vij);
 			Polynoms Poly;
+			primToConsJacobianMatrix(_Vj);
 			Poly.matrixProduct(_AroeMinus, _nVar, _nVar, _primToConsJacoMat, _nVar, _nVar, _AroeMinusImplicit);
+			primToConsJacobianMatrix(_Vi);
 			Poly.matrixProduct(_AroePlus,  _nVar, _nVar, _primToConsJacoMat, _nVar, _nVar, _AroePlusImplicit);
 		}
 	}
