@@ -92,6 +92,7 @@ void DriftModel::initialize(){
 		_Enthalpy=Field("Enthalpy",CELLS,_mesh,1);
 		_Concentration=Field("Concentration",CELLS,_mesh,1);
 		_Pressure=Field("Pressure",CELLS,_mesh,1);
+		_mixtureDensity=Field("Mixt density",CELLS,_mesh,1);
 		_Temperature=Field("Temperature",CELLS,_mesh,1);
 		_DensiteLiquide=Field("Liquid density",CELLS,_mesh,1);
 		_DensiteVapeur=Field("Steam density",CELLS,_mesh,1);
@@ -598,7 +599,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 			}
 		}
 		_externalStates[_nVar-1] = _externalStates[1]*_fluides[0]->getInternalEnergy(_limitField[nameOfGroup].T,rho_v)
-																																																																																																																					 +(_externalStates[0]-_externalStates[1])*_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + _externalStates[0]*v2/2;
+																																																																																																																							 +(_externalStates[0]-_externalStates[1])*_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + _externalStates[0]*v2/2;
 		_idm[0] = 0;
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
@@ -1650,8 +1651,8 @@ void DriftModel::primToConsJacobianMatrix(double *V)
 		for(int idim=0;idim<_Ndim;idim++)
 			_primToConsJacoMat[(_nVar-1)*_nVar+2+idim]=rho*vitesse[idim];
 		_primToConsJacoMat[(_nVar-1)*_nVar+_nVar-1]=rho*(cv_v*concentration + cv_l*(1-concentration))
-																																																																											-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
-																																																																													+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
+																																																																													-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
+																																																																															+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
 	}
 	else if(_useDellacherieEOS)
 	{
@@ -1708,8 +1709,8 @@ void DriftModel::primToConsJacobianMatrix(double *V)
 		for(int idim=0;idim<_Ndim;idim++)
 			_primToConsJacoMat[(_nVar-1)*_nVar+2+idim]=rho*vitesse[idim];
 		_primToConsJacoMat[(_nVar-1)*_nVar+_nVar-1]=rho*(cp_v*concentration + cp_l*(1-concentration))
-																																																																											-rho*rho*H*(cp_v*   concentration /(rho_v*(h_v-q_v))
-																																																																													+cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
+																																																																													-rho*rho*H*(cp_v*   concentration /(rho_v*(h_v-q_v))
+																																																																															+cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
 	}
 	else
 	{
@@ -1871,7 +1872,7 @@ void DriftModel::getMixturePressureAndTemperature(double c_v, double rhom, doubl
 		StiffenedGas* fluide1=dynamic_cast<StiffenedGas*>(_fluides[1]);
 
 		temperature= (rhom_em-m_v*fluide0->getInternalEnergy(0)-m_l*fluide1->getInternalEnergy(0))
-																																																																																																																			/(m_v*fluide0->constante("cv")+m_l*fluide1->constante("cv"));
+																																																																																																																					/(m_v*fluide0->constante("cv")+m_l*fluide1->constante("cv"));
 
 		double e_v=fluide0->getInternalEnergy(temperature);
 		double e_l=fluide1->getInternalEnergy(temperature);
@@ -3224,8 +3225,8 @@ void DriftModel::getDensityDerivatives(double concentration, double pression, do
 				+(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(e_l-q_l))
 		);
 		_drhoE_sur_dT=rho*(cv_v*concentration + cv_l*(1-concentration))
-																																																																			-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
-																																																																					+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
+																																																																					-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
+																																																																							+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
 	}
 	else if(_useDellacherieEOS)
 	{
@@ -3263,8 +3264,8 @@ void DriftModel::getDensityDerivatives(double concentration, double pression, do
 				+gamma_l*(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(h_l-q_l))
 		)-1;
 		_drhoE_sur_dT=rho*(cp_v*concentration + cp_l*(1-concentration))
-		           	    																																																   -rho*rho*H*( cp_v*   concentration /(rho_v*(h_v-q_v))
-		           	    																																																		   +cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
+		           	    																																																		   -rho*rho*H*( cp_v*   concentration /(rho_v*(h_v-q_v))
+		           	    																																																				   +cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
 	}
 	else
 		throw CdmathException("SinglePhase::primToConsJacobianMatrix: eos should be StiffenedGas or StiffenedGasDellacherie");
@@ -3464,6 +3465,7 @@ void DriftModel::save(){
 			_VoidFraction(i)=alpha_v;
 			_Enthalpy(i)=(m_v*h_v+m_l*h_l)/rhom;
 			_Concentration(i)=cv;
+			_mixtureDensity(i)=rhom;
 			_Pressure(i)=p;
 			_Temperature(i)=Tm;
 			_DensiteLiquide(i)=rho_l;
@@ -3481,6 +3483,7 @@ void DriftModel::save(){
 		_VoidFraction.setTime(_time,_nbTimeStep);
 		_Enthalpy.setTime(_time,_nbTimeStep);
 		_Concentration.setTime(_time,_nbTimeStep);
+		_mixtureDensity.setTime(_time,_nbTimeStep);
 		_Pressure.setTime(_time,_nbTimeStep);
 		_Temperature.setTime(_time,_nbTimeStep);
 		_DensiteLiquide.setTime(_time,_nbTimeStep);
@@ -3501,6 +3504,7 @@ void DriftModel::save(){
 				_VoidFraction.writeVTK(allFields+"_VoidFraction");
 				_Enthalpy.writeVTK(allFields+"_Enthalpy");
 				_Concentration.writeVTK(allFields+"_Concentration");
+				_mixtureDensity.writeVTK(allFields+"_Density");
 				_Pressure.writeVTK(allFields+"_Pressure");
 				_Temperature.writeVTK(allFields+"_Temperature");
 				_DensiteLiquide.writeVTK(allFields+"_LiquidDensity");
@@ -3519,6 +3523,7 @@ void DriftModel::save(){
 				_VoidFraction.writeMED(allFields+"_VoidFraction");
 				_Enthalpy.writeMED(allFields+"_Enthalpy");
 				_Concentration.writeMED(allFields+"_Concentration");
+				_mixtureDensity.writeMED(allFields+"_Density");
 				_Pressure.writeMED(allFields+"_Pressure");
 				_Temperature.writeMED(allFields+"_Temperature");
 				_DensiteLiquide.writeMED(allFields+"_LiquidDensity");
@@ -3537,6 +3542,7 @@ void DriftModel::save(){
 				_VoidFraction.writeCSV(allFields+"_VoidFraction");
 				_Enthalpy.writeCSV(allFields+"_Enthalpy");
 				_Concentration.writeCSV(allFields+"_Concentration");
+				_mixtureDensity.writeCSV(allFields+"_Density");
 				_Pressure.writeCSV(allFields+"_Pressure");
 				_Temperature.writeCSV(allFields+"_Temperature");
 				_DensiteLiquide.writeCSV(allFields+"_LiquidDensity");
@@ -3560,6 +3566,7 @@ void DriftModel::save(){
 				_VoidFraction.writeVTK(allFields+"_VoidFraction",false);
 				_Enthalpy.writeVTK(allFields+"_Enthalpy",false);
 				_Concentration.writeVTK(allFields+"_Concentration",false);
+				_mixtureDensity.writeVTK(allFields+"_Density",false);
 				_Pressure.writeVTK(allFields+"_Pressure",false);
 				_Temperature.writeVTK(allFields+"_Temperature",false);
 				_DensiteLiquide.writeVTK(allFields+"_LiquidDensity",false);
@@ -3578,6 +3585,7 @@ void DriftModel::save(){
 				_VoidFraction.writeMED(allFields+"_VoidFraction",false);
 				_Enthalpy.writeMED(allFields+"_Enthalpy",false);
 				_Concentration.writeMED(allFields+"_Concentration",false);
+				_mixtureDensity.writeMED(allFields+"_Density",false);
 				_Pressure.writeMED(allFields+"_Pressure",false);
 				_Temperature.writeMED(allFields+"_Temperature",false);
 				_DensiteLiquide.writeMED(allFields+"_LiquidDensity",false);
@@ -3596,6 +3604,7 @@ void DriftModel::save(){
 				_VoidFraction.writeCSV(allFields+"_VoidFraction");
 				_Enthalpy.writeCSV(allFields+"_Enthalpy");
 				_Concentration.writeCSV(allFields+"_Concentration");
+				_mixtureDensity.writeCSV(allFields+"_Density");
 				_Pressure.writeCSV(allFields+"_Pressure");
 				_Temperature.writeCSV(allFields+"_Temperature");
 				_DensiteLiquide.writeCSV(allFields+"_LiquidDensity");
@@ -3622,6 +3631,7 @@ void DriftModel::save(){
 					_VoidFraction.writeVTK(allFields+"_VoidFraction",false);
 					_Enthalpy.writeVTK(allFields+"_Enthalpy",false);
 					_Concentration.writeVTK(allFields+"_Concentration",false);
+					_mixtureDensity.writeVTK(allFields+"_Density",false);
 					_Pressure.writeVTK(allFields+"_Pressure",false);
 					_Temperature.writeVTK(allFields+"_Temperature",false);
 					_DensiteLiquide.writeVTK(allFields+"_LiquidDensity",false);
@@ -3640,6 +3650,7 @@ void DriftModel::save(){
 					_VoidFraction.writeMED(allFields+"_VoidFraction",false);
 					_Enthalpy.writeMED(allFields+"_Enthalpy",false);
 					_Concentration.writeMED(allFields+"_Concentration",false);
+					_mixtureDensity.writeMED(allFields+"_Density",false);
 					_Pressure.writeMED(allFields+"_Pressure",false);
 					_Temperature.writeMED(allFields+"_Temperature",false);
 					_DensiteLiquide.writeMED(allFields+"_LiquidDensity",false);
@@ -3658,6 +3669,7 @@ void DriftModel::save(){
 					_VoidFraction.writeCSV(allFields+"_VoidFraction");
 					_Enthalpy.writeCSV(allFields+"_Enthalpy");
 					_Concentration.writeCSV(allFields+"_Concentration");
+					_mixtureDensity.writeCSV(allFields+"_Density");
 					_Pressure.writeCSV(allFields+"_Pressure");
 					_Temperature.writeCSV(allFields+"_Temperature");
 					_DensiteLiquide.writeCSV(allFields+"_LiquidDensity");
