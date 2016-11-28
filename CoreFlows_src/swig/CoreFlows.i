@@ -3,6 +3,8 @@
 %include std_string.i
 %include std_vector.i
 
+%apply bool& INOUT {bool &stop}
+
 namespace std {
  %template(VectorDouble) vector<double>;
 };

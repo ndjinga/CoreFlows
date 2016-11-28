@@ -702,7 +702,7 @@ void SinglePhase::convectionMatrices()
 			for(int i=0; i<_nVar*_nVar;i++)
 				_absAroe[i] = 0;
 		}
-		else if(_spaceScheme == upwind || _spaceScheme ==pressureCorrection || _spaceScheme ==lowMach || (_spaceScheme==staggered )){
+		else if(_spaceScheme == upwind || _spaceScheme ==pressureCorrection || _spaceScheme ==lowMach){
 			if(_entropicCorrection)
 				entropicShift(_vec_normal);
 			else
@@ -1628,12 +1628,10 @@ void SinglePhase::staggeredRoeUpwindingMatrixConservativeVariables( double u_n, 
 		for(int i=0; i<_nVar*_nVar;i++)
 			_absAroe[i] *= signu;
 	}
-	else//umn=0 ->rusanov scheme
+	else//umn=0 ->centered scheme
 	{
 		for(int i=0; i<_nVar*_nVar;i++)
 			_absAroe[i] =0;
-		for(int i=0; i<_nVar;i++)
-			_absAroe[i+i*_nVar] =_maxvploc;
 	}
 }
 void SinglePhase::staggeredRoeUpwindingMatrixPrimitiveVariables(double rho, double u_n,double H, Vector vitesse)
