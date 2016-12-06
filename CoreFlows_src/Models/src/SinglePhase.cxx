@@ -316,6 +316,7 @@ void SinglePhase::convectionState( const long &i, const long &j, const bool &IsB
 	{
 		cout<<"!!!!!!!!!!!!!!!!!!!!!!!!densite negative, arret de calcul!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
 		*_runLogFile<<"!!!!!!!!!!!!!!!!!!!!!!!!densite negative, arret de calcul!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
+		_runLogFile->close();
 		throw CdmathException("densite negative, arret de calcul");
 	}
 	PetscScalar ri, rj, xi, xj, pi, pj;
@@ -636,6 +637,7 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 		cout<<"Boundary condition not set for boundary named "<<nameOfGroup<<endl;
 		cout<<"Accepted boundary condition are Neumann, Wall, Inlet, and Outlet"<<endl;
 		*_runLogFile<<"Boundary condition not set for boundary named. Accepted boundary condition are Neumann, Wall, Inlet, and Outlet"<<endl;
+		_runLogFile->close();
 		throw CdmathException("Unknown boundary condition");
 	}
 }
@@ -691,12 +693,16 @@ void SinglePhase::convectionMatrices()
 		/******** Construction des matrices de decentrement ********/
 		if( _spaceScheme ==centered){
 			if(_entropicCorrection)
+			{
+				*_runLogFile<<"SinglePhase::convectionMatrices: entropy scheme not available for centered scheme"<<endl;
+				_runLogFile->close();
 				throw CdmathException("SinglePhase::convectionMatrices: entropy scheme not available for centered scheme");
+			}
 
 			for(int i=0; i<_nVar*_nVar;i++)
 				_absAroe[i] = 0;
 		}
-		else if(_spaceScheme == upwind || _spaceScheme ==pressureCorrection || _spaceScheme ==lowMach || (_spaceScheme==staggered )){
+		else if(_spaceScheme == upwind || _spaceScheme ==pressureCorrection || _spaceScheme ==lowMach){
 			if(_entropicCorrection)
 				entropicShift(_vec_normal);
 			else
@@ -721,12 +727,20 @@ void SinglePhase::convectionMatrices()
 		}
 		else if( _spaceScheme ==staggered ){
 			if(_entropicCorrection)//To do: study entropic correction for staggered
+			{
+				*_runLogFile<<"SinglePhase::convectionMatrices: entropy scheme not available for staggered scheme"<<endl;
+				_runLogFile->close();
 				throw CdmathException("SinglePhase::convectionMatrices: entropy scheme not available for staggered scheme");
+			}
 
 			staggeredRoeUpwindingMatrixConservativeVariables( u_n, H, vitesse, k, K);
 		}
 		else
+		{
+			*_runLogFile<<"SinglePhase::convectionMatrices: scheme not treated"<<endl;
+			_runLogFile->close();
 			throw CdmathException("SinglePhase::convectionMatrices: scheme not treated");
+		}
 
 		for(int i=0; i<_nVar*_nVar;i++)
 		{
@@ -797,7 +811,11 @@ void SinglePhase::convectionMatrices()
 		_signAroe[_nVar*(_nVar-1)+_nVar-1] = signu;
 	}
 	else
+	{
+		*_runLogFile<<"SinglePhase::convectionMatrices: well balanced option not treated"<<endl;
+		_runLogFile->close();
 		throw CdmathException("SinglePhase::convectionMatrices: well balanced option not treated");
+	}
 }
 void SinglePhase::computeScaling(double maxvp)
 {
@@ -1247,6 +1265,8 @@ void SinglePhase::jacobian(const int &j, string nameOfGroup,double * normale)
 	else  if (_limitField[nameOfGroup].bcType!=Neumann)// not wall, not inlet, not outlet
 	{
 		cout << "group named "<<nameOfGroup << " : unknown boundary condition" << endl;
+		*_runLogFile<<"group named "<<nameOfGroup << " : unknown boundary condition" << endl;
+		_runLogFile->close();
 		throw CdmathException("SinglePhase::jacobian: This boundary condition is not treated");
 	}
 }
@@ -1316,6 +1336,8 @@ void  SinglePhase::jacobianDiff(const int &j, string nameOfGroup)
 	}
 	else{
 		cout << "group named "<<nameOfGroup << " : unknown boundary condition" << endl;
+		*_runLogFile<<"group named "<<nameOfGroup << " : unknown boundary condition" << endl;
+		_runLogFile->close();
 		throw CdmathException("SinglePhase::jacobianDiff: This boundary condition is not recognised");
 	}
 }
@@ -1395,7 +1417,11 @@ void SinglePhase::primToConsJacobianMatrix(double *V)
 		_primToConsJacoMat[(_nVar-1)*_nVar+_nVar-1]=rho*cp*(1-H/(h-q));
 	}
 	else
+	{
+		*_runLogFile<<"SinglePhase::primToConsJacobianMatrix: eos should be StiffenedGas or StiffenedGasDellacherie"<<endl;
+		_runLogFile->close();
 		throw CdmathException("SinglePhase::primToConsJacobianMatrix: eos should be StiffenedGas or StiffenedGasDellacherie");
+	}
 
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
@@ -1418,6 +1444,7 @@ void SinglePhase::consToPrim(const double *Wcons, double* Wprim,double porosity)
 	if (Wprim[0]<0){
 		cout << "pressure = "<< Wprim[0] << " < 0 " << endl;
 		*_runLogFile<< "pressure = "<< Wprim[0] << " < 0 " << endl;
+		_runLogFile->close();
 		throw CdmathException("SinglePhase::consToPrim: negative pressure");
 	}
 	for(int k=1;k<=_Ndim;k++)
@@ -1601,12 +1628,10 @@ void SinglePhase::staggeredRoeUpwindingMatrixConservativeVariables( double u_n, 
 		for(int i=0; i<_nVar*_nVar;i++)
 			_absAroe[i] *= signu;
 	}
-	else//umn=0 ->rusanov scheme
+	else//umn=0 ->centered scheme
 	{
 		for(int i=0; i<_nVar*_nVar;i++)
 			_absAroe[i] =0;
-		for(int i=0; i<_nVar;i++)
-			_absAroe[i+i*_nVar] =_maxvploc;
 	}
 }
 void SinglePhase::staggeredRoeUpwindingMatrixPrimitiveVariables(double rho, double u_n,double H, Vector vitesse)
@@ -1637,7 +1662,11 @@ Vector SinglePhase::staggeredVFFCFlux()
 		cout<<"SinglePhase::staggeredVFFCFlux() start"<<endl;
 
 	if(_spaceScheme!=staggered || _nonLinearFormulation!=VFFC)
+	{
+		_runLogFile->close();
+		*_runLogFile<< "SinglePhase::staggeredVFFCFlux: staggeredVFFCFlux method should be called only for VFFC formulation and staggered upwinding, pressure = "<<  endl;
 		throw CdmathException("SinglePhase::staggeredVFFCFlux: staggeredVFFCFlux method should be called only for VFFC formulation and staggered upwinding");
+	}
 	else//_spaceScheme==staggered && _nonLinearFormulation==VFFC
 	{
 		Vector Fij(_nVar);
@@ -1696,7 +1725,11 @@ void SinglePhase::staggeredVFFCMatricesConservativeVariables(double un)//vitesse
 		cout<<"SinglePhase::staggeredVFFCMatrices()"<<endl;
 
 	if(_spaceScheme!=staggered || _nonLinearFormulation!=VFFC)
+	{
+		_runLogFile->close();
+		*_runLogFile<< "SinglePhase::staggeredVFFCMatrices: staggeredVFFCMatrices method should be called only for VFFC formulation and staggered upwinding"<< endl;
 		throw CdmathException("SinglePhase::staggeredVFFCMatrices: staggeredVFFCMatrices method should be called only for VFFC formulation and staggered upwinding");
+	}
 	else//_spaceScheme==staggered && _nonLinearFormulation==VFFC
 	{
 		double ui_n=0, ui_2=0, uj_n=0, uj_2=0;//vitesse normale et carré du module
@@ -1986,7 +2019,11 @@ void SinglePhase::staggeredVFFCMatricesPrimitiveVariables(double un)//vitesse no
 		cout<<"SinglePhase::staggeredVFFCMatricesPrimitiveVariables()"<<endl;
 
 	if(_spaceScheme!=staggered || _nonLinearFormulation!=VFFC)
+	{
+		_runLogFile->close();
+		*_runLogFile<< "SinglePhase::staggeredVFFCMatricesPrimitiveVariables: staggeredVFFCMatricesPrimitiveVariables method should be called only for VFFC formulation and staggered upwinding" << endl;
 		throw CdmathException("SinglePhase::staggeredVFFCMatricesPrimitiveVariables: staggeredVFFCMatricesPrimitiveVariables method should be called only for VFFC formulation and staggered upwinding");
+	}
 	else//_spaceScheme==staggered && _nonLinearFormulation==VFFC
 	{
 		double ui_n=0., ui_2=0., uj_n=0., uj_2=0.;//vitesse normale et carré du module
@@ -2176,6 +2213,12 @@ void SinglePhase::staggeredVFFCMatricesPrimitiveVariables(double un)//vitesse no
 						_AroeMinusImplicit[_nVar*(_nVar-1)+idim+1]=(rhoj*Ej+pi)*_vec_normal[idim]+rhoj*uj_n*_Vj[1+idim];
 					_AroeMinusImplicit[_nVar*_nVar -1] = rhoj*uj_n*(1-Ej/(ej-q))*cv;
 				}
+				else
+				{
+					_runLogFile->close();
+					*_runLogFile<< "SinglePhase::staggeredVFFCMatricesPrimitiveVariables: velocity un should be non zero" << endl;
+					throw CdmathException("SinglePhase::staggeredVFFCMatricesPrimitiveVariables: velocity un should be non zero");
+				}
 			}
 			else if(_useDellacherieEOS )
 			{
@@ -2336,24 +2379,26 @@ void SinglePhase::staggeredVFFCMatricesPrimitiveVariables(double un)//vitesse no
 						_AroeMinusImplicit[_nVar*(_nVar-1)+idim+1]=(rhoj*Ej+pi)*_vec_normal[idim]+rhoj*uj_n*_Vj[1+idim];
 					_AroeMinusImplicit[_nVar*_nVar -1] = rhoj*uj_n*(1-Hj/(hj-q))*cp;
 				}
+				else
+				{
+					_runLogFile->close();
+					*_runLogFile<< "SinglePhase::staggeredVFFCMatricesPrimitiveVariables: velocity un should be non zero" << endl;
+					throw CdmathException("SinglePhase::staggeredVFFCMatricesPrimitiveVariables: velocity un should be non zero");
+				}
 			}
 			else
+			{
+				_runLogFile->close();
+				*_runLogFile<< "SinglePhase::staggeredVFFCMatricesPrimitiveVariables: eos should be StiffenedGas or StiffenedGasDellacherie" << endl;
 				throw CdmathException("SinglePhase::staggeredVFFCMatricesPrimitiveVariables: eos should be StiffenedGas or StiffenedGasDellacherie");
+			}
 		}
 		else//case nil velocity on the interface, apply centered scheme
 		{
-			double u_2=0;// carré du module
-			for(int i=0;i<_Ndim;i++)
-			{
-				u_2 += _Uroe[1+i]*_Uroe[1+i];
-			}
-			_Vij[0]=_fluides[0]->getPressureFromEnthalpy(_Uroe[_nVar-1]-u_2/2, _Uroe[0]);//pressure
-			_Vij[_nVar-1]=_fluides[0]->getTemperatureFromPressure( _Vij[0], _Uroe[0]);//Temperature
-			for(int idim=0;idim<_Ndim; idim++)
-				_Vij[1+idim]=_Uroe[1+idim];
-			primToConsJacobianMatrix(_Vij);
 			Polynoms Poly;
+			primToConsJacobianMatrix(_Vj);
 			Poly.matrixProduct(_AroeMinus, _nVar, _nVar, _primToConsJacoMat, _nVar, _nVar, _AroeMinusImplicit);
+			primToConsJacobianMatrix(_Vi);
 			Poly.matrixProduct(_AroePlus,  _nVar, _nVar, _primToConsJacoMat, _nVar, _nVar, _AroePlusImplicit);
 		}
 	}
@@ -2361,7 +2406,11 @@ void SinglePhase::staggeredVFFCMatricesPrimitiveVariables(double un)//vitesse no
 void SinglePhase::applyVFRoeLowMachCorrections()
 {
 	if(_nonLinearFormulation!=VFRoe)
+	{
+		_runLogFile->close();
+		*_runLogFile<< "SinglePhase::applyVFRoeLowMachCorrections: applyVFRoeLowMachCorrections method should be called only for VFRoe formulation" << endl;
 		throw CdmathException("SinglePhase::applyVFRoeLowMachCorrections: applyVFRoeLowMachCorrections method should be called only for VFRoe formulation");
+	}
 	else//_nonLinearFormulation==VFRoe
 	{
 		if(_spaceScheme==lowMach){
@@ -2483,7 +2532,11 @@ void SinglePhase::getDensityDerivatives( double pressure, double temperature, do
 		_drhoE_sur_dT=rho*cp*(1-H/(h-q));
 	}
 	else
+	{
+		*_runLogFile<< "SinglePhase::staggeredVFFCMatricesPrimitiveVariables: eos should be StiffenedGas or StiffenedGasDellacherie" << endl;
+		_runLogFile->close();
 		throw CdmathException("SinglePhase::staggeredVFFCMatricesPrimitiveVariables: eos should be StiffenedGas or StiffenedGasDellacherie");
+	}
 
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{

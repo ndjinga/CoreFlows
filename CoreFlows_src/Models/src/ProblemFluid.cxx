@@ -32,6 +32,7 @@ void ProblemFluid::initialize()
 {
 	if(!_initialDataSet){
 		*_runLogFile<<"ProblemFluid::initialize() set initial data first"<<endl;
+		_runLogFile->close();
 		throw CdmathException("ProblemFluid::initialize() set initial data first");
 	}
 	cout << "Number of Phases = " << _nbPhases << " mesh dimension = "<<_Ndim<<" number of variables = "<<_nVar<<endl;
@@ -528,7 +529,10 @@ double ProblemFluid::computeTimeStep(bool & stop){
 			*_runLogFile<<"Warning: treatment of a junction node"<<endl;
 
 			if(!_sectionFieldSet)
+			{
+				_runLogFile->close();
 				throw CdmathException("ProblemFluid::ComputeTimeStep(): pipe network requires section field");
+			}
 			int largestSectionCellIndex=0;
 			for(int i=1;i<Fj.getNumberOfCells();i++){
 				if(_sectionField(idCells[i])>_sectionField(idCells[largestSectionCellIndex]))
@@ -618,7 +622,10 @@ double ProblemFluid::computeTimeStep(bool & stop){
 			}
 		}
 		else
+		{
+			_runLogFile->close();
 			throw CdmathException("ProblemFluid::ComputeTimeStep(): incompatible number of cells around a face");
+		}
 
 	}
 	VecAssemblyEnd(_conservativeVars);
@@ -1307,6 +1314,7 @@ vector< complex<double> > ProblemFluid::getRacines(vector< double > pol_car){
 			cout<<pol_car[ct]<< " , " <<endl;
 
 		*_runLogFile<<"getRacines computation failed"<<endl;
+		_runLogFile->close();
 		throw CdmathException("getRacines computation failed");
 	}
 
