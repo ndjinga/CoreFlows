@@ -72,26 +72,51 @@ public :
 	 * \param [in] double : the value of the z component of the velocity at the boundary
 	 * \param [out] void
 	 *  */
-	void setInletEnthalpyBoundaryCondition(string groupName,double enthalpie,double concentration, double v_x=0, double v_y=0, double v_z=0){
+	void setInletEnthalpyBoundaryCondition(string groupName,double enthalpie, double v_x=0, double v_y=0, double v_z=0){
 		if(!_useDellacherieEOS)
 		{
-			cout<<"!!!!!!!!!!!!!!!!!!!!!!!! ProblemFluid::setInletEnthalpyBoundaryCondition only available for Dellacherie EOS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
-			*_runLogFile<<"!!!!!!!!!!!!!!!!!!!!!!!!ProblemFluid::setInletEnthalpyBoundaryCondition only available for Dellacherie EOS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
-			throw CdmathException("ProblemFluid::setInletEnthalpyBoundaryCondition only available for Dellacherie EOS");
+			cout<<"!!!!!!!!!!!!!!!!!!!!!!!! DriftModel::setInletEnthalpyBoundaryCondition only available for Dellacherie EOS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
+			*_runLogFile<<"!!!!!!!!!!!!!!!!!!!!!!!! DriftModel::setInletEnthalpyBoundaryCondition only available for Dellacherie EOS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
+			throw CdmathException("DriftModel::setInletEnthalpyBoundaryCondition only available for Dellacherie EOS");
 		}
 		else{
-			double Temperature;
-
-			if(concentration<_precision)
-				Temperature =_fluides[1]->getTemperatureFromEnthalpy(enthalpie, 0);
-			else if (concentration>1-_precision)
-				Temperature =_fluides[0]->getTemperatureFromEnthalpy(enthalpie, 0);
-			else
-				Temperature =_Tsat;
+			double Temperature  =getMixtureTemperature( enthalpie);
+			double concentration=getMixtureConcentration( enthalpie);
 
 			_limitField[groupName]=LimitField(Inlet,-1,vector<double>(1,v_x),vector<double>(1,v_y),vector<double>(1,v_z),Temperature,-1,-1,concentration);
 		}
 	};
+
+	double getMixtureConcentration(double enthalpie)
+	{//On extrait la concentration à partir du titre thermodynamique
+		double titreThermo=(enthalpie-_hsatl)/(_hsatv-_hsatl);
+		if(titreThermo<=0)
+			return 0.;
+		else if(titreThermo>=1)
+			return 1.;
+		else
+			return  titreThermo;
+	}
+	double getMixtureTemperature(double enthalpie)
+	{
+		if(!_useDellacherieEOS)
+		{
+			cout<<"!!!!!!!!!!!!!!!!!!!!!!!! DriftModel::setInletEnthalpyBoundaryCondition only available for Dellacherie EOS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
+			*_runLogFile<<"!!!!!!!!!!!!!!!!!!!!!!!! DriftModel::setInletEnthalpyBoundaryCondition only available for Dellacherie EOS!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"<<endl;
+			throw CdmathException("DriftModel::setInletEnthalpyBoundaryCondition only available for Dellacherie EOS");
+		}
+		else{
+			//On extrait la température à partir du titre thermodynamique
+		double titreThermo=(enthalpie-_hsatl)/(_hsatv-_hsatl);
+
+		if(titreThermo<=_precision)
+			return _fluides[1]->getTemperatureFromEnthalpy(enthalpie, 0);
+		else if (titreThermo>1-_precision)
+			return _fluides[0]->getTemperatureFromEnthalpy(enthalpie, 0);
+		else
+			return _Tsat;
+		}
+	}
 
 	/** \fn setIntletPressureBoundaryCondition
 	 * \brief adds a new boundary condition of type InletPressure

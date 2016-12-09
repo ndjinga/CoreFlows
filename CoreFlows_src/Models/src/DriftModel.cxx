@@ -3006,7 +3006,7 @@ void DriftModel::applyVFRoeLowMachCorrections()
 				uj_n += _Vj[2+i]*_vec_normal[i];
 			}
 			norm_uij=sqrt(norm_uij);
-			_Vij[1]=(_Vi[1]+_Vj[1])/2 ;//+ uij_n/norm_uij*(_Vj[1]-_Vi[1])/4 - _Uroe[0]*norm_uij*(uj_n-ui_n)/4;
+			_Vij[1]=(_Vi[1]+_Vj[1])/2 + uij_n/norm_uij*(_Vj[1]-_Vi[1])/4 - _Uroe[0]*norm_uij*(uj_n-ui_n)/4;
 		}
 		else if(_spaceScheme==staggered)
 		{
