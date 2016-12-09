@@ -119,7 +119,7 @@ void ProblemCoreFlows::setInitialField(const Field &VV)
 	_Nmailles = _mesh.getNumberOfCells();
 	_perimeters=Field("Perimeters", CELLS, _mesh,1);
 
-	// find _minl and maimum nb of neibourghs
+	// find _minl and maximum nb of neibourghs
 	_minl  = INFINITY;
 	int nbNeib,indexFace;
 	Cell Ci;
@@ -139,6 +139,7 @@ void ProblemCoreFlows::setInitialField(const Field &VV)
 			_neibMaxNb=nbNeib;
 		//Compute mesh data
 		if (_Ndim > 1){
+			_perimeters(i)=0;
 			for (int k=0 ; k<Ci.getNumberOfFaces() ; k++){
 				indexFace=Ci.getFacesId()[k];
 				Fk = _mesh.getFace(indexFace);
@@ -169,8 +170,8 @@ void ProblemCoreFlows::setInitialFieldConstant(string fileName, const vector<dou
 		for (int i=0; i< VV.getNumberOfComponents(); i++)
 			VV(j,i) = Vconstant[i];
 	}
-	setInitialField(VV);
 
+	setInitialField(VV);
 }
 void ProblemCoreFlows::	setInitialFieldConstant(const Mesh& M, const Vector Vconstant)
 {

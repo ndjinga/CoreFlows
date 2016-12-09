@@ -38,8 +38,8 @@ int main()
 	double xsup=1.0;
 	double yinf=0.0;
 	double ysup=1.0;
-	int nx=1;
-	int ny=1;
+	int nx=2;
+	int ny=2;
 
 	// Prepare for the initial condition
 	vector<double> VV_Constant(nVar);
@@ -52,6 +52,7 @@ int main()
 
 	//Initial field creation
 	cout << "Building initial data" << endl;
+	myProblem.setVerbose(true);
 	myProblem.setInitialFieldConstant(spaceDim,VV_Constant,xinf,xsup,nx,"wall","wall",yinf,ysup,ny,"inlet","outlet");
 
 	//set the boundary conditions
@@ -66,7 +67,8 @@ int main()
 	myProblem.setGravity(gravite);
 
 	// set the numerical method
-	myProblem.setNumericalScheme(upwind, Implicit);
+	myProblem.setNumericalScheme(staggered, Implicit);
+	myProblem.setWellBalancedCorrection(true);
 	myProblem.setNonLinearFormulation(VFFC);
 
 	// name of result file
