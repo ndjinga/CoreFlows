@@ -1121,7 +1121,7 @@ void ProblemFluid::addSourceTermToSecondMember
 	if(!isBord){
 		if(_wellBalancedCorrection){
 			for(int k=0; k<_nVar;k++)
-				_phi[k]=(_Si[k]+_Sj[k])/2+6*_pressureLossVector[k]+_porosityGradientSourceVector[k];
+				_phi[k]=(_Si[k]+_Sj[k])/2+_pressureLossVector[k]+_porosityGradientSourceVector[k];
 			Poly.matrixProdVec(_signAroe, _nVar, _nVar, _phi, _l);
 			for(int k=0; k<_nVar;k++){
 				_Si[k]=(_phi[k]-_l[k])*mesureFace/_perimeters(i);///nbVoisinsi;
@@ -1143,8 +1143,8 @@ void ProblemFluid::addSourceTermToSecondMember
 		}
 		else{
 			for(int k=0; k<_nVar;k++){
-				_Si[k]=_Si[k]/nbVoisinsi+6*_pressureLossVector[k]/2+_porosityGradientSourceVector[k]/2;//mesureFace/_perimeters(i)
-				_Sj[k]=_Sj[k]/nbVoisinsj+6*_pressureLossVector[k]/2+_porosityGradientSourceVector[k]/2;//mesureFace/_perimeters(j)
+				_Si[k]=_Si[k]/nbVoisinsi+_pressureLossVector[k]/2+_porosityGradientSourceVector[k]/2;//mesureFace/_perimeters(i)
+				_Sj[k]=_Sj[k]/nbVoisinsj+_pressureLossVector[k]/2+_porosityGradientSourceVector[k]/2;//mesureFace/_perimeters(j)
 			}
 			if (_verbose && _nbTimeStep%_freqSave ==0)
 			{
@@ -1162,7 +1162,7 @@ void ProblemFluid::addSourceTermToSecondMember
 	}else{
 		if(_wellBalancedCorrection){
 			for(int k=0; k<_nVar;k++)
-				_phi[k]=(_Si[k]+_Sj[k])/2+6*_pressureLossVector[k]+_porosityGradientSourceVector[k];
+				_phi[k]=(_Si[k]+_Sj[k])/2+_pressureLossVector[k]+_porosityGradientSourceVector[k];
 			Poly.matrixProdVec(_signAroe, _nVar, _nVar, _phi, _l);
 			for(int k=0; k<_nVar;k++)
 				_Si[k]=(_phi[k]-_l[k])*mesureFace/_perimeters(i);///nbVoisinsi;
@@ -1178,7 +1178,7 @@ void ProblemFluid::addSourceTermToSecondMember
 		else
 		{
 			for(int k=0; k<_nVar;k++)
-				_Si[k]=_Si[k]/nbVoisinsi+6*_pressureLossVector[k]/2+_porosityGradientSourceVector[k]/2;//mesureFace/_perimeters(i);//
+				_Si[k]=_Si[k]/nbVoisinsi+_pressureLossVector[k]/2+_porosityGradientSourceVector[k]/2;//mesureFace/_perimeters(i);//
 			if (_verbose && _nbTimeStep%_freqSave ==0)
 			{
 				cout << "Contribution au terme source Si de la cellule i= " << i<<" venant de la face (i,bord) "<<endl;

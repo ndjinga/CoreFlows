@@ -3111,6 +3111,8 @@ void DriftModel::staggeredRoeUpwindingMatrixConservativeVariables(double cm, dou
 	{
 		for(int i=0; i<_nVar*_nVar;i++)
 			_absAroe[i] =0;
+		//for(int i=0; i<_nVar;i++)
+		//	_absAroe[i+_nVar*i] =_maxvploc;
 	}
 }
 
