@@ -218,10 +218,16 @@ bool ProblemFluid::iterateTimeStep(bool &converged)
 		KSPGetIterationNumber(_ksp, &_PetscIts);
 		if( _MaxIterLinearSolver < _PetscIts)//save the maximum number of iterations needed during the newton scheme
 			_MaxIterLinearSolver = _PetscIts;
-		if(_PetscIts>=_maxPetscIts)//solving the linear system failed
+			
+	    KSPConvergedReason reason;
+		KSPGetConvergedReason(_ksp,&reason);
+
+		if(reason<0)//solving the linear system failed
 		{
-			cout<<"Systeme lineaire : pas de convergence de Petsc. Itérations maximales "<<_maxPetscIts<<" atteintes"<<endl;
-			*_runLogFile<<"Systeme lineaire : pas de convergence de Petsc. Itérations maximales "<<_maxPetscIts<<" atteintes"<<endl;
+			cout<<"Systeme lineaire : pas de convergence de Petsc. Raison PETSC numéro "<<reason<<endl;
+			cout<<"Nombre d'itérations effectuées "<< _PetscIts<<" nombre maximal Itérations autorisées "<<_maxPetscIts<<endl;
+			*_runLogFile<<"Systeme lineaire : pas de convergence de Petsc. Raison PETSC numéro "<<reason<<endl;
+			*_runLogFile<<"Nombre d'itérations effectuées "<< _PetscIts<<" nombre maximal Itérations autorisées "<<_maxPetscIts<<endl;
 			converged=false;
 			return false;
 		}

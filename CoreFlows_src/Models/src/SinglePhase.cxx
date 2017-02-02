@@ -1663,8 +1663,8 @@ Vector SinglePhase::staggeredVFFCFlux()
 
 	if(_spaceScheme!=staggered || _nonLinearFormulation!=VFFC)
 	{
-		_runLogFile->close();
 		*_runLogFile<< "SinglePhase::staggeredVFFCFlux: staggeredVFFCFlux method should be called only for VFFC formulation and staggered upwinding, pressure = "<<  endl;
+		_runLogFile->close();
 		throw CdmathException("SinglePhase::staggeredVFFCFlux: staggeredVFFCFlux method should be called only for VFFC formulation and staggered upwinding");
 	}
 	else//_spaceScheme==staggered && _nonLinearFormulation==VFFC
@@ -1726,8 +1726,8 @@ void SinglePhase::staggeredVFFCMatricesConservativeVariables(double un)//vitesse
 
 	if(_spaceScheme!=staggered || _nonLinearFormulation!=VFFC)
 	{
-		_runLogFile->close();
 		*_runLogFile<< "SinglePhase::staggeredVFFCMatrices: staggeredVFFCMatrices method should be called only for VFFC formulation and staggered upwinding"<< endl;
+		_runLogFile->close();
 		throw CdmathException("SinglePhase::staggeredVFFCMatrices: staggeredVFFCMatrices method should be called only for VFFC formulation and staggered upwinding");
 	}
 	else//_spaceScheme==staggered && _nonLinearFormulation==VFFC
@@ -2020,8 +2020,8 @@ void SinglePhase::staggeredVFFCMatricesPrimitiveVariables(double un)//vitesse no
 
 	if(_spaceScheme!=staggered || _nonLinearFormulation!=VFFC)
 	{
-		_runLogFile->close();
 		*_runLogFile<< "SinglePhase::staggeredVFFCMatricesPrimitiveVariables: staggeredVFFCMatricesPrimitiveVariables method should be called only for VFFC formulation and staggered upwinding" << endl;
+		_runLogFile->close();
 		throw CdmathException("SinglePhase::staggeredVFFCMatricesPrimitiveVariables: staggeredVFFCMatricesPrimitiveVariables method should be called only for VFFC formulation and staggered upwinding");
 	}
 	else//_spaceScheme==staggered && _nonLinearFormulation==VFFC
@@ -2215,8 +2215,8 @@ void SinglePhase::staggeredVFFCMatricesPrimitiveVariables(double un)//vitesse no
 				}
 				else
 				{
-					_runLogFile->close();
 					*_runLogFile<< "SinglePhase::staggeredVFFCMatricesPrimitiveVariables: velocity un should be non zero" << endl;
+					_runLogFile->close();
 					throw CdmathException("SinglePhase::staggeredVFFCMatricesPrimitiveVariables: velocity un should be non zero");
 				}
 			}
@@ -2381,15 +2381,15 @@ void SinglePhase::staggeredVFFCMatricesPrimitiveVariables(double un)//vitesse no
 				}
 				else
 				{
-					_runLogFile->close();
 					*_runLogFile<< "SinglePhase::staggeredVFFCMatricesPrimitiveVariables: velocity un should be non zero" << endl;
+					_runLogFile->close();
 					throw CdmathException("SinglePhase::staggeredVFFCMatricesPrimitiveVariables: velocity un should be non zero");
 				}
 			}
 			else
 			{
-				_runLogFile->close();
 				*_runLogFile<< "SinglePhase::staggeredVFFCMatricesPrimitiveVariables: eos should be StiffenedGas or StiffenedGasDellacherie" << endl;
+				_runLogFile->close();
 				throw CdmathException("SinglePhase::staggeredVFFCMatricesPrimitiveVariables: eos should be StiffenedGas or StiffenedGasDellacherie");
 			}
 		}
@@ -2407,8 +2407,8 @@ void SinglePhase::applyVFRoeLowMachCorrections()
 {
 	if(_nonLinearFormulation!=VFRoe)
 	{
-		_runLogFile->close();
 		*_runLogFile<< "SinglePhase::applyVFRoeLowMachCorrections: applyVFRoeLowMachCorrections method should be called only for VFRoe formulation" << endl;
+		_runLogFile->close();
 		throw CdmathException("SinglePhase::applyVFRoeLowMachCorrections: applyVFRoeLowMachCorrections method should be called only for VFRoe formulation");
 	}
 	else//_nonLinearFormulation==VFRoe
@@ -2689,6 +2689,54 @@ void SinglePhase::save(){
 				break;
 			case MED :
 				_Vitesse.writeMED(prim+"_Velocity",false);
+				break;
+			case CSV :
+				_Vitesse.writeCSV(prim+"_Velocity");
+				break;
+			}
+		}
+	}
+	if(_isStationary)
+	{
+		prim+="_Stat";
+		cons+="_Stat";
+
+		switch(_saveFormat)
+		{
+		case VTK :
+			_VV.writeVTK(prim);
+			break;
+		case MED :
+			_VV.writeMED(prim);
+			break;
+		case CSV :
+			_VV.writeCSV(prim);
+			break;
+		}
+
+		if(_saveConservativeField){
+			switch(_saveFormat)
+			{
+			case VTK :
+				_UU.writeVTK(cons,false);
+				break;
+			case MED :
+				_UU.writeMED(cons,false);
+				break;
+			case CSV :
+				_UU.writeCSV(cons);
+				break;
+			}
+		}
+
+		if(_saveVelocity){
+			switch(_saveFormat)
+			{
+			case VTK :
+				_Vitesse.writeVTK(prim+"_Velocity");
+				break;
+			case MED :
+				_Vitesse.writeMED(prim+"_Velocity");
 				break;
 			case CSV :
 				_Vitesse.writeCSV(prim+"_Velocity");
