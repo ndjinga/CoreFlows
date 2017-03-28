@@ -950,13 +950,13 @@ void DriftModel::convectionMatrices()
 	}
 
 	/*******Calcul de la matrice signe pour VFFC, VFRoe et décentrement des termes source***/
-	if(_entropicCorrection)
+	if(_entropicCorrection || (_spaceScheme ==lowMach) || (_spaceScheme ==pressureCorrection))
 	{
 		InvMatriceRoe( vp_dist);
 		Polynoms Poly;
 		Poly.matrixProduct(_absAroe, _nVar, _nVar, _invAroe, _nVar, _nVar, _signAroe);
 	}
-	else if (_spaceScheme==upwind || (_spaceScheme ==lowMach) || (_spaceScheme ==pressureCorrection))//upwind sans entropic
+	else if (_spaceScheme==upwind)//upwind sans entropic
 		SigneMatriceRoe( vp_dist);
 	else if(_spaceScheme== centered)//centre  sans entropic
 		for(int i=0; i<_nVar*_nVar;i++)
@@ -3809,10 +3809,10 @@ void DriftModel::save(){
 			switch(_saveFormat)
 			{
 			case VTK :
-				_UU.writeVTK(cons,false);
+				_UU.writeVTK(cons);
 				break;
 			case MED :
-				_UU.writeMED(cons,false);
+				_UU.writeMED(cons);
 				break;
 			case CSV :
 				_UU.writeCSV(cons);
