@@ -2134,7 +2134,10 @@ void FiveEqsTwoFluid::applyVFRoeLowMachCorrections()
 			}
 			norm_uij=sqrt(norm_uij)/rhom;
 			uij_n/=rhom;
-			_Vij[1]=(_Vi[1]+_Vj[1])/2 + uij_n/norm_uij*(_Vj[1]-_Vi[1])/4 - rhom*norm_uij*(uj_n-ui_n)/4;
+			if(norm_uij>_precision)//avoid division by zero
+				_Vij[1]=(_Vi[1]+_Vj[1])/2 + uij_n/norm_uij*(_Vj[1]-_Vi[1])/4 - rhom*norm_uij*(uj_n-ui_n)/4;
+			else
+				_Vij[1]=(_Vi[1]+_Vj[1])/2                                    - rhom*norm_uij*(uj_n-ui_n)/4;
 		}
 		else if(_spaceScheme==staggered)
 		{

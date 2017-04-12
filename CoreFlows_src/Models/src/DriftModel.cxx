@@ -3169,7 +3169,10 @@ void DriftModel::applyVFRoeLowMachCorrections()
 				uj_n += _Vj[2+i]*_vec_normal[i];
 			}
 			norm_uij=sqrt(norm_uij);
-			_Vij[1]=(_Vi[1]+_Vj[1])/2 + uij_n/norm_uij*(_Vj[1]-_Vi[1])/4 - _Uroe[0]*norm_uij*(uj_n-ui_n)/4;
+			if(norm_uij>_precision)//avoid division by zero
+				_Vij[1]=(_Vi[1]+_Vj[1])/2 + uij_n/norm_uij*(_Vj[1]-_Vi[1])/4 - _Uroe[0]*norm_uij*(uj_n-ui_n)/4;
+			else
+				_Vij[1]=(_Vi[1]+_Vj[1])/2                                    - _Uroe[0]*norm_uij*(uj_n-ui_n)/4;
 		}
 		else if(_spaceScheme==staggered)
 		{
@@ -3809,10 +3812,10 @@ void DriftModel::save(){
 			switch(_saveFormat)
 			{
 			case VTK :
-				_UU.writeVTK(cons,false);
+				_UU.writeVTK(cons);
 				break;
 			case MED :
-				_UU.writeMED(cons,false);
+				_UU.writeMED(cons);
 				break;
 			case CSV :
 				_UU.writeCSV(cons);

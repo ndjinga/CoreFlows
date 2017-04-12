@@ -2432,7 +2432,11 @@ void SinglePhase::applyVFRoeLowMachCorrections()
 				uj_n += _Vj[1+i]*_vec_normal[i];
 			}
 			norm_uij=sqrt(norm_uij);
-			_Vij[0]=(_Vi[0]+_Vj[0])/2 + uij_n/norm_uij*(_Vj[0]-_Vi[0])/4 - _Uroe[0]*norm_uij*(uj_n-ui_n)/4;
+			if(norm_uij>_precision)//avoid division by zero
+				_Vij[0]=(_Vi[0]+_Vj[0])/2 + uij_n/norm_uij*(_Vj[0]-_Vi[0])/4 - _Uroe[0]*norm_uij*(uj_n-ui_n)/4;
+			else
+				_Vij[0]=(_Vi[0]+_Vj[0])/2                                    - _Uroe[0]*norm_uij*(uj_n-ui_n)/4;
+
 		}
 		else if(_spaceScheme==staggered)
 		{

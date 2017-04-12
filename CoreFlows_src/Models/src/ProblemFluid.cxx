@@ -218,8 +218,8 @@ bool ProblemFluid::iterateTimeStep(bool &converged)
 		KSPGetIterationNumber(_ksp, &_PetscIts);
 		if( _MaxIterLinearSolver < _PetscIts)//save the maximum number of iterations needed during the newton scheme
 			_MaxIterLinearSolver = _PetscIts;
-			
-	    KSPConvergedReason reason;
+
+		KSPConvergedReason reason;
 		KSPGetConvergedReason(_ksp,&reason);
 
 		if(reason<0)//solving the linear system failed
@@ -927,7 +927,8 @@ void ProblemFluid::addConvectionToSecondMember
 				_Uij[i1]=Uij(i1);
 
 			consToPrim(_Uij, _Vij,porosityij);
-			applyVFRoeLowMachCorrections();
+			//if(!isBord)
+				applyVFRoeLowMachCorrections();
 
 			for(int i1=0;i1<_nVar;i1++)
 			{
