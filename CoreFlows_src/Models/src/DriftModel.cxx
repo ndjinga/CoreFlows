@@ -950,13 +950,13 @@ void DriftModel::convectionMatrices()
 	}
 
 	/*******Calcul de la matrice signe pour VFFC, VFRoe et décentrement des termes source***/
-	if(_entropicCorrection || (_spaceScheme ==lowMach) || (_spaceScheme ==pressureCorrection))
+	if(_entropicCorrection)
 	{
 		InvMatriceRoe( vp_dist);
 		Polynoms Poly;
 		Poly.matrixProduct(_absAroe, _nVar, _nVar, _invAroe, _nVar, _nVar, _signAroe);
 	}
-	else if (_spaceScheme==upwind)//upwind sans entropic
+	else if (_spaceScheme==upwind  || (_spaceScheme ==lowMach) || (_spaceScheme ==pressureCorrection))//upwind sans entropic
 		SigneMatriceRoe( vp_dist);
 	else if(_spaceScheme== centered)//centre  sans entropic
 		for(int i=0; i<_nVar*_nVar;i++)
