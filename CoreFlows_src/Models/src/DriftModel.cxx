@@ -3844,41 +3844,41 @@ void DriftModel::save(){
 			switch(_saveFormat)
 			{
 			case VTK :
-				_VoidFraction.writeVTK(allFields+"_VoidFraction",false);
-				_Enthalpy.writeVTK(allFields+"_Enthalpy",false);
-				_Concentration.writeVTK(allFields+"_Concentration",false);
-				_mixtureDensity.writeVTK(allFields+"_Density",false);
-				_Pressure.writeVTK(allFields+"_Pressure",false);
-				_Temperature.writeVTK(allFields+"_Temperature",false);
-				_DensiteLiquide.writeVTK(allFields+"_LiquidDensity",false);
-				_DensiteVapeur.writeVTK(allFields+"_SteamDensity",false);
-				_EnthalpieLiquide.writeVTK(allFields+"_LiquidEnthalpy",false);
-				_EnthalpieVapeur.writeVTK(allFields+"_SteamEnthalpy",false);
-				_VitesseX.writeVTK(allFields+"_VelocityX",false);
+				_VoidFraction.writeVTK(allFields+"_VoidFraction");
+				_Enthalpy.writeVTK(allFields+"_Enthalpy");
+				_Concentration.writeVTK(allFields+"_Concentration");
+				_mixtureDensity.writeVTK(allFields+"_Density");
+				_Pressure.writeVTK(allFields+"_Pressure");
+				_Temperature.writeVTK(allFields+"_Temperature");
+				_DensiteLiquide.writeVTK(allFields+"_LiquidDensity");
+				_DensiteVapeur.writeVTK(allFields+"_SteamDensity");
+				_EnthalpieLiquide.writeVTK(allFields+"_LiquidEnthalpy");
+				_EnthalpieVapeur.writeVTK(allFields+"_SteamEnthalpy");
+				_VitesseX.writeVTK(allFields+"_VelocityX");
 				if(_Ndim>1)
 				{
-					_VitesseY.writeVTK(allFields+"_VelocityY",false);
+					_VitesseY.writeVTK(allFields+"_VelocityY");
 					if(_Ndim>2)
-						_VitesseZ.writeVTK(allFields+"_VelocityZ",false);
+						_VitesseZ.writeVTK(allFields+"_VelocityZ");
 				}
 				break;
 			case MED :
-				_VoidFraction.writeMED(allFields+"_VoidFraction",false);
-				_Enthalpy.writeMED(allFields+"_Enthalpy",false);
-				_Concentration.writeMED(allFields+"_Concentration",false);
-				_mixtureDensity.writeMED(allFields+"_Density",false);
-				_Pressure.writeMED(allFields+"_Pressure",false);
-				_Temperature.writeMED(allFields+"_Temperature",false);
-				_DensiteLiquide.writeMED(allFields+"_LiquidDensity",false);
-				_DensiteVapeur.writeMED(allFields+"_SteamDensity",false);
-				_EnthalpieLiquide.writeMED(allFields+"_LiquidEnthalpy",false);
-				_EnthalpieVapeur.writeMED(allFields+"_SteamEnthalpy",false);
-				_VitesseX.writeMED(allFields+"_VelocityX",false);
+				_VoidFraction.writeMED(allFields+"_VoidFraction");
+				_Enthalpy.writeMED(allFields+"_Enthalpy");
+				_Concentration.writeMED(allFields+"_Concentration");
+				_mixtureDensity.writeMED(allFields+"_Density");
+				_Pressure.writeMED(allFields+"_Pressure");
+				_Temperature.writeMED(allFields+"_Temperature");
+				_DensiteLiquide.writeMED(allFields+"_LiquidDensity");
+				_DensiteVapeur.writeMED(allFields+"_SteamDensity");
+				_EnthalpieLiquide.writeMED(allFields+"_LiquidEnthalpy");
+				_EnthalpieVapeur.writeMED(allFields+"_SteamEnthalpy");
+				_VitesseX.writeMED(allFields+"_VelocityX");
 				if(_Ndim>1)
 				{
-					_VitesseY.writeMED(allFields+"_VelocityY",false);
+					_VitesseY.writeMED(allFields+"_VelocityY");
 					if(_Ndim>2)
-						_VitesseZ.writeMED(allFields+"_VelocityZ",false);
+						_VitesseZ.writeMED(allFields+"_VelocityZ");
 				}
 				break;
 			case CSV :
