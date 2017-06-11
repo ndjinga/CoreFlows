@@ -169,7 +169,7 @@ public :
 	/** \fn getNumberOfPhases
 	 * \brief The numer of phase (one or two) depending on the model considered
 	 * @param void
-	 * @return the numer of phases considered in the model
+	 * @return the number of phases considered in the model
 	 * */
 	int getNumberOfPhases(){
 		return _nbPhases;
@@ -189,8 +189,8 @@ public :
 	virtual void testConservation()=0;
 
 	/** \fn saveVelocity
-	 * \brief saves the velocity field in a separate file so that paraview can display streamlines
-	 * @param void
+	 * \brief saves the velocity field in a separate 3D file so that paraview can display the streamlines
+	 * @param bool
 	 * */
 	void saveVelocity(bool save_v=true){
 		_saveVelocity=save_v;
@@ -198,7 +198,6 @@ public :
 
 	/** \fn saveConservativeField
 	 * \brief saves the conservative fields (density, momentum etc...)
-	 * @param void
 	 * */
 	void saveConservativeField(bool save=true){
 		_saveConservativeField=save;
@@ -206,18 +205,29 @@ public :
 	/** \fn setEntropicCorrection
 	 * \brief include an entropy correction to avoid non entropic solutions
 	 * @param boolean that is true if entropy correction should be applied
-	 * @param void
 	 * */
 	void setEntropicCorrection(bool entropyCorr){
 		_entropicCorrection=entropyCorr;
 	}
 
-	/** \fn entropicShift
-	 * \brief computes the eigenvalue jumps for the entropy correction
-	 * @param normal vector n to the interface between the two cells _l and _r
-	 * @param void
-	 * */
-	virtual void entropicShift(double* n)=0;
+	/** \fn setPressureCorrectionOrder
+	 * \brief In case a pressure correction scheme is set by a call to setNumericalScheme(pressureCorrection) this function allows the setting of the type of pressure correction to be used
+	 * @param int the order of the pressure correction
+	* \details The following treatment is applied depending on the value of the input parameter order
+	* \details 1 -> no pressure correction (pressure correction is applied nowhere in the domain), standard upwind scheme instead is used
+	* \details 2 -> standard pressure correction is applied everywhere in the domain, even at the boundary faces
+	* \details 3 -> standard pressure correction is applied inside the domain (not at the boundary faces)
+	* \details 4 -> standard pressure correction is applied inside the domain and a special pressure correction is applied at the boundary (boundary pressure = inner pressure)
+	* */
+	void setPressureCorrectionOrder(int order){
+		if( order >4 or order <1)
+			throw CdmathException("ProblemFluid::setPressureCorrectionOrder Pressure correction order must be an integer between 1 and 4");
+		else
+			_pressureCorrectionOrder=order;
+
+		if(order==1)
+			_spaceScheme=upwind;
+	}
 
 	// Petsc resolution
 
@@ -384,38 +394,41 @@ public :
 	 */
 
 protected :
-	/** Number of phases in the fluid */
+	/** Number of phases in the fluid **/
 	int _nbPhases;
-	/** Field of conservative variables (the primitive variables are defined in the mother class ProblemCoreFlows */
+	/** Field of conservative variables (the primitive variables are defined in the mother class ProblemCoreFlows **/
 	Field  _UU;
 	/** Field of interfacial states of the VFRoe scheme **/
 	Field _UUstar, _VVstar;
 	/** the formulation used to compute the non viscous fluxes **/
 	NonLinearFormulation _nonLinearFormulation;
 
-	/** boolean used to specify that an entropic correction should be used */
+	/** boolean used to specify that an entropic correction should be used **/
 	bool _entropicCorrection;
 	/** Vector containing the eigenvalue jumps for the entropic correction **/
 	vector<double> _entropicShift;
+	/** In case a pressure correction scheme is used some more option regarding the type of pressure correction **/
+	int _pressureCorrectionOrder;
 
-	/** Fluid equation of state*/
+	/** Fluid equation of state **/
 	vector<	Fluide* > _fluides;
 	//!Viscosity coefficients 
 	vector<double> _viscosite;
 	//!Conductivity coefficients 
 	vector<double> _conductivite;
 
-	// Source terms 
+	/** Source terms **/
 	vector<double> _gravite, _GravityField3d, _gravityReferencePoint, _dragCoeffs;
 	double _latentHeat, _Tsat,_Psat,_dHsatl_over_dp;
 	Field _porosityField, _pressureLossField, _dp_over_dt, _sectionField;
 	bool _porosityFieldSet, _pressureLossFieldSet, _sectionFieldSet;
 	double _porosityi, _porosityj;//porosity of the left and right states around an interface
-	// User options
+
+	/** User options **/
 	bool _isScaling;
-	bool _saveVelocity;//In order to display streamlines with paraview
-	bool _saveConservativeField;//Save conservative fields such as density momentum...
-	bool _saveInterfacialField;//Save interfacial fields of the VFRoe scheme
+	bool _saveVelocity;/* In order to display streamlines with paraview */
+	bool _saveConservativeField;/* Save conservative fields such as density or momentum for instance */
+	bool _saveInterfacialField;/* Save interfacial fields of the VFRoe scheme */
 	bool _usePrimitiveVarsInNewton;
 
 	// Variables du schema numerique 
@@ -557,7 +570,7 @@ protected :
 	//!Computes the interfacial flux for the VFFC formulation of the staggered upwinding
 	virtual Vector staggeredVFFCFlux()=0;
 	//!Compute the corrected interfacial state for lowMach, pressureCorrection and staggered versions of the VFRoe formulation
-	virtual void applyVFRoeLowMachCorrections()=0;
+	virtual void applyVFRoeLowMachCorrections(bool isBord)=0;
 
 	//remplit les vecteurs de scaling
 	/** \fn computeScaling
@@ -642,6 +655,12 @@ protected :
 	 * @param valeurs_propres_dist is the vector of distinct eigenvalues of the Roe matrix
 	 * */
 	void InvMatriceRoe(vector< complex<double> > valeurs_propres_dist);
+
+	/** \fn entropicShift
+	 * \brief computes the eigenvalue jumps for the entropy correction
+	 * @param normal vector n to the interface between the two cells _l and _r
+	 * */
+	virtual void entropicShift(double* n)=0;
 
 };
 

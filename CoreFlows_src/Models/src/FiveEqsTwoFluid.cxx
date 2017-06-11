@@ -2100,7 +2100,7 @@ Vector FiveEqsTwoFluid::staggeredVFFCFlux()
 	}
 }
 
-void FiveEqsTwoFluid::applyVFRoeLowMachCorrections()
+void FiveEqsTwoFluid::applyVFRoeLowMachCorrections(bool isBord)
 {
 	if(_nonLinearFormulation!=VFRoe)
 		throw CdmathException("FiveEqsTwoFluid::applyVFRoeLowMachCorrections: applyVFRoeLowMachCorrections method should be called only for VFRoe formulation");
@@ -2120,6 +2120,9 @@ void FiveEqsTwoFluid::applyVFRoeLowMachCorrections()
 		}
 		else if(_spaceScheme==pressureCorrection)
 		{
+			if(_pressureCorrectionOrder>2)
+				throw CdmathException("FiveEqsTwoFluid::applyVFRoeLowMachCorrections pressure correction order can be only 1 or 2 for five equation two-fluid model");
+
 			double norm_uij=0, uij_n=0, ui_n=0, uj_n=0;//mean velocities
 			double rho1 =  _fluides[0]->getDensity(_Uroe[1],_Uroe[_nVar-1]);
 			double rho2 =  _fluides[1]->getDensity(_Uroe[1],_Uroe[_nVar-1]);

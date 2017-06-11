@@ -2403,7 +2403,7 @@ void SinglePhase::staggeredVFFCMatricesPrimitiveVariables(double un)//vitesse no
 		}
 	}
 }
-void SinglePhase::applyVFRoeLowMachCorrections()
+void SinglePhase::applyVFRoeLowMachCorrections(bool isBord)
 {
 	if(_nonLinearFormulation!=VFRoe)
 	{
@@ -2423,6 +2423,8 @@ void SinglePhase::applyVFRoeLowMachCorrections()
 		}
 		else if(_spaceScheme==pressureCorrection)
 		{
+			if(_pressureCorrectionOrder==2 || (!isBord && _pressureCorrectionOrder==3) )
+			{
 			double norm_uij=0, uij_n=0, ui_n=0, uj_n=0;
 			for(int i=0;i<_Ndim;i++)
 			{
@@ -2436,7 +2438,9 @@ void SinglePhase::applyVFRoeLowMachCorrections()
 				_Vij[0]=(_Vi[0]+_Vj[0])/2 + uij_n/norm_uij*(_Vj[0]-_Vi[0])/4 - _Uroe[0]*norm_uij*(uj_n-ui_n)/4;
 			else
 				_Vij[0]=(_Vi[0]+_Vj[0])/2                                    - _Uroe[0]*norm_uij*(uj_n-ui_n)/4;
-
+			}
+			else if(_pressureCorrectionOrder==4)
+				_Vij[0]=_Vi[0];
 		}
 		else if(_spaceScheme==staggered)
 		{

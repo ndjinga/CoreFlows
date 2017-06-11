@@ -24,6 +24,7 @@ ProblemFluid::ProblemFluid(void){
 	_err_press_max=0; _part_imag_max=0; _nbMaillesNeg=0; _nbVpCplx=0;_minm1=1e30;_minm2=1e30;
 	_isScaling=false;
 	_entropicCorrection=false;
+	_pressureCorrectionOrder=1;
 	_nonLinearFormulation=Roe;
 	_maxvploc=0.;
 }
@@ -927,8 +928,8 @@ void ProblemFluid::addConvectionToSecondMember
 				_Uij[i1]=Uij(i1);
 
 			consToPrim(_Uij, _Vij,porosityij);
-			//if(!isBord)
-				applyVFRoeLowMachCorrections();
+
+			applyVFRoeLowMachCorrections(isBord);
 
 			for(int i1=0;i1<_nVar;i1++)
 			{

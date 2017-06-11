@@ -151,7 +151,7 @@ protected :
 	//!Computes the matrices A^+ and A^- for the VFFC formulation of the staggered upwinding using Primitive Variables
 	void staggeredVFFCMatricesPrimitiveVariables(double u_n);
 	//!Compute the corrected interfacial state for lowMach, pressureCorrection and staggered versions of the VFRoe formulation
-	void applyVFRoeLowMachCorrections();
+	void applyVFRoeLowMachCorrections(bool isBord);
 	//!Special preconditioner based on a matrix scaling strategy
 	void computeScaling(double offset);
 	//!Calcule les saut de valeurs propres pour la correction entropique

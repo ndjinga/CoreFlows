@@ -131,7 +131,7 @@ public :
 
 	/** \fn terminate
 	 * \brief vide la mémoire et enregistre le résultat final
-	 * \Deatils on la surcharge dans le problem fluid
+	 * \Details on la surcharge dans le problem fluid
 	 *  @param void
 	 *  */
 	virtual void terminate()=0;
@@ -190,9 +190,11 @@ public :
 	virtual bool run();//
 
 	/** \fn iterateTimeStep
-	 * \brief
-	 * \details
-	 * \param [in] bool
+	 * \brief Calcul d'une sous-itération du pas de temps en cours, typiquement une itération de Newton pour un schéma implicite
+	 * \details Deux paramètres booléen (converged et ok) sont retournés
+	 * converged, Vaut true si on peut passer au pas de temps suivant (shéma explicite ou convergence du schéma de Newton dans le schéma implicite)
+	 * ok  vaut true si le calcul n'a pas rencontré d'erreur ou de problème particulier dans la mise à jour des variables physiques
+	 * \param [in] bool, passage par reférence.
 	 * \param [out] bool
 	 *  */
 	virtual bool iterateTimeStep(bool &converged) = 0; //??
@@ -244,7 +246,7 @@ public :
 	//paramètres du calcul -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 
 	/** \fn setPresentTime
-	 * \brief : met à jour _time (le temps courant du calcul)
+	 * \brief met à jour _time (le temps courant du calcul)
 	 * \details
 	 * \param [in] double
 	 * \param [out] void
@@ -493,12 +495,11 @@ public :
 	 * \param [in] TimeScheme
 	 * \param [out] void
 	 *  */
-	void setNumericalScheme(SpaceScheme scheme, TimeScheme method);
+	void setNumericalScheme(SpaceScheme scheme, TimeScheme method=Explicit);
 
 	/** \fn setWellBalancedCorrection
 	 * \brief include a well balanced correction to treat stiff source terms
 	 * @param boolean that is true if a well balanced correction should be applied
-	 * @param void
 	 * */
 	void setWellBalancedCorrection(bool wellBalancedCorr){
 		_wellBalancedCorrection=wellBalancedCorr;

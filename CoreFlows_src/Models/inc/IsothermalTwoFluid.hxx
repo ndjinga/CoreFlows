@@ -111,7 +111,7 @@ protected :
 	//!Computes the interfacial flux for the VFFC formulation of the staggered upwinding
 	Vector staggeredVFFCFlux();
 	//!Compute the corrected interfacial state for lowMach, pressureCorrection and staggered versions of the VFRoe formulation
-	void applyVFRoeLowMachCorrections();
+	void applyVFRoeLowMachCorrections(bool isBord);
 	//!remplit les vecteurs de scaling
 	void computeScaling(double offset);
 	//!Calcule les saut de valeurs propres pour la correction entropique

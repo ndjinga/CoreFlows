@@ -3143,7 +3143,7 @@ void DriftModel::staggeredVFFCMatricesPrimitiveVariables(double u_mn)
 	}
 }
 
-void DriftModel::applyVFRoeLowMachCorrections()
+void DriftModel::applyVFRoeLowMachCorrections(bool isBord)
 {
 	if(_nonLinearFormulation!=VFRoe)
 		throw CdmathException("DriftModel::applyVFRoeLowMachCorrections: applyVFRoeLowMachCorrections method should be called only for VFRoe formulation");
@@ -3160,6 +3160,8 @@ void DriftModel::applyVFRoeLowMachCorrections()
 		}
 		else if(_spaceScheme==pressureCorrection)
 		{
+			if(_pressureCorrectionOrder==2 || (!isBord && _pressureCorrectionOrder==3) )
+			{
 			double norm_uij=0, uij_n=0, ui_n=0, uj_n=0;
 			for(int i=0;i<_Ndim;i++)
 			{
@@ -3173,6 +3175,9 @@ void DriftModel::applyVFRoeLowMachCorrections()
 				_Vij[1]=(_Vi[1]+_Vj[1])/2 + uij_n/norm_uij*(_Vj[1]-_Vi[1])/4 - _Uroe[0]*norm_uij*(uj_n-ui_n)/4;
 			else
 				_Vij[1]=(_Vi[1]+_Vj[1])/2                                    - _Uroe[0]*norm_uij*(uj_n-ui_n)/4;
+			}
+			else if(_pressureCorrectionOrder==4)
+				_Vij[1]=_Vi[1];
 		}
 		else if(_spaceScheme==staggered)
 		{
