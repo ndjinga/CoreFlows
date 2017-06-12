@@ -46,7 +46,7 @@ void IsothermalTwoFluid::initialize(){
 
 	_guessalpha = _VV(0,0);
 
-	_gravite = vector<double>(_nVar,0);
+	_gravite = vector<double>(_nVar,0);//Not to be confused with _GravityField3d (size _Ndim). _gravite (size _Nvar) is usefull for dealing with source term and implicitation of gravity vector
 	for(int i=0; i<_Ndim; i++)
 	{
 		_gravite[i+1]=_GravityField3d[i];

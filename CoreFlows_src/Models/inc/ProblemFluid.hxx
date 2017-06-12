@@ -218,9 +218,10 @@ public :
 	* \details 2 -> standard pressure correction is applied everywhere in the domain, even at the boundary faces
 	* \details 3 -> standard pressure correction is applied inside the domain (not at the boundary faces)
 	* \details 4 -> standard pressure correction is applied inside the domain and a special pressure correction is applied at the boundary (boundary pressure = inner pressure)
+	* \details 5 -> standard pressure correction is applied inside the domain and a special pressure correction is applied at the boundary (boundary pressure = inner pressure+ source term)
 	* */
 	void setPressureCorrectionOrder(int order){
-		if( order >4 or order <1)
+		if( order >5 or order <1)
 			throw CdmathException("ProblemFluid::setPressureCorrectionOrder Pressure correction order must be an integer between 1 and 4");
 		else
 			_pressureCorrectionOrder=order;
@@ -418,7 +419,7 @@ protected :
 	vector<double> _conductivite;
 
 	/** Source terms **/
-	vector<double> _gravite, _GravityField3d, _gravityReferencePoint, _dragCoeffs;
+	vector<double> _gravite, _GravityField3d, _gravityReferencePoint, _dragCoeffs;//_GravityField3d has size _Ndim whereas _gravite has size _Nvar and is usefull for dealing with source term and implicitation of gravity vector
 	double _latentHeat, _Tsat,_Psat,_dHsatl_over_dp;
 	Field _porosityField, _pressureLossField, _dp_over_dt, _sectionField;
 	bool _porosityFieldSet, _pressureLossFieldSet, _sectionFieldSet;

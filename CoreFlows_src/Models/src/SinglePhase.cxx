@@ -50,7 +50,7 @@ void SinglePhase::initialize(){
 	*_runLogFile<<"Initialising the Navier-Stokes model"<<endl;
 
 	_Uroe = new double[_nVar];
-	_gravite = vector<double>(_nVar,0);
+	_gravite = vector<double>(_nVar,0);//Not to be confused with _GravityField3d (size _Ndim). _gravite (size _Nvar) is usefull for dealing with source term and implicitation of gravity vector
 	for(int i=0; i<_Ndim; i++)
 		_gravite[i+1]=_GravityField3d[i];
 
@@ -2422,25 +2422,32 @@ void SinglePhase::applyVFRoeLowMachCorrections(bool isBord)
 			_Vij[0]=M*_Vij[0]+(1-M)*(_Vi[0]+_Vj[0])/2;
 		}
 		else if(_spaceScheme==pressureCorrection)
-		{
-			if(_pressureCorrectionOrder==2 || (!isBord && _pressureCorrectionOrder==3) )
+		{//order 1 : no correction, oarder 2 : correction everywhere, order 3 : correction only inside, orders 4 and 5 : special correction at boundaries
+			if(_pressureCorrectionOrder==2 || (!isBord && _pressureCorrectionOrder==3) || (!isBord && _pressureCorrectionOrder==4) || (!isBord && _pressureCorrectionOrder==5) )
 			{
-			double norm_uij=0, uij_n=0, ui_n=0, uj_n=0;
-			for(int i=0;i<_Ndim;i++)
-			{
-				norm_uij += _Uroe[1+i]*_Uroe[1+i];
-				uij_n += _Uroe[1+i]*_vec_normal[i];
-				ui_n += _Vi[1+i]*_vec_normal[i];
-				uj_n += _Vj[1+i]*_vec_normal[i];
+				double norm_uij=0, uij_n=0, ui_n=0, uj_n=0;
+				for(int i=0;i<_Ndim;i++)
+				{
+					norm_uij += _Uroe[1+i]*_Uroe[1+i];
+					uij_n += _Uroe[1+i]*_vec_normal[i];
+					ui_n += _Vi[1+i]*_vec_normal[i];
+					uj_n += _Vj[1+i]*_vec_normal[i];
+				}
+				norm_uij=sqrt(norm_uij);
+				if(norm_uij>_precision)//avoid division by zero
+					_Vij[0]=(_Vi[0]+_Vj[0])/2 + uij_n/norm_uij*(_Vj[0]-_Vi[0])/4 - _Uroe[0]*norm_uij*(uj_n-ui_n)/4;
+				else
+					_Vij[0]=(_Vi[0]+_Vj[0])/2                                    - _Uroe[0]*norm_uij*(uj_n-ui_n)/4;
 			}
-			norm_uij=sqrt(norm_uij);
-			if(norm_uij>_precision)//avoid division by zero
-				_Vij[0]=(_Vi[0]+_Vj[0])/2 + uij_n/norm_uij*(_Vj[0]-_Vi[0])/4 - _Uroe[0]*norm_uij*(uj_n-ui_n)/4;
-			else
-				_Vij[0]=(_Vi[0]+_Vj[0])/2                                    - _Uroe[0]*norm_uij*(uj_n-ui_n)/4;
-			}
-			else if(_pressureCorrectionOrder==4)
+			else if(_pressureCorrectionOrder==4 && isBord)
 				_Vij[0]=_Vi[0];
+			else if(_pressureCorrectionOrder==5 && isBord)
+			{
+				double g_n=0;//scalar product of gravity and normal vector
+				for(int i=0;i<_Ndim;i++)
+					g_n += _GravityField3d[i]*_vec_normal[i];
+				_Vij[0]=_Vi[0]- _Ui[0]*g_n/_inv_dxi/2;
+			}
 		}
 		else if(_spaceScheme==staggered)
 		{
