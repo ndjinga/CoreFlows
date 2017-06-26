@@ -216,12 +216,13 @@ public :
 	* \details The following treatment is applied depending on the value of the input parameter order
 	* \details 1 -> no pressure correction (pressure correction is applied nowhere in the domain), standard upwind scheme instead is used
 	* \details 2 -> standard pressure correction is applied everywhere in the domain, even at the boundary faces
-	* \details 3 -> standard pressure correction is applied inside the domain (not at the boundary faces)
-	* \details 4 -> standard pressure correction is applied inside the domain and a special pressure correction is applied at the boundary (boundary pressure = inner pressure)
-	* \details 5 -> standard pressure correction is applied inside the domain and a special pressure correction is applied at the boundary (boundary pressure = inner pressure+ source term)
+	* \details 3 -> standard pressure correction is applied only inside the domain (not at the boundary faces)
+	* \details 4 -> no pressure correction (pressure correction is applied nowhere in the domain), no Riemann problem at wall boundaries (boundary pressure = inner pressure)
+	* \details 5 -> standard pressure correction is applied everywhere in the domain, no Riemann problem at the boundary (boundary pressure = inner pressure)
+	* \details 6 -> standard pressure correction is applied inside the domain and a special pressure correction involving gravity is applied at the boundary, no Riemann problem at wall boundaries (boundary pressure = inner pressure+ source term)
 	* */
 	void setPressureCorrectionOrder(int order){
-		if( order >5 or order <1)
+		if( order >6 or order <1)
 			throw CdmathException("ProblemFluid::setPressureCorrectionOrder Pressure correction order must be an integer between 1 and 4");
 		else
 			_pressureCorrectionOrder=order;
