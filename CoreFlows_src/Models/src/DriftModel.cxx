@@ -599,7 +599,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 			}
 		}
 		_externalStates[_nVar-1] = _externalStates[1]*_fluides[0]->getInternalEnergy(_limitField[nameOfGroup].T,rho_v)
-																																																																																																																																			 +(_externalStates[0]-_externalStates[1])*_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + _externalStates[0]*v2/2;
+																																																																																																																																					 +(_externalStates[0]-_externalStates[1])*_fluides[1]->getInternalEnergy(_limitField[nameOfGroup].T,rho_l) + _externalStates[0]*v2/2;
 		_idm[0] = 0;
 		for(k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
@@ -1654,8 +1654,8 @@ void DriftModel::primToConsJacobianMatrix(double *V)
 		for(int idim=0;idim<_Ndim;idim++)
 			_primToConsJacoMat[(_nVar-1)*_nVar+2+idim]=rho*vitesse[idim];
 		_primToConsJacoMat[(_nVar-1)*_nVar+_nVar-1]=rho*(cv_v*concentration + cv_l*(1-concentration))
-																																																																																									-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
-																																																																																											+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
+																																																																																											-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
+																																																																																													+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
 	}
 	else if(_useDellacherieEOS)
 	{
@@ -1712,8 +1712,8 @@ void DriftModel::primToConsJacobianMatrix(double *V)
 		for(int idim=0;idim<_Ndim;idim++)
 			_primToConsJacoMat[(_nVar-1)*_nVar+2+idim]=rho*vitesse[idim];
 		_primToConsJacoMat[(_nVar-1)*_nVar+_nVar-1]=rho*(cp_v*concentration + cp_l*(1-concentration))
-																																																																																									-rho*rho*H*(cp_v*   concentration /(rho_v*(h_v-q_v))
-																																																																																											+cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
+																																																																																											-rho*rho*H*(cp_v*   concentration /(rho_v*(h_v-q_v))
+																																																																																													+cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
 	}
 	else
 	{
@@ -1876,7 +1876,7 @@ void DriftModel::getMixturePressureAndTemperature(double c_v, double rhom, doubl
 		StiffenedGas* fluide1=dynamic_cast<StiffenedGas*>(_fluides[1]);
 
 		temperature= (rhom_em-m_v*fluide0->getInternalEnergy(0)-m_l*fluide1->getInternalEnergy(0))
-																																																																																																																																	/(m_v*fluide0->constante("cv")+m_l*fluide1->constante("cv"));
+																																																																																																																																			/(m_v*fluide0->constante("cv")+m_l*fluide1->constante("cv"));
 
 		double e_v=fluide0->getInternalEnergy(temperature);
 		double e_l=fluide1->getInternalEnergy(temperature);
@@ -3163,45 +3163,38 @@ void DriftModel::applyVFRoeLowMachCorrections(bool isBord)
 			/* orders 1 to 3 use a half Riemann problem at boundaries
 			 * order 1 : no pressure correction
 			 * order 2 : pressure correction everywhere
-			 * order 3 : pressure correction only inside */
+			 * order 3 : pressure correction only inside, upwind on the boundary */
 			/* orders 4 to 6 do not use a half Riemann problem at boundaries
-			 * order 4 : no pressure correction
-			 * order 5 : pressure correction
+			 * order 4 : no pressure correction inside, centered pressure at the boundary
+			 * order 5 : pressure correction, centered pressure at the boundary
 			 * order 6 : standard pressure correction inside the domain and special pressure correction involving gravity at wall boundaries */
 
-			double norm_uij=0, uij_n=0, ui_n=0, uj_n=0;
-			for(int i=0;i<_Ndim;i++)
+			if(	_pressureCorrectionOrder==2 || (!isBord && _pressureCorrectionOrder==3) ||
+					_pressureCorrectionOrder==5 || (!isBord && _pressureCorrectionOrder==6) )
 			{
-				norm_uij += _Uroe[2+i]*_Uroe[2+i];
-				uij_n += _Uroe[2+i]*_vec_normal[i];
-				ui_n += _Vi[2+i]*_vec_normal[i];
-				uj_n += _Vj[2+i]*_vec_normal[i];
-			}
-			norm_uij=sqrt(norm_uij);
+				double norm_uij=0, uij_n=0, ui_n=0, uj_n=0;
+				for(int i=0;i<_Ndim;i++)
+				{
+					norm_uij += _Uroe[2+i]*_Uroe[2+i];
+					uij_n += _Uroe[2+i]*_vec_normal[i];
+					ui_n += _Vi[2+i]*_vec_normal[i];
+					uj_n += _Vj[2+i]*_vec_normal[i];
+				}
+				norm_uij=sqrt(norm_uij);
 
-			if(				_pressureCorrectionOrder==2 || (!isBord && _pressureCorrectionOrder==3) ||
-				(!isBord && _pressureCorrectionOrder==5) || (!isBord && _pressureCorrectionOrder==6) )
-			{
 				if(norm_uij>_precision)//avoid division by zero
 					_Vij[1]=(_Vi[1]+_Vj[1])/2 + uij_n/norm_uij*(_Vj[1]-_Vi[1])/4 - _Uroe[0]*norm_uij*(uj_n-ui_n)/4;
 				else
 					_Vij[1]=(_Vi[1]+_Vj[1])/2                                    - _Uroe[0]*norm_uij*(uj_n-ui_n)/4;
 			}
-			else if(_pressureCorrectionOrder==4 && isBord)
+			else if( (_pressureCorrectionOrder==4 && isBord) || (_pressureCorrectionOrder==5 && isBord))
 				_Vij[1]=_Vi[1];
-			else if(_pressureCorrectionOrder==5 && isBord)
-			{
-				if(norm_uij>_precision)//avoid division by zero
-					_Vij[1]=_Vi[1] + uij_n/norm_uij*(_Vj[1]-_Vi[1])/4 - _Uroe[0]*norm_uij*(uj_n-ui_n)/4;
-				else
-					_Vij[1]=_Vi[1]                                    - _Uroe[0]*norm_uij*(uj_n-ui_n)/4;
-			}
 			else if(_pressureCorrectionOrder==6 && isBord)
 			{
 				double g_n=0;//scalar product of gravity and normal vector
 				for(int i=0;i<_Ndim;i++)
 					g_n += _GravityField3d[i]*_vec_normal[i];
-				_Vij[1]=_Vi[1]- _Ui[1]*g_n/_inv_dxi/2;
+				_Vij[1]=_Vi[1]- _Ui[0]*g_n/_inv_dxi/2;
 			}
 		}
 		else if(_spaceScheme==staggered)
@@ -3423,8 +3416,8 @@ void DriftModel::getDensityDerivatives(double concentration, double pression, do
 				+(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(e_l-q_l))
 		);
 		_drhoE_sur_dT=rho*(cv_v*concentration + cv_l*(1-concentration))
-																																																																																	-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
-																																																																																			+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
+																																																																																			-rho*rho*E*( cv_v*   concentration /(rho_v*(e_v-q_v))
+																																																																																					+cv_l*(1-concentration)/(rho_l*(e_l-q_l)));
 	}
 	else if(_useDellacherieEOS)
 	{
@@ -3462,8 +3455,8 @@ void DriftModel::getDensityDerivatives(double concentration, double pression, do
 				+gamma_l*(1-concentration)/(rho_l*rho_l*(gamma_l-1)*(h_l-q_l))
 		)-1;
 		_drhoE_sur_dT=rho*(cp_v*concentration + cp_l*(1-concentration))
-		           	    																																																														   -rho*rho*H*( cp_v*   concentration /(rho_v*(h_v-q_v))
-		           	    																																																																   +cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
+		           	    																																																																   -rho*rho*H*( cp_v*   concentration /(rho_v*(h_v-q_v))
+		           	    																																																																		   +cp_l*(1-concentration)/(rho_l*(h_l-q_l)));
 	}
 	else
 		throw CdmathException("DriftModel::primToConsJacobianMatrix: eos should be StiffenedGas or StiffenedGasDellacherie");
