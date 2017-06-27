@@ -222,7 +222,7 @@ public :
 	* \details 6 -> standard pressure correction is applied inside the domain and a special pressure correction involving gravity is applied at the boundary, no Riemann problem at wall boundaries (boundary pressure = inner pressure+ source term)
 	* */
 	void setPressureCorrectionOrder(int order){
-		if( order >6 or order <1)
+		if( order >6 || order <1)
 			throw CdmathException("ProblemFluid::setPressureCorrectionOrder Pressure correction order must be an integer between 1 and 4");
 		else
 			_pressureCorrectionOrder=order;

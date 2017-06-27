@@ -3169,8 +3169,8 @@ void DriftModel::applyVFRoeLowMachCorrections(bool isBord)
 			 * order 5 : pressure correction, centered pressure at the boundary
 			 * order 6 : standard pressure correction inside the domain and special pressure correction involving gravity at wall boundaries */
 
-			if(	_pressureCorrectionOrder==2 || (!isBord && _pressureCorrectionOrder==3) ||
-					_pressureCorrectionOrder==5 || (!isBord && _pressureCorrectionOrder==6) )
+			if(				_pressureCorrectionOrder==2 || (!isBord && _pressureCorrectionOrder==3) ||
+				(!isBord &&	_pressureCorrectionOrder==5) || (!isBord && _pressureCorrectionOrder==6) )
 			{
 				double norm_uij=0, uij_n=0, ui_n=0, uj_n=0;
 				for(int i=0;i<_Ndim;i++)
@@ -3194,7 +3194,7 @@ void DriftModel::applyVFRoeLowMachCorrections(bool isBord)
 				double g_n=0;//scalar product of gravity and normal vector
 				for(int i=0;i<_Ndim;i++)
 					g_n += _GravityField3d[i]*_vec_normal[i];
-				_Vij[1]=_Vi[1]- _Ui[0]*g_n/_inv_dxi/2;
+				_Vij[1]=_Vi[1]+ _Ui[0]*g_n/_inv_dxi/2;
 			}
 		}
 		else if(_spaceScheme==staggered)
