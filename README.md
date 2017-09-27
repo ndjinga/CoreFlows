@@ -17,30 +17,30 @@ are the study of
 - New preconditioners for implicit methods for two phase flows
 - The coupling of fluid models or multiphysics coupling (eg thermal hydraulics and neutronics or thermal hydraulics and solid thermics)
 
-CDMATH-CoreFlows relies on the library 'CDMATH' for the handling of meshes and fields, and on the library 'PETSC' for the handling of large sparse matrices.
+CDMATH-CoreFlows relies on the numerical toolbox of the project [CDMATH]((http://cdmath.jimdo.com)) for the handling of meshes and fields, and on the library [PETSC](https://www.mcs.anl.gov/petsc/) for the handling of large sparse matrices.
 You will need the packages 'doxygen' if you want to generate de documentation and 'swig' if you want to use python scripts.
 
 Download and compilation of PETSC
 ---------------------------------
 In order to install PETSC you need first to download and compile the sources of PETSC, version 3.4 or later. 
-The sources of PETSC 3.7.3 can be downloaded with the command
--  `wget http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-3.7.3.tar.gz`
+The sources of PETSC 3.8.0 can be downloaded with the command
+-  `wget http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-3.8.0.tar.gz`
 Unzip the file and move into the newly created directory using the commands
-- `tar xzf petsc-3.7.3.tar.gz `
-- `cd petsc-3.7.3`
+- `tar xzf petsc-3.8.0.tar.gz `
+- `cd petsc-3.8.0`
 Then compile petsc using on the commands
 - `./configure  --with-mpi=0 --download-f2cblaslapack=1`
-- `make PETSC_DIR=~/workspace/petsc-3.7.3 PETSC_ARCH=arch-linux2-c-opt all`
+- `make PETSC_DIR=~/workspace/petsc-3.8.0 PETSC_ARCH=arch-linux2-c-opt all`
 
 For the moment, CDMATH-CoreFlows is a sequential library (no parallelism).
 
 Download and compilation of CDMATH
 ----------------------------------
 In order to download 'CDMATH' either unzip the following file to a directory cdmath_src
-- `wget https://github.com/PROJECT-CDMATH/CDMATH/archive/master.zip`
+- `wget https://github.com/mndjinga/CDMATH/archive/master.zip`
 
 or clone the git repository to a folder cdmath_src
-- `git clone https://github.com/PROJECT-CDMATH/CDMATH.git cdmath_src`
+- `git clone https://github.com/mndjinga/CDMATH cdmath_src`
 
 In order to compile 'CDMATH' you will need the packages 'cmake ', and 'hdf5' plus 'numpy' and 'swig' if you intend to use cdmath functions in your python scripts. 
 First create build and install repositories:

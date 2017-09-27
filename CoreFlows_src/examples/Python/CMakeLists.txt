@@ -56,13 +56,10 @@ endif ()                                                                        
 
 ############# python tests
 
-set(python_env_for_tests "${CMAKE_BINARY_DIR}/CoreFlows_src/swig:${CDMATH_DIR}/lib/:${CDMATH_DIR}/lib/cdmath:${CDMATH_DIR}/bin/cdmath")
-
 function(CreatePythonTest pythonFile)
-    add_test(NAME ${pythonFile} COMMAND "${CMAKE_CURRENT_BINARY_DIR}/${pythonFile}")
-    set_tests_properties(${pythonFile} PROPERTIES 
-        ENVIRONMENT "PYTHONPATH=${python_env_for_tests}"
-        )
+    add_test(${pythonFile} ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/${pythonFile})
+    SET_PROPERTY(TEST ${pythonFile} PROPERTY ENVIRONMENT "LD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/lib:${CDMATH_DIR}/lib:${PETSC_DIR}/${PETSC_ARCH}/lib")
+    SET_PROPERTY(TEST ${pythonFile} APPEND PROPERTY ENVIRONMENT "PYTHONPATH=${CMAKE_INSTALL_PREFIX}/lib:${CMAKE_INSTALL_PREFIX}/lib/CoreFlows_Python:${CMAKE_INSTALL_PREFIX}/bin/CoreFlows_Python:${CDMATH_DIR}/lib:${CDMATH_DIR}/lib/cdmath:${CDMATH_DIR}/bin/cdmath")
 endfunction(CreatePythonTest)
 
 # copy all *.py tests files before build
