@@ -22,6 +22,7 @@ You will need the packages 'doxygen' if you want to generate de documentation an
 
 Download and compilation of PETSC
 ---------------------------------
+Petsc can be installed together with CDMATH or separately. In the following we detail a separate installation of PETSC.
 In order to install PETSC you need first to download and compile the sources of PETSC, version 3.4 or later. 
 The sources of PETSC 3.8.0 can be downloaded with the command
 -  `wget http://ftp.mcs.anl.gov/pub/petsc/release-snapshots/petsc-3.8.0.tar.gz`
@@ -42,7 +43,7 @@ In order to download 'CDMATH' either unzip the following file to a directory cdm
 or clone the git repository to a folder cdmath_src
 - `git clone https://github.com/mndjinga/CDMATH cdmath_src`
 
-In order to compile 'CDMATH' you will need the packages 'cmake ', and 'hdf5' plus 'numpy' and 'swig' if you intend to use cdmath functions in your python scripts. 
+In order to compile 'CDMATH' you will need the packages 'cmake ', and 'hdf5' plus 'numpy' and 'swig' if you intend to use CoreFlows via python scripts. The 'petsc-dev' package is necessary if you want to install PETSC along with CDMATH with the option
 First create build and install repositories:
 
 - `mkdir ~/workspace/cdmath `
@@ -54,9 +55,8 @@ Go to the build directory
 - `cd cdmath_build `
 
 Then run the commands
-- `cmake ../cdmath_src/ -DCMAKE_INSTALL_PREFIX=../cdmath_install -DCMAKE_BUILD_TYPE=Release -DCDMATH_WITH_PYTHON=ON `
+- `cmake ../cdmath_src/ -DCMAKE_INSTALL_PREFIX=../cdmath_install -DCMAKE_BUILD_TYPE=Release -DCDMATH_WITH_PYTHON=ON -DCDMATH_WITH_PETSC=ON`
 - `make install -j`
-
 
 
 Download and compilation of CoreFlows
@@ -84,7 +84,7 @@ Once the file CoreFlows.sh has been edited, you can open a terminal, go to CoreF
 Use of CDMATH-CoreFlows
 -----------------------
 First load CDMATH-CoreFlows environment from the CoreFlows-master directory
-- `source CoreFlows-master/CoreFlows.sh `
+- `source CoreFlows_INSTAL/env_CoreFlows.sh `
 
 If you use C language: edit the file CoreFlows-master/CoreFlows_src/main.cxx then in a terminal type
 - `cd CoreFlows-master/CoreFlows_build  `
