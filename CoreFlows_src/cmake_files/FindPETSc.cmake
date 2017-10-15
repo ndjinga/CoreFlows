@@ -48,8 +48,14 @@ else()
 endif()
 
 function (petsc_get_version)
-  if (EXISTS "${PETSC_DIR}/include/petscversion.h")
-    file (STRINGS "${PETSC_DIR}/include/petscversion.h" vstrings REGEX "#define PETSC_VERSION_(RELEASE|MAJOR|MINOR|SUBMINOR|PATCH) ")
+  if (EXISTS "${PETSC_DIR}/petscversion.h" OR EXISTS "${PETSC_DIR}/include/petscversion.h" OR EXISTS "${PETSC_DIR}/${PETSC_ARCH}/include/petscversion.h")
+    if (EXISTS "${PETSC_DIR}/include/petscversion.h")
+      file (STRINGS "${PETSC_DIR}/include/petscversion.h" vstrings REGEX "#define PETSC_VERSION_(RELEASE|MAJOR|MINOR|SUBMINOR|PATCH) ")
+    else( EXISTS "${PETSC_DIR}/${PETSC_ARCH}/include/petscversion.h" )
+      file (STRINGS "${PETSC_DIR}/${PETSC_ARCH}/include/petscversion.h" vstrings REGEX "#define PETSC_VERSION_(RELEASE|MAJOR|MINOR|SUBMINOR|PATCH) ")
+    else()
+      file (STRINGS "${PETSC_DIR}/petscversion.h" vstrings REGEX "#define PETSC_VERSION_(RELEASE|MAJOR|MINOR|SUBMINOR|PATCH) ")
+    endif()
     foreach (line ${vstrings})
       string (REGEX REPLACE " +" ";" fields ${line}) # break line into three fields (the first is always "#define")
       list (GET fields 1 var)
@@ -57,6 +63,7 @@ function (petsc_get_version)
       set (${var} ${val} PARENT_SCOPE)
       set (${var} ${val})         # Also in local scope so we have access below
     endforeach ()
+
     if (PETSC_VERSION_RELEASE)
       set (PETSC_VERSION "${PETSC_VERSION_MAJOR}.${PETSC_VERSION_MINOR}.${PETSC_VERSION_SUBMINOR}p${PETSC_VERSION_PATCH}" PARENT_SCOPE)
     else ()
@@ -64,14 +71,18 @@ function (petsc_get_version)
       set (PETSC_VERSION "${PETSC_VERSION_MAJOR}.${PETSC_VERSION_MINOR}.${PETSC_VERSION_SUBMINOR}.99" PARENT_SCOPE)
     endif ()
   else ()
-    message (SEND_ERROR "PETSC_DIR can not be used, ${PETSC_DIR}/include/petscversion.h does not exist")
+    message (SEND_ERROR "PETSC_DIR can not be used, file ${PETSC_DIR}/include/petscversion.h does not exist")
   endif ()
 endfunction ()
 
 find_path (PETSC_DIR include/petsc.h
   HINTS ENV PETSC_DIR
   PATHS
+  #RedHat paths
+  /usr/include/petsc
   # Debian paths
+  /usr/lib/petscdir/3.7.6 /usr/lib/petscdir/3.7
+  /usr/lib/petscdir/3.6.2 /usr/lib/petscdir/3.6
   /usr/lib/petscdir/3.5.1 /usr/lib/petscdir/3.5
   /usr/lib/petscdir/3.4.2 /usr/lib/petscdir/3.4
   /usr/lib/petscdir/3.3 /usr/lib/petscdir/3.2 /usr/lib/petscdir/3.1
@@ -85,9 +96,11 @@ find_program (MAKE_EXECUTABLE NAMES make gmake)
 
 if (PETSC_DIR AND NOT PETSC_ARCH)
   set (_petsc_arches
-    $ENV{PETSC_ARCH}                   # If set, use environment variable first
-    linux-gnu-c-debug linux-gnu-c-opt  # Debian defaults
-    arch-linux2-c-debug arch-linux2-c-opt
+    $ENV{PETSC_ARCH}                            # If set, use environment variable first
+    linux-gnu-c-debug linux-gnu-c-opt           # Debian defaults (petsc compilation)
+    x86_64-linux-gnu-real   i686-linux-gnu-real # Debian defaults (petsc system installation)
+    arch-linux2-c-opt or arch-linux2-c-debug    # RedHat defaults (petsc compilation)
+    x86_64-redhat-linux-gnu i686-redhat-linux-gnu # RedHat defaults (petsc apt installation)
     x86_64-unknown-linux-gnu i386-unknown-linux-gnu)
   set (petscconf "NOTFOUND" CACHE FILEPATH "Cleared" FORCE)
   foreach (arch ${_petsc_arches})
@@ -224,7 +237,13 @@ show :
     petsc_join (ALL  TS)
   else ()
     set (PETSC_LIBRARY_VEC "NOTFOUND" CACHE INTERNAL "Cleared" FORCE) # There is no libpetscvec
-    petsc_find_library (SINGLE petsc)
+    petsc_find_library (SINGLE petsc) #check existence of libpetsc.so
+    if (NOT PETSC_LIBRARY_SINGLE)
+      petsc_find_library (SINGLE petsc_real) #check existence of libpetsc_real.so
+    endif()
+    if (NOT PETSC_LIBRARY_SINGLE)
+      petsc_find_library (SINGLE petsc_complex) #check existence of libpetsc_complex.so
+    endif()
     foreach (pkg SYS VEC MAT DM KSP SNES TS ALL)
       set (PETSC_LIBRARIES_${pkg} "${PETSC_LIBRARY_SINGLE}")
     endforeach ()
