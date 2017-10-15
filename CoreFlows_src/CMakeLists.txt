@@ -12,34 +12,69 @@ option (COREFLOWS_WITH_GUI "Compile Graphic user Interface for COREFLOWS." OFF)
 option (COREFLOWS_WITH_PACKAGE "Generate RPM, Debian and tarball packages." OFF)
 
 enable_testing()											   #
-# Debug mode activates testing and profiling ---------------------------------------------------------------#
-if (CMAKE_BUILD_TYPE STREQUAL Debug)										   #
+# Debug mode activates testing and profiling --------------------------------------------------------------#
+if (CMAKE_BUILD_TYPE STREQUAL Debug)									   #
 													   #
- SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg --coverage")								   #
- SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg --coverage")						   #
- SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg --coverage")					   #
+ SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pg --coverage")						   #
+ SET(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -pg --coverage")					   #
+ SET(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} -pg --coverage")				   #
 													   #
 endif ()												   #
 													   #
 #----------------------------------------------------------------------------------------------------------#
 
-# PETSC ----------------------------------------------------------------------------------------------------#
 list (APPEND CMAKE_MODULE_PATH "${CoreFlows_SOURCE_DIR}/cmake_files")                                       #  
-find_package (PETSc 3.4 REQUIRED)
-petsc_get_version ()
-  if (${PETSC_VERSION} VERSION_GREATER 3.5)
-    add_definitions(-DPETSC_VERSION_GREATER_3_5)
-  endif ()
-set (CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, petsc-dev (>= 3.4), petsc-dev (<< 3.5)")
-set (CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, petsc >= 3.4, petsc < 3.5") # This is not fully working yet.
-                                                                                                            #
-#-----------------------------------------------------------------------------------------------------------#
-
-
 
 # CDMATH ---------------------------------------------------------------------------------------------------#
 find_package (CDMATH REQUIRED)                                                                              #
 #-----------------------------------------------------------------------------------------------------------#
+
+
+# PETSC ----------------------------------------------------------------------------------------------------#
+if ( IS_DIRECTORY "$ENV{PETSC_DIR}")
+
+  find_package (PETSc 3.4 REQUIRED)
+  petsc_get_version ()
+
+  message ( STATUS "PETSC_DIR not set, searching petsc in the system" )
+
+elseif ( IS_DIRECTORY "/usr/lib/petsc/") #Case ubuntu/debian system install
+  message ( STATUS "PETSC found in /usr/lib/petsc/" )
+  set(PETSC_DIR /usr/lib/petsc/)
+
+  find_package (PETSc 3.4 REQUIRED)
+  petsc_get_version ()
+
+elseif ( IS_DIRECTORY "/usr/include/petsc/" AND EXISTS "/usr/lib64/libpetsc.so")  #Case fedora/redhat system install
+  message ( STATUS "PETSC includes found in /usr/include/petsc/" )
+  message ( STATUS "PETSC library found in /usr/lib64" )
+  set(PETSC_DIR /usr/)
+  set(PETSC_INCLUDES  /usr/include/petsc /usr/include/petsc/petsc/mpiuni)
+  set(PETSC_LIBRARIES /usr/lib64/libpetsc.so)
+  set(PETSC_VERSION "3.7") #value for fedora 25/26 
+
+else ()
+  message ( STATUS "PETSC_DIR not found in the system, checking whether petsc was compiled in the CDMATH install directory" )
+  set(PETSC_DIR ${CDMATH_DIR}/share/petsc-3.8.0) # Location of the CDMATH install 
+  set(PETSC_INCLUDES  ${PETSC_DIR}/include/  ${PETSC_DIR}/include/petsc/mpiuni)
+  set(PETSC_LIBRARIES ${PETSC_DIR}/lib/libpetsc.so)
+  set(PETSC_VERSION "3.8.0")  
+
+  find_package (PETSc 3.4 REQUIRED)
+  petsc_get_version ()
+
+endif ()
+
+if (${PETSC_VERSION} VERSION_GREATER 3.5)
+  add_definitions(-DPETSC_VERSION_GREATER_3_5)
+endif ()
+
+set (CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, petsc-dev   (>= 3.4)")
+set (CPACK_RPM_PACKAGE_REQUIRES   "${CPACK_RPM_PACKAGE_REQUIRES}, petsc-devel (>= 3.4)") # This is not fully working yet. 
+                                                                                                            #
+#-----------------------------------------------------------------------------------------------------------#
+
+
 
 # Base directories
 set (CoreFlows_SRC ${CoreFlows_SOURCE_DIR}/Models ) 
@@ -130,8 +165,8 @@ ADD_EXECUTABLE(TestEOS.exe    ${CoreFlows_SRC}/src/testEOS.cxx ${CoreFlows_SRC}/
 TARGET_LINK_LIBRARIES(TestEOS.exe  ${_extra_lib_CoreFlows})
 
 configure_file(
-    ${PROJECT_SOURCE_DIR}/conf/env.sh
-    ${CMAKE_INSTALL_PREFIX}/env.sh
+    ${PROJECT_SOURCE_DIR}/env_CoreFlows.sh
+    ${CMAKE_INSTALL_PREFIX}/env_CoreFlows.sh
     @ONLY
 )
 													    
