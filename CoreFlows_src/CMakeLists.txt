@@ -31,47 +31,34 @@ find_package (CDMATH REQUIRED)                                                  
 
 
 # PETSC ----------------------------------------------------------------------------------------------------#
-if ( IS_DIRECTORY "$ENV{PETSC_DIR}")
+message ( STATUS "Checking variable PETSC_DIR : " $ENV{PETSC_DIR} )
 
-  find_package (PETSc 3.4 REQUIRED)
-  petsc_get_version ()
-
-  message ( STATUS "PETSC_DIR not set, searching petsc in the system" )
-
-elseif ( IS_DIRECTORY "/usr/lib/petsc/") #Case ubuntu/debian system install
-  message ( STATUS "PETSC found in /usr/lib/petsc/" )
-  set(PETSC_DIR /usr/lib/petsc/)
-
-  find_package (PETSc 3.4 REQUIRED)
-  petsc_get_version ()
-
-elseif ( IS_DIRECTORY "/usr/include/petsc/" AND EXISTS "/usr/lib64/libpetsc.so")  #Case fedora/redhat system install
+if ( NOT DEFINED ENV{PETSC_DIR} AND IS_DIRECTORY "/usr/include/petsc/" AND EXISTS "/usr/lib64/libpetsc.so")  #Case fedora/redhat system install
   message ( STATUS "PETSC includes found in /usr/include/petsc/" )
   message ( STATUS "PETSC library found in /usr/lib64" )
   set(PETSC_DIR /usr/)
   set(PETSC_INCLUDES  /usr/include/petsc /usr/include/petsc/petsc/mpiuni)
   set(PETSC_LIBRARIES /usr/lib64/libpetsc.so)
   set(PETSC_VERSION "3.7") #value for fedora 25/26 
+  set (CPACK_RPM_PACKAGE_REQUIRES   "${CPACK_RPM_PACKAGE_REQUIRES}, petsc-devel (>= 3.4)") # This is not fully working yet. 
+
+#elseif ( NOT DEFINED ENV{PETSC_DIR} AND  IS_DIRECTORY "/usr/lib/petsc/") #Case ubuntu/debian system install
+#  message ( STATUS "PETSC found in /usr/lib/petsc/" )
+#  set(PETSC_DIR /usr/lib/petsc/)
+
+#  find_package (PETSc 3.4 REQUIRED)
+#  petsc_get_version ()
+#  set (CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, petsc-dev   (>= 3.4)") # This is not fully working yet. 
 
 else ()
-  message ( STATUS "PETSC_DIR not found in the system, checking whether petsc was compiled in the CDMATH install directory" )
-  set(PETSC_DIR ${CDMATH_DIR}/share/petsc-3.8.0) # Location of the CDMATH install 
-  set(PETSC_INCLUDES  ${PETSC_DIR}/include/  ${PETSC_DIR}/include/petsc/mpiuni)
-  set(PETSC_LIBRARIES ${PETSC_DIR}/lib/libpetsc.so)
-  set(PETSC_VERSION "3.8.0")  
-
   find_package (PETSc 3.4 REQUIRED)
   petsc_get_version ()
-
 endif ()
 
 if (${PETSC_VERSION} VERSION_GREATER 3.5)
   add_definitions(-DPETSC_VERSION_GREATER_3_5)
 endif ()
 
-set (CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, petsc-dev   (>= 3.4)")
-set (CPACK_RPM_PACKAGE_REQUIRES   "${CPACK_RPM_PACKAGE_REQUIRES}, petsc-devel (>= 3.4)") # This is not fully working yet. 
-                                                                                                            #
 #-----------------------------------------------------------------------------------------------------------#
 
 
