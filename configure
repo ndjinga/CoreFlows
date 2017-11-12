@@ -64,7 +64,7 @@ def CheckOptions(parser):
 
 def printDocumentationInstructions(options):
 	if options.doc:
-		print "Then use\n\t$ make doc\nto create the documentation."
+		print "\n\t$ make doc\n\tto create the documentation."
 	return
 
 
@@ -178,7 +178,8 @@ def main():
     returnCode=subprocess.call(cmake_cmd,shell=True)
     returnCode=0
     if returnCode == 0:
-        print("\n\nNow issue:\n\t$ make\nfor compiling the code.")
+        print("\n\nNow issue:\n\t$ make install\n\tfor compiling the code.")
+        print("\n\t$ make test\n\tto test the code execution.")
         printDocumentationInstructions(options)
     else:
         print("error: cmake did not run correctly.")
