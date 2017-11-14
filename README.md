@@ -43,10 +43,10 @@ Go to the build directory
 - `cd cdmath_build `
 
 Then run the commands
-- `cmake ../cdmath-masterc/ -DCMAKE_INSTALL_PREFIX=../cdmath_install -DCMAKE_BUILD_TYPE=Release -DCDMATH_WITH_PYTHON=ON -DCDMATH_WITH_PETSC=ON`
+- `cmake ../cdmath-master/ -DCMAKE_INSTALL_PREFIX=../cdmath_install -DCMAKE_BUILD_TYPE=Release -DCDMATH_WITH_PYTHON=ON -DCDMATH_WITH_PETSC=ON`
 - `make install`
 
-By default, CDMATH will compile a new sequential installation of PETSc. If an installation of PETSc (version 3.4 or later) is already available in the system, it is possible to save time by setting the environment variables PETSC_DIR and PETSC_ARCH to the appropriate values as can be found in petscversion.h.
+By default, CDMATH will compile a new sequential installation of PETSc. If an installation of PETSc (version 3.4 or later) is already available in the system, it is possible to save time by first setting the environment variables PETSC_DIR and PETSC_ARCH to the appropriate values as can be found in petscconf.h, and then run the above cmake command.
 
 Download and compilation of CoreFlows
 ---------------------------------------------
@@ -65,13 +65,13 @@ This latter command results in the creation of a directory `~/workspace/CDMATH-C
 
 In the following steps we assume that 'PETSC' (version 3.4 or more recent) and 'CDMATH' are installed on your computer.
 You need to set the following variables 
-- `PETSC_DIR`, the path to your PETSC installation
+- `CDMATH_DIR`, the path to your CDMATH installation, for example  `~/workspace/cdmath/cdmath_install//share/petsc-3.8.0 `
+- `PETSC_DIR`, the path to your PETSC installation. If Petsc was installed by CDMATH then PETSC_DIR can be defined as `~/workspace/cdmath/cdmath_install`
 - `PETSC_ARCH`, the type of installation used (usually arch-linux2-c-opt or linux-gnu-c-opt)
-- `CDMATH_DIR`, the path to your CDMATH installation
 In order to do so, type in you linux terminal
+- `export CDMATH_DIR=~/workspace/cdmath/cdmath_install`
 - `export PETSC_DIR=/path/to/my/petsc/installation`
 - `export PETSC_ARCH=my-petsc-arch`
-- `export CDMATH_DIR=~/workspace/cdmath/cdmath_install`
 
 Go to the build directory
 - `cd CDMATH-CoreFlows_build `
