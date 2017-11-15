@@ -167,6 +167,20 @@ public :
 		_limitField[groupName]=LimitField(Wall,-1,vector<double>(1,v_x),vector<double>(1,v_y),vector<double>(1,v_z),Temperature,-1,-1,-1);
 	};
 
+	/** \fn setInnerWallBoundaryCondition
+	 * \brief adds a new boundary condition of type InnerWall (special treatment of the inner wall)
+	 * \details
+	 * \param [in] string : the name of the boundary
+	 * \param [in] double : the value of the temperature at the boundary
+	 * \param [in] double : the value of the x component of the velocity at the boundary
+	 * \param [in] double : the value of the y component of the velocity at the boundary
+	 * \param [in] double : the value of the z component of the velocity at the boundary
+	 * \param [out] void
+	 *  */
+	void setInnerWallBoundaryCondition(string groupName,double Temperature,double v_x, double v_y=0, double v_z=0){
+		_limitField[groupName]=LimitField(InnerWall,-1,vector<double>(1,v_x),vector<double>(1,v_y),vector<double>(1,v_z),Temperature,-1,-1,-1);
+	};
+
 	/** \fn computeNewtonVariation
 	 * \brief Builds and solves the linear system to obtain the variation Vkp1-Vk in a Newton scheme using primitive variables
 	 * @param
