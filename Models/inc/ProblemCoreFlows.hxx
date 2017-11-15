@@ -60,7 +60,7 @@ enum pressureEstimate
 
 //! enumeration BoundaryType
 /*! Boundary condition type  */
-enum BoundaryType	{Wall,Inlet, InletPressure, InletEnthalpy, Outlet, Neumann, Dirichlet,NoTypeSpecified};
+enum BoundaryType	{Wall, InnerWall, Inlet, InletPressure, InletEnthalpy, Outlet, Neumann, Dirichlet, NoTypeSpecified};
 //! enumeration Fluid
 /*! The fluid type can be Gas or water  */
 enum phaseType

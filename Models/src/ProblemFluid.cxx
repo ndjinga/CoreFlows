@@ -371,7 +371,7 @@ double ProblemFluid::computeTimeStep(bool & stop){
 				else
 					_inv_dxi = 1/Ctemp1.getMeasure();
 
-				addConvectionToSecondMember(idCells[k],-1,true);
+				addConvectionToSecondMember(idCells[k],-1,true,nameOfGroup);
 				addDiffusionToSecondMember(idCells[k],-1,true);
 				addSourceTermToSecondMember(idCells[k],(_mesh.getCell(idCells[k])).getNumberOfFaces(),-1, -1,true,j,_inv_dxi*Ctemp1.getMeasure());
 
@@ -856,7 +856,7 @@ void ProblemFluid::abortTimeStep(){
 
 void ProblemFluid::addConvectionToSecondMember
 (		const int &i,
-		const int &j, bool isBord
+		const int &j, bool isBord, string groupname
 )
 {
 	if(_verbose && _nbTimeStep%_freqSave ==0)
@@ -929,7 +929,7 @@ void ProblemFluid::addConvectionToSecondMember
 
 			consToPrim(_Uij, _Vij,porosityij);
 
-			applyVFRoeLowMachCorrections(isBord);
+			applyVFRoeLowMachCorrections(isBord, groupname);
 
 			for(int i1=0;i1<_nVar;i1++)
 			{

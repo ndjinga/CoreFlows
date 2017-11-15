@@ -572,7 +572,7 @@ protected :
 	//!Computes the interfacial flux for the VFFC formulation of the staggered upwinding
 	virtual Vector staggeredVFFCFlux()=0;
 	//!Compute the corrected interfacial state for lowMach, pressureCorrection and staggered versions of the VFRoe formulation
-	virtual void applyVFRoeLowMachCorrections(bool isBord)=0;
+	virtual void applyVFRoeLowMachCorrections(bool isBord, string groupname="")=0;
 
 	//remplit les vecteurs de scaling
 	/** \fn computeScaling
@@ -625,8 +625,9 @@ protected :
 	 * @param i left cell number
 	 * @param j right cell number
 	 * @param isBord is a boolean that is true if the interface (i,j) is a boundary interface
+	 * @param groupname : is a string that may be used when isBord is true to specify which boundary the face (i,j) belongs to
 	 * */
-	virtual void addConvectionToSecondMember(const int &i,const int &j,bool isBord);
+	virtual void addConvectionToSecondMember(const int &i,const int &j,bool isBord, string groupname="");
 
 	/** \fn updatePrimitives
 	 * \brief updates the global primitive vector from the global conservative vector
