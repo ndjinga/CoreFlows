@@ -3143,7 +3143,7 @@ void DriftModel::staggeredVFFCMatricesPrimitiveVariables(double u_mn)
 	}
 }
 
-void DriftModel::applyVFRoeLowMachCorrections(bool isBord)
+void DriftModel::applyVFRoeLowMachCorrections(bool isBord, string groupname)
 {
 	if(_nonLinearFormulation!=VFRoe)
 		throw CdmathException("DriftModel::applyVFRoeLowMachCorrections: applyVFRoeLowMachCorrections method should be called only for VFRoe formulation");
@@ -3160,14 +3160,14 @@ void DriftModel::applyVFRoeLowMachCorrections(bool isBord)
 		}
 		else if(_spaceScheme==pressureCorrection)
 		{
-			/* orders 1 to 3 use a half Riemann problem at boundaries
-			 * order 1 : no pressure correction
-			 * order 2 : pressure correction everywhere
-			 * order 3 : pressure correction only inside, upwind on the boundary */
-			/* orders 4 to 6 do not use a half Riemann problem at boundaries
-			 * order 4 : no pressure correction inside, centered pressure at the boundary
-			 * order 5 : pressure correction, centered pressure at the boundary
-			 * order 6 : standard pressure correction inside the domain and special pressure correction involving gravity at wall boundaries */
+			/* options 1 to 3 use a half Riemann problem at boundaries
+			 * option 1 : no pressure correction
+			 * option 2 : pressure correction everywhere
+			 * option 3 : pressure correction only inside, upwind on the boundary */
+			/* options 4 to 6 do not use a half Riemann problem at boundaries
+			 * option 4 : no pressure correction inside, centered pressure at the boundary
+			 * option 5 : pressure correction, centered pressure at the boundary
+			 * option 6 : standard pressure correction inside the domain and special pressure correction involving gravity at wall boundaries */
 
 			if(				_pressureCorrectionOrder==2 || (!isBord && _pressureCorrectionOrder==3) ||
 				(!isBord &&	_pressureCorrectionOrder==5) || (!isBord && _pressureCorrectionOrder==6) )
@@ -3187,9 +3187,9 @@ void DriftModel::applyVFRoeLowMachCorrections(bool isBord)
 				else
 					_Vij[1]=(_Vi[1]+_Vj[1])/2                                    - _Uroe[0]*norm_uij*(uj_n-ui_n)/4;
 			}
-			else if( (_pressureCorrectionOrder==4 && isBord) || (_pressureCorrectionOrder==5 && isBord))
+			else if( (isBord && _pressureCorrectionOrder==4) || (isBord && _pressureCorrectionOrder==5) ||  (isBord && _limitField[nameOfGroup].bcType==InnerWall))
 				_Vij[1]=_Vi[1];
-			else if(_pressureCorrectionOrder==6 && isBord)
+			else if(isBord && _pressureCorrectionOrder==6)
 			{
 				double g_n=0;//scalar product of gravity and normal vector
 				for(int i=0;i<_Ndim;i++)
