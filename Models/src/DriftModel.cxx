@@ -3187,7 +3187,7 @@ void DriftModel::applyVFRoeLowMachCorrections(bool isBord, string groupname)
 				else
 					_Vij[1]=(_Vi[1]+_Vj[1])/2                                    - _Uroe[0]*norm_uij*(uj_n-ui_n)/4;
 			}
-			else if( (isBord && _pressureCorrectionOrder==4) || (isBord && _pressureCorrectionOrder==5) ||  (isBord && _limitField[nameOfGroup].bcType==InnerWall))
+			else if( (isBord && _pressureCorrectionOrder==4) || (isBord && _pressureCorrectionOrder==5) ||  (isBord && _limitField[groupname].bcType==InnerWall))
 				_Vij[1]=_Vi[1];
 			else if(isBord && _pressureCorrectionOrder==6)
 			{

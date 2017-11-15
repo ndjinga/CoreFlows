@@ -2403,7 +2403,7 @@ void SinglePhase::staggeredVFFCMatricesPrimitiveVariables(double un)//vitesse no
 		}
 	}
 }
-void SinglePhase::applyVFRoeLowMachCorrections(bool isBord)
+void SinglePhase::applyVFRoeLowMachCorrections(bool isBord, string groupname)
 {
 	if(_nonLinearFormulation!=VFRoe)
 	{

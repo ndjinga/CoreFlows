@@ -117,7 +117,7 @@ class FiveEqsTwoFluid : public ProblemFluid{
 	//!Computes the interfacial flux for the VFFC formulation of the staggered upwinding
 	Vector staggeredVFFCFlux();
 	//!Compute the corrected interfacial state for lowMach, pressureCorrection and staggered versions of the VFRoe formulation
-	void applyVFRoeLowMachCorrections(bool isBord);
+	void applyVFRoeLowMachCorrections(bool isBord, string groupname="");
 
 	//!Special preconditioner based on a matrix scaling strategy
 	void computeScaling(double offset);

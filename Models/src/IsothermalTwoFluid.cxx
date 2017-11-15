@@ -1506,7 +1506,7 @@ Vector IsothermalTwoFluid::staggeredVFFCFlux()
 	}
 }
 
-void IsothermalTwoFluid::applyVFRoeLowMachCorrections(bool isBord)
+void IsothermalTwoFluid::applyVFRoeLowMachCorrections(bool isBord, string groupname)
 {
 	if(_nonLinearFormulation!=VFRoe)
 		throw CdmathException("IsothermalTwoFluid::applyVFRoeLowMachCorrections: applyVFRoeLowMachCorrections method should be called only for VFRoe formulation");

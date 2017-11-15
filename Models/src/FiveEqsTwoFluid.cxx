@@ -2100,7 +2100,7 @@ Vector FiveEqsTwoFluid::staggeredVFFCFlux()
 	}
 }
 
-void FiveEqsTwoFluid::applyVFRoeLowMachCorrections(bool isBord)
+void FiveEqsTwoFluid::applyVFRoeLowMachCorrections(bool isBord, string groupname)
 {
 	if(_nonLinearFormulation!=VFRoe)
 		throw CdmathException("FiveEqsTwoFluid::applyVFRoeLowMachCorrections: applyVFRoeLowMachCorrections method should be called only for VFRoe formulation");
