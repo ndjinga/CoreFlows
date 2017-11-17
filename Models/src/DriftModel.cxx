@@ -3160,17 +3160,22 @@ void DriftModel::applyVFRoeLowMachCorrections(bool isBord, string groupname)
 		}
 		else if(_spaceScheme==pressureCorrection)
 		{
-			/* options 1 to 3 use a half Riemann problem at boundaries
-			 * option 1 : no pressure correction
-			 * option 2 : pressure correction everywhere
-			 * option 3 : pressure correction only inside, upwind on the boundary */
-			/* options 4 to 6 do not use a half Riemann problem at boundaries
-			 * option 4 : no pressure correction inside, centered pressure at the boundary
-			 * option 5 : pressure correction, centered pressure at the boundary
-			 * option 6 : standard pressure correction inside the domain and special pressure correction involving gravity at wall boundaries */
+			/* 
+			 * option 1 : no pressure correction except for inner walls where p^*=p_int
+			 * option 2 : Clerc pressure correction everywhere, except for inner walls where p^*=p_int
+			 * option 3 : Clerc pressure correction everywhere, even for inner walls
+			 * option 4 : Clerc pressure correction only inside, upwind on wall and innerwall boundaries
+			 * option 5 : Clerc pressure correction inside the domain and special pressure correction involving gravity at wall and inner wall boundaries 
+			 * */
+			bool isWall=false, isInnerWall=false;
+			if(isBord)
+			{
+				isWall = _limitField[nameOfGroup].bcType==Wall;
+				isInnerWall = _limitField[nameOfGroup].bcType==InnerWall;
+			}
 
-			if(				_pressureCorrectionOrder==2 || (!isBord && _pressureCorrectionOrder==3) ||
-				(!isBord &&	_pressureCorrectionOrder==5) || (!isBord && _pressureCorrectionOrder==6) )
+			if(	(!isInnerWall && _pressureCorrectionOrder==2)  || _pressureCorrectionOrder==3 ||
+				(!isBord &&	_pressureCorrectionOrder==4) || (!isBord && _pressureCorrectionOrder==5)   )//Clerc pressure correction
 			{
 				double norm_uij=0, uij_n=0, ui_n=0, uj_n=0;
 				for(int i=0;i<_Ndim;i++)
@@ -3181,21 +3186,20 @@ void DriftModel::applyVFRoeLowMachCorrections(bool isBord, string groupname)
 					uj_n += _Vj[2+i]*_vec_normal[i];
 				}
 				norm_uij=sqrt(norm_uij);
-
-				if(norm_uij>_precision)//avoid division by zero
+					if(norm_uij>_precision)//avoid division by zero
 					_Vij[1]=(_Vi[1]+_Vj[1])/2 + uij_n/norm_uij*(_Vj[1]-_Vi[1])/4 - _Uroe[0]*norm_uij*(uj_n-ui_n)/4;
 				else
 					_Vij[1]=(_Vi[1]+_Vj[1])/2                                    - _Uroe[0]*norm_uij*(uj_n-ui_n)/4;
 			}
-			else if( (isBord && _pressureCorrectionOrder==4) || (isBord && _pressureCorrectionOrder==5) ||  (isBord && _limitField[groupname].bcType==InnerWall))
-				_Vij[1]=_Vi[1];
-			else if(isBord && _pressureCorrectionOrder==6)
+			else if(isBord && _pressureCorrectionOrder==5)
 			{
 				double g_n=0;//scalar product of gravity and normal vector
 				for(int i=0;i<_Ndim;i++)
 					g_n += _GravityField3d[i]*_vec_normal[i];
 				_Vij[1]=_Vi[1]+ _Ui[0]*g_n/_inv_dxi/2;
 			}
+			else if(isInnerWall && (_pressureCorrectionOrder==1 || _pressureCorrectionOrder==2) )
+					_Vij[1]=_Vi[1];
 		}
 		else if(_spaceScheme==staggered)
 		{
