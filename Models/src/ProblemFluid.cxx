@@ -24,7 +24,7 @@ ProblemFluid::ProblemFluid(void){
 	_err_press_max=0; _part_imag_max=0; _nbMaillesNeg=0; _nbVpCplx=0;_minm1=1e30;_minm2=1e30;
 	_isScaling=false;
 	_entropicCorrection=false;
-	_pressureCorrectionOrder=1;
+	_pressureCorrectionOrder=2;
 	_nonLinearFormulation=Roe;
 	_maxvploc=0.;
 }
