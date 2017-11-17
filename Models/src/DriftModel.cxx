@@ -551,7 +551,7 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 		cout<<endl;
 	}
 
-	if (_limitField[nameOfGroup].bcType==Wall){
+	if (_limitField[nameOfGroup].bcType==Wall || _limitField[nameOfGroup].bcType==InnerWall){
 		//Pour la convection, inversion du sens de la vitesse normale
 		for(k=0; k<_Ndim; k++)
 			_externalStates[(k+2)]-= 2*q_n*normale[k];
@@ -779,8 +779,8 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 	}
 	else {
 		cout<<"Boundary condition not set for boundary named "<<nameOfGroup<<endl;
-		cout<<"Accepted boundary condition are Neumann, Wall, Inlet, and Outlet"<<endl;
-		*_runLogFile<<"Boundary condition not set for boundary named "<<nameOfGroup<<"Accepted boundary condition are Neumann, Wall, Inlet, and Outlet"<<endl;
+		cout<<"Accepted boundary condition are Neumann, Wall, InnerWall, Inlet, and Outlet"<<endl;
+		*_runLogFile<<"Boundary condition not set for boundary named "<<nameOfGroup<<"Accepted boundary condition are Neumann,Wall, InnerWall, Inlet, and Outlet"<<endl;
 		_runLogFile->close();
 		throw CdmathException("Unknown boundary condition");
 	}
@@ -1240,7 +1240,7 @@ void DriftModel::jacobian(const int &j, string nameOfGroup,double * normale)
 		q_n+=_externalStates[(k+1)]*normale[k];
 
 	// loop of boundary types
-	if (_limitField[nameOfGroup].bcType==Wall)
+	if (_limitField[nameOfGroup].bcType==Wall || _limitField[nameOfGroup].bcType==InnerWall)
 	{
 		for(k=0; k<_nVar;k++)
 			_Jcb[k*_nVar + k] = 1;
@@ -1437,7 +1437,7 @@ void DriftModel::jacobian(const int &j, string nameOfGroup,double * normale)
 	{
 		cout << "group named "<<nameOfGroup << " : unknown boundary condition" << endl;
 		_runLogFile->close();
-		throw CdmathException("DriftModel::jacobian: The boundary condition is not recognised: neither inlet, inltPressure, outlet, wall nor neumann");
+		throw CdmathException("DriftModel::jacobian: The boundary condition is not recognised: neither inlet, inltPressure, outlet, wall, InnerWall, nor neumann");
 	}
 }
 
@@ -1454,7 +1454,7 @@ void  DriftModel::jacobianDiff(const int &j, string nameOfGroup)
 	for(k=0; k<_nVar*_nVar;k++)
 		_JcbDiff[k] = 0;
 
-	if (_limitField[nameOfGroup].bcType==Wall){
+	if (_limitField[nameOfGroup].bcType==Wall || _limitField[nameOfGroup].bcType==InnerWall){
 	}
 	else if (_limitField[nameOfGroup].bcType==Outlet || _limitField[nameOfGroup].bcType==Neumann
 			||_limitField[nameOfGroup].bcType==Inlet || _limitField[nameOfGroup].bcType==InletPressure)
@@ -3143,7 +3143,7 @@ void DriftModel::staggeredVFFCMatricesPrimitiveVariables(double u_mn)
 	}
 }
 
-void DriftModel::applyVFRoeLowMachCorrections(bool isBord, string groupname)
+void DriftModel::applyVFRoeLowMachCorrections(bool isBord, string nameOfGroup)
 {
 	if(_nonLinearFormulation!=VFRoe)
 		throw CdmathException("DriftModel::applyVFRoeLowMachCorrections: applyVFRoeLowMachCorrections method should be called only for VFRoe formulation");
