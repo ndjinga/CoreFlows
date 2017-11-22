@@ -328,7 +328,8 @@ double ProblemFluid::computeTimeStep(bool & stop){
 				// compute the normal vector corresponding to face j : from Ctemp1 outward
 				Ctemp1 = _mesh.getCell(idCells[k]);//origin of the normal vector
 				if (_Ndim >1){
-					for(int l=0; l<Ctemp1.getNumberOfFaces(); l++){//we look for l the index of the face Fj for the cell Ctemp1
+					for(int l=0; l<Ctemp1.getNumberOfFaces(); l++)
+					{//we look for l the index of the face Fj for the cell Ctemp1
 						if (j == Ctemp1.getFacesId()[l])
 						{
 							for (int idim = 0; idim < _Ndim; ++idim)
