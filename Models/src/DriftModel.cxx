@@ -3170,12 +3170,12 @@ void DriftModel::applyVFRoeLowMachCorrections(bool isBord, string nameOfGroup)
 			bool isWall=false, isInnerWall=false;
 			if(isBord)
 			{
-				isWall = _limitField[nameOfGroup].bcType==Wall;
-				isInnerWall = _limitField[nameOfGroup].bcType==InnerWall;
+				isWall = (_limitField[nameOfGroup].bcType==Wall);
+				isInnerWall = (_limitField[nameOfGroup].bcType==InnerWall);
 			}
 
 			if(	(!isInnerWall && _pressureCorrectionOrder==2)  || _pressureCorrectionOrder==3 ||
-				(!isBord &&	_pressureCorrectionOrder==4) || (!isBord && _pressureCorrectionOrder==5)   )//Clerc pressure correction
+				(!isBord &&	_pressureCorrectionOrder==4) || (!isWall && !isInnerWall && _pressureCorrectionOrder==5)   )//Clerc pressure correction
 			{
 				double norm_uij=0, uij_n=0, ui_n=0, uj_n=0;
 				for(int i=0;i<_Ndim;i++)
@@ -3191,7 +3191,7 @@ void DriftModel::applyVFRoeLowMachCorrections(bool isBord, string nameOfGroup)
 				else
 					_Vij[1]=(_Vi[1]+_Vj[1])/2                                    - _Uroe[0]*norm_uij*(uj_n-ui_n)/4;
 			}
-			else if(isBord && _pressureCorrectionOrder==5)
+			else if((isWall || isInnerWall) && _pressureCorrectionOrder==5)//correction de pression gravitaire
 			{
 				double g_n=0;//scalar product of gravity and normal vector
 				for(int i=0;i<_Ndim;i++)
