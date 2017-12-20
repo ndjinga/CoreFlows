@@ -300,7 +300,7 @@ void ProblemCoreFlows::setInitialFieldSphericalStepFunction(const Mesh M, const 
 	if((Center.size()!=M.getSpaceDimension()) || (Vout.size() != Vin.size()) )
 	{
 		cout<< "Vout.size()= "<<Vout.size() << ", Vin.size()= "<<Vin.size()<<", Center.size()="<<Center.size()<<", M.getSpaceDim= "<< M.getSpaceDimension()<<endl;
-		throw CdmathException("Vector size error : Spherical field generation failed");
+		throw CdmathException("ProblemCoreFlows::setInitialFieldSphericalStepFunction : Vector size error");
 	}
 	int nVar=Vout.size();
 	int spaceDim=M.getSpaceDimension();
