@@ -24,7 +24,7 @@ ProblemFluid::ProblemFluid(void){
 	_err_press_max=0; _part_imag_max=0; _nbMaillesNeg=0; _nbVpCplx=0;_minm1=1e30;_minm2=1e30;
 	_isScaling=false;
 	_entropicCorrection=false;
-	_pressureCorrectionOrder=1;
+	_pressureCorrectionOrder=2;
 	_nonLinearFormulation=Roe;
 	_maxvploc=0.;
 }
@@ -323,13 +323,15 @@ double ProblemFluid::computeTimeStep(bool & stop){
 		// If Fj is on the boundary
 		if (_isBoundary)
 		{
-			for(int k=0;k<Fj.getNumberOfCells();k++)//there will be at most two neighours
+			for(int k=0;k<Fj.getNumberOfCells();k++)//there will be at most two neighours in the case of an inner wall
 			{
 				// compute the normal vector corresponding to face j : from Ctemp1 outward
 				Ctemp1 = _mesh.getCell(idCells[k]);//origin of the normal vector
 				if (_Ndim >1){
-					for(int l=0; l<Ctemp1.getNumberOfFaces(); l++){//we look for l the index of the face Fj for the cell Ctemp1
-						if (j == Ctemp1.getFacesId()[l]){
+					for(int l=0; l<Ctemp1.getNumberOfFaces(); l++)
+					{//we look for l the index of the face Fj for the cell Ctemp1
+						if (j == Ctemp1.getFacesId()[l])
+						{
 							for (int idim = 0; idim < _Ndim; ++idim)
 								_vec_normal[idim] = Ctemp1.getNormalVector(l,idim);
 							break;
@@ -424,7 +426,6 @@ double ProblemFluid::computeTimeStep(bool & stop){
 					MatSetValuesBlocked(_A, size, &idm, size, &idm, _Diffusion, ADD_VALUES);
 				}
 			}
-
 		} else 	if (Fj.getNumberOfCells()==2 ){	// Fj is inside the domain and has two neighours (no junction)
 			// compute the normal vector corresponding to face j : from Ctemp1 to Ctemp2
 			Ctemp1 = _mesh.getCell(idCells[0]);//origin of the normal vector
