@@ -630,6 +630,7 @@ double ProblemFluid::computeTimeStep(bool & stop){
 		}
 		else
 		{
+			cout<< "Face j="<<j<< " is not a boundary face and has "<<Fj.getNumberOfCells()<< " neighbour cells"<<endl;
 			_runLogFile->close();
 			throw CdmathException("ProblemFluid::ComputeTimeStep(): incompatible number of cells around a face");
 		}
