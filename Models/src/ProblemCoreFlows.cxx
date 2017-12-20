@@ -294,6 +294,38 @@ void ProblemCoreFlows::setInitialFieldStepFunction( int nDim, const vector<doubl
 	}
 	setInitialFieldStepFunction(M, V_Left, V_Right, xstep);
 }
+
+void ProblemCoreFlows::setInitialFieldSphericalStepFunction(const Mesh M, const Vector Vin, const Vector Vout, double radius, const Vector Center)
+{
+	if((Center.size()!=M.getSpaceDimension()) || (Vout.size() != Vin.size()) )
+	{
+		cout<< "Vout.size()= "<<Vout.size() << ", Vin.size()= "<<Vin.size()<<", Center.size()="<<Center.size()<<", M.getSpaceDim= "<< M.getSpaceDimension()<<endl;
+		throw CdmathException("Vector size error : Spherical field generation failed");
+	}
+	int nVar=Vout.size();
+	int spaceDim=M.getSpaceDimension();
+	Field VV("Primitive variables for spherical step function", CELLS, M, nVar);
+
+	Vector currentPoint(spaceDim);
+	for(int i=0;i<M.getNumberOfCells();i++)
+	{
+		currentPoint(0)=M.getCell(i).x();
+		if(spaceDim>1)
+		{
+			currentPoint(1)=M.getCell(i).y();
+			if(spaceDim>2)
+				currentPoint(2)=M.getCell(i).z();
+		}
+		if((currentPoint-Center).norm()<radius)
+			for(int j=0;j<nVar;j++)
+				VV(i,j)=Vin[j];
+		else
+			for(int j=0;j<nVar;j++)
+				VV(i,j)=Vout[j];
+	}
+	setInitialField(VV);
+}
+
 double ProblemCoreFlows::getTime()
 {
 	return _time;

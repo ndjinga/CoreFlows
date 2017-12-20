@@ -390,6 +390,19 @@ public :
 			double xmin, double xmax,int nx, string leftSide, string rightSide,
 			double ymin=0, double ymax=0, int ny=0, string backSide="", string frontSide="",
 			double zmin=0, double zmax=0, int nz=0, string bottomSide="", string topSide="");
+
+	/** \fn setInitialFieldSphericalStepFunction
+	 * \brief sets a step function initial field with value Vin inside the ball with radius Radius and Vout outside
+	 * \details
+	 * \param [in] Mesh
+	 * \param [in] Vector Vin, value inside the ball
+	 * \param [in] Vector Vout, value outside the ball
+	 * \param [in] double radius of the ball
+	 * \param [in] Vector Center, coordinates of the ball center
+	 * \param [out] void
+	 *  */
+	void setInitialFieldSphericalStepFunction(const Mesh M, const Vector Vin, const Vector Vout, double Radius, Vector Center);
+
 	/** \fn getTime
 	 * \brief renvoie _time (le temps courant du calcul)
 	 * \details
