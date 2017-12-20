@@ -7,7 +7,6 @@ import CoreFlows as cf
 
 def SinglePhase_2DSphericalExplosion_unstructured():
 
-	print( "Loading unstructured mesh " );
 	inputfile="../resources/BoxWithMeshWithTriangularCells";
 	fieldName="Initial variables for spherical explosion";
 	spaceDim=2
@@ -16,7 +15,7 @@ def SinglePhase_2DSphericalExplosion_unstructured():
 	nVar=myProblem.getNumberOfVariables();
 
 	# Initial field creation
-	print ("Setting mesh and initial data " ) ;
+	print ("Loading unstructured mesh and initial data for test SinglePhase_2DSphericalExplosion_unstructured()" ) ;
 	myProblem.setInitialField(inputfile,fieldName,0);
 
 	# set the boundary conditions
@@ -36,7 +35,7 @@ def SinglePhase_2DSphericalExplosion_unstructured():
 	myProblem.setWellBalancedCorrection(False);
     
 	# name file save
-	fileName = "2DSphericalExplosion_unstructred";
+	fileName = "2DSphericalExplosion_unstructured";
 
 	# parameters calculation
 	MaxNbOfTimeStep = 3 ;

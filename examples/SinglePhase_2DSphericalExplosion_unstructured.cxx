@@ -35,7 +35,7 @@ using namespace std;
 int main(int argc, char** argv)
 {
 	// preprocessing: mesh and group creation
-	cout << "Loading unstructured mesh for test SinglePhase_2DSphericalExplosion_unstructured()" << endl;
+	cout << "Loading unstructured mesh and initial data for test SinglePhase_2DSphericalExplosion_unstructured()" << endl;
 	string inputfile="resources/BoxWithMeshWithTriangularCells";
 	string fieldName="Initial variables for spherical explosion";
 	int spaceDim=2;
@@ -43,7 +43,7 @@ int main(int argc, char** argv)
 	SinglePhase  myProblem(Gas,around1bar300K,spaceDim);
 
 	//Initial field creation
-	cout << "Setting initial data " << endl;
+	cout << "Loading unstructured mesh and initial data for test SinglePhase_2DSphericalExplosion_unstructured()" << endl;
 	myProblem.setInitialField(inputfile,fieldName,0);
 
 	//set the boundary conditions
@@ -59,7 +59,7 @@ int main(int argc, char** argv)
 	myProblem.setNumericalScheme(upwind, Explicit);
 
 	// name file save
-	string fileName = "2DSphericalExplosion_unstructred";
+	string fileName = "2DSphericalExplosion_unstructured";
 
 	// parameters calculation
 	unsigned MaxNbOfTimeStep = 3 ;
