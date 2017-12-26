@@ -24,6 +24,7 @@ endif ()												   #
 #----------------------------------------------------------------------------------------------------------#
 
 list (APPEND CMAKE_MODULE_PATH "${CoreFlows_SOURCE_DIR}/cmake_files")                                       #  
+#list (APPEND CMAKE_PREFIX_PATH "${CoreFlows_SOURCE_DIR}/cmake_files")                                       #  
 
 # CDMATH ---------------------------------------------------------------------------------------------------#
 find_package (CDMATH REQUIRED)                                                                              #
@@ -108,7 +109,7 @@ endif ()                                                                        
 
 # Graphic interface-----------------------------------------------------------------------------------------#
      													    #
-if (COREFLOWS_WITH_GUI)											    							       														    #
+if (COREFLOWS_WITH_GUI)											    					  														    #
  set (CoreFlows_GUI_DIR ${CoreFlows_SOURCE_DIR}/gui)                                                        #
  add_subdirectory(${CoreFlows_GUI_DIR})			
 
