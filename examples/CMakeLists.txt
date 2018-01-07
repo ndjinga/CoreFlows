@@ -56,8 +56,6 @@ set( libs_for_tests ${_extra_lib_CoreFlows} )
 # copy tests resources (med files etc.) into the build directory
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/resources DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
-CreateTestExecAndInstall(test_template.cxx  "${libs_for_tests}" )
-
 CreateTestExecAndInstall(CoupledTransportDiffusionEquations_1DHeatedChannel.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(DiffusionEquation_1DHeatedRod.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(DriftModel_1DBoilingAssembly.cxx  "${libs_for_tests}" )
@@ -98,6 +96,7 @@ CreateTestExecAndInstall(SinglePhase_2DWallHeatedChannel.cxx  "${libs_for_tests}
 CreateTestExecAndInstall(SinglePhase_3DHeatDrivenCavity.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(SinglePhase_HeatedWire_2Branches.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(TransportEquation_1DHeatedChannel.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(testEOS.cxx  "${libs_for_tests}" )
 
 
 #TODO: install for tests and test data

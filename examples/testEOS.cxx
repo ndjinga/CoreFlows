@@ -1,10 +1,11 @@
 #include "Fluide.h"
+#include <cstdlib>
 
 #include <iostream>
 
 using namespace std;
 
-int main() {
+int main(int argc, char** argv) {
 	double _Tsat = 656; //saturation temperature used in Dellacherie EOS
 	StiffenedGasDellacherie fluid1 = StiffenedGasDellacherie(1.43, 0,
 			2.030255e6, 1040.14); //stiffened gas law for Gas from S. Dellacherie
@@ -24,5 +25,5 @@ int main() {
 	cout << "Tvalid1 fluide 1 = " << Tvalid1 << endl;
 	cout << "h1 fluide 1 = " << h1 << endl;
 
-	return 0;
+	return  EXIT_SUCCESS;
 }

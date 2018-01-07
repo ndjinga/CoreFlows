@@ -148,10 +148,6 @@ SET_TARGET_PROPERTIES(CoreFlowsMainExe PROPERTIES COMPILE_FLAGS "")					    #
 TARGET_LINK_LIBRARIES(CoreFlowsMainExe CoreFlows  ${_extra_lib_CoreFlows})				    #
 INSTALL(TARGETS CoreFlowsMainExe DESTINATION bin/Executable)						    #
 													    #
-
-ADD_EXECUTABLE(TestEOS.exe    ${CoreFlows_SRC}/src/testEOS.cxx ${CoreFlows_SRC}/src/Fluide.cxx )
-TARGET_LINK_LIBRARIES(TestEOS.exe  ${_extra_lib_CoreFlows})
-
 configure_file(
     ${PROJECT_SOURCE_DIR}/env_CoreFlows.sh
     ${CMAKE_INSTALL_PREFIX}/env_CoreFlows.sh
