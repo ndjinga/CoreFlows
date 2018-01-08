@@ -6,6 +6,20 @@
 
 using namespace std;
 
+void
+computeVelocityMCells(const Field& velocity,
+                      Field& velocityMCells)
+{
+    Mesh myMesh=velocity.getMesh();
+    int nbCells=myMesh.getNumberOfCells();
+
+    for(int i=0;i<nbCells;i++)
+    {
+        IntTab facesId=myMesh.getCell(i).getFacesId();
+        velocityMCells(i)=(velocity(facesId[0])+velocity(facesId[1]))/2.;
+    }
+}
+
 SinglePhaseStaggered::SinglePhaseStaggered(phaseType fluid, pressureEstimate pEstimate, int dim, bool useDellacherieEOS){
 	_Ndim=dim;
 	_nVar=_Ndim+2;
