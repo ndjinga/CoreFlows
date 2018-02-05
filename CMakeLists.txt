@@ -123,6 +123,8 @@ INCLUDE_DIRECTORIES(						   					    #
 													    #
   ${PETSC_INCLUDES}											    #
   ${CDMATH_INCLUDES}											    #
+  ${CDMATH_INCLUDES}/med											    #
+  ${CDMATH_INCLUDES}/medcoupling											    #
   ${CoreFlows_SRC}/inc											    #    
   )													    #
 													    #

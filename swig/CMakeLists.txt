@@ -12,6 +12,8 @@ INCLUDE_DIRECTORIES(
 INCLUDE_DIRECTORIES(
       ${PETSC_INCLUDES}
       ${CDMATH_INCLUDES}
+      ${CDMATH_INCLUDES}/med											    #
+      ${CDMATH_INCLUDES}/medcoupling											    #
 )
 SET(_extra_lib_SWIG ${CDMATH_LIBRARIES} ${PETSC_LIBRARIES})   
 
