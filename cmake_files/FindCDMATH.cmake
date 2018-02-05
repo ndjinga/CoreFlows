@@ -57,8 +57,8 @@ endif ()
 
 # CDMATH libraries against which to link
 # This sets the variable ${CDMATH_LIBRARIES}.
-set(CDMATH_LIBDIR ${CDMATH_DIR}/lib  ${CDMATH_DIR}/lib/med  ${CDMATH_DIR}/lib/medcoupling)
-if (NOT (IS_DIRECTORY  ${CDMATH_LIBDIR}) )
+set(CDMATH_LIBDIR ${CDMATH_DIR}/lib)
+if ( NOT (IS_DIRECTORY  ${CDMATH_LIBDIR}) )
   message (SEND_ERROR "CDMATH_LIBDIR can not be used, ${CDMATH_LIBDIR} does not exist.")
 endif () 
 find_library (INTERPKERNEL_LIB NAMES interpkernel PATHS ${CDMATH_LIBDIR}/medcoupling)
