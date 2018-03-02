@@ -1671,11 +1671,15 @@ Vector SinglePhase::staggeredVFFCFlux()
 	{
 		Vector Fij(_nVar);
 
-		double uijn=0, phiqn=0;
+		double uijn=0, phiqn=0, uin=0, ujn=0;
 		for(int idim=0;idim<_Ndim;idim++)
+		{
 			uijn+=_vec_normal[idim]*_Uroe[1+idim];//URoe = rho, u, H
-
-		if(uijn>_precision)
+			uin +=_vec_normal[idim]*_Ui[1+idim];
+			ujn +=_vec_normal[idim]*_Uj[1+idim];
+		}
+		
+		if( (uin>0 && ujn >0) || (uin>=0 && ujn <=0 && uijn>0) ) // formerly (uijn>_precision)
 		{
 			for(int idim=0;idim<_Ndim;idim++)
 				phiqn+=_vec_normal[idim]*_Ui[1+idim];//phi rho u n
@@ -1684,7 +1688,7 @@ Vector SinglePhase::staggeredVFFCFlux()
 				Fij(1+idim)=phiqn*_Vi[1+idim]+_Vj[0]*_vec_normal[idim]*_porosityj;
 			Fij(_nVar-1)=phiqn/_Ui[0]*(_Ui[_nVar-1]+_Vj[0]*sqrt(_porosityj/_porosityi));
 		}
-		else if(uijn<-_precision)
+		else if( (uin<0 && ujn <0) || (uin>=0 && ujn <=0 && uijn<0) ) // formerly (uijn<-_precision)
 		{
 			for(int idim=0;idim<_Ndim;idim++)
 				phiqn+=_vec_normal[idim]*_Uj[1+idim];//phi rho u n
@@ -1693,7 +1697,7 @@ Vector SinglePhase::staggeredVFFCFlux()
 				Fij(1+idim)=phiqn*_Vj[1+idim]+_Vi[0]*_vec_normal[idim]*_porosityi;
 			Fij(_nVar-1)=phiqn/_Uj[0]*(_Uj[_nVar-1]+_Vi[0]*sqrt(_porosityi/_porosityj));
 		}
-		else//case nil velocity on the interface, apply centered scheme
+		else//case (uin<=0 && ujn >=0) or (uin>=0 && ujn <=0 && uijn==0), apply centered scheme
 		{
 			Vector Ui(_nVar), Uj(_nVar), Vi(_nVar), Vj(_nVar), Fi(_nVar), Fj(_nVar);
 			Vector normale(_Ndim);
