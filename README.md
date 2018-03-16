@@ -59,6 +59,9 @@ Now create build and install repositories:
 
 Download CDMATH-CoreFlows source files in zipped form
 - `wget https://github.com/mndjinga/CDMATH-CoreFlows/archive/master.zip `
+or clone the git repository to a folder CoreFlows-master
+-`git clone https://github.com/mndjinga/CDMATH-CoreFlows.git CoreFlows-master` 
+
 Unzip the source file
 - `unzip master.zip`
 This latter command results in the creation of a directory `~/workspace/CDMATH-CoreFlows/CDMATH-CoreFlows-master`  containing the source files.
@@ -73,8 +76,11 @@ In order to do so, type in you linux terminal
 - `export PETSC_DIR=/path/to/my/petsc/installation`
 - `export PETSC_ARCH=my-petsc-arch`
 
+then create build and install repositories next to CoreFlows-master :
+- `mkdir CoreFlows_build CoreFlows_install`
+
 Go to the build directory
-- `cd CDMATH-CoreFlows_build `
+- `cd CoreFlows_build `
 
 Then run the command
 - `../CDMATH-CoreFlows-master/configure  --prefix=../CDMATH-CoreFlows_install/ --with-petsc-dir=$PETSC_DIR --with-petsc-arch=$PETSC_ARCH --with-cdmath-dir=$CDMATH_DIR --with-python --with-doc`
