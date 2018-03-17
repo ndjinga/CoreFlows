@@ -64,7 +64,6 @@ In order to download CDMATH-CoreFlows either unzip the following file to a direc
 or clone the git repository to a folder CDMATH-CoreFlows-master
 - `git clone https://github.com/mndjinga/CDMATH-CoreFlows.git CDMATH-CoreFlows-master`
 Either of these latter commands results in the creation of a directory `~/workspace/CDMATH-CoreFlows/CDMATH-CoreFlows-master`  containing the source files.
-This latter command results in the creation of a directory `~/workspace/CDMATH-CoreFlows/CDMATH-CoreFlows-master`  containing the source files.
 
 In the following steps we assume that PETSc (version 3.4 or more recent) has been installed with CDMATH with the process described above.
 You need to set the following variables 
@@ -75,8 +74,11 @@ You need to set the following variables
 In order to do so, it is sufficient to source the 'CDMATH' environment file. Type in you linux terminal
 - `source ~/workspace/cdmath/cdmath_install/env_CDMATH.sh`
 
+then create build and install repositories next to CoreFlows-master :
+- `mkdir CoreFlows_build CoreFlows_install`
+
 Go to the build directory
-- `cd CDMATH-CoreFlows_build `
+- `cd CoreFlows_build `
 
 Then run the command
 - `../CDMATH-CoreFlows-master/configure  --prefix=../CDMATH-CoreFlows_install/ --with-petsc-dir=$PETSC_DIR --with-petsc-arch=$PETSC_ARCH --with-cdmath-dir=$CDMATH_DIR --with-python --with-doc`
