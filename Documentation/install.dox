@@ -17,11 +17,11 @@ First create and enter a working dir
 
 In order to download the approriate branch of \ref cdmath either unzip the following file to a directory cdmath-master
 \verbatim 
- https://github.com/mndjinga/CDMATH/archive/master.zip
+ https://github.com/ndjinga/CDMATH/archive/master.zip
 \endverbatim
 or clone the git repository to a folder cdmath-master
 \verbatim 
-git clone https://github.com/mndjinga/CDMATH.git cdmath-master
+git clone https://github.com/ndjinga/CDMATH.git cdmath-master
 \endverbatim 
 
 In order to compile \ref cdmath you will need at least the libraries '\a cmake ', '\a gcc', '\a gfortran' , and '\a hdf5' plus optionally '\a swig' 'python-dev' and '\a numpy' if you intend to use \ref cdmath functions in your python scripts. 
@@ -60,11 +60,11 @@ mkdir CDMATH-CoreFlows_build CDMATH-CoreFlows_install
 
 In order to download CDMATH-CoreFlows either unzip the following file to a directory CDMATH-CoreFlows-master
 \verbatim
- https://github.com/mndjinga/CDMATH-CoreFlows/archive/master.zip
+ https://github.com/ndjinga/CDMATH-CoreFlows/archive/master.zip
 \endverbatim
 or clone the git repository to a folder CDMATH-CoreFlows-master
 \verbatim 
-git clone https://github.com/mndjinga/CDMATH-CoreFlows.git CDMATH-CoreFlows-master
+git clone https://github.com/ndjinga/CDMATH-CoreFlows.git CDMATH-CoreFlows-master
 \endverbatim 
 Either of these latter commands results in the creation of a directory `~/workspace/CDMATH-CoreFlows/CDMATH-CoreFlows-master`  containing the source files.
 
