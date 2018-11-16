@@ -35,9 +35,9 @@ Then create build and install repositories:
 - `mkdir cdmath_build cdmath_install `
 
 In order to download the approriate branch of \ref cdmath either unzip the following file to a directory cdmath-master
-- `https://github.com/mndjinga/CDMATH/archive/master.zip`
+- `https://github.com/ndjinga/CDMATH/archive/master.zip`
 or clone the git repository to a folder cdmath-master
-- `git clone https://github.com/mndjinga/CDMATH.git cdmath-master`
+- `git clone https://github.com/ndjinga/CDMATH.git cdmath-master`
 
 This latter command results in the creation of a directory `~/workspace/cdmath/cdmath-master` containing the source files of \ref cdmath.
 
@@ -60,9 +60,9 @@ Now create build and install repositories:
 - `mkdir CDMATH-CoreFlows_build CDMATH-CoreFlows_install `
 
 In order to download CDMATH-CoreFlows either unzip the following file to a directory CDMATH-CoreFlows-master
-- `https://github.com/mndjinga/CDMATH-CoreFlows/archive/master.zip`
+- `https://github.com/ndjinga/CDMATH-CoreFlows/archive/master.zip`
 or clone the git repository to a folder CDMATH-CoreFlows-master
-- `git clone https://github.com/mndjinga/CDMATH-CoreFlows.git CDMATH-CoreFlows-master`
+- `git clone https://github.com/ndjinga/CDMATH-CoreFlows.git CDMATH-CoreFlows-master`
 Either of these latter commands results in the creation of a directory `~/workspace/CDMATH-CoreFlows/CDMATH-CoreFlows-master`  containing the source files.
 
 In the following steps we assume that PETSc (version 3.4 or more recent) has been installed with CDMATH with the process described above.
