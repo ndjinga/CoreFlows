@@ -17,7 +17,7 @@ are the study of
 - New preconditioners for implicit methods for two phase flows
 - The coupling of fluid models or multiphysics coupling (eg thermal hydraulics and neutronics or thermal hydraulics and solid thermics)
 
-CDMATH-CoreFlows relies on the numerical toolbox of the project [CDMATH]((http://cdmath.jimdo.com)) for the handling of meshes and fields, and on the library [PETSC](https://www.mcs.anl.gov/petsc/) for the handling of large sparse matrices.
+CDMATH-CoreFlows relies on the numerical toolbox [CDMATH-Toolbox](https://github.com/ndjinga/CDMATH) of the project [CDMATH](http://cdmath.jimdo.com) for the handling of meshes and fields, and on the library [PETSC](https://www.mcs.anl.gov/petsc/) for the handling of large sparse matrices.
 You will need the packages 'doxygen' if you want to generate de documentation and 'swig' if you want to use python scripts.
 
 The following instructions detail the compilation and installation of both CDMATH and CDMATH-CoreFlows in a linux terminal.
@@ -25,6 +25,8 @@ The following instructions detail the compilation and installation of both CDMAT
 Download and compilation of CDMATH and PETSc
 --------------------------------------------
 CDMATH can be downloaded and compiled together with PETSc in a single process, thanks to the cmake option -DCDMATH_WITH_PETSC=ON.
+We summarise the installation procedure that you can find in detailed form here
+- https://github.com/ndjinga/CDMATH
 
 In order to compile 'CDMATH' you will need the packages 'cmake', 'gcc', 'gfortran', 'hdf5' plus 'numpy' and 'swig' if you intend to use CoreFlows via python scripts.
 First create and access a working directory :
@@ -34,12 +36,12 @@ First create and access a working directory :
 Then create build and install repositories:
 - `mkdir cdmath_build cdmath_install `
 
-In order to download the approriate branch of \ref cdmath either unzip the following file to a directory cdmath-master
+In order to download the approriate branch of [CDMATH](https://github.com/ndjinga/CDMATH) either unzip the following file to a directory cdmath-master
 - `https://github.com/ndjinga/CDMATH/archive/master.zip`
 or clone the git repository to a folder cdmath-master
 - `git clone https://github.com/ndjinga/CDMATH.git cdmath-master`
 
-This latter command results in the creation of a directory `~/workspace/cdmath/cdmath-master` containing the source files of \ref cdmath.
+This latter command results in the creation of a directory `~/workspace/cdmath/cdmath-master` containing the source files of [CDMATH](https://github.com/ndjinga/CDMATH).
 
 Go to the build directory
 - `cd cdmath_build `
