@@ -20,7 +20,10 @@ are the study of
 CDMATH-CoreFlows relies on the numerical toolbox [CDMATH-Toolbox](https://github.com/ndjinga/CDMATH) of the project [CDMATH](http://cdmath.jimdo.com) for the handling of meshes and fields, and on the library [PETSC](https://www.mcs.anl.gov/petsc/) for the handling of large sparse matrices.
 You will need the packages 'doxygen' if you want to generate de documentation and 'swig' if you want to use python scripts.
 
-The following instructions detail the compilation and installation of both CDMATH and CDMATH-CoreFlows in a linux terminal.
+User guide
+----------
+The user guide is organized as follows :
+- [The physical models](./Documentation/PhysicalModels.md)
 
 Download and compilation of CDMATH and PETSc
 --------------------------------------------
@@ -28,8 +31,8 @@ CDMATH can be downloaded and compiled together with PETSc in a single process, t
 We summarise the installation procedure that you can find in detailed form here
 - https://github.com/ndjinga/CDMATH
 
-In order to compile 'CDMATH' you will need the packages 'cmake', 'gcc', 'gfortran', 'hdf5' plus 'numpy' and 'swig' if you intend to use CoreFlows via python scripts.
-First create and access a working directory :
+In order to compile 'CDMATH' you will need the packages 'cmake', 'gcc', 'gfortran', 'hdf5' plus 'numpy' and 'swig'.
+In a linux terminal, first create and access a working directory :
 - `mkdir -p ~/workspace/cdmath `
 - `cd ~/workspace/cdmath `
 

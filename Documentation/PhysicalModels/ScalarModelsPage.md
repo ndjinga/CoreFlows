@@ -1,11 +1,8 @@
-/*!
-\page ScalarModelsPage Scalar models
+The scalar models
+=================
 
-[TOC]
-
-
-* 1- \subpage TransportEqPage "The transport equation "	
-
+The transport equation	
+----------------------
  
 \f[
  \partial_t H + \vec{u}\cdot\vec{\nabla} H = \Phi+\lambda_{sf}(T_s-T)
@@ -21,9 +18,10 @@ where
 - \f$ \lambda_{sf}\f$ is the fluid-rod heat transfer coefficient provided by the user
 - \f$ c_p \f$ is the fluid specific heat, provided by the user and assumed constant
 
+See the [Transport equation page](TransportEq.md)
 
-* 2- \subpage DiffusionEqPage "The diffusion equation "	
-
+The diffusion equation	
+----------------------
 \f[
  \partial_t T =d\triangle T +\frac{ \Phi+\lambda_{sf}(T_f-T)}{\rho c_p}
 \f]
@@ -36,4 +34,5 @@ where
 - \f$\Phi\f$ is the heat source term if explicitely known
 - \f$T_f\f$ is the fluid temperature field provided by the user
 
-*/
+See the [Diffusion equation page](DiffusionEq.md)
+
