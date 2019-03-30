@@ -27,7 +27,7 @@ The user guide is organized as follows :
     - [The linear scalar problems](./Documentation/PhysicalModels/ScalarModelsPage.md)
         - [The transport equation](./Documentation/PhysicalModels/TransportEq.md)
         - [The diffusion equation](./Documentation/PhysicalModels/DiffusionEq.md)
-    - [The Navier-Stokes model](./Documentation/PhysicalModels/NSModelsPage.md)
+    - [The compressible Navier-Stokes equations](./Documentation/PhysicalModels/NSModelsPage.md)
     - [The two-phase flow models](./Documentation/PhysicalModels/TwoPhasePage.md)
         - [The drift model](./Documentation/PhysicalModels/TwoPhase/DriftModelPage.md)
         - [The isothermal two-fluid model](./Documentation/PhysicalModels/TwoPhase/IsothermalPage.md)
