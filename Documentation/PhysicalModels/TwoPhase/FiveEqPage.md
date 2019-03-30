@@ -3,7 +3,7 @@ The five equation two-fluid model
 
 The model consists in the phasic mass and momentum balance equations and one mixture total energy balance equation. 
 
-The main unknowns are $\alpha$,$P$,$\vec{u}_g$,$\vec{u}_l$ and $T=T_g=T_l$. 
+The main unknowns are $\alpha$, $P$, $\vec{u}_g$, $\vec{u}_l$ and $T=T_g=T_l$. 
 
 The model uses stiffened gas laws $p_g(\rho_g,T)$ and  $p_l(\rho_l,T)$ and linearised internal energy laws $e_g(T)$ and  $e_l(T)$ fitted by either around 1 bar and 373K or around 155 bars and 618K (see \ref pressureEstimate).
 

@@ -23,8 +23,8 @@ $$
 $$
 
 Here :
--$\nu_k$ is the viscosity of phase $k$, set by \ref IsothermalTwoFluid::setViscosity
--$\Delta p$ denotes the pressure default $p-p_k$ between the bulk average pressure and the interfacial average pressure.
+- $\nu_k$ is the viscosity of phase $k$, set by \ref IsothermalTwoFluid::setViscosity
+- $\Delta p$ denotes the pressure default $p-p_k$ between the bulk average pressure and the interfacial average pressure.
 - $\vec g$ the gravity vector (\ref IsothermalTwoFluid::setGravity)
 - $K$ the interphase friction coefficient (\ref IsothermalTwoFluid::setDragCoeffs),
 - $K_s(\vec x)$ the singular friction function, $\delta_s(\vec x)$ the Dirac delta function with support on the set $s$ (\ref IsothermalTwoFluid::setPressureLossField).

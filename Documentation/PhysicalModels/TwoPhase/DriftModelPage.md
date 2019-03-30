@@ -49,9 +49,9 @@ The constant parameters $\lambda_k, \nu_k,\vec g, K_k$ and the fields $\phi(\vec
 
 
 To close the system we need a drift correlation for the relative velocity:
-\f{eqnarray*}
+$$
 \vec{u}_r=\vec{u}_g-\vec{u}_l=\vec{f}_r(c_g,\vec{u}_m,\rho_m).
-\f}
+$$
 For the moment the only drift correlation available is $\vec{u}_g=\vec{u}_l$.
 
 The phase change is modeled using the formula

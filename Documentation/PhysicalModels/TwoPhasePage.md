@@ -19,28 +19,28 @@ $$
          \partial_t(\alpha_g\rho_g\vec{u}_g+\alpha_l\rho_l\vec{u}_l)&+\nabla\cdot(\alpha_g\rho_g\vec{u}_g\otimes\vec{u}_g+\alpha_l\rho_l\vec{u}_l\otimes\vec{u}_l+p {I}_d)&=\rho_m\vec{g}-K_g\alpha_g\rho_g||\vec{u}_g||\vec{u}_g-K_l\alpha_l\rho_l||\vec{u}_l||\vec{u}_l\\
          \partial_t(\alpha_g\rho_g E_g+\alpha_l\rho_l E_l)&+\nabla\cdot(\alpha_g\rho_g H_g{}^t\vec{u}_g+\alpha_l\rho_l H_l{}^t\vec{u}_l)&=\Phi+\rho\vec{g}\cdot\vec{u}-K_g\alpha_g\rho_g||\vec{u}_g||^3-K_l\alpha_l\rho_l||\vec{u}_l||^3
         \end{array}\right.,
-\f}
+$$
 where the total energy and total enthalpy are defined by
 $$
 E_k=e_k+\frac{1}{2}|\vec{u}_k|^2&,&\quad H_k=h_k+\frac{1}{2}|\vec{u}_k|^2,\qquad k=v,l,
-\f}
+$$
 where $e_k$ is the internal energy, and $h_k=e_k+\frac{p}{\rho_k}$ the enthalpy associated to phase $k$ and
-\f{eqnarray*}
+$$
 \rho_m&=&\alpha_g\rho_g+\alpha_l\rho_l\\
 \vec{u}_m&=&\frac{\alpha_g\rho_g\vec{u}_g+\alpha_l\rho_l\vec{u}_l}{\alpha_g\rho_g+\alpha_l\rho_l}\\
 h_m&=&\frac{\alpha_g\rho_g h_g+\alpha_l\rho_l h_l}{\alpha_g\rho_g+\alpha_l\rho_l}.
-\f}
+$$
 We need a drift correlation for the relative velocity:
-\f{eqnarray*}
+$$
 \vec{u}_r=\vec{u}_g-\vec{u}_l=\vec{f}_r(c_g,\vec{u}_m,\rho_m).
 \f}
 The phase change is modeled using the formula
-\f{eqnarray*}
+$$
  \Gamma_g=\left\{\begin{array}{cc}
          \frac{\Phi}{\mathcal{L}}&\textrm{ if } h_l^{sat}\leq h< h_g^{sat} \textrm{ and } 0<\alpha_g<1\\[1.5ex]
          0& \textrm{ otherwise }
         \end{array}\right..
-\f}
+$$
 The parameters $\lambda_k, \nu_k,\vec g, K_k$ and $\Phi$ can be set by the user.
 
 [More details about the drift model are available here](TwoPhase/DriftModelPage.md)
