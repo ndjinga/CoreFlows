@@ -24,6 +24,14 @@ User guide
 ----------
 The user guide is organized as follows :
 - [The physical models](./Documentation/PhysicalModels.md)
+    - [The linear scalar problems](./Documentation/PhysicalModels/ScalarModelsPage.md)
+        - [The transport equation](./Documentation/PhysicalModels/TransportEq.md)
+        - [The diffusion equation](./Documentation/PhysicalModels/DiffusionEq.md)
+    - [The Navier-Stokes model](./Documentation/PhysicalModels/NSModelsPage.md)
+    - [The two-phase flow models](./Documentation/PhysicalModels/TwoPhasePage.md)
+        - [The drift model](./Documentation/PhysicalModels/TwoPhase/DriftModelPage.md)
+        - [The isothermal two-fluid model](./Documentation/PhysicalModels/TwoPhase/IsothermalPage.md)
+        - [The five equation two-fluid model](./Documentation/PhysicalModels/TwoPhase/FiveEqPage.md)
 
 Download and compilation of CDMATH and PETSc
 --------------------------------------------

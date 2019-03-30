@@ -4,12 +4,9 @@ The physical models are presented below in order of mathematical complexity:
     - [Transport equation page](PhysicalModels/TransportEqPage.md)
     - [Diffusion equation page](PhysicalModels/DiffusionEqPage.md)
 
-- \subpage NSModelsPage "The Navier-Stokes model" 
-- \subpage twophasePage "The two-phase flow models"
-	+ \ref DriftModelPage "The Drift model"
-	+ \ref IsothermalPage "The isothermal two-fluid model"
-	+ \ref FiveEqPage "The five equation two-fluid model"	
-
-
-
+    - [The Navier-Stokes model](./Documentation/PhysicalModels/NSModelsPage.md)
+    - [The two-phase flow models](./Documentation/PhysicalModels/TwoPhasePage.md)
+        - [The drift model](./Documentation/PhysicalModels/TwoPhase/DriftModelPage.md)
+        - [The isothermal two-fluid model](./Documentation/PhysicalModels/TwoPhase/FiveEqPage.md)
+        - [The five equation two-fluid model](./Documentation/PhysicalModels/TwoPhase/IsothermalPage.md)
 

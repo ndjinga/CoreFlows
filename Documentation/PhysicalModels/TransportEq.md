@@ -1,19 +1,19 @@
 The transport equation
 ======================
  
-\f[
+$$
  \partial_t h + \vec{u}\cdot\vec{\nabla} h = \Phi+\lambda_{sf}(T_s-T)
-\f]
+$$
 
 where
 
-- \f$ h \f$ the main unknown is the fluid enthalpy field
-- \f$ \vec{u} \f$ is the constant transport velocity set by the user
-- \f$ \Phi \f$ is the heat source term if explicitely known
-- \f$ T_s \f$ is the rod temperature field provided by the user
-- \f$ T=T_0+\frac{h-h_0}{c_p}\f$ is the fluid temperature field
-- \f$ \lambda_{sf}\f$ is the fluid-rod heat transfer coefficient provided by the user
-- \f$ c_p \f$ is the fluid specific heat, provided by the user and assumed constant
+- $ h $ the main unknown is the fluid enthalpy field
+- $ \vec{u} $ is the constant transport velocity set by the user
+- $ \Phi $ is the heat source term if explicitely known
+- $ T_s $ is the rod temperature field provided by the user
+- $ T=T_0+\frac{h-h_0}{c_p}$ is the fluid temperature field
+- $ \lambda_{sf}$ is the fluid-rod heat transfer coefficient provided by the user
+- $ c_p $ is the fluid specific heat, provided by the user and assumed constant
 
 
 

@@ -1,20 +1,20 @@
 The diffusion equation
 ======================
 
-\f[
+$$
  \partial_t T =d\triangle T +\frac{ \Phi+\lambda_{sf}(T_f-T)}{\rho c_p}
-\f]
+$$
 where
-- \f$T\f$ the main unknown is the solid temperature field
-- \f$\rho\f$ is the solid density assumed constant and possibly set by the user
-- \f$c_p\f$ is the solid specific heat, possibly set provided by the user and assumed constant
-- \f$\lambda\f$ is the solid thermal conductivity possibly set provided by the user
-- \f$d=\frac{\lambda}{\rho c_p}\f$ is the solid diffusivity
-- \f$\lambda_{sf}\f$ is the fluid-solid heat transfer coefficient provided by the user
-- \f$\Phi\f$ is the heat source term if explicitely known
-- \f$T_f\f$ is the fluid temperature field provided by the user
+- $T$ the main unknown is the solid temperature field
+- $\rho$ is the solid density assumed constant and possibly set by the user
+- $c_p$ is the solid specific heat, possibly set provided by the user and assumed constant
+- $\lambda$ is the solid thermal conductivity possibly set provided by the user
+- $d=\frac{\lambda}{\rho c_p}$ is the solid diffusivity
+- $\lambda_{sf}$ is the fluid-solid heat transfer coefficient provided by the user
+- $\Phi$ is the heat source term if explicitely known
+- $T_f$ is the fluid temperature field provided by the user
 
-* The class \ref DiffusionEquation implementing a scalar diffusion equation for the temperature in a solid. The default values for \f$\rho, c_p, \lambda\f$ are those of Uranium oxyde at \f$900 K\f$.
+* The class \ref DiffusionEquation implementing a scalar diffusion equation for the temperature in a solid. The default values for $\rho, c_p, \lambda$ are those of Uranium oxyde at $900 K$.
 
 
 * \subpage ExampleDiffusionEqPage "Here are C and Python example scripts"

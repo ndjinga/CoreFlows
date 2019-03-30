@@ -4,35 +4,35 @@ The scalar models
 The transport equation	
 ----------------------
  
-\f[
+$$
  \partial_t H + \vec{u}\cdot\vec{\nabla} H = \Phi+\lambda_{sf}(T_s-T)
-\f]
+$$
 
 where
 
-- \f$ H \f$ the main unknown is the fluid enthalpy field
-- \f$ \vec{u} \f$ is the constant transport velocity
-- \f$ \Phi \f$ is the heat source term if explicitely known
-- \f$ T_s \f$ is the rod temperature field provided by the user
-- \f$ T=T_0+\frac{H-H_0}{c_p}\f$ is the fluid temperature field
-- \f$ \lambda_{sf}\f$ is the fluid-rod heat transfer coefficient provided by the user
-- \f$ c_p \f$ is the fluid specific heat, provided by the user and assumed constant
+- $ H $ the main unknown is the fluid enthalpy field
+- $ \vec{u} $ is the constant transport velocity
+- $ \Phi $ is the heat source term if explicitely known
+- $ T_s $ is the rod temperature field provided by the user
+- $ T=T_0+\frac{H-H_0}{c_p}$ is the fluid temperature field
+- $ \lambda_{sf}$ is the fluid-rod heat transfer coefficient provided by the user
+- $ c_p $ is the fluid specific heat, provided by the user and assumed constant
 
 See the [Transport equation page](TransportEq.md)
 
 The diffusion equation	
 ----------------------
-\f[
+$$
  \partial_t T =d\triangle T +\frac{ \Phi+\lambda_{sf}(T_f-T)}{\rho c_p}
-\f]
+$$
 where
-- \f$T\f$ the main unknown is the rod temperature field
-- \f$d=\frac{\lambda}{\rho c_p}\f$ is the rod diffusivity
-- \f$\lambda_{sf}\f$ is the fluid-rod heat transfer coefficient provided by the user
-- \f$\rho\f$ is the rod density assumed constant
-- \f$c_p\f$ is the rod specific heat, provided by the user and assumed constant
-- \f$\Phi\f$ is the heat source term if explicitely known
-- \f$T_f\f$ is the fluid temperature field provided by the user
+- $T$ the main unknown is the rod temperature field
+- $d=\frac{\lambda}{\rho c_p}$ is the rod diffusivity
+- $\lambda_{sf}$ is the fluid-rod heat transfer coefficient provided by the user
+- $\rho$ is the rod density assumed constant
+- $c_p$ is the rod specific heat, provided by the user and assumed constant
+- $\Phi$ is the heat source term if explicitely known
+- $T_f$ is the fluid temperature field provided by the user
 
 See the [Diffusion equation page](DiffusionEq.md)
 
