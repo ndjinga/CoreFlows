@@ -13,10 +13,25 @@ CoreFlows example scripts
     - [Coupled Problem Transport Diffusion 1D Heated Channel (C)](../examples/CoupledTransportDiffusionEquations_1DHeatedChannel.cxx)
 
 - "The Single Phase Examples " 
-	+ \ref Single1H 
-	+ \ref Single1Hpy 
-	+ \ref Single1R 
-	+ \ref Single1RPy 
+    - [Single Phase Problem 1D Heated Channel (C)](../examples/SinglePhase_1DHeatedChannel.cxx)
+    - [Single Phase Problem 1D Heated Channel (Python)](../examples/Python/SinglePhase_1DHeatedChannel.py)
+    - [Single Phase Problem 1D RiemannProblem (C)](../examples/SinglePhase_1DRiemannProblem.cxx)
+    - [Single Phase Problem 1D RiemannProblem (Python)](../examples/Python/SinglePhase_1DRiemannProblem.py)
+    - [Single Phase Problem 1D depressurisation (C)](../examples/SinglePhase_1DDepressurisation.cxx)
+    - [Single Phase Problem 1D depressurisation (Python)](../examples/Python/SinglePhase_1DDepressurisation.py
+)
+    - [Single Phase Problem 1D water hammer (Python)](../examples/Python/SinglePhase_1DWaterHammer.py)
+    - [Single Phase Problem 1D porosity jump (C)](../examples/SinglePhase_1DPorosityJump.cxx)
+
+    ![Structured mesh used for the driven cavity and the spherical explosion tests](Figures/BoiteStruct.png)
+    ![Unstructured mesh used for the driven cavity and the spherical explosion tests](Figures/BoiteNStruct.png)
+
+    - [Single Phase Problem 2D Lid driven cavity (C)](../examples/SinglePhase_2DLidDrivenCavity.cxx)
+    - [Single Phase Problem 2D Lid driven cavity (Python)](../examples/Python/SinglePhase_2DLidDrivenCavity.py)
+    - [Single Phase Problem 2D Lid driven cavity on an unstructured mesh (C)](../examples/SinglePhase_2DLidDrivenCavity_unstructured.cxx)
+    - [Single Phase Problem 2D Lid driven cavity on an unstructured mesh (Python)](../examples/PythonSinglePhase_2DLidDrivenCavity_unstructured.py)
+    - []()
+    - []()
 	+ \ref Single1DDep 
 	+ \ref Single1DDepPy 
 	+ \ref Single1DWaterHammerPy

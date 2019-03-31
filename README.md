@@ -33,7 +33,7 @@ The user guide is organized as follows :
         - [The isothermal two-fluid model](./Documentation/PhysicalModels/TwoPhase/IsothermalPage.md) with two partial masses and two momentum equations (no energy equation)
         - [The five equation two-fluid model](./Documentation/PhysicalModels/TwoPhase/FiveEqPage.md) with two partial masses, two momentum equations and one energy equation
 - [Software structure](Documentation/software.md)
-- [CDMATH-CoreFlows example scripts](Documentation/example.md)
+- [CDMATH-CoreFlows example scripts](Documentation/examples.md)
 
 Download and compilation of CDMATH and PETSc
 --------------------------------------------
