@@ -48,8 +48,8 @@ CoreFlows example scripts
     - [Single Phase Problem 2D Wall heated Channel with cross section change (C)](../examples/SinglePhase_2DWallHeatedChannel_ChangeSect.cxx)
     - [Single Phase Problem Heated wire with 2 Branches (C)](../examples/SinglePhase_HeatedWire_2Branches.cxx)
     
-    ![Power field of the heated wire problem](Figures/2BranchesHeatedChannelPower.png)
-    ![Stationary temperature field of the heated wire problem](Figures/2BranchesHeatedChannelTemperature.png)
+    | <img src="Figures/2BranchesHeatedChannelPower.png" width="400"/> | <img src="Figures/2BranchesHeatedChannelTemperature.png" width="400"/> |  
+    | Power field of the heated wire problem | Stationary temperature field of the heated wire problem |  
 
     - [Single Phase Problem Heated wire with 2 Branches (Python)](../examples/Python/SinglePhase_2BranchesHeatedChannels.py)
     - [Single Phase Problem 2D Thermal conduction (Python)](../examples/Python/SinglePhase_2DThermalDiffusion.py)
