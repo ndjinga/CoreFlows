@@ -17,7 +17,7 @@ scalar models : [SinglePhase](../Models/inc/SinglePhase.hxx) [DriftModel](../Mod
 - [ProblemCoreFlows](../Models/inc/ProblemCoreFlows.hxx) which contains the methods that are common to the scalar and non scalar models: [ProblemFluid](../Models/inc/ProblemFluid.hxx), [TransportEquation](../Models/inc/TransportEquation.hxx) and [DiffusionEquation](../Models/inc/DiffusionEquation.hxx)
 
 Here follows an inheritance diagram of CoreFlows  
-![CoreFlows inheritance diagram](Figures/classProblemCoreFlows__inherit__graph.png)
+!["CoreFlows inheritance diagram"](Figures/classProblemCoreFlows__inherit__graph.png)
 
 
 The program can build simple geometries and meshes using the library [CDMATH-Toolbox](https://github.com/ndjinga/CDMATH) or load complex geometries and meshes written with the [MED](https://www.salome-platform.org/user-section/about/med) file system (see [SALOME](https://www.salome-platform.org/) ). The output files containing the fields resulting from the calculation can be either of [VTK](https://vtk.org/) or [MED](https://www.salome-platform.org/user-section/about/med) type. One can use [PARAVIEW](https://www.paraview.org/) (for [VTK](https://vtk.org/) files) or [SALOME](https://www.salome-platform.org/) (for [MED](https://www.salome-platform.org/user-section/about/med) files) to visualise the results.
