@@ -13,6 +13,7 @@ CoreFlows example scripts
     - [Coupled Problem Transport Diffusion 1D Heated Channel (C)](../examples/CoupledTransportDiffusionEquations_1DHeatedChannel.cxx)
 
 - Single phase examples
+    * 1D Tests
     - [Single Phase Problem 1D Heated Channel (C)](../examples/SinglePhase_1DHeatedChannel.cxx)
     - [Single Phase Problem 1D Heated Channel (Python)](../examples/Python/SinglePhase_1DHeatedChannel.py)
     - [Single Phase Problem 1D RiemannProblem (C)](../examples/SinglePhase_1DRiemannProblem.cxx)
@@ -23,16 +24,18 @@ CoreFlows example scripts
     - [Single Phase Problem 1D water hammer (Python)](../examples/Python/SinglePhase_1DWaterHammer.py)
     - [Single Phase Problem 1D porosity jump (C)](../examples/SinglePhase_1DPorosityJump.cxx)
 
-    | <img src="Figures/BoiteStruct.png" alt="drawing" width="200"/> |
+    * 2D Tests meshes
+    | <img src="Figures/BoiteStruct.png" alt="drawing" width="400"/> | <img src="Figures/BoiteNStruct.png" alt="drawing" width="400"/> |
     |:--:|
-    | *Structured mesh used for the driven cavity and the spherical explosion tests* |
-    ![Unstructured mesh used for the driven cavity and the spherical explosion tests](Figures/BoiteNStruct.png)
+    | *Structured mesh * | *Unstructured mesh * |
 
+    * 2D Tests scripts
     - [Single Phase Problem 2D Lid driven cavity (C)](../examples/SinglePhase_2DLidDrivenCavity.cxx)
     - [Single Phase Problem 2D Lid driven cavity (Python)](../examples/Python/SinglePhase_2DLidDrivenCavity.py)
     - [Single Phase Problem 2D Lid driven cavity on an unstructured mesh (C)](../examples/SinglePhase_2DLidDrivenCavity_unstructured.cxx)
     - [Single Phase Problem 2D Lid driven cavity on an unstructured mesh (Python)](../examples/Python/SinglePhase_2DLidDrivenCavity_unstructured.py)
 
+    * 2D Tests scripts results
     ![2D Lid driven cavity test with upwind scheme on a structured mesh](Figures/Simulations/DrivenCavity/DrivenCavityStructuredUpwind.png)
     ![2D Lid driven cavity test with upwind scheme on an unstructured mesh](Figures/Simulations/DrivenCavity/DrivenCavityUnstructuredUpwind.png)
     ![2D Lid driven cavity test with lowMachDellacherieOmnes scheme on a structured mesh](Figures/Simulations/DrivenCavity/DrivenCavityStructuredDellacherieOmnes.png)
