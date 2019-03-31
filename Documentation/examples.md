@@ -95,24 +95,24 @@ CoreFlows example scripts
     | <img src="Figures/PowerFieldCloison.png" width="400"/> |   |  
     | --- | --- |  
     | Mesh and heat power field for the 2D Vertical Boiling Channel with a barrier |   |  
-    | <img src="Figures/DriftModel_2DCanalCloisonVit0.1Conc.png" width="400"/> | <img src="Figures/DriftModel_2DCanalCloisonVit0.1Vy.png" width="400"/> |  
+    | <img src="Figures/Simulations/CanalCloison/DriftModel_2DCanalCloisonVit0.1Conc.png" width="400"/> | <img src="Figures/Simulations/CanalCloison/DriftModel_2DCanalCloisonVit0.1Vy.png" width="400"/> |  
     | --- | --- |  
     | Stationary concentration field and streamlines, 2D Vertical Boiling Channel with a barrier | Stationary velocity field and streamlines, 2D Vertical Boiling Channel with a barrier |  
 
     - [Drift Model 2D Inclined Boiling Channel with a barrier (Python)](../examples/Python/DriftModel_2DInclinedBoilingChannelBarrier.py)
 
-    | <img src="Figures/MaillagePuissanceThermiqueIncline.png" width="400"/> | <img src="Figures/CanalCloisonInclinedUpwindWBConcentration.png" width="400"/> |  
+    | <img src="Figures/MaillagePuissanceThermiqueIncline.png" width="400"/> | <img src="Figures/Simulations/CanalCloison/Diphasique/inclined/CanalCloisonInclinedUpwindWBConcentration.png" width="400"/> |  
     | --- | --- |  
     | Mesh and heat power field for the 2D inclined Vertical Boiling Channel with a barrier | Stationary concentration field and streamlines 2D inclined  Vertical Boiling Channel with a barrier |  
 
     - [Drift Model boiling wire with two Branches (Python)](../examples/Python/DriftModel_2BranchesBoilingChannels.py)
     - [Drift Model 3D Vertical Boiling Channel with two barriers (Python)](../examples/Python/DriftModel_3DBoilingChannelBarrier.py)
 
-    | <img src="Figures/DomainePuissanceThermiqueVueAvant.png" width="400"/> | <img src="Figures/DomainePuissanceThermiqueVueArriere.png" width="400"/> |  
+    | <img src="Figures/Simulations/CanalCloison/Diphasique/3D/DomainePuissanceThermiqueVueAvant.png" width="400"/> | <img src="Figures/Simulations/CanalCloison/Diphasique/3D/DomainePuissanceThermiqueVueArriere.png" width="400"/> |  
     | --- | --- |  
     | Front view of the power field for the 3D Vertical Boiling Channel with two barrier | Rear view of the power field for the 3D Vertical Boiling Channel with two barrier |  
 
-    | <img src="Figures/step_73.png" width="400"/> |  
+    | <img src="Figures/Simulations/CanalCloison/Diphasique/3D/step_73.png" width="400"/> |  
     | Streamlines at time step 7300 for the 3D Vertical Boiling Channel with two barrier |  
 
     - [Drift Model 2D tank drainage problem (Python)](../examples/Python/DriftModel_2DVidangeReservoir.py)
