@@ -78,7 +78,7 @@ CoreFlows example scripts
     - [Drift Model 1D tank drainage problem (Python)](../examples/Python/DriftModel_1DVidangeReservoir.py)
     - [Drift Model 2D pressure loss (Python)](../examples/Python/DriftModel_2DPressureLoss.py)
     - [Drift Model 2D porosity jump (Python)](../examples/Python/DriftModel_2DPorosityJump.py)
-    - [Drift Model 2D Inclined Boiling Channel (C)](../examples/Drift Model 2D Inclined Boiling Channel (C))
+    - [Drift Model 2D Inclined Boiling Channel (C)](../examples/DriftModel_2DInclinedBoilingChannel.cxx)
     - [Drift Model 2D Inclined Boiling Channel (Python)](../examples/Python/DriftModel_2DInclinedBoilingChannel.py)
     - [Drift Model 2D Inclined Channel with Gravity (C)](../examples/DriftModel_2DInclinedChannelGravity.cxx)
     - [Drift Model 2D Inclined Channel with Gravity (Python)](../examples/Python/DriftModel_2DInclinedChannelGravity.py)
