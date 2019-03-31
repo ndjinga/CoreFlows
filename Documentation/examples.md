@@ -13,7 +13,6 @@ CoreFlows example scripts
     - [Coupled Problem Transport Diffusion 1D Heated Channel (C)](../examples/CoupledTransportDiffusionEquations_1DHeatedChannel.cxx)
 
 - Single phase examples
-    * 1D Tests
     - [Single Phase Problem 1D Heated Channel (C)](../examples/SinglePhase_1DHeatedChannel.cxx)
     - [Single Phase Problem 1D Heated Channel (Python)](../examples/Python/SinglePhase_1DHeatedChannel.py)
     - [Single Phase Problem 1D RiemannProblem (C)](../examples/SinglePhase_1DRiemannProblem.cxx)
@@ -24,9 +23,10 @@ CoreFlows example scripts
     - [Single Phase Problem 1D water hammer (Python)](../examples/Python/SinglePhase_1DWaterHammer.py)
     - [Single Phase Problem 1D porosity jump (C)](../examples/SinglePhase_1DPorosityJump.cxx)
 
-    * 2D Tests meshes
+    2D Tests meshes | 
+    --- | ---
     <img src="Figures/BoiteStruct.png" width="330"/> | <img src="Figures/BoiteNStruct.png" width="330"/> 
-    - | -
+    --- | ---
     Structured mesh | Unstructured mesh
 
     * 2D Tests scripts
