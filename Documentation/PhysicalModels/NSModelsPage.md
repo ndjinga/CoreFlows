@@ -35,7 +35,7 @@ For the sake of simplicity, for the moment we consider constant viscosity and co
 The constant parameters $\lambda, \nu,\vec g, K_r$ and the fields $\phi(\vec x),\: \Phi(\vec x),\: K_s(\vec x)$ can be set by the user.
 
 
-* The class : \ref SinglePhase implements the single phase model
+* The class : [SinglePhase](../../Models/inc/SinglePhase.hxx) implements the single phase model
 
 * \subpage ExampleSinglePhase "Here are C and Python example scripts using the single phase model "
 
