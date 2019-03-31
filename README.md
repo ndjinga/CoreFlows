@@ -48,12 +48,12 @@ In a linux terminal, first create and access a working directory :
 Then create build and install repositories:
 - `mkdir cdmath_build cdmath_install `
 
-In order to download the approriate branch of [CDMATH](https://github.com/ndjinga/CDMATH) either unzip the following file to a directory cdmath-master
+In order to download the approriate branch of [CDMATH-Toolbox](https://github.com/ndjinga/CDMATH) either unzip the following file to a directory cdmath-master
 - `https://github.com/ndjinga/CDMATH/archive/master.zip`
 or clone the git repository to a folder cdmath-master
 - `git clone https://github.com/ndjinga/CDMATH.git cdmath-master`
 
-This latter command results in the creation of a directory `~/workspace/cdmath/cdmath-master` containing the source files of [CDMATH](https://github.com/ndjinga/CDMATH).
+This latter command results in the creation of a directory `~/workspace/cdmath/cdmath-master` containing the source files of [CDMATH-Toolbox](https://github.com/ndjinga/CDMATH).
 
 Go to the build directory
 - `cd cdmath_build `
@@ -79,10 +79,10 @@ or clone the git repository to a folder CDMATH-CoreFlows-master
 - `git clone https://github.com/ndjinga/CDMATH-CoreFlows.git CDMATH-CoreFlows-master`
 Either of these latter commands results in the creation of a directory `~/workspace/CDMATH-CoreFlows/CDMATH-CoreFlows-master`  containing the source files.
 
-In the following steps we assume that PETSc (version 3.4 or more recent) has been installed with CDMATH with the process described above.
+In the following steps we assume that [PETSC](https://www.mcs.anl.gov/petsc/) (version 3.4 or more recent) has been installed with CDMATH with the process described above.
 You need to set the following variables 
 - `CDMATH_DIR`, the path to your CDMATH installation, for example  `~/workspace/cdmath/cdmath_install//share/petsc-3.8.3 `
-- `PETSC_DIR`, the path to your PETSc installation. If PETSc was installed by CDMATH then PETSC_DIR can be defined as `~/workspace/cdmath/cdmath_install`
+- `PETSC_DIR`, the path to your PETSc installation. If [PETSC](https://www.mcs.anl.gov/petsc/) was installed by CDMATH then [CDMATH-Toolbox](https://github.com/ndjinga/CDMATH) can be defined as `~/workspace/cdmath/cdmath_install`
 - `PETSC_ARCH`, the type of installation used (usually arch-linux2-c-opt or linux-gnu-c-opt)
 
 In order to do so, it is sufficient to source the 'CDMATH' environment file. Type in you linux terminal
@@ -117,7 +117,7 @@ Then you can run the simulation in any directory with the command line
 If you use python language: edit your own python file `my_file.py` following for example the pattern of the file `CDMATH-CoreFlows-master/main.py`. Then in a terminal type
 - `python my_file.py `
 
-If you use the graphic interface, you need to run a Salomé Unix shell 
+If you use the graphic interface, you need to run a [SALOME](https://www.salome-platform.org/) Unix shell 
 - `./salome shell`
 and type the command line
 - `runSalome -mCOREFLOWS`
