@@ -22,18 +22,20 @@ $$
 $$
 where the total energy and total enthalpy are defined by
 $$
-E_k=e_k+\frac{1}{2}|\vec{u}_k|^2&,&\quad H_k=h_k+\frac{1}{2}|\vec{u}_k|^2,\qquad k=v,l,
+E_k=e_k+\frac{1}{2}|\vec{u}_k|^2,\quad H_k=h_k+\frac{1}{2}|\vec{u}_k|^2,\qquad k=v,l,
 $$
 where $e_k$ is the internal energy, and $h_k=e_k+\frac{p}{\rho_k}$ the enthalpy associated to phase $k$ and
 $$
+\begin{array}{lll}
 \rho_m&=&\alpha_g\rho_g+\alpha_l\rho_l\\
 \vec{u}_m&=&\frac{\alpha_g\rho_g\vec{u}_g+\alpha_l\rho_l\vec{u}_l}{\alpha_g\rho_g+\alpha_l\rho_l}\\
 h_m&=&\frac{\alpha_g\rho_g h_g+\alpha_l\rho_l h_l}{\alpha_g\rho_g+\alpha_l\rho_l}.
+\end{array}
 $$
 We need a drift correlation for the relative velocity:
 $$
 \vec{u}_r=\vec{u}_g-\vec{u}_l=\vec{f}_r(c_g,\vec{u}_m,\rho_m).
-\f}
+$$
 The phase change is modeled using the formula
 $$
  \Gamma_g=\left\{\begin{array}{cc}
@@ -41,9 +43,9 @@ $$
          0& \textrm{ otherwise }
         \end{array}\right..
 $$
-The parameters $\lambda_k, \nu_k,\vec g, K_k$ and $\Phi$ can be set by the user.
+The parameters $\lambda_k, \nu_k,\vec g, K_k $ and $\Phi$ can be set by the user.
 
-[More details about the drift model are available here](TwoPhase/DriftModelPage.md)
+[More details about the drift model are available here](TwoPhase/DriftModelPage.ipynb)
 
 	
 The isothermal two-fluid model
@@ -71,22 +73,21 @@ $$
 $$
 
 Here :
--$\nu_k$ is the viscosity of phase $k$,
--$\Delta p$ denotes the pressure default $p-p_k$ between the bulk average pressure and the interfacial average pressure.
+- $\nu_k$ is the viscosity of phase $k$,
+- $\Delta p$ denotes the pressure default $p-p_k$ between the bulk average pressure and the interfacial average pressure.
 
 where 
-$ 
+$$ 
 \left\{\begin{array}{clc}
 	\alpha_g +\alpha_l &=& 1 \\[1.5ex]
 	m_k &=& \alpha_k \rho_k \\[1.5ex]
 	\vec{q}_k &=& \alpha_k \rho_k \vec{u}_k \\[1.5ex]
-        
-	\end{array}\right..
-$
+        	\end{array}\right..
+$$
 
-The parameters $\lambda_k, \nu_k,\vec g, K_k$ and $\Phi$ can be set by the user.
+The parameters $\lambda_k, \nu_k,\vec g, K_k $ and $\Phi$ can be set by the user.
 
-[More details about the isothermal two-fluid model are available here](IsothermalPage.md)
+[More details about the isothermal two-fluid model are available here](IsothermalPage.ipynb)
 
 
 The five equation two-fluid model
@@ -114,8 +115,10 @@ $$
 $$
 where
 $$
+\begin{array}{ccl}
 \rho_m&=&\alpha_g\rho_g+\alpha_l\rho_l\\
  E_m&=&\frac{\alpha_g\rho_g E_g+\alpha_l\rho_l E_l}{\alpha_g\rho_g+\alpha_l\rho_l}.
+\end{array}
 $$
 
 The phase change is modeled using the formula
@@ -127,7 +130,7 @@ $$
         \end{array}\right..
 $$
 
-The parameters $\lambda_k, \nu_k,\vec g, K_k$ and $\Phi$ can be set by the user.
+The parameters $\lambda_k, \nu_k,\vec g, K_k $ and $\Phi$ can be set by the user.
 
-[More details about the five equation two-fluid model are available here](TwoPhase/FiveEqPage.md)
+[More details about the five equation two-fluid model are available here](TwoPhase/FiveEqPage.ipynb)
 
