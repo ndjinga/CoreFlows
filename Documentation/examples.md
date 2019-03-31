@@ -118,36 +118,33 @@ CoreFlows example scripts
     - [Drift Model 2D tank drainage problem (Python)](../examples/Python/DriftModel_2DVidangeReservoir.py)
     - [Drift Model 2D tank drainage problem with an unstructured mesh (Python)](../examples/Python/DriftModel_2DVidangeReservoirUnstructured.py)
 
-- " The Isothermal TwoFluid model "
-    - [](../examples/Python/)
-    - [](../examples/Python/)
-    - [](../examples/Python/)
-    - [](../examples/Python/)
-    - [](../examples/Python/)
-    - [](../examples/Python/)
-    - [](../examples/Python/)
-    - [](../examples/Python/)
-    - [](../examples/Python/)
-    - [](../examples/Python/)
-	+ \ref IsoRP
- 	+ \ref IsoSed
- 	+ \ref IsoSedPy
-	+ \ref IsoVidPy
-	+ \ref IsoDepr
- 	+ \ref IsoSed2D
-	+ \ref IsoVid2D
-	+ \ref IsoVid2DPy
+- The Isothermal TwoFluid model
+    - [Isothermal 1D RiemannProblem  (C)](../examples/IsothermalTwoFluid_1DRiemannProblem.cxx)
+    - [Isothermal 1D Sedimentation  (C)](../examples/IsothermalTwoFluid_1DSedimentation.cxx)
+    - [Isothermal 1D Sedimentation  (Python)](../examples/Python/IsothermalTwoFluid_1DSedimentation.py)
+    - [Isothermal 1D Depressurisation  (C)](../examples/IsothermalTwoFluid_1DDepressurisation.cxx)
+    - [Isothermal 1D Emptying tank  (Python)](../examples/Python/IsothermalTwoFluid_1DVidangeReservoir.py)
+    - [IsothermalTwoFluid_2DInclinedSedimentation.cxx](../examples/Isothermal 2D Inclined Sedimentation  (C))
+    - [Isothermal 2D Emptying tank  (C)](../examples/IsothermalTwoFluid_2DVidangeReservoir.cxx)
+    - [Isothermal 2D Emptying tank  (Python)](../examples/Python/IsothermalTwoFluid_2DVidangeReservoir.py)
 
-- " The five equations model " 
-	+ \ref RiemannPrblm5Eq
-	+ \ref BoilingChannel5Eq
-	+ \ref BoilingChannel5EqPy 
-	+ \ref BoilingAssembly5EqPy 
-	+ \ref FiveEqVidangeReservoirPy
-	+ \ref FiveEqDepr
-	+ \ref FiveEqSed2DInclined
-	+ \ref FiveEqSed2DInclinedPy 
-	+ \ref FiveEqBoilingChannel2D
-	+ \ref FiveEqBoilingChannel2DPy 
-	+ \ref FiveEqVidangeReservoir2DPy
+- The five equations model
+    - [Five Equations Model 1D Riemann Problem  (C)](../examples/FiveEqsTwoFluid_1DRiemannProblem.cxx)
+    - [Five Equations Model 1D Boiling Channel (C)](../examples/FiveEqsTwoFluid_1DBoilingChannel.cxx)
+    - [Five Equations Model 1D Boiling Channel (Python)](../examples/Python/FiveEqsTwoFluid_1DBoilingChannel.py)
+    - [Five Equations Model 1D Boiling Assembly (Python)](../examples/Python/FiveEqsTwoFluid_1DBoilingAssembly.py)
+    - [Five Equations Model 1D Depressurisation  (C)](../examples/FiveEqsTwoFluid_1DDepressurisation.cxx)
+    - [Five Equations Model 1D Emptying tank  (Python)](../examples/Python/FiveEqsTwoFluid_1DVidangeReservoir.py)
+    - [Five Equations Model 2D Inclined Sedimentation  (C)](../examples/FiveEqsTwoFluid_2DInclinedSedimentation.cxx)
+    - [Five Equations Model 2D Inclined Sedimentation  (Python)](../examples/Python/FiveEqsTwoFluid_2DInclinedSedimentation.py)
+
+    | <img src="Figures/Simulations/Sedimentation/2DSedimentation.png" width="400"/> | <img src="Figures/Simulations/Sedimentation/2DSedimentationPression.png" width="400"/> |  
+    | --- | --- |  
+    | Stationary void fraction | Stationary pressure |  
+    | <img src="Figures/Simulations/Sedimentation/2DSedimentationVitesseGaz.png" width="400"/> | <img src="Figures/Simulations/Sedimentation/2DSedimentationVitesseLiq.png" width="400"/> |  
+    | Stationary gas velocity | Stationary liquid velocity |  
+
+    - [Five Equations Model 2D Inclined Boiling Channel (C)](../examples/FiveEqsTwoFluid_2DInclinedBoilingChannel.cxx)
+    - [Five Equations Model 2D Inclined Boiling Channel (Python)](../examples/Python/FiveEqsTwoFluid_2DInclinedBoilingChannel.py)
+    - [Five Equations Model 2D Emptying tank  (Python)](../examples/Python/FiveEqsTwoFluid_2DVidangeReservoir.py)
 
