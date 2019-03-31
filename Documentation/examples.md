@@ -25,9 +25,9 @@ CoreFlows example scripts
     - [Single Phase Problem 1D porosity jump (C)](../examples/SinglePhase_1DPorosityJump.cxx)
 
     * 2D Tests meshes
-    <img src="Figures/BoiteStruct.png" width="350"/> | <img src="Figures/BoiteNStruct.png" width="350"/> 
-    -|-
-    *Structured mesh* | *Unstructured mesh*
+    <img src="Figures/BoiteStruct.png" width="330"/> | <img src="Figures/BoiteNStruct.png" width="330"/> 
+    - | -
+    Structured mesh | Unstructured mesh
 
     * 2D Tests scripts
     - [Single Phase Problem 2D Lid driven cavity (C)](../examples/SinglePhase_2DLidDrivenCavity.cxx)
