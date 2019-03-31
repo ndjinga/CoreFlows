@@ -28,7 +28,7 @@
 \include FiveEqsTwoFluid_2DInclinedSedimentation.py
 
 \image html 2DSedimentation.png "Stationary void fraction"
-\image html 2DSedimentationPression.png "Stationary pression"
+\image html 2DSedimentationPression.png "Stationary pressure"
 \image html 2DSedimentationVitesseGaz.png "Stationary gas velocity"
 \image html 2DSedimentationVitesseLiq.png "Stationary liquid velocity"
 
