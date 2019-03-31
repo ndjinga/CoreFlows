@@ -49,13 +49,15 @@ CoreFlows example scripts
     - [Single Phase Problem Heated wire with 2 Branches (C)](../examples/SinglePhase_HeatedWire_2Branches.cxx)
     
     | <img src="Figures/2BranchesHeatedChannelPower.png" width="400"/> | <img src="Figures/2BranchesHeatedChannelTemperature.png" width="400"/> |  
+    | --- | --- |  
     | Power field of the heated wire problem | Stationary temperature field of the heated wire problem |  
 
     - [Single Phase Problem Heated wire with 2 Branches (Python)](../examples/Python/SinglePhase_2BranchesHeatedChannels.py)
     - [Single Phase Problem 2D Thermal conduction (Python)](../examples/Python/SinglePhase_2DThermalDiffusion.py)
 
-    ![Initial data and mesh for the 2D thermal diffusion problem](Figures/2DRiemann_t0.png)
-    ![Stationary solution for the 2D thermal diffusion problem](Figures/2DRiemannStaggered.png)
+    | <img src="Figures/2DRiemann_t0.png" width="400"/> | <img src="Figures/2DRiemannStaggered.png" width="400"/> |  
+    | --- | --- |  
+    | Initial data and mesh for the 2D thermal diffusion problem | Stationary solution for the 2D thermal diffusion problem |  
     
     - [Single Phase 2D tank drainage problem (Python)](../examples/Python/SinglePhase_2DVidangeReservoir.py)
     - [Single Phase Problem 3D Heat driven cavity (C)](../examples/SinglePhase_3DHeatDrivenCavity.cxx)
