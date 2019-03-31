@@ -14,9 +14,9 @@ where
 - $\Phi$ is the heat source term if explicitely known
 - $T_f$ is the fluid temperature field provided by the user
 
-* The class [DiffusionEquation](../../Models/inc/DiffusionEquation.hxx) implementing a scalar diffusion equation for the temperature in a solid. The default values for $\rho, c_p, \lambda$ are those of Uranium oxyde at $900 K$.
+The class [DiffusionEquation](../../Models/inc/DiffusionEquation.hxx) implementing a scalar diffusion equation for the temperature in a solid. The default values for $\rho, c_p, \lambda$ are those of Uranium oxyde at $900 K$.  
 
 
-* \subpage ExampleDiffusionEqPage "Here are C and Python example scripts"
+\subpage ExampleDiffusionEqPage "Here are C and Python example scripts"
 
 

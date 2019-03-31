@@ -23,23 +23,24 @@ $$
 $$
 
 Here :
-- $\nu_k$ is the viscosity of phase $k$, set by \ref IsothermalTwoFluid::setViscosity
+- $\nu_k$ is the viscosity of phase $k$, set by [IsothermalTwoFluid](../../../Models/inc/IsothermalTwoFluid.hxx)::setViscosity
 - $\Delta p$ denotes the pressure default $p-p_k$ between the bulk average pressure and the interfacial average pressure.
-- $\vec g$ the gravity vector (\ref IsothermalTwoFluid::setGravity)
-- $K$ the interphase friction coefficient (\ref IsothermalTwoFluid::setDragCoeffs),
-- $K_s(\vec x)$ the singular friction function, $\delta_s(\vec x)$ the Dirac delta function with support on the set $s$ (\ref IsothermalTwoFluid::setPressureLossField).
+- $\vec g$ the gravity vector ([IsothermalTwoFluid](../../../Models/inc/IsothermalTwoFluid.hxx)::setGravity)
+- $K$ the interphase friction coefficient ([IsothermalTwoFluid](../../../Models/inc/IsothermalTwoFluid.hxx)::setDragCoeffs),
+- $K_s(\vec x)$ the singular friction function, $\delta_s(\vec x)$ the Dirac delta function with support on the set $s$ ([IsothermalTwoFluid](../../../Models/inc/IsothermalTwoFluid.hxx)::setPressureLossField).
 
-where $ 
+where 
+$$ 
  \left\{\begin{array}{clc}
 	\alpha_g +\alpha_l &=& 1 \\[1.5ex]
 	m_k &=& \alpha_k \rho_k \\[1.5ex]
 	\vec{q}_k &=& \alpha_k \rho_k \vec{u}_k \\[1.5ex]
         
 	\end{array}\right..
-$
+$$
 
 
-* The class : \ref IsothermalTwoFluid implements the isentropic two-fluid model
+* The class : [IsothermalTwoFluid](../../../Models/inc/IsothermalTwoFluid.hxx) implements the isentropic two-fluid model
 
 * \subpage ExampleIsothermalPage "Here are C and Python example scripts using the isothermal two-fluid model"	
 

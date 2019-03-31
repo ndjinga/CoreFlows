@@ -22,9 +22,11 @@ $$
 $$
 where the mixture quantities are defined by
 $$
+\begin{array}{lll}
 \rho_m&=&\alpha_g\rho_g+\alpha_l\rho_l\\
 \vec{u}_m&=&\frac{\alpha_g\rho_g\vec{u}_g+\alpha_l\rho_l\vec{u}_l}{\alpha_g\rho_g+\alpha_l\rho_l}\\
 E_m&=&\alpha_g\rho_g E_g+\alpha_l\rho_l E_l,
+\end{array}
 $$
 
 whereas the quantities associated to each to phase $k=g,l$ are defined as
@@ -39,14 +41,14 @@ whereas the quantities associated to each to phase $k=g,l$ are defined as
 - $h_k=e_k+\frac{p}{\rho_k}$ the phasic enthalpy
 - $H_k=h_k+\frac{1}{2}|\vec{u}_k|^2$ the phasic total enthalpy
 - $T$ the common absolute temperature,
-- $\nu_k$ the viscosity (\ref FiveEqsTwoFluid::setViscosity),
-- $\lambda_k$ the thermal conductivity (\ref FiveEqsTwoFluid::setConductivity),
-- $K$ the interphase friction coefficient (\ref FiveEqsTwoFluid::setDragCoeffs),
+- $\nu_k$ the viscosity ([FiveEqsTwoFluid](../../../Models/inc/FiveEqsTwoFluid.hxx)::setViscosity),
+- $\lambda_k$ the thermal conductivity ([FiveEqsTwoFluid](../../../Models/inc/FiveEqsTwoFluid.hxx)::setConductivity),
+- $K$ the interphase friction coefficient ([FiveEqsTwoFluid](../../../Models/inc/FiveEqsTwoFluid.hxx)::setDragCoeffs),
 
 Geometric and physical source terms are
-- $\vec g$ the gravity vector (\ref FiveEqsTwoFluid::setGravity)
-- $\Phi(\vec x)$ the heat power received by the fluid (\ref FiveEqsTwoFluid::setHeatPowerField),
-- $K_s(\vec x)$ the singular friction function, $\delta_s(\vec x)$ the Dirac delta function with support on the set $s$ (\ref FiveEqsTwoFluid::setPressureLossField).
+- $\vec g$ the gravity vector ([FiveEqsTwoFluid](../../../Models/inc/FiveEqsTwoFluid.hxx)::setGravity)
+- $\Phi(\vec x)$ the heat power received by the fluid ([FiveEqsTwoFluid](../../../Models/inc/FiveEqsTwoFluid.hxx)::setHeatPowerField),
+- $K_s(\vec x)$ the singular friction function, $\delta_s(\vec x)$ the Dirac delta function with support on the set $s$ ([FiveEqsTwoFluid](../../../Models/inc/FiveEqsTwoFluid.hxx)::setPressureLossField).
 
 We close the Drift-Model system with a stiffened gas law $p = (\gamma_k -1) \rho_k e_k -\gamma_k p_{0k}$ for each phase and a linearised internal energy law $h_k(T)$ valid around the points $(P=1 bar, T=300K)$ or $(P=155 bars, T=618K)$ depending on the value of the enum \ref pressureEstimate.
 
@@ -63,7 +65,7 @@ $$
 
 The parameters $\lambda_k, \nu_k,\vec g, K$ and $\Phi$ can be set by the user.
 
-* The class : \ref FiveEqsTwoFluid implements the equal temperature two fluid model
+* The class : [FiveEqsTwoFluid](../../../Models/inc/FiveEqsTwoFluid.hxx) implements the equal temperature two fluid model
 
 * \subpage Example5EqPage "Here are C and Python example scripts using the five equation two-fluid model "
 

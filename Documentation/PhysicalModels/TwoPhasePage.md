@@ -69,7 +69,7 @@ $$
 \frac{\partial \vec{q}_l}{\partial t}& +& \nabla \cdot (\vec{q}_l\otimes\frac{\vec{q}_l}{m_l})+ \alpha_l \vec\nabla p&\\[1.5ex]
 &+&\Delta p \nabla \alpha_l -\nu_l\Delta \vec{u}_l &= m_l\vec{g}-K_lm_l||\vec{u}_l||\vec{u}_l,\\
 \end{array}
-\right. \label{eq: isentropictwophase}
+\right.
 $$
 
 Here :

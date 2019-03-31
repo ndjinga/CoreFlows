@@ -14,9 +14,11 @@ $$
 $$
 where the mixture quantities are defined by
 $$
+\begin{array}{lll}
 \rho_m&=&\alpha_g\rho_g+\alpha_l\rho_l\\
 \vec{u}_m&=&\frac{\alpha_g\rho_g\vec{u}_g+\alpha_l\rho_l\vec{u}_l}{\alpha_g\rho_g+\alpha_l\rho_l}\\
 E_m&=&\alpha_g\rho_g E_g+\alpha_l\rho_l E_l,
+\end{array}
 $$
 
 whereas the quantities associated to each to phase $k=g,l$ are defined as
@@ -31,15 +33,15 @@ whereas the quantities associated to each to phase $k=g,l$ are defined as
 - $h_k=e_k+\frac{p}{\rho_k}$ the phasic enthalpy
 - $H_k=h_k+\frac{1}{2}|\vec{u}_k|^2$ the phasic total enthalpy
 - $T$ the common absolute temperature,
-- $\nu_k$ the viscosity (\ref DriftModel::setViscosity),
-- $\lambda_k$ the thermal conductivity (\ref DriftModel::setConductivity),
-- $K_k$ the phasic regular friction coefficient (\ref DriftModel::setDragCoeffs),
+- $\nu_k$ the viscosity ([DriftModel](../../../Models/inc/DriftModel.hxx)::setViscosity),
+- $\lambda_k$ the thermal conductivity ([DriftModel](../../../Models/inc/DriftModel.hxx)::setConductivity),
+- $K_k$ the phasic regular friction coefficient ([DriftModel](../../../Models/inc/DriftModel.hxx)::setDragCoeffs),
 
 Geometric and physical source terms are
-- $\vec g$ the gravity vector (\ref DriftModel::setGravity)
-- $\Phi(\vec x)$ the heat power received by the fluid (\ref DriftModel::setHeatPowerField),
-- $\phi(\vec x)$ the volumic porosity field (\ref DriftModel::setPorosityField),
-- $K_s(\vec x)$ the singular friction function, $\delta_s(\vec x)$ the Dirac delta function with support on the set $s$ (\ref DriftModel::setPressureLossField).
+- $\vec g$ the gravity vector ([DriftModel](../../../Models/inc/DriftModel.hxx)::setGravity)
+- $\Phi(\vec x)$ the heat power received by the fluid ([DriftModel](../../../Models/inc/DriftModel.hxx)::setHeatPowerField),
+- $\phi(\vec x)$ the volumic porosity field ([DriftModel](../../../Models/inc/DriftModel.hxx)::setPorosityField),
+- $K_s(\vec x)$ the singular friction function, $\delta_s(\vec x)$ the Dirac delta function with support on the set $s$ ([DriftModel](../../../Models/inc/DriftModel.hxx)::setPressureLossField).
 
 We close the Drift-Model system with a stiffened gas law $p = (\gamma_k -1) \rho_k e_k -\gamma_k p_{0k}$ for each phase and a linearised enthalpy law $h_k(T)$ valid around the points $(P=1 bar, T=300K)$ or $(P=155 bars, T=618K)$ depending on the value of the enum \ref pressureEstimate.
 
@@ -64,7 +66,7 @@ $$
 
 For the moment the boiling temperature $T^{sat}$ is constant and can be changed using the function DriftModell::setSatTemp.
 
-* The class : \ref DriftModel implements the 4 equation drift model
+* The class : [DriftModel](../../../Models/inc/DriftModel.hxx) implements the 4 equation drift model
 
 * \subpage ExampleDriftModelPage "Here are C and Python example scripts using the Drift Model  "
 
