@@ -24,6 +24,7 @@ CoreFlows example scripts
     - [Single Phase Problem 1D porosity jump (C)](../examples/SinglePhase_1DPorosityJump.cxx)
 
     ![Structured mesh used for the driven cavity and the spherical explosion tests](Figures/BoiteStruct.png)
+    *Structured mesh used for the driven cavity and the spherical explosion tests*
     ![Unstructured mesh used for the driven cavity and the spherical explosion tests](Figures/BoiteNStruct.png)
 
     - [Single Phase Problem 2D Lid driven cavity (C)](../examples/SinglePhase_2DLidDrivenCavity.cxx)
