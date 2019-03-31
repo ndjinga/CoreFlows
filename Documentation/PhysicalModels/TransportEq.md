@@ -17,7 +17,7 @@ where
 
 
 
-* The class \ref TransportEquation implements a scalar advection equation for the enthalpy of a fluid. The fluid can be either steam or liquid water around 1 bar or 155 bars.
+* The class [TransportEquation](../../Models/inc/TransportEquation.hxx) implements a scalar advection equation for the enthalpy of a fluid. The fluid can be either steam or liquid water around 1 bar or 155 bars.
 
 * \subpage ExampleTransportEqPage "Here are C and Python example scripts"	
 

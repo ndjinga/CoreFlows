@@ -18,7 +18,7 @@ where
 - $ \lambda_{sf}$ is the fluid-rod heat transfer coefficient provided by the user
 - $ c_p $ is the fluid specific heat, provided by the user and assumed constant
 
-See the [Transport equation page](TransportEq.md)
+See the [Transport equation page](TransportEq.ipynb)
 
 The diffusion equation	
 ----------------------
@@ -34,5 +34,5 @@ where
 - $\Phi$ is the heat source term if explicitely known
 - $T_f$ is the fluid temperature field provided by the user
 
-See the [Diffusion equation page](DiffusionEq.md)
+See the [Diffusion equation page](DiffusionEq.ipynb)
 

@@ -14,18 +14,20 @@ All the boundary faces of the mesh sould be gathered into groups of FACES that w
 - using \ref salome platform when generating the med file
 
 
-\section Initialdata Initial data or power fields
+Initial data and power fields
+-----------------------------
+
 The initial data and power fields can be defined on the simulation mesh using the Field class of \ref cdmath either
 - starting from a null field using the command Field(fieldname,ON\_CELLS,numberOfComponents), then setting the values on cell $i$ for each component  $j$ with the command $F(i,j)=fij$
 - loading a field stored in a med file using the command Field(filename,ON\_CELLS, filename)
 
 The initial data should in general be a vector field containing parameters that are specific to each model
-- SinglePhase : $(p, \vec{v}, T)$, ie pressure, velocity, temperature
-- DriftModel : $(c_g, p, \vec{v}, T)$, ie phase 1 concentration, pressure, velocity, temperature
-- IsothermalTwoFluid : $(\alpha_g, p,\vec{v}_g,\vec{v}_l)$, ie phase 1 void fraction, pressure, phase 1 velocity, phase 2 velocity
-- FiveEqsTwoFluid : $(\alpha_g, p,\vec{v}_g,\vec{v}_l,T)$, ie phase 1 void fraction, pressure, phase 1 velocity, phase 2 velocity, common temperature
-- TransportEquation : $h$ the fluid enthalpy 
-- DiffusionEquation : $T$ the solid temperature
+- [SinglePhase](../Models/inc/SinglePhase.hxx) : $(p, \vec{v}, T)$, ie pressure, velocity, temperature
+- [DriftModel](../Models/inc/DriftModel.hxx) : $(c_g, p, \vec{v}, T)$, ie phase 1 concentration, pressure, velocity, temperature
+- [IsothermalTwoFluid](../Models/inc/IsothermalTwoFluid.hxx) : $(\alpha_g, p,\vec{v}_g,\vec{v}_l)$, ie phase 1 void fraction, pressure, phase 1 velocity, phase 2 velocity
+- [FiveEqsTwoFluid](../Models/inc/FiveEqsTwoFluid.hxx) : $(\alpha_g, p,\vec{v}_g,\vec{v}_l,T)$, ie phase 1 void fraction, pressure, phase 1 velocity, phase 2 velocity, common temperature
+- [TransportEquation](../Models/inc/TransportEquation.hxx) : $h$ the fluid enthalpy 
+- [DiffusionEquation](../Models/inc/DiffusionEquation.hxx) : $T$ the solid temperature
 
 Whatever the model chosen, the initial data is set with the function ProblemCoreFlows::setInitialField (initialField), and the heat power field is set with the function ProblemCoreFlows::setHeatSource(heatPower) for a constant uniform value or the function ProblemCoreFlows::setHeatSourceField(heatPowerField) for a variable power field.
 
