@@ -45,7 +45,7 @@
 \include DriftModel_2DPorosityJump.py
 
 \section  Drift2DBoilC Drift Model 2D Inclined Boiling Channel (C)
-\include DriftModel_2DInclinedBoilingChannel.cxx
+\include Drift Model 2D Inclined Boiling Channel (C)
 
 \section  Drift2DBoilPy Drift Model 2D Inclined Boiling Channel (Python)
 \include DriftModel_2DInclinedBoilingChannel.py
@@ -83,9 +83,6 @@
 @image html MaillagePuissanceThermiqueIncline.png  "Mesh and heat power field for the 2D inclined Vertical Boiling Channel with a barrier"
 
 @image html CanalCloisonInclinedUpwindWBConcentration.png "Stationary concentration field and streamlines 2D inclined  Vertical Boiling Channel with a barrier"
-
-\section  Drift2DInclGravBarsC Drift Model 2D Inclined Channel with Gravity and three barriers (C)
-\include DriftModel_2DInclinedChannelGravityBarriers.cxx
 
 \section DriftWirePy Drift Model boiling wire with two Branches (Python)
 \include DriftModel_2BranchesBoilingChannels.py
