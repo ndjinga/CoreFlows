@@ -96,7 +96,6 @@ CoreFlows example scripts
     | --- | --- |  
     | Mesh and heat power field for the 2D Vertical Boiling Channel with a barrier |   |  
     | <img src="Figures/Simulations/CanalCloison/Diphasique/DriftModel_2DCanalCloisonVit0.1Conc.png" width="400"/> | <img src="Figures/Simulations/CanalCloison/Diphasique/DriftModel_2DCanalCloisonVit0.1Vy.png" width="400"/> |  
-    | --- | --- |  
     | Stationary concentration field and streamlines, 2D Vertical Boiling Channel with a barrier | Stationary velocity field and streamlines, 2D Vertical Boiling Channel with a barrier |  
 
     - [Drift Model 2D Inclined Boiling Channel with a barrier (Python)](../examples/Python/DriftModel_2DInclinedBoilingChannelBarrier.py)
