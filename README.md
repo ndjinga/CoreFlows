@@ -25,13 +25,13 @@ User guide
 The user guide is organized as follows :
 - [The physical models](./Documentation/PhysicalModels.md)
     - [The linear scalar problems](./Documentation/PhysicalModels/ScalarModelsPage.md)
-        - [The transport equation](./Documentation/PhysicalModels/TransportEq.md)
-        - [The diffusion equation](./Documentation/PhysicalModels/DiffusionEq.md)
+        - [The transport equation](./Documentation/PhysicalModels/TransportEq.md) for pure advection phenomena
+        - [The diffusion equation](./Documentation/PhysicalModels/DiffusionEq.md) for pure diffusion phenomena
     - [The compressible Navier-Stokes equations](./Documentation/PhysicalModels/NSModelsPage.md)
     - [The two-phase flow models](./Documentation/PhysicalModels/TwoPhasePage.md)
-        - [The drift model](./Documentation/PhysicalModels/TwoPhase/DriftModelPage.md)
-        - [The isothermal two-fluid model](./Documentation/PhysicalModels/TwoPhase/IsothermalPage.md)
-        - [The five equation two-fluid model](./Documentation/PhysicalModels/TwoPhase/FiveEqPage.md)
+        - [The drift model](./Documentation/PhysicalModels/TwoPhase/DriftModelPage.md) with two partial masses, one momentum and one energy equation
+        - [The isothermal two-fluid model](./Documentation/PhysicalModels/TwoPhase/IsothermalPage.md) with two partial masses and two momentum equations (no energy equation)
+        - [The five equation two-fluid model](./Documentation/PhysicalModels/TwoPhase/FiveEqPage.md) with two partial masses, two momentum equations and one energy equation
 - [Software structure](Documentation/software.md)
 
 Download and compilation of CDMATH and PETSc
