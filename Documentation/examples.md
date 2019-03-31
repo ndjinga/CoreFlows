@@ -23,10 +23,9 @@ CoreFlows example scripts
     - [Single Phase Problem 1D water hammer (Python)](../examples/Python/SinglePhase_1DWaterHammer.py)
     - [Single Phase Problem 1D porosity jump (C)](../examples/SinglePhase_1DPorosityJump.cxx)
 
-    | 2D Tests meshes |  
-    |:---:|:---:|  
+    | 2D Tests meshes |   |  
+    | --- | --- |  
     | <img src="Figures/BoiteStruct.png" width="350"/> | <img src="Figures/BoiteNStruct.png" width="350"/> |  
-    | - | - |  
     | Structured mesh | Unstructured mesh |  
 
     * 2D Tests scripts
