@@ -32,14 +32,15 @@ The user guide is organized as follows :
         - [The drift model](./Documentation/PhysicalModels/TwoPhase/DriftModelPage.md)
         - [The isothermal two-fluid model](./Documentation/PhysicalModels/TwoPhase/IsothermalPage.md)
         - [The five equation two-fluid model](./Documentation/PhysicalModels/TwoPhase/FiveEqPage.md)
+- [Software structure](Documentation/software.md)
 
 Download and compilation of CDMATH and PETSc
 --------------------------------------------
-CDMATH can be downloaded and compiled together with PETSc in a single process, thanks to the cmake option -DCDMATH_WITH_PETSC=ON.
+[CDMATH-Toolbox](https://github.com/ndjinga/CDMATH) can be downloaded and compiled together with [PETSC](https://www.mcs.anl.gov/petsc/) in a single process, thanks to the cmake option -DCDMATH_WITH_PETSC=ON.
 We summarise the installation procedure that you can find in detailed form here
 - https://github.com/ndjinga/CDMATH
 
-In order to compile 'CDMATH' you will need the packages 'cmake', 'gcc', 'gfortran', 'hdf5' plus 'numpy' and 'swig'.
+In order to compile [CDMATH-Toolbox](https://github.com/ndjinga/CDMATH) you will need the packages 'cmake', 'gcc', 'gfortran', 'hdf5' plus 'numpy' and 'swig'.
 In a linux terminal, first create and access a working directory :
 - `mkdir -p ~/workspace/cdmath `
 - `cd ~/workspace/cdmath `
@@ -62,7 +63,7 @@ Then run the commands
 - `make`
 - `make install`
 
-By default, CDMATH will compile a new sequential installation of PETSc. If an installation of PETSc (version 3.4 or later) is already available in the system, it is possible to save time by first setting the environment variables PETSC_DIR and PETSC_ARCH to the appropriate values as can be found in petscconf.h, and then running the above cmake command.
+By default, [CDMATH-Toolbox](https://github.com/ndjinga/CDMATH) will compile a new sequential installation of [PETSC](https://www.mcs.anl.gov/petsc/). If an installation of [PETSC](https://www.mcs.anl.gov/petsc/) (version 3.4 or later) is already available in the system, it is possible to save time by first setting the environment variables PETSC_DIR and PETSC_ARCH to the appropriate values as can be found in petscconf.h, and then running the above cmake command.
 
 Download and compilation of CoreFlows
 ---------------------------------------------
