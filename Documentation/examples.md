@@ -23,18 +23,16 @@ CoreFlows example scripts
     - [Single Phase Problem 1D water hammer (Python)](../examples/Python/SinglePhase_1DWaterHammer.py)
     - [Single Phase Problem 1D porosity jump (C)](../examples/SinglePhase_1DPorosityJump.cxx)
 
-    | 2D Tests meshes |   |  
+    | 2D Tests meshes for lid driven cavity test |   |  
     | --- | --- |  
-    | <img src="Figures/BoiteStruct.png" width="350"/> | <img src="Figures/BoiteNStruct.png" width="350"/> |  
-    | Structured mesh | Unstructured mesh |  
+    | <img src="Figures/BoiteStruct.png" width="400"/> | <img src="Figures/BoiteNStruct.png" width="400"/> |  
+    | 2D Structured mesh (squares) | Unstructured mesh (Delaunay triangles) |  
 
-    * 2D Tests scripts
     - [Single Phase Problem 2D Lid driven cavity (C)](../examples/SinglePhase_2DLidDrivenCavity.cxx)
     - [Single Phase Problem 2D Lid driven cavity (Python)](../examples/Python/SinglePhase_2DLidDrivenCavity.py)
     - [Single Phase Problem 2D Lid driven cavity on an unstructured mesh (C)](../examples/SinglePhase_2DLidDrivenCavity_unstructured.cxx)
     - [Single Phase Problem 2D Lid driven cavity on an unstructured mesh (Python)](../examples/Python/SinglePhase_2DLidDrivenCavity_unstructured.py)
 
-    * 2D Tests scripts results
     ![2D Lid driven cavity test with upwind scheme on a structured mesh](Figures/Simulations/DrivenCavity/DrivenCavityStructuredUpwind.png)
     ![2D Lid driven cavity test with upwind scheme on an unstructured mesh](Figures/Simulations/DrivenCavity/DrivenCavityUnstructuredUpwind.png)
     ![2D Lid driven cavity test with lowMachDellacherieOmnes scheme on a structured mesh](Figures/Simulations/DrivenCavity/DrivenCavityStructuredDellacherieOmnes.png)
