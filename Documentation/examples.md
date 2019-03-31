@@ -64,35 +64,71 @@ CoreFlows example scripts
     - [Single Phase Problem 3D Heat driven cavity (Python)](../examples/Python/SinglePhase_3DHeatDrivenCavity.py)
 
 - " The Drift Model"
-	+ \ref Drift1DRP
-	+ \ref Drift1DRPpy
-	+ \ref Drift1DDepr
-	+ \ref Drift1DDeprPy
-	+ \ref Drift1DPressLoss
-	+ \ref Drift1DPressLossPy
-	+ \ref Drift1DPorJump
-	+ \ref Drift1DPorJumpPy
-	+ \ref Drift1DBoilChann
-	+ \ref Drift1DBoilChannPy
-	+ \ref Drift1DBoilAssPy
-	+ \ref Drift1DVidResPy
-	+ \ref Drift2DBoilC
-	+ \ref Drift2DBoilPy
-	+ \ref Drift2DInclGravC
-	+ \ref Drift2DInclGravPy
-	+ \ref Drift2DInclGravTriPy
-	+ \ref Drift2DInclGravBarsC
-	+ \ref Drift2DInclGravBarsPy
-	+ \ref Drift2DPressLossPy
-	+ \ref Drift2DPorJumpPy
-	+ \ref Drift2DBoilBarVertPy
-	+ \ref Drift2DBoilBarIncPy
-	+ \ref Drift2DVidResPy
-	+ \ref Drift2DVidResUnsPy
-	+ \ref DriftWirePy 
-	+ \ref Drift3DBoilBarPy
+    - [Drift Model 1D Riemann problem (C)](../examples/DriftModel_1DRiemannProblem.cxx)
+    - [Drift Model 1D Riemann problem (Python)](../examples/Python/DriftModel_1DRiemannProblem.py)
+    - [Drift Model 1D depressurisation (C)](../examples/DriftModel_1DDepressurisation.cxx)
+    - [Drift Model 1D depressurisation (Python)](../examples/Python/DriftModel_1DDepressurisation.py)
+    - [Drift Model 1D pressure loss (C)](../examples/DriftModel_1DPressureLoss.cxx)
+    - [Drift Model 1D pressure loss (Python)](../examples/Python/DriftModel_1DPressureLoss.py)
+    - [Drift Model 1D porosity jump (C)](../examples/DriftModel_1DPorosityJump.cxx)
+    - [Drift Model 1D porosity jump (Python)](../examples/Python/DriftModel_1DPorosityJump.py)
+    - [Drift Model 1D Boiling Channel (C)](../examples/DriftModel_1DBoilingChannel.cxx)
+    - [Drift Model 1D Boiling Channel (Python)](../examples/Python/DriftModel_1DBoilingChannel.py)
+    - [Drift Model 1D Boiling Assembly (Python)](../examples/Python/DriftModel_1DAssembly.py)
+    - [Drift Model 1D tank drainage problem (Python)](../examples/Python/DriftModel_1DVidangeReservoir.py)
+    - [Drift Model 2D pressure loss (Python)](../examples/Python/DriftModel_2DPressureLoss.py)
+    - [Drift Model 2D porosity jump (Python)](../examples/Python/DriftModel_2DPorosityJump.py)
+    - [Drift Model 2D Inclined Boiling Channel (C)](../examples/Drift Model 2D Inclined Boiling Channel (C))
+    - [Drift Model 2D Inclined Boiling Channel (Python)](../examples/Python/DriftModel_2DInclinedBoilingChannel.py)
+    - [Drift Model 2D Inclined Channel with Gravity (C)](../examples/DriftModel_2DInclinedChannelGravity.cxx)
+    - [Drift Model 2D Inclined Channel with Gravity (Python)](../examples/Python/DriftModel_2DInclinedChannelGravity.py)
+
+    | <img src="Figures/ChannelSquaresStruct.png" width="400"/> | <img src="Figures/ChannelTrianglesStruct.png" width="400"/> |  
+    | --- | --- |  
+    | Structured mesh with square cells for the 2D Vertical Inclined channel with gravity | Structured mesh with triangular cells for the 2D Vertical Inclined channel with gravity |  
+    
+    - [Drift Model 2D Inclined Channel with Gravity on a triangular mesh (Python)](../examples/Python/DriftModel_2DInclinedChannelGravityTriangles.py)
+    - [Drift Model 2D Inclined Channel with Gravity and three barriers (C)](../examples/DriftModel_2DInclinedChannelGravityBarriers.cxx)
+    - [Drift Model 2D Inclined Channel with Gravity and three barriers (Python)](../examples/Python/DriftModel_2DInclinedChannelGravityBarriers.py)
+    - [Drift Model 2D Vertical Boiling Channel with a barrier (Python)](../examples/Python/DriftModel_2DBoilingChannelBarrier.py)
+
+    | <img src="Figures/PowerFieldCloison.png" width="400"/> |   |  
+    | --- | --- |  
+    | Mesh and heat power field for the 2D Vertical Boiling Channel with a barrier |   |  
+    | <img src="Figures/DriftModel_2DCanalCloisonVit0.1Conc.png" width="400"/> | <img src="Figures/DriftModel_2DCanalCloisonVit0.1Vy.png" width="400"/> |  
+    | --- | --- |  
+    | Stationary concentration field and streamlines, 2D Vertical Boiling Channel with a barrier | Stationary velocity field and streamlines, 2D Vertical Boiling Channel with a barrier |  
+
+    - [Drift Model 2D Inclined Boiling Channel with a barrier (Python)](../examples/Python/DriftModel_2DInclinedBoilingChannelBarrier.py)
+
+    | <img src="Figures/MaillagePuissanceThermiqueIncline.png" width="400"/> | <img src="Figures/CanalCloisonInclinedUpwindWBConcentration.png" width="400"/> |  
+    | --- | --- |  
+    | Mesh and heat power field for the 2D inclined Vertical Boiling Channel with a barrier | Stationary concentration field and streamlines 2D inclined  Vertical Boiling Channel with a barrier |  
+
+    - [Drift Model boiling wire with two Branches (Python)](../examples/Python/DriftModel_2BranchesBoilingChannels.py)
+    - [Drift Model 3D Vertical Boiling Channel with two barriers (Python)](../examples/Python/DriftModel_3DBoilingChannelBarrier.py)
+
+    | <img src="Figures/DomainePuissanceThermiqueVueAvant.png" width="400"/> | <img src="Figures/DomainePuissanceThermiqueVueArriere.png" width="400"/> |  
+    | --- | --- |  
+    | Front view of the power field for the 3D Vertical Boiling Channel with two barrier | Rear view of the power field for the 3D Vertical Boiling Channel with two barrier |  
+
+    | <img src="Figures/step_73.png" width="400"/> |  
+    | Streamlines at time step 7300 for the 3D Vertical Boiling Channel with two barrier |  
+
+    - [Drift Model 2D tank drainage problem (Python)](../examples/Python/DriftModel_2DVidangeReservoir.py)
+    - [Drift Model 2D tank drainage problem with an unstructured mesh (Python)](../examples/Python/DriftModel_2DVidangeReservoirUnstructured.py)
 
 - " The Isothermal TwoFluid model "
+    - [](../examples/Python/)
+    - [](../examples/Python/)
+    - [](../examples/Python/)
+    - [](../examples/Python/)
+    - [](../examples/Python/)
+    - [](../examples/Python/)
+    - [](../examples/Python/)
+    - [](../examples/Python/)
+    - [](../examples/Python/)
+    - [](../examples/Python/)
 	+ \ref IsoRP
  	+ \ref IsoSed
  	+ \ref IsoSedPy
