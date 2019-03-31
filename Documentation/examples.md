@@ -23,7 +23,7 @@ CoreFlows example scripts
     - [Single Phase Problem 1D water hammer (Python)](../examples/Python/SinglePhase_1DWaterHammer.py)
     - [Single Phase Problem 1D porosity jump (C)](../examples/SinglePhase_1DPorosityJump.cxx)
 
-    | ![Structured mesh used for the driven cavity and the spherical explosion tests](Figures/BoiteStruct.png =10x) |
+    | ![Structured mesh used for the driven cavity and the spherical explosion tests](Figures/BoiteStruct.png =10x10) |
     |:--:|
     | *Structured mesh used for the driven cavity and the spherical explosion tests* |
     ![Unstructured mesh used for the driven cavity and the spherical explosion tests](Figures/BoiteNStruct.png)
