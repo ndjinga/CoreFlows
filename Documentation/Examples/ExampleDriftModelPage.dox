@@ -45,7 +45,7 @@
 \include DriftModel_2DPorosityJump.py
 
 \section  Drift2DBoilC Drift Model 2D Inclined Boiling Channel (C)
-\include Drift Model 2D Inclined Boiling Channel (C)
+\include DriftModel_2DInclinedBoilingChannel.cxx
 
 \section  Drift2DBoilPy Drift Model 2D Inclined Boiling Channel (Python)
 \include DriftModel_2DInclinedBoilingChannel.py
