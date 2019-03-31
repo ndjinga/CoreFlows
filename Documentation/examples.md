@@ -33,12 +33,14 @@ CoreFlows example scripts
     - [Single Phase Problem 2D Lid driven cavity on an unstructured mesh (C)](../examples/SinglePhase_2DLidDrivenCavity_unstructured.cxx)
     - [Single Phase Problem 2D Lid driven cavity on an unstructured mesh (Python)](../examples/Python/SinglePhase_2DLidDrivenCavity_unstructured.py)
 
-    ![2D Lid driven cavity test with upwind scheme on a structured mesh](Figures/Simulations/DrivenCavity/DrivenCavityStructuredUpwind.png)
-    ![2D Lid driven cavity test with upwind scheme on an unstructured mesh](Figures/Simulations/DrivenCavity/DrivenCavityUnstructuredUpwind.png)
-    ![2D Lid driven cavity test with lowMachDellacherieOmnes scheme on a structured mesh](Figures/Simulations/DrivenCavity/DrivenCavityStructuredDellacherieOmnes.png)
-    ![2D Lid driven cavity test with lowMachDellacherieOmnes scheme on an unstructured mesh](Figures/Simulations/DrivenCavity/DrivenCavityUnstructuredDellacherieOmnes.png)
-    ![2D Lid driven cavity test with staggered scheme on a structured mesh](Figures/Simulations/DrivenCavity/DrivenCavityStructuredStaggered.png)
-    ![2D Lid driven cavity test with staggered scheme on an unstructured mesh](Figures/Simulations/DrivenCavity/DrivenCavityUnstructuredStaggered.png)
+    | Results for lid driven cavity test |   |  
+    | --- | --- |  
+    | <img src="Figures/Simulations/DrivenCavity/DrivenCavityStructuredUpwind.png" width="400"/> | <img src="Figures/Simulations/DrivenCavity/DrivenCavityUnstructuredUpwind.png" width="400"/> |  
+    | Upwind scheme on structured mesh (squares) | Upwind scheme on unstructured mesh (Delaunay triangles) |  
+    | <img src="Figures/Simulations/DrivenCavity/DrivenCavityStructuredDellacherieOmnes.png" width="400"/> | <img src="Figures/Simulations/DrivenCavity/DrivenCavityUnstructuredDellacherieOmnes.png" width="400"/> |  
+    | LowMachDellacherieOmnes scheme on structured mesh (squares) | LowMachDellacherieOmnes scheme on unstructured mesh (Delaunay triangles) |  
+    | <img src="Figures/Simulations/DrivenCavity/DrivenCavityStructuredStaggered.png" width="400"/> | <img src="Figures/Simulations/DrivenCavity/DrivenCavityUnstructuredStaggered.png" width="400"/> |  
+    | Pseudo staggered scheme on structured mesh (squares) | Pseudo staggered scheme on unstructured mesh (Delaunay triangles) |  
 
     - [Single Phase Problem 2D Spherical wave on an unstructured mesh (C)](../examples/SinglePhase_2DSphericalExplosion_unstructured.cxx)
     - [Single Phase Problem 2D Spherical wave on an unstructured mesh (Python)](../examples/Python/SinglePhase_2DSphericalExplosion_unstructured.py)
