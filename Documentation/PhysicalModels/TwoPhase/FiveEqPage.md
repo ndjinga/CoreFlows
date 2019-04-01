@@ -65,7 +65,7 @@ $$
 
 The parameters $\lambda_k, \nu_k,\vec g, K$ and $\Phi$ can be set by the user.
 
-* The class : [FiveEqsTwoFluid](../../../Models/inc/FiveEqsTwoFluid.hxx) implements the equal temperature two fluid model
+The class : [FiveEqsTwoFluid](../../../Models/inc/FiveEqsTwoFluid.hxx) implements the equal temperature two fluid model  
 
-* \subpage Example5EqPage "Here are C and Python example scripts using the five equation two-fluid model "
+\subpage Example5EqPage "Here are C and Python example scripts using the five equation two-fluid model "
 

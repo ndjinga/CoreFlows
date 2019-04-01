@@ -19,7 +19,7 @@ $$
 \frac{\partial \vec{q}_l}{\partial t}& +& \nabla \cdot (\vec{q}_l\otimes\frac{\vec{q}_l}{m_l})+ \alpha_l \vec\nabla p&\\[1.5ex]
 &+&\Delta p \nabla \alpha_l -\nu_l\Delta \vec{u}_l &= m_l\vec{g}-K\rho_m||\vec{u}_l-\vec{u}_g||(\vec{u}_l-\vec{u}_g)-K_s\delta(x)m_l||\vec{u}_l||\vec{u}_l\\
 \end{array}
-\right. \label{eq: isentropictwophase}
+\right.
 $$
 
 Here :
@@ -34,13 +34,12 @@ $$
  \left\{\begin{array}{clc}
 	\alpha_g +\alpha_l &=& 1 \\[1.5ex]
 	m_k &=& \alpha_k \rho_k \\[1.5ex]
-	\vec{q}_k &=& \alpha_k \rho_k \vec{u}_k \\[1.5ex]
-        
+	\vec{q}_k &=& \alpha_k \rho_k \vec{u}_k
 	\end{array}\right..
 $$
 
 
-* The class : [IsothermalTwoFluid](../../../Models/inc/IsothermalTwoFluid.hxx) implements the isentropic two-fluid model
+The class : [IsothermalTwoFluid](../../../Models/inc/IsothermalTwoFluid.hxx) implements the isentropic two-fluid model  
 
-* \subpage ExampleIsothermalPage "Here are C and Python example scripts using the isothermal two-fluid model"	
+\subpage ExampleIsothermalPage "Here are C and Python example scripts using the isothermal two-fluid model"	
 

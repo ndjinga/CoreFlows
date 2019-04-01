@@ -66,8 +66,8 @@ $$
 
 For the moment the boiling temperature $T^{sat}$ is constant and can be changed using the function DriftModell::setSatTemp.
 
-* The class : [DriftModel](../../../Models/inc/DriftModel.hxx) implements the 4 equation drift model
+The class : [DriftModel](../../../Models/inc/DriftModel.hxx) implements the 4 equation drift model  
 
-* \subpage ExampleDriftModelPage "Here are C and Python example scripts using the Drift Model  "
+\subpage ExampleDriftModelPage "Here are C and Python example scripts using the Drift Model  "
 
 
