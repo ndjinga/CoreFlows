@@ -15,6 +15,7 @@ SET(src_models_CXX
     ProblemCoreFlows.cxx
     TransportEquation.cxx
     DiffusionEquation.cxx
+    StationaryDiffusionEquation.cxx
     Fluide.cxx
     ProblemFluid.cxx
     utilitaire_algebre.cxx
