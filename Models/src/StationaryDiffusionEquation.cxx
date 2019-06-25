@@ -424,7 +424,6 @@ bool StationaryDiffusionEquation::iterateTimeStep(bool &converged)
             {
                 VecGetValues(_deltaT, 1, &i, &dTi);
                 VecGetValues(_Tk, 1, &i, &Ti);
-                _VV(i)=Ti;
                 if(_erreur_rel < fabs(dTi/Ti))
                     _erreur_rel = fabs(dTi/Ti);
             }
@@ -433,11 +432,9 @@ bool StationaryDiffusionEquation::iterateTimeStep(bool &converged)
             {
                 VecGetValues(_deltaT, 1, &i, &dTi);
                 VecGetValues(_Tk, 1, &i, &Ti);
-                _VV(i+_NboundaryNodes)=Ti;
                 if(_erreur_rel < fabs(dTi/Ti))
                     _erreur_rel = fabs(dTi/Ti);
             }
-
         converged = (_erreur_rel <= _precision) ;//converged=convergence des iterations de Newton
     }
 
@@ -493,6 +490,38 @@ void StationaryDiffusionEquation::save(){
     string suppress ="rm -rf "+resultFile+"_*";
     system(suppress.c_str());//Nettoyage des précédents calculs identiques
     
+    double Ti; 
+    if(!_FECalculation)
+        for(int i=0; i<_Nmailles; i++)
+            {
+                VecGetValues(_Tk, 1, &i, &Ti);
+                _VV(i)=Ti;
+            }
+    else
+        {
+            for(int i=0; i<_NinteriorNodes; i++)
+            {
+                VecGetValues(_Tk, 1, &i, &Ti);
+                _VV(i+_NboundaryNodes)=Ti;//Assumes node numbering starts with border nodes
+            }
+            Node Ni;
+            string nameOfGroup;
+            for(int i=0; i<_NboundaryNodes; i++)
+            {
+                Ni=_mesh.getNode(i);
+                if(Ni.isBorder())
+                {
+                    nameOfGroup = Ni.getGroupName();
+                    _VV(i)=_limitField[nameOfGroup].T;//Assumes node numbering starts with border nodes
+                }
+                else
+                {
+                    std::cout<<"Node number i= "<<i <<" is not a boundary node. NboundaryNodes= "<< _NboundaryNodes <<endl;
+                    throw CdmathException("Error StationaryDiffusionEquation::save : unusual node numbering : should start with boundary nodes");
+                }
+            }
+        }
+
     _VV.setInfoOnComponent(0,"Temperature_(K)");
     switch(_saveFormat)
     {
