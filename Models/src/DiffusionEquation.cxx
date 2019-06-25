@@ -11,7 +11,7 @@ DiffusionEquation::DiffusionEquation(int dim,double rho,double cp, double lambda
         std::cout<<"rho="<<_rho<<", cp= "<<cp<< ", precision= "<<_precision<<endl;
         throw CdmathException("Error : parameters rho and cp should be strictly positive");
     }
-    if(_lambda < 0.)
+    if(lambda < 0.)
     {
         std::cout<<"conductivity="<<lambda<<endl;
         throw CdmathException("Error : conductivity parameter lambda cannot  be negative");
@@ -426,6 +426,7 @@ void DiffusionEquation::save(){
         case CSV :
             _VV.writeCSV(resultFile);
             break;
+        }
     }
 }
 

@@ -18,7 +18,7 @@ StationaryDiffusionEquation::StationaryDiffusionEquation(int dim, double lambda,
 	if(!petscInitialized)
 		PetscInitialize(NULL,NULL,0,0);
 
-    if(_lambda < 0.)
+    if(lambda < 0.)
     {
         std::cout<<"conductivity="<<lambda<<endl;
         throw CdmathException("Error : conductivity parameter lambda cannot  be negative");
@@ -137,13 +137,13 @@ void StationaryDiffusionEquation::initialize()
 double StationaryDiffusionEquation::computeTimeStep(bool & stop){
 	if(!_diffusionMatrixSet)//The diffusion matrix is computed once and for all time steps
     {
-		_dt_diffusion=computeDiffusionMatrix();
+		computeDiffusionMatrix();
         //Contribution from the solid/fluid heat exchange
-        if(_heatTransfertCoeff/(_rho*_cp)>_precision)
+        if(_heatTransfertCoeff>_precision)
         {   
             MatAssemblyBegin(_A, MAT_FINAL_ASSEMBLY);
             MatAssemblyEnd(_A, MAT_FINAL_ASSEMBLY);
-            MatShift(_A,_heatTransfertCoeff/(_rho*_cp));
+            MatShift(_A,_heatTransfertCoeff);
         }
     }
 
