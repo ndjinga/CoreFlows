@@ -448,12 +448,22 @@ bool StationaryDiffusionEquation::iterateTimeStep(bool &converged)
 
 void StationaryDiffusionEquation::setMesh(const Mesh &M)
 {
-
-	if(_Ndim != M.getSpaceDimension()){
-		*_runLogFile<<"ProblemCoreFlows::setInitialField: mesh has incorrect space dimension"<<endl;
+	if(_Ndim != M.getSpaceDimension() or _Ndim!=M.getMeshDimension()){
+        cout<< "Problem : dim = "<<_Ndim<< " but mesh dim= "<<M.getMeshDimension()<<", mesh space dim= "<<M.getSpaceDimension()<<endl;
+		*_runLogFile<<"StationaryDiffusionEquation::setMesh: mesh has incorrect dimension"<<endl;
 		_runLogFile->close();
-		throw CdmathException("ProblemCoreFlows::setInitialField: mesh has incorrect space dimension");
+		throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect space dimension");
 	}
+    if(_Ndim==3 and not M.isTetrahedral())
+    {
+        cout<<"Dimension is "<<_Ndim<< ", mesh should be tetrahedral"<<endl;
+		throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect cell types");
+    }
+    if(_Ndim==2 and not M.isTriangular())
+    {
+        cout<<"Dimension is "<<_Ndim<< ", mesh should be triangular"<<endl;
+		throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect cell types");
+    }
 
 	_mesh=M;
 	_Nmailles = _mesh.getNumberOfCells();
