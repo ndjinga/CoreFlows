@@ -6,6 +6,17 @@
 using namespace std;
 
 DiffusionEquation::DiffusionEquation(int dim,double rho,double cp, double lambda){
+    if(_rho<_precision or cp<_precision)
+    {
+        std::cout<<"rho="<<_rho<<", cp= "<<cp<< ", precision= "<<_precision<<endl;
+        throw CdmathException("Error : parameters rho and cp should be strictly positive");
+    }
+    if(_lambda < 0.)
+    {
+        std::cout<<"conductivity="<<lambda<<endl;
+        throw CdmathException("Error : conductivity parameter lambda cannot  be negative");
+    }
+
 	_conductivity=lambda;
 	_cp=cp;
 	_rho=rho;
@@ -50,7 +61,7 @@ void DiffusionEquation::initialize()
 	VecDuplicate(_Tk, &_Tn);
 	VecDuplicate(_Tk, &_Tkm1);
 	VecDuplicate(_Tk, &_deltaT);
-	VecDuplicate(_Tk, &_b);//RHS of the linear system: _b=Hn/dt + _b0 + puisance
+	VecDuplicate(_Tk, &_b);//RHS of the linear system: _b=Tn/dt + _b0 + puisance volumique + couplage thermique avec le fluide
 	VecDuplicate(_Tk, &_b0);//part of the RHS that comes from the boundary conditions
 
 	for(int i =0; i<_Nmailles;i++)
@@ -69,8 +80,18 @@ void DiffusionEquation::initialize()
 }
 
 double DiffusionEquation::computeTimeStep(bool & stop){
-	if(!_diffusionMatrixSet)
+	if(!_diffusionMatrixSet)//The diffusion matrix is computed once and for all time steps
+    {
 		_dt_diffusion=computeDiffusionMatrix();
+        //Contribution from the solid/fluid heat exchange
+        if(_timeScheme == Implicit and _heatTransfertCoeff/(_rho*_cp)>_precision)
+        {   
+            MatAssemblyBegin(_A, MAT_FINAL_ASSEMBLY);
+            MatAssemblyEnd(_A, MAT_FINAL_ASSEMBLY);
+            MatShift(_A,_heatTransfertCoeff/(_rho*_cp));
+        }
+    }
+
 	_dt_src=computeRHS();
 
 	stop=false;
@@ -191,35 +212,52 @@ double DiffusionEquation::computeDiffusionMatrix(){
 }
 double DiffusionEquation::computeRHS(){
 	VecCopy(_b0,_b);
-	VecAssemblyBegin(_b);
 
-	for (int i=0; i<_Nmailles;i++){
-		VecSetValue(_b,i,_heatTransfertCoeff*(_fluidTemperatureField(i)-_VV(i))/(_rho*_cp),ADD_VALUES);
-		VecSetValue(_b,i,_heatPowerField(i)/(_rho*_cp),ADD_VALUES);
+	VecAssemblyBegin(_b);      
+    double Ti;  
+	for (int i=0; i<_Nmailles;i++)
+    {
+		VecSetValue(_b,i,_heatPowerField(i)/(_rho*_cp),ADD_VALUES);//Contribution of the volumic heat power
+        //Contribution due to fluid/solide heat exchange
+        if(_timeScheme == Explicit)
+        {
+            VecGetValues(_Tn, 1, &i, &Ti);
+            VecSetValue(_b,i,_heatTransfertCoeff/(_rho*_cp)*(_fluidTemperatureField(i)-Ti),ADD_VALUES);
+        }
+        else//Implicit scheme    
+            VecSetValue(_b,i,_heatTransfertCoeff/(_rho*_cp)* _fluidTemperatureField(i)    ,ADD_VALUES);
 	}
 	VecAssemblyEnd(_b);
 
-	return _rho*_cp/_heatTransfertCoeff;
+    if(_heatTransfertCoeff>_precision)
+        return _rho*_cp/_heatTransfertCoeff;
+    else
+        return INFINITY;
 }
 
 bool DiffusionEquation::initTimeStep(double dt){
-	_dt = dt;
-	if(_verbose && _nbTimeStep%_freqSave ==0)
-		MatView(_A,PETSC_VIEWER_STDOUT_SELF);
+    VecAXPY(_b, 1/_dt, _Tn);
+        
 	MatAssemblyBegin(_A, MAT_FINAL_ASSEMBLY);
 	MatAssemblyEnd(_A, MAT_FINAL_ASSEMBLY);
 
 	if(_timeScheme == Implicit)
 		MatShift(_A,1/_dt);
 
+	_dt = dt;
+
+	if(_verbose && _nbTimeStep%_freqSave ==0)
+		MatView(_A,PETSC_VIEWER_STDOUT_SELF);
+
 	return _dt>0;
 }
 
 void DiffusionEquation::abortTimeStep(){
+    //Remove contribution od dt to the RHS
 	VecAXPY(_b,  -1/_dt, _Tn);
 	MatAssemblyBegin(_A, MAT_FINAL_ASSEMBLY);
-	MatAssemblyEnd(_A, MAT_FINAL_ASSEMBLY);
-
+	MatAssemblyEnd(  _A, MAT_FINAL_ASSEMBLY);
+    //Remove contribution od dt to the matrix
 	if(_timeScheme == Implicit)
 		MatShift(_A,-1/_dt);
 	_dt = 0;
@@ -237,7 +275,7 @@ bool DiffusionEquation::iterateTimeStep(bool &converged)
 		converged=false;
 		return false;
 	}
-	VecAXPY(_b, 1/_dt, _Tn);
+
 	if(_timeScheme == Explicit)
 	{
 		MatMult(_A, _Tn, _Tk);
@@ -280,7 +318,6 @@ bool DiffusionEquation::iterateTimeStep(bool &converged)
 			{
 				VecGetValues(_deltaT, 1, &i, &dTi);
 				VecGetValues(_Tk, 1, &i, &Ti);
-				_VV(i)=Ti;
 				if(_erreur_rel < fabs(dTi/Ti))
 					_erreur_rel = fabs(dTi/Ti);
 			}
@@ -298,14 +335,14 @@ void DiffusionEquation::validateTimeStep()
 	VecAXPY(_deltaT,  -1, _Tn);//On obtient deltaT=Tnp1-Tn
 
 	_erreur_rel= 0;
-	double hi, dhi;
+	double Ti, dTi;
 
 	for(int i=0; i<_Nmailles; i++)
 	{
-		VecGetValues(_deltaT, 1, &i, &dhi);
-		VecGetValues(_Tk, 1, &i, &hi);
-		if(_erreur_rel < fabs(dhi/hi))
-			_erreur_rel = fabs(dhi/hi);
+		VecGetValues(_deltaT, 1, &i, &dTi);
+		VecGetValues(_Tk, 1, &i, &Ti);
+		if(_erreur_rel < fabs(dTi/Ti))
+			_erreur_rel = fabs(dTi/Ti);
 	}
 	_isStationary =(_erreur_rel <_precision);
 
@@ -314,22 +351,39 @@ void DiffusionEquation::validateTimeStep()
 
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 		cout <<"Valeur propre locale max: " << _maxvp << endl;
+
+    //Remove the contribution from dt to prepare for new initTimeStep. The contribution from diffusion is not recomputed
+	if(_timeScheme == Implicit)
+		MatShift(_A,-1/_dt);
+    //No need to remove the contribution to the right hand side since it is recomputed from scratch at each time step
+    
 	_time+=_dt;
 	_nbTimeStep++;
-	save();
+	if (_nbTimeStep%_freqSave ==0 || _isStationary || _time>=_timeMax || _nbTimeStep>=_maxNbOfTimeStep)
+        save();
 }
 
 void DiffusionEquation::save(){
-	string resultFile(_path+"/DiffusionEquation");///Results
+	string resultFile(_path+"/DiffusionEquation");//Results
 
 	resultFile+="_";
 	resultFile+=_fileName;
 
+    //On remplit le champ
+    double Ti;
+   	for(int i =0; i<_Nmailles;i++)
+	{
+        VecGetValues(_Tn, 1, &i, &Ti);
+		_VV(i)=Ti;
+    }
 	_VV.setTime(_time,_nbTimeStep);
+
 	// create mesh and component info
 	if (_nbTimeStep ==0){
 		string suppress ="rm -rf "+resultFile+"_*";
 		system(suppress.c_str());//Nettoyage des précédents calculs identiques
+        
+        _VV.setInfoOnComponent(0,"Temperature_(K)");
 		switch(_saveFormat)
 		{
 		case VTK :
@@ -343,8 +397,7 @@ void DiffusionEquation::save(){
 			break;
 		}
 	}
-	// do not create mesh
-	else{
+	else{	// do not create mesh
 		switch(_saveFormat)
 		{
 		case VTK :
@@ -358,7 +411,24 @@ void DiffusionEquation::save(){
 			break;
 		}
 	}
+    
+    if(_isStationary)
+	{
+        resultFile+="_Stat";
+        switch(_saveFormat)
+        {
+        case VTK :
+            _VV.writeVTK(resultFile);
+            break;
+        case MED :
+            _VV.writeMED(resultFile);
+            break;
+        case CSV :
+            _VV.writeCSV(resultFile);
+            break;
+    }
 }
+
 void DiffusionEquation::terminate(){
 	VecDestroy(&_Tn);
 	VecDestroy(&_Tk);
