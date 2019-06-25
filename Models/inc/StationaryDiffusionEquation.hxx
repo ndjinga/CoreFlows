@@ -44,6 +44,9 @@ public :
 	bool iterateTimeStep(bool &ok);
 	void save();
 
+    /* Boundary conditions */
+	void setBoundaryFields(map<string, LimitField> boundaryFields){
+		_limitField = boundaryFields;
 	/** \fn setDirichletBoundaryCondition
 			 * \brief adds a new boundary condition of type Dirichlet
 			 * \details
@@ -74,6 +77,8 @@ public :
 	}
 	void setDiffusiontensor(Matrix DiffusionTensor){
 		_DiffusionTensor=DiffusionTensor;
+	};
+
 	};
     
 protected :
