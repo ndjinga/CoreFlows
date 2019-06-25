@@ -454,16 +454,6 @@ void StationaryDiffusionEquation::setMesh(const Mesh &M)
 		_runLogFile->close();
 		throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect space dimension");
 	}
-    if(_Ndim==3 and not M.isTetrahedral())
-    {
-        cout<<"Dimension is "<<_Ndim<< ", mesh should be tetrahedral"<<endl;
-		throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect cell types");
-    }
-    if(_Ndim==2 and not M.isTriangular())
-    {
-        cout<<"Dimension is "<<_Ndim<< ", mesh should be triangular"<<endl;
-		throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect cell types");
-    }
 
 	_mesh=M;
 	_Nmailles = _mesh.getNumberOfCells();
@@ -474,6 +464,16 @@ void StationaryDiffusionEquation::setMesh(const Mesh &M)
         _neibMaxNbCells=_mesh.getMaxNbNeighbours(CELLS);
     else
     {
+        if(_Ndim==3 and not M.isTetrahedral())
+        {
+            cout<<"Dimension is "<<_Ndim<< ", mesh should be tetrahedral"<<endl;
+            throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect cell types");
+        }
+        if(_Ndim==2 and not M.isTriangular())
+        {
+            cout<<"Dimension is "<<_Ndim<< ", mesh should be triangular"<<endl;
+            throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect cell types");
+        }
         _neibMaxNbNodes=_mesh.getMaxNbNeighbours(NODES);
         _boundaryNodeIds=_mesh.getBoundaryNodeIds();
         _NboundaryNodes=_boundaryNodeIds.size();
