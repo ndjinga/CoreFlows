@@ -18,6 +18,12 @@ StationaryDiffusionEquation::StationaryDiffusionEquation(int dim, double lambda,
 	if(!petscInitialized)
 		PetscInitialize(NULL,NULL,0,0);
 
+    if(_lambda < 0.)
+    {
+        std::cout<<"conductivity="<<lambda<<endl;
+        throw CdmathException("Error : conductivity parameter lambda cannot  be negative");
+    }
+
     _FECalculation=FECalculation;
     
 	_Ndim=dim;
@@ -114,8 +120,7 @@ void StationaryDiffusionEquation::initialize()
 	VecSetFromOptions(_Tk);
 	VecDuplicate(_Tk, &_Tkm1);
 	VecDuplicate(_Tk, &_deltaT);
-	VecDuplicate(_Tk, &_b);//RHS of the linear system: _b=Hn/dt + _b0 + puisance
-	VecDuplicate(_Tk, &_b0);//part of the RHS that comes from the boundary conditions
+	VecDuplicate(_Tk, &_b);//RHS of the linear system
 
 	//Linear solver
 	KSPCreate(PETSC_COMM_SELF, &_ksp);
@@ -130,10 +135,19 @@ void StationaryDiffusionEquation::initialize()
 }
 
 double StationaryDiffusionEquation::computeTimeStep(bool & stop){
-	if(!_diffusionMatrixSet)
-		computeDiffusionMatrix();
-	_dt_src=computeRHS();
+	if(!_diffusionMatrixSet)//The diffusion matrix is computed once and for all time steps
+    {
+		_dt_diffusion=computeDiffusionMatrix();
+        //Contribution from the solid/fluid heat exchange
+        if(_heatTransfertCoeff/(_rho*_cp)>_precision)
+        {   
+            MatAssemblyBegin(_A, MAT_FINAL_ASSEMBLY);
+            MatAssemblyEnd(_A, MAT_FINAL_ASSEMBLY);
+            MatShift(_A,_heatTransfertCoeff/(_rho*_cp));
+        }
+    }
 
+	_dt_src=computeRHS();
 	stop=false;
 	return _dt_src;
 }
@@ -158,9 +172,8 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFE(){
 	Cell Cj;
 	string nameOfGroup;
 	double dn;
-	PetscInt idm, idn;
 	MatZeroEntries(_A);
-	VecZeroEntries(_b0);
+	VecZeroEntries(_b);
     
     Matrix M(_Ndim+1,_Ndim+1);//cell geometry matrix
     std::vector< Vector > GradShapeFuncs(_Ndim+1);//shape functions of cell nodes
@@ -219,7 +232,7 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFE(){
                         }
                         GradShapeFuncBorder=gradientNodal(M,valuesBorder)/fact(_Ndim);
                         double coeff =-_conductivity*(_DiffusionTensor*GradShapeFuncBorder)*GradShapeFuncs[idim]/Cj.getMeasure();
-                        VecSetValue(_b0,i_int,coeff, ADD_VALUES);                        
+                        VecSetValue(_b,i_int,coeff, ADD_VALUES);                        
                     }
                 }
             }
@@ -228,8 +241,8 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFE(){
     
     MatAssemblyBegin(_A, MAT_FINAL_ASSEMBLY);
 	MatAssemblyEnd(_A, MAT_FINAL_ASSEMBLY);
-	VecAssemblyBegin(_b0);
-	VecAssemblyEnd(_b0);
+	VecAssemblyBegin(_b);
+	VecAssemblyEnd(_b);
 
 	_diffusionMatrixSet=true;
 
@@ -247,7 +260,7 @@ double StationaryDiffusionEquation::computeDiffusionMatrix(){
 	PetscInt idm, idn;
 	IntTab idCells;
 	MatZeroEntries(_A);
-	VecZeroEntries(_b0);
+	VecZeroEntries(_b);
 	for (int j=0; j<nbFaces;j++){
 		Fj = _mesh.getFace(j);
 
@@ -302,7 +315,7 @@ double StationaryDiffusionEquation::computeDiffusionMatrix(){
 			}
 			else if(_limitField[nameOfGroup].bcType==Dirichlet){
 				MatSetValue(_A,idm,idm,inv_dxi*dn, ADD_VALUES);
-				VecSetValue(_b0,idm,inv_dxi*dn*_limitField[nameOfGroup].T, ADD_VALUES);
+				VecSetValue(_b,idm,inv_dxi*dn*_limitField[nameOfGroup].T, ADD_VALUES);
 			}
 			else {
 				cout<<"Boundary condition not treated for boundary named "<<nameOfGroup<<endl;
@@ -336,28 +349,29 @@ double StationaryDiffusionEquation::computeDiffusionMatrix(){
 		else
 			throw CdmathException("StationaryDiffusionEquation::ComputeTimeStep(): incompatible number of cells around a face");
 	}
+
 	MatAssemblyBegin(_A, MAT_FINAL_ASSEMBLY);
 	MatAssemblyEnd(_A, MAT_FINAL_ASSEMBLY);
-	VecAssemblyBegin(_b0);
-	VecAssemblyEnd(_b0);
+	VecAssemblyBegin(_b);
+	VecAssemblyEnd(_b);
+    
 	_diffusionMatrixSet=true;
 
 	return INFINITY;
 }
 
 double StationaryDiffusionEquation::computeRHS(){
-	VecCopy(_b0,_b);
 	VecAssemblyBegin(_b);
 
     if(!_FECalculation)
         for (int i=0; i<_Nmailles;i++){
-            VecSetValue(_b,i,_heatTransfertCoeff*(_fluidTemperatureField(i)-_VV(i)),ADD_VALUES);
-            VecSetValue(_b,i,_heatPowerField(i),ADD_VALUES);
+            VecSetValue(_b,i,_heatTransfertCoeff*_fluidTemperatureField(i),ADD_VALUES);
+            VecSetValue(_b,i,_heatPowerField(i)                           ,ADD_VALUES);
         }
     else
         for (int i=0; i<_NinteriorNodes;i++){
-            VecSetValue(_b,i,_heatTransfertCoeff*(_fluidTemperatureField(i)-_VV(i)),ADD_VALUES);
-            VecSetValue(_b,i,_heatPowerField(i),ADD_VALUES);
+            VecSetValue(_b,i,_heatTransfertCoeff*_fluidTemperatureField(i+_NinteriorNodes),ADD_VALUES);
+            VecSetValue(_b,i,_heatPowerField(i+_NinteriorNodes)                           ,ADD_VALUES);
         }
     
 	VecAssemblyEnd(_b);
@@ -378,7 +392,7 @@ bool StationaryDiffusionEquation::iterateTimeStep(bool &converged)
 	}
     //Only implicit scheme considered
     MatAssemblyBegin(_A, MAT_FINAL_ASSEMBLY);
-    MatAssemblyEnd(_A, MAT_FINAL_ASSEMBLY);
+    MatAssemblyEnd(  _A, MAT_FINAL_ASSEMBLY);
 
 #if PETSC_VERSION_GREATER_3_5
     KSPSetOperators(_ksp, _A, _A);
@@ -405,14 +419,25 @@ bool StationaryDiffusionEquation::iterateTimeStep(bool &converged)
         _erreur_rel= 0;
         double Ti, dTi;
 
-        for(int i=0; i<_Nmailles; i++)
-        {
-            VecGetValues(_deltaT, 1, &i, &dTi);
-            VecGetValues(_Tk, 1, &i, &Ti);
-            _VV(i)=Ti;
-            if(_erreur_rel < fabs(dTi/Ti))
-                _erreur_rel = fabs(dTi/Ti);
-        }
+        if(!_FECalculation)
+            for(int i=0; i<_Nmailles; i++)
+            {
+                VecGetValues(_deltaT, 1, &i, &dTi);
+                VecGetValues(_Tk, 1, &i, &Ti);
+                _VV(i)=Ti;
+                if(_erreur_rel < fabs(dTi/Ti))
+                    _erreur_rel = fabs(dTi/Ti);
+            }
+        else
+            for(int i=0; i<_NinteriorNodes; i++)
+            {
+                VecGetValues(_deltaT, 1, &i, &dTi);
+                VecGetValues(_Tk, 1, &i, &Ti);
+                _VV(i+_NboundaryNodes)=Ti;
+                if(_erreur_rel < fabs(dTi/Ti))
+                    _erreur_rel = fabs(dTi/Ti);
+            }
+
         converged = (_erreur_rel <= _precision) ;//converged=convergence des iterations de Newton
     }
 
@@ -457,24 +482,25 @@ void StationaryDiffusionEquation::save(){
 	// create mesh and component info
     string suppress ="rm -rf "+resultFile+"_*";
     system(suppress.c_str());//Nettoyage des précédents calculs identiques
+    
+    _VV.setInfoOnComponent(0,"Temperature_(K)");
     switch(_saveFormat)
     {
-    case VTK :
-        _VV.writeVTK(resultFile);
-        break;
-    case MED :
-        _VV.writeMED(resultFile);
-        break;
-    case CSV :
-        _VV.writeCSV(resultFile);
-        break;
+        case VTK :
+            _VV.writeVTK(resultFile);
+            break;
+        case MED :
+            _VV.writeMED(resultFile);
+            break;
+        case CSV :
+            _VV.writeCSV(resultFile);
+            break;
     }
 }
 void StationaryDiffusionEquation::terminate(){
 	VecDestroy(&_Tk);
 	VecDestroy(&_Tkm1);
 	VecDestroy(&_deltaT);
-	VecDestroy(&_b0);
 	VecDestroy(&_b);
 	MatDestroy(&_A);
 }
