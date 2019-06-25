@@ -62,7 +62,7 @@ void DiffusionEquation::initialize()
 	VecDuplicate(_Tk, &_Tkm1);
 	VecDuplicate(_Tk, &_deltaT);
 	VecDuplicate(_Tk, &_b);//RHS of the linear system: _b=Tn/dt + _b0 + puisance volumique + couplage thermique avec le fluide
-	VecDuplicate(_Tk, &_b0);//part of the RHS that comes from the boundary conditions
+	VecDuplicate(_Tk, &_b0);//part of the RHS that comes from the boundary conditions. Computed only once at the first time step
 
 	for(int i =0; i<_Nmailles;i++)
 		VecSetValue(_Tn,i,_VV(i), INSERT_VALUES);
@@ -91,6 +91,9 @@ double DiffusionEquation::computeTimeStep(bool & stop){
             MatShift(_A,_heatTransfertCoeff/(_rho*_cp));
         }
     }
+
+    //reset right hand side
+   	VecCopy(_b0,_b);
 
 	_dt_src=computeRHS();
 
@@ -210,9 +213,8 @@ double DiffusionEquation::computeDiffusionMatrix(){
 	else
 		return _cfl*_minl*_minl/_maxvp;
 }
-double DiffusionEquation::computeRHS(){
-	VecCopy(_b0,_b);
 
+double DiffusionEquation::computeRHS(){
 	VecAssemblyBegin(_b);      
     double Ti;  
 	for (int i=0; i<_Nmailles;i++)
@@ -236,13 +238,28 @@ double DiffusionEquation::computeRHS(){
 }
 
 bool DiffusionEquation::initTimeStep(double dt){
-    VecAXPY(_b, 1/_dt, _Tn);
-        
-	MatAssemblyBegin(_A, MAT_FINAL_ASSEMBLY);
-	MatAssemblyEnd(_A, MAT_FINAL_ASSEMBLY);
 
-	if(_timeScheme == Implicit)
-		MatShift(_A,1/_dt);
+    if(_dt>0 and dt>0)
+    {
+        //Remove the contribution from dt to prepare for new initTimeStep. The contribution from diffusion is not recomputed
+        if(_timeScheme == Implicit)
+            MatShift(_A,-1/_dt+1/dt);
+        //No need to remove the contribution to the right hand side since it is recomputed from scratch at each time step
+    }
+    else if(dt>0)//_dt==0, first time step
+    {
+        MatAssemblyBegin(_A, MAT_FINAL_ASSEMBLY);
+        MatAssemblyEnd(  _A, MAT_FINAL_ASSEMBLY);
+        if(_timeScheme == Implicit)
+            MatShift(_A,1/_dt);        
+    }
+    else//dt==0
+    {
+        cout<<"DiffusionEquation::initTimeStep dt= "<<dt<<endl;
+        throw CdmathException("Error DiffusionEquation::initTimeStep : cannot set time step to zero");        
+    }
+    //At this stage _b contains _b0 + power + heat exchange
+    VecAXPY(_b, 1/_dt, _Tn);        
 
 	_dt = dt;
 
@@ -352,11 +369,6 @@ void DiffusionEquation::validateTimeStep()
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 		cout <<"Valeur propre locale max: " << _maxvp << endl;
 
-    //Remove the contribution from dt to prepare for new initTimeStep. The contribution from diffusion is not recomputed
-	if(_timeScheme == Implicit)
-		MatShift(_A,-1/_dt);
-    //No need to remove the contribution to the right hand side since it is recomputed from scratch at each time step
-    
 	_time+=_dt;
 	_nbTimeStep++;
 	if (_nbTimeStep%_freqSave ==0 || _isStationary || _time>=_timeMax || _nbTimeStep>=_maxNbOfTimeStep)
