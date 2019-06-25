@@ -75,6 +75,7 @@ public :
 	void setDiffusiontensor(Matrix DiffusionTensor){
 		_DiffusionTensor=DiffusionTensor;
 	};
+    
 protected :
 	//Main unknown field
 	Field _VV;
@@ -137,8 +138,12 @@ protected :
 	string _path;//path to execution directory used for saving results
 	saveFormat _saveFormat;//file saving format : MED, VTK or CSV
 
-	double computeDiffusionMatrix();
 	double computeRHS();
+	double computeDiffusionMatrix();
+    /* Functions for finite element method */
+    Vector gradientNodal(Matrix M, vector< double > v);//gradient of nodal shape functions
+	double computeDiffusionMatrixFE();
+    int fact(int n);
 };
 
 #endif /* StationaryDiffusionEquation_HXX_ */

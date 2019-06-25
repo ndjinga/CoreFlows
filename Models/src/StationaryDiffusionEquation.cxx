@@ -1,9 +1,16 @@
 #include "StationaryDiffusionEquation.hxx"
+#include "Node.hxx"
 #include "math.h"
+#include <algorithm> 
 #include <fstream>
 #include <sstream>
 
 using namespace std;
+
+int StationaryDiffusionEquation::fact(int n)
+{
+  return (n == 1 || n == 0) ? 1 : fact(n - 1) * n;
+}
 
 StationaryDiffusionEquation::StationaryDiffusionEquation(int dim, double lambda, bool FECalculation){
 	PetscBool petscInitialized;
@@ -14,10 +21,11 @@ StationaryDiffusionEquation::StationaryDiffusionEquation(int dim, double lambda,
     _FECalculation=FECalculation;
     
 	_Ndim=dim;
-	_nVar=1;
+	_nVar=1;//scalar prolem
 	_dt_src=0;
 	_diffusionMatrixSet=false;
     _neibMaxNbCells=0;    
+    _neibMaxNbNodes=0;    
     _meshSet=false;
 	_initializedMemory=false;
     
@@ -129,6 +137,105 @@ double StationaryDiffusionEquation::computeTimeStep(bool & stop){
 	stop=false;
 	return _dt_src;
 }
+
+Vector StationaryDiffusionEquation::gradientNodal(Matrix M, vector< double > values){
+    vector< Matrix > matrices(_Ndim);
+    
+    for (int idim=0; idim<_Ndim;idim++){
+        matrices[idim]=M.deepCopy();
+        for (int jdim=0; jdim<_Ndim+1;jdim++)
+			matrices[idim](jdim,idim) = values[jdim] ;
+    }
+
+	Vector result(_Ndim);
+    for (int idim=0; idim<_Ndim;idim++)
+        result[idim] = matrices[idim].determinant();
+
+	return result;    
+}
+
+double StationaryDiffusionEquation::computeDiffusionMatrixFE(){
+	Cell Cj;
+	string nameOfGroup;
+	double dn;
+	PetscInt idm, idn;
+	MatZeroEntries(_A);
+	VecZeroEntries(_b0);
+    
+    Matrix M(_Ndim+1,_Ndim+1);//cell geometry matrix
+    std::vector< Vector > GradShapeFuncs(_Ndim+1);//shape functions of cell nodes
+    std::vector< int > nodeIds(_Ndim+1);//cell node Ids
+    std::vector< Node > nodes(_Ndim+1);//cell nodes
+    int i_int, j_int; //index of nodes j and k considered as interior nodes
+    bool borderCell;
+    
+    std::vector< vector< double > > values(_Ndim+1,vector< double >(_Ndim+1,0));//values of shape functions on cell node
+    for (int idim=0; idim<_Ndim+1;idim++)
+        values[idim][idim]=1;
+
+    /* parameters for boundary treatment */
+    vector< double > valuesBorder(_Ndim+1);
+    Vector GradShapeFuncBorder(_Ndim+1);
+    
+	for (int j=0; j<_Nmailles;j++)
+    {
+		Cj = _mesh.getCell(j);
+
+        for (int idim=0; idim<_Ndim+1;idim++){
+            nodeIds[idim]=Cj.getNodeId(idim);
+            nodes[idim]=_mesh.getNode(nodeIds[idim]);
+            for (int jdim=0; jdim<_Ndim;jdim++)
+                M(idim,jdim)=nodes[idim].getPoint()[jdim];
+            M(idim,_Ndim)=1;
+        }
+        for (int idim=0; idim<_Ndim+1;idim++)
+            GradShapeFuncs[idim]=gradientNodal(M,values[idim])/fact(_Ndim);
+            
+        for (int idim=0; idim<_Ndim+1;idim++)
+        {
+            if(find(_boundaryNodeIds.begin(),_boundaryNodeIds.end(),nodeIds[idim])!=_boundaryNodeIds.end()) //or for better performance nodeIds[idim]>boundaryNodes.upper_bound()
+            {
+                i_int=nodeIds[idim]-_NboundaryNodes;//assumes node numbering starts with interior nodes. otherwise interiorNodes.index(j)
+                borderCell=false;
+                for (int jdim=0; jdim<_Ndim+1;jdim++)
+                {
+                    if(find(_boundaryNodeIds.begin(),_boundaryNodeIds.end(),nodeIds[jdim])!=_boundaryNodeIds.end()) //or for better performance nodeIds[jdim]>boundaryNodes.upper_bound()
+                    {
+                        j_int= nodeIds[jdim]-_NboundaryNodes;
+                        MatSetValue(_A,i_int,j_int,_conductivity*(_DiffusionTensor*GradShapeFuncs[idim])*GradShapeFuncs[jdim]/Cj.getMeasure(), ADD_VALUES);
+                    }
+                    else if (!borderCell)
+                    {
+                        borderCell=true;
+                        for (int kdim=0; kdim<_Ndim+1;kdim++)
+                        {
+                            if(nodes[kdim].isBorder())
+                            {
+                                nameOfGroup = nodes[kdim].getGroupName();
+                                valuesBorder[kdim]=_limitField[nameOfGroup].T;
+                            }
+                            else
+                                valuesBorder[kdim]=0;                            
+                        }
+                        GradShapeFuncBorder=gradientNodal(M,valuesBorder)/fact(_Ndim);
+                        double coeff =-_conductivity*(_DiffusionTensor*GradShapeFuncBorder)*GradShapeFuncs[idim]/Cj.getMeasure();
+                        VecSetValue(_b0,i_int,coeff, ADD_VALUES);                        
+                    }
+                }
+            }
+        }            
+	}
+    
+    MatAssemblyBegin(_A, MAT_FINAL_ASSEMBLY);
+	MatAssemblyEnd(_A, MAT_FINAL_ASSEMBLY);
+	VecAssemblyBegin(_b0);
+	VecAssemblyEnd(_b0);
+
+	_diffusionMatrixSet=true;
+
+	return INFINITY;
+}
+
 double StationaryDiffusionEquation::computeDiffusionMatrix(){
 	long nbFaces = _mesh.getNumberOfFaces();
 	Face Fj;
@@ -237,6 +344,7 @@ double StationaryDiffusionEquation::computeDiffusionMatrix(){
 
 	return INFINITY;
 }
+
 double StationaryDiffusionEquation::computeRHS(){
 	VecCopy(_b0,_b);
 	VecAssemblyBegin(_b);
