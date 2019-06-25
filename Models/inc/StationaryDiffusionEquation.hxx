@@ -47,6 +47,7 @@ public :
     /* Boundary conditions */
 	void setBoundaryFields(map<string, LimitField> boundaryFields){
 		_limitField = boundaryFields;
+    };
 	/** \fn setDirichletBoundaryCondition
 			 * \brief adds a new boundary condition of type Dirichlet
 			 * \details
@@ -79,8 +80,6 @@ public :
 		_DiffusionTensor=DiffusionTensor;
 	};
 
-	};
-    
 protected :
 	//Main unknown field
 	Field _VV;
