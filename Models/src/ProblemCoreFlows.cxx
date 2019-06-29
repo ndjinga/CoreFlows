@@ -382,7 +382,7 @@ void ProblemCoreFlows::setLinearSolver(linearSolver kspType, preconditioner pcTy
 		_runLogFile->close();
 		throw CdmathException("only 'NONE' or 'LU' or 'ILU' preconditioners are acceptable !!!" );
 	}
-};
+}
 
 // Description:
 // Cette methode lance une execution du ProblemCoreFlows
