@@ -12,7 +12,7 @@ int StationaryDiffusionEquation::fact(int n)
   return (n == 1 || n == 0) ? 1 : fact(n - 1) * n;
 }
 
-StationaryDiffusionEquation::StationaryDiffusionEquation(int dim, double lambda, bool FECalculation){
+StationaryDiffusionEquation::StationaryDiffusionEquation(int dim, bool FECalculation, double lambda){
 	PetscBool petscInitialized;
 	PetscInitialized(&petscInitialized);
 	if(!petscInitialized)
@@ -137,7 +137,7 @@ void StationaryDiffusionEquation::initialize()
 double StationaryDiffusionEquation::computeTimeStep(bool & stop){
 	if(!_diffusionMatrixSet)//The diffusion matrix is computed once and for all time steps
     {
-		computeDiffusionMatrix();
+		computeDiffusionMatrix(stop);
         //Contribution from the solid/fluid heat exchange
         if(_heatTransfertCoeff>_precision)
         {   
@@ -147,7 +147,7 @@ double StationaryDiffusionEquation::computeTimeStep(bool & stop){
         }
     }
 
-	_dt_src=computeRHS();
+	_dt_src=computeRHS(stop);
 	stop=false;
 	return _dt_src;
 }
@@ -168,7 +168,15 @@ Vector StationaryDiffusionEquation::gradientNodal(Matrix M, vector< double > val
 	return result;    
 }
 
-double StationaryDiffusionEquation::computeDiffusionMatrixFE(){
+double StationaryDiffusionEquation::computeDiffusionMatrix(bool & stop)
+{
+    if(_FECalculation)
+        return computeDiffusionMatrixFE(stop);
+    else
+        return computeDiffusionMatrixFV(stop);
+}
+
+double StationaryDiffusionEquation::computeDiffusionMatrixFE(bool & stop){
 	Cell Cj;
 	string nameOfGroup;
 	double dn;
@@ -245,11 +253,12 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFE(){
 	VecAssemblyEnd(_b);
 
 	_diffusionMatrixSet=true;
+    stop=false ;
 
 	return INFINITY;
 }
 
-double StationaryDiffusionEquation::computeDiffusionMatrix(){
+double StationaryDiffusionEquation::computeDiffusionMatrixFV(bool & stop){
 	long nbFaces = _mesh.getNumberOfFaces();
 	Face Fj;
 	Cell Cell1,Cell2;
@@ -318,6 +327,7 @@ double StationaryDiffusionEquation::computeDiffusionMatrix(){
 				VecSetValue(_b,idm,inv_dxi*dn*_limitField[nameOfGroup].T, ADD_VALUES);
 			}
 			else {
+                stop=true ;
 				cout<<"Boundary condition not treated for boundary named "<<nameOfGroup<<endl;
 				cout<<"Accepted boundary condition are Neumann and Dirichlet "<<nameOfGroup<<endl;
 				throw CdmathException("Unknown boundary condition");
@@ -356,11 +366,12 @@ double StationaryDiffusionEquation::computeDiffusionMatrix(){
 	VecAssemblyEnd(_b);
     
 	_diffusionMatrixSet=true;
-
-	return INFINITY;
+    stop=false ;
+	
+    return INFINITY;
 }
 
-double StationaryDiffusionEquation::computeRHS(){
+double StationaryDiffusionEquation::computeRHS(bool & stop){
 	VecAssemblyBegin(_b);
 
     if(!_FECalculation)
@@ -376,20 +387,14 @@ double StationaryDiffusionEquation::computeRHS(){
     
 	VecAssemblyEnd(_b);
 
+    stop=false ;
 	return INFINITY;
 }
 
-bool StationaryDiffusionEquation::iterateTimeStep(bool &converged)
+bool StationaryDiffusionEquation::iterateNewtonStep(bool &converged)
 {
-	bool stop=false;
+	bool stop;
 
-	if(_NEWTON_its>0){//Pas besoin de computeTimeStep à la première iteration de Newton
-		computeTimeStep(stop);
-	}
-	if(stop){
-		converged=false;
-		return false;
-	}
     //Only implicit scheme considered
     MatAssemblyBegin(_A, MAT_FINAL_ASSEMBLY);
     MatAssemblyEnd(  _A, MAT_FINAL_ASSEMBLY);
@@ -410,8 +415,8 @@ bool StationaryDiffusionEquation::iterateTimeStep(bool &converged)
     if(_PetscIts>=_maxPetscIts)
     {
         cout<<"Systeme lineaire : pas de convergence de Petsc. Itérations maximales "<<_maxPetscIts<<" atteintes"<<endl;
-        converged=false;
-        return false;
+        converged = false;
+        stop = true;
     }
     else{
         VecCopy(_Tk, _deltaT);//ici on a deltaT=Tk
@@ -435,12 +440,13 @@ bool StationaryDiffusionEquation::iterateTimeStep(bool &converged)
                 if(_erreur_rel < fabs(dTi/Ti))
                     _erreur_rel = fabs(dTi/Ti);
             }
+        stop=false;
         converged = (_erreur_rel <= _precision) ;//converged=convergence des iterations de Newton
     }
 
 	VecCopy(_Tk, _Tkm1);
 
-	return true;
+	return stop;
 }
 
 void StationaryDiffusionEquation::setMesh(const Mesh &M)
@@ -478,6 +484,82 @@ void StationaryDiffusionEquation::setMesh(const Mesh &M)
     }
 
 	_meshSet=true;
+}
+
+void StationaryDiffusionEquation::setLinearSolver(linearSolver kspType, preconditioner pcType)
+{
+	//_maxPetscIts=maxIterationsPetsc;
+	// set linear solver algorithm
+	if (kspType==GMRES)
+		_ksptype = (char*)&KSPGMRES;
+	else if (kspType==BICGSTAB)
+		_ksptype = (char*)&KSPBCGS;
+	else {
+		cout << "only 'GRMES' or 'BICGSTAB' is acceptable as a linear solver !!!" << endl;
+		*_runLogFile << "only 'GRMES' or 'BICGSTAB' is acceptable as a linear solver !!!" << endl;
+		_runLogFile->close();
+		throw CdmathException("only 'GRMES' or 'BICGSTAB' algorithm is acceptable !!!");
+	}
+	// set preconditioner
+	if (pcType == NONE){
+		_pctype = (char*)&PCNONE;
+	} else if (pcType ==LU){
+		_pctype = (char*)&PCLU;
+	} else if (pcType == ILU){
+		_pctype = (char*)&PCILU;
+	} else {
+		cout << "only 'NONE' or 'LU' or 'ILU' preconditioners are acceptable !!!" << endl;
+		*_runLogFile << "only 'NONE' or 'LU' or 'ILU' preconditioners are acceptable !!!" << endl;
+		_runLogFile->close();
+		throw CdmathException("only 'NONE' or 'LU' or 'ILU' preconditioners are acceptable !!!" );
+	}
+}
+
+bool StationaryDiffusionEquation::solveStationaryProblem()
+{
+	if(!_initializedMemory)
+	{
+		_runLogFile->close();
+		throw CdmathException("ProblemCoreFlows::run() call initialize() first");
+	}
+	bool stop=false; // Does the Problem want to stop (error) ?
+	bool converged=false; // has the newton scheme converged (error) ?
+
+	cout<< "Running test case "<< _fileName<<endl;
+    computeDiffusionMatrix( stop);
+    
+	_runLogFile->open((_fileName+".log").c_str(), ios::out | ios::trunc);;//for creation of a log file to save the history of the simulation
+	*_runLogFile<< "Running test case "<< _fileName<<endl;
+
+	// Newton iteration loop
+	while(!stop and !converged and _NEWTON_its<_maxNewtonIts)
+	{
+        computeRHS(stop);
+        if (stop){
+            cout << "Error : failed computing right hand side at Newton iteration "<<_NEWTON_its<<", stopping calculation"<< endl;
+            *_runLogFile << "Error : failed computing right hand side at Newton iteration "<<_NEWTON_its<<", stopping calculation"<< endl;
+            throw CdmathException("Failed computing right hand side at Newton iteration");
+        }
+        stop = iterateNewtonStep(converged);
+        _NEWTON_its++;
+	}
+    if (stop){
+        cout << "Error : failed solving Newton iteration "<<_NEWTON_its<<", stopping calculation"<< endl;
+        *_runLogFile << "Error : failed solving right hand side at Newton iteration "<<_NEWTON_its<<", stopping calculation"<< endl;
+        throw CdmathException("Failed solving right hand side at Newton iteration");
+    }
+    else if(_NEWTON_its==_maxNewtonIts){
+        cout << "Error : no convergence of Newton scheme. Maximum Newton iterations "<<_maxNewtonIts<<" reached, stopping calculation"<< endl;
+        *_runLogFile << "Error : no convergence of Newton scheme. Maximum Newton iterations "<<_maxNewtonIts<<" reached, stopping calculation"<< endl;
+        throw CdmathException("No convergence of Newton scheme");
+    }
+    else{
+        cout << "Convergence of Newton scheme at iteration "<<_NEWTON_its<<", end of calculation"<< endl;
+        *_runLogFile << "Convergence of Newton scheme at iteration "<<_NEWTON_its<<", end of calculation"<< endl;
+    }
+
+	_runLogFile->close();
+	return !stop;
 }
 
 void StationaryDiffusionEquation::save(){

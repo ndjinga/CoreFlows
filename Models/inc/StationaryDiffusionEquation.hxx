@@ -33,15 +33,18 @@ public :
 			 * \param [in] double : solid conductivity
 			 *  */
 
-	StationaryDiffusionEquation( int dim,double lambda=5,bool FECalculation=true);
+	StationaryDiffusionEquation( int dim,bool FECalculation=true,double lambda=5);
 
     void setMesh(const Mesh &M);
-
+    void setLinearSolver(linearSolver kspType, preconditioner pcType);
+    bool solveStationaryProblem();
+    
 	//Gestion du calcul
 	void initialize();
 	void terminate();//vide la mémoire et enregistre le résultat final
-	double computeTimeStep(bool & stop);//propose un pas de temps pour le calcul. Celà nécessite de discrétiser les opérateur (convection, diffusion, sources) et pour chacun d'employer la condition cfl. En cas de problème durant ce calcul (exemple t=tmax), renvoie stop=true
-	bool iterateTimeStep(bool &ok);
+	double computeDiffusionMatrix(bool & stop);
+    double computeTimeStep(bool & stop);//For coupling calculations
+	bool iterateNewtonStep(bool &ok);
 	void save();
 
     /* Boundary conditions */
@@ -142,11 +145,11 @@ protected :
 	string _path;//path to execution directory used for saving results
 	saveFormat _saveFormat;//file saving format : MED, VTK or CSV
 
-	double computeRHS();
-	double computeDiffusionMatrix();
+	double computeRHS(bool & stop);
+	double computeDiffusionMatrixFV(bool & stop);
     /* Functions for finite element method */
     Vector gradientNodal(Matrix M, vector< double > v);//gradient of nodal shape functions
-	double computeDiffusionMatrixFE();
+	double computeDiffusionMatrixFE(bool & stop);
     int fact(int n);
 };
 
