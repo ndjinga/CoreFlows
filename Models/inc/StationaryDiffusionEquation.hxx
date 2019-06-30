@@ -12,7 +12,7 @@
 /*! \class StationaryDiffusionEquation StationaryDiffusionEquation.hxx "StationaryDiffusionEquation.hxx"
  *  \brief Scalar stationary heat equation for the Uranium rods temperature
  *  \details see \ref TransportEqPage for more details
- * -\lambda\Delta T=\Phi + \lambda_{sf} (T_{fluid}-T)
+ * -\lambda\Delta T=\Phi(T) + \lambda_{sf} (T_{fluid}-T)
  */
 #ifndef StationaryDiffusionEquation_HXX_
 #define StationaryDiffusionEquation_HXX_

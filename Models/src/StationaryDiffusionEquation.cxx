@@ -143,7 +143,7 @@ double StationaryDiffusionEquation::computeTimeStep(bool & stop){
         {   
             MatAssemblyBegin(_A, MAT_FINAL_ASSEMBLY);
             MatAssemblyEnd(_A, MAT_FINAL_ASSEMBLY);
-            MatShift(_A,_heatTransfertCoeff);
+            MatShift(_A,_heatTransfertCoeff);//Contribution from the liquit/solid heat transfer
         }
     }
 
@@ -174,6 +174,10 @@ double StationaryDiffusionEquation::computeDiffusionMatrix(bool & stop)
         return computeDiffusionMatrixFE(stop);
     else
         return computeDiffusionMatrixFV(stop);
+
+    //Contribution from the solid/fluid heat exchange
+    if(_heatTransfertCoeff>_precision)
+        MatShift(_A,_heatTransfertCoeff);//Contribution from the liquit/solid heat transfer
 }
 
 double StationaryDiffusionEquation::computeDiffusionMatrixFE(bool & stop){
