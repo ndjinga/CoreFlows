@@ -564,6 +564,7 @@ bool StationaryDiffusionEquation::solveStationaryProblem()
     else{
         cout << "Convergence of Newton scheme at iteration "<<_NEWTON_its<<", end of calculation"<< endl;
         *_runLogFile << "Convergence of Newton scheme at iteration "<<_NEWTON_its<<", end of calculation"<< endl;
+        save();
     }
 
 	_runLogFile->close();
@@ -580,6 +581,9 @@ void StationaryDiffusionEquation::save(){
     string suppress ="rm -rf "+resultFile+"_*";
     system(suppress.c_str());//Nettoyage des précédents calculs identiques
     
+    if(_verbose or _system)
+        VecView(_Tk,PETSC_VIEWER_STDOUT_SELF);
+
     double Ti; 
     if(!_FECalculation)
         for(int i=0; i<_Nmailles; i++)
@@ -588,29 +592,32 @@ void StationaryDiffusionEquation::save(){
                 _VV(i)=Ti;
             }
     else
+    {
+        cout<< "starting save function1"<<endl;
+        for(int i=0; i<_NinteriorNodes; i++)
+        { cout<<"i= "<<i<<endl;
+            VecGetValues(_Tk, 1, &i, &Ti);
+            _VV(i+_NboundaryNodes)=Ti;//Assumes node numbering starts with border nodes
+        }
+
+        Node Ni;
+        string nameOfGroup;
+        for(int i=0; i<_NboundaryNodes; i++)
         {
-            for(int i=0; i<_NinteriorNodes; i++)
+            Ni=_mesh.getNode(i);
+            if(Ni.isBorder())
             {
-                VecGetValues(_Tk, 1, &i, &Ti);
-                _VV(i+_NboundaryNodes)=Ti;//Assumes node numbering starts with border nodes
+                nameOfGroup = Ni.getGroupName();
+                cout<<"group name= "<<nameOfGroup<<endl;
+                _VV(i)=_limitField[nameOfGroup].T;//Assumes node numbering starts with border nodes
             }
-            Node Ni;
-            string nameOfGroup;
-            for(int i=0; i<_NboundaryNodes; i++)
+            else
             {
-                Ni=_mesh.getNode(i);
-                if(Ni.isBorder())
-                {
-                    nameOfGroup = Ni.getGroupName();
-                    _VV(i)=_limitField[nameOfGroup].T;//Assumes node numbering starts with border nodes
-                }
-                else
-                {
-                    std::cout<<"Node number i= "<<i <<" is not a boundary node. NboundaryNodes= "<< _NboundaryNodes <<endl;
-                    throw CdmathException("Error StationaryDiffusionEquation::save : unusual node numbering : should start with boundary nodes");
-                }
+                std::cout<<"Node number i= "<<i <<" is not a boundary node. NboundaryNodes= "<< _NboundaryNodes <<endl;
+                throw CdmathException("Error StationaryDiffusionEquation::save : unusual node numbering : should start with boundary nodes");
             }
         }
+    }
 
     _VV.setInfoOnComponent(0,"Temperature_(K)");
     switch(_saveFormat)
