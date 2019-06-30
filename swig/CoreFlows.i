@@ -18,6 +18,7 @@ namespace std {
 #include "ProblemCoreFlows.hxx"
 #include "TransportEquation.hxx"
 #include "DiffusionEquation.hxx"
+#include "StationaryDiffusionEquation.hxx"
 #include "SinglePhase.hxx"
 #include "Fluide.h"
 
@@ -30,6 +31,7 @@ namespace std {
 %include "IsothermalTwoFluid.hxx"
 %include "TransportEquation.hxx"
 %include "DiffusionEquation.hxx"
+%include "StationaryDiffusionEquation.hxx"
 %include "SinglePhase.hxx"
 %include "Fluide.h"
 
