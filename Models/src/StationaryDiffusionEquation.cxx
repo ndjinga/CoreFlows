@@ -53,7 +53,7 @@ StationaryDiffusionEquation::StationaryDiffusionEquation(int dim, bool FECalcula
 	_runLogFile=new ofstream;
 
 	//save results
-	_fileName = "myStationaryDiffusionProblem";
+	_fileName = "StationaryDiffusionProblem";
 	char result[ PATH_MAX ];//extracting current directory
 	getcwd(result, PATH_MAX );
 	_path=string( result );
@@ -170,14 +170,20 @@ Vector StationaryDiffusionEquation::gradientNodal(Matrix M, vector< double > val
 
 double StationaryDiffusionEquation::computeDiffusionMatrix(bool & stop)
 {
+    double result;
+    
     if(_FECalculation)
-        return computeDiffusionMatrixFE(stop);
+        result=computeDiffusionMatrixFE(stop);
     else
-        return computeDiffusionMatrixFV(stop);
+        result=computeDiffusionMatrixFV(stop);
 
     //Contribution from the solid/fluid heat exchange
     if(_heatTransfertCoeff>_precision)
         MatShift(_A,_heatTransfertCoeff);//Contribution from the liquit/solid heat transfer
+        
+    cout<<"Diffusion matrix computed"<<endl;
+    
+    return  result;
 }
 
 double StationaryDiffusionEquation::computeDiffusionMatrixFE(bool & stop){
@@ -385,11 +391,13 @@ double StationaryDiffusionEquation::computeRHS(bool & stop){
         }
     else
         for (int i=0; i<_NinteriorNodes;i++){
-            VecSetValue(_b,i,_heatTransfertCoeff*_fluidTemperatureField(i+_NinteriorNodes),ADD_VALUES);
-            VecSetValue(_b,i,_heatPowerField(i+_NinteriorNodes)                           ,ADD_VALUES);
+            VecSetValue(_b,i,_heatTransfertCoeff*_fluidTemperatureField(i+_NboundaryNodes),ADD_VALUES);
+            VecSetValue(_b,i,_heatPowerField(i+_NboundaryNodes)                           ,ADD_VALUES);
         }
     
 	VecAssemblyEnd(_b);
+
+    cout<<"RHS computed"<<endl;
 
     stop=false ;
 	return INFINITY;

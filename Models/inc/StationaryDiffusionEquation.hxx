@@ -37,6 +37,9 @@ public :
 
     void setMesh(const Mesh &M);
     void setLinearSolver(linearSolver kspType, preconditioner pcType);
+    void setFileName(string fileName){
+	_fileName = fileName;
+    }
     bool solveStationaryProblem();
     
 	//Gestion du calcul
