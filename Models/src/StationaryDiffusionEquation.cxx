@@ -181,8 +181,6 @@ double StationaryDiffusionEquation::computeDiffusionMatrix(bool & stop)
     if(_heatTransfertCoeff>_precision)
         MatShift(_A,_heatTransfertCoeff);//Contribution from the liquit/solid heat transfer
         
-    cout<<"Diffusion matrix computed"<<endl;
-    
     return  result;
 }
 
@@ -224,13 +222,13 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFE(bool & stop){
             
         for (int idim=0; idim<_Ndim+1;idim++)
         {
-            if(find(_boundaryNodeIds.begin(),_boundaryNodeIds.end(),nodeIds[idim])!=_boundaryNodeIds.end()) //or for better performance nodeIds[idim]>boundaryNodes.upper_bound()
+            if(find(_boundaryNodeIds.begin(),_boundaryNodeIds.end(),nodeIds[idim])==_boundaryNodeIds.end()) //or for better performance nodeIds[idim]>boundaryNodes.upper_bound()
             {
                 i_int=nodeIds[idim]-_NboundaryNodes;//assumes node numbering starts with interior nodes. otherwise interiorNodes.index(j)
                 borderCell=false;
                 for (int jdim=0; jdim<_Ndim+1;jdim++)
                 {
-                    if(find(_boundaryNodeIds.begin(),_boundaryNodeIds.end(),nodeIds[jdim])!=_boundaryNodeIds.end()) //or for better performance nodeIds[jdim]>boundaryNodes.upper_bound()
+                    if(find(_boundaryNodeIds.begin(),_boundaryNodeIds.end(),nodeIds[jdim])==_boundaryNodeIds.end()) //or for better performance nodeIds[jdim]>boundaryNodes.upper_bound()
                     {
                         j_int= nodeIds[jdim]-_NboundaryNodes;
                         MatSetValue(_A,i_int,j_int,_conductivity*(_DiffusionTensor*GradShapeFuncs[idim])*GradShapeFuncs[jdim]/Cj.getMeasure(), ADD_VALUES);
@@ -396,8 +394,6 @@ double StationaryDiffusionEquation::computeRHS(bool & stop){
         }
     
 	VecAssemblyEnd(_b);
-
-    cout<<"RHS computed"<<endl;
 
     stop=false ;
 	return INFINITY;
