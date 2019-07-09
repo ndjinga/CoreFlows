@@ -23,6 +23,11 @@ StationaryDiffusionEquation::StationaryDiffusionEquation(int dim, bool FECalcula
         std::cout<<"conductivity="<<lambda<<endl;
         throw CdmathException("Error : conductivity parameter lambda cannot  be negative");
     }
+    if(dim==0)
+    {
+        std::cout<<"space dimension="<<dim<<endl;
+        throw CdmathException("Error : cparameter dim cannot  be zero");
+    }
 
     _FECalculation=FECalculation;
     
@@ -38,6 +43,7 @@ StationaryDiffusionEquation::StationaryDiffusionEquation(int dim, bool FECalcula
     //Linear solver data
 	_precision=1.e-6;
 	_precision_Newton=_precision;
+	_MaxIterLinearSolver=0;//During several newton iterations, stores the max petssc interations
 	_maxPetscIts=50;
 	_maxNewtonIts=50;
 	_NEWTON_its=0;
@@ -73,8 +79,14 @@ void StationaryDiffusionEquation::initialize()
 	if(!_meshSet)
 		throw CdmathException("StationaryDiffusionEquation::initialize() set initial data first");
 	else
-		cout<<"Initialising the diffusion of a solid temperature"<<endl;
-
+    {
+		cout<<"Initialisatioon of the computation of the temperature diffusion in a solid using ";
+        if(!_FECalculation)
+            cout<< "Finite volumes method"<<endl;
+        else
+            cout<< "Finite elements method"<<endl;
+    }
+    
 	_DiffusionTensor=Matrix(_Ndim);
 	for(int idim=0;idim<_Ndim;idim++)
 		_DiffusionTensor(idim,idim)=1;
@@ -429,8 +441,14 @@ bool StationaryDiffusionEquation::iterateNewtonStep(bool &converged)
     else{
         VecCopy(_Tk, _deltaT);//ici on a deltaT=Tk
         VecAXPY(_deltaT,  -1, _Tkm1);//On obtient deltaT=Tk-Tkm1
+
         _erreur_rel= 0;
         double Ti, dTi;
+
+        VecAssemblyBegin(_Tk);
+        VecAssemblyEnd(  _Tk);
+        VecAssemblyBegin(_deltaT);
+        VecAssemblyEnd(  _deltaT);
 
         if(!_FECalculation)
             for(int i=0; i<_Nmailles; i++)
@@ -472,7 +490,10 @@ void StationaryDiffusionEquation::setMesh(const Mesh &M)
     
 	// find  maximum nb of neibourghs
     if(!_FECalculation)
+    {
+    	_VV=Field ("Temperature", CELLS, _mesh, 1);
         _neibMaxNbCells=_mesh.getMaxNbNeighbours(CELLS);
+    }
     else
     {
         if(_Ndim==3 and not M.isTetrahedral())
@@ -485,6 +506,9 @@ void StationaryDiffusionEquation::setMesh(const Mesh &M)
             cout<<"Dimension is "<<_Ndim<< ", mesh should be triangular"<<endl;
             throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect cell types");
         }
+
+		_VV=Field ("Temperature", NODES, _mesh, 1);
+
         _neibMaxNbNodes=_mesh.getMaxNbNeighbours(NODES);
         _boundaryNodeIds=_mesh.getBoundaryNodeIds();
         _NboundaryNodes=_boundaryNodeIds.size();
@@ -533,7 +557,12 @@ bool StationaryDiffusionEquation::solveStationaryProblem()
 	bool stop=false; // Does the Problem want to stop (error) ?
 	bool converged=false; // has the newton scheme converged (error) ?
 
-	cout<< "Running test case "<< _fileName<<endl;
+	cout<< "Running test case "<< _fileName << " using ";
+    if(!_FECalculation)
+        cout<< "Finite volumes method"<<endl;
+    else
+        cout<< "Finite elements method"<<endl;
+
     computeDiffusionMatrix( stop);
     
 	_runLogFile->open((_fileName+".log").c_str(), ios::out | ios::trunc);;//for creation of a log file to save the history of the simulation
@@ -572,7 +601,7 @@ bool StationaryDiffusionEquation::solveStationaryProblem()
 }
 
 void StationaryDiffusionEquation::save(){
-	string resultFile(_path+"/StationaryDiffusionEquation");///Results
+	string resultFile(_path+"/StationaryDiffusionEquation");//Results
 
 	resultFile+="_";
 	resultFile+=_fileName;
@@ -593,9 +622,8 @@ void StationaryDiffusionEquation::save(){
             }
     else
     {
-        cout<< "starting save function1"<<endl;
         for(int i=0; i<_NinteriorNodes; i++)
-        { cout<<"i= "<<i<<endl;
+        {
             VecGetValues(_Tk, 1, &i, &Ti);
             _VV(i+_NboundaryNodes)=Ti;//Assumes node numbering starts with border nodes
         }
