@@ -33,7 +33,7 @@ public :
 			 * \param [in] double : solid conductivity
 			 *  */
 
-	StationaryDiffusionEquation( int dim,bool FECalculation=true,double lambda=5);
+	StationaryDiffusionEquation( int dim,bool FECalculation=true,double lambda=1);
 
     void setMesh(const Mesh &M);
     void setLinearSolver(linearSolver kspType, preconditioner pcType);
@@ -85,6 +85,29 @@ public :
 	void setDiffusiontensor(Matrix DiffusionTensor){
 		_DiffusionTensor=DiffusionTensor;
 	};
+
+	/** \fn setHeatPowerField
+	 * \brief set the heat power field (variable in space)
+	 * \details
+	 * \param [in] Field
+	 * \param [out] void
+	 *  */
+	void setHeatPowerField(Field heatPower){
+		_heatPowerField=heatPower;
+		_heatPowerFieldSet=true;
+	}
+
+	/** \fn setHeatPowerField
+	 * \brief set the heat power field (variable in space)
+	 * \details
+	 * \param [in] string fileName (including file path)
+	 * \param [in] string fieldName
+	 * \param [out] void
+	 *  */
+	void setHeatPowerField(string fileName, string fieldName){
+		_heatPowerField=Field(fileName, CELLS,fieldName);
+		_heatPowerFieldSet=true;
+	}
 
 protected :
 	//Main unknown field
