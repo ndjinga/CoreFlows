@@ -1,5 +1,7 @@
 #include "StationaryDiffusionEquation.hxx"
+#include "math.h"
 
+double pi = M_PI;
 using namespace std;
 
 int main(int argc, char** argv)
@@ -11,8 +13,8 @@ int main(int argc, char** argv)
 	double xsup=1.0;
 	double yinf=0.0;
 	double ysup=1.0;
-	int nx=5;
-	int ny=5;
+	int nx=20;
+	int ny=20;
 
     /* Mesh construction */
 	Mesh M(xinf,xsup,nx,yinf,ysup,ny,0); //Regular triangular mesh
@@ -33,7 +35,8 @@ int main(int argc, char** argv)
 	cout<< "Building of a regular triangular 2D mesh from a square mesh with "<< nx<<"x" <<ny<< " cells"<<endl;
 
     /* Create the problem */
-	StationaryDiffusionEquation myProblem(spaceDim);
+    bool FEComputation=true;
+	StationaryDiffusionEquation myProblem(spaceDim,FEComputation);
 	myProblem.setMesh(M);
 
     /* set the boundary conditions */
@@ -42,6 +45,19 @@ int main(int argc, char** argv)
 	myProblem.setDirichletBoundaryCondition("Bord3",T3);
 	myProblem.setDirichletBoundaryCondition("Bord4",T4);
 
+	/* Set the right hand side function*/
+	Field my_RHSfield("RHS_field", NODES, M, 1);
+    Node Ni; 
+    double x, y;
+	for(int i=0; i< M.getNumberOfNodes(); i++)
+    {
+		Ni= M.getNode(i);
+		x = Ni.x();
+		y = Ni.y();
+
+		my_RHSfield[i]=2*pi*pi*sin(pi*x)*sin(pi*y);//mettre la fonction definie au second membre de l'edp
+	}
+	myProblem.setHeatPowerField(my_RHSfield);
 	myProblem.setLinearSolver(GMRES,ILU);
 
     /* name the result file */
