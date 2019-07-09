@@ -18,6 +18,7 @@
 #define StationaryDiffusionEquation_HXX_
 
 #include "ProblemCoreFlows.hxx"
+#include "Node.hxx"
 
 using namespace std;
 

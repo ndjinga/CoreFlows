@@ -1,5 +1,4 @@
 #include "StationaryDiffusionEquation.hxx"
-#include "Node.hxx"
 #include "math.h"
 #include <algorithm> 
 #include <fstream>
@@ -400,9 +399,18 @@ double StationaryDiffusionEquation::computeRHS(bool & stop){
             VecSetValue(_b,i,_heatPowerField(i)                           ,ADD_VALUES);
         }
     else
-        for (int i=0; i<_NinteriorNodes;i++){
-            VecSetValue(_b,i,_heatTransfertCoeff*_fluidTemperatureField(i+_NboundaryNodes),ADD_VALUES);
-            VecSetValue(_b,i,_heatPowerField(i+_NboundaryNodes)                           ,ADD_VALUES);
+        {
+            Cell Ci;
+            IntTab nodesId;
+            for (int i=0; i<_Nmailles;i++){
+                Ci=_mesh.getCell(i);
+                nodesId=Ci.getNodesId();
+                for (int j=0; j<nodesId.size();j++)
+                {
+                    VecSetValue(_b,j-_NboundaryNodes,_heatTransfertCoeff*_fluidTemperatureField(j)*Ci.getMeasure()/(_Ndim+1),ADD_VALUES);
+                    VecSetValue(_b,j-_NboundaryNodes,_heatPowerField(j)*Ci.getMeasure()/(_Ndim+1)                           ,ADD_VALUES);
+                }
+            }
         }
     
 	VecAssemblyEnd(_b);
