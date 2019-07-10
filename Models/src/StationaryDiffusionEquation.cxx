@@ -85,7 +85,7 @@ void StationaryDiffusionEquation::initialize()
 		throw CdmathException("StationaryDiffusionEquation::initialize() set initial data first");
 	else
     {
-		cout<<"Initialisatioon of the computation of the temperature diffusion in a solid using ";
+		cout<<"Initialisation of the computation of the temperature diffusion in a solid using ";
         if(!_FECalculation)
             cout<< "Finite volumes method"<<endl;
         else
@@ -108,6 +108,7 @@ void StationaryDiffusionEquation::initialize()
             for(int i =0; i<_Nmailles; i++)
                 _heatPowerField(i) = _heatSource;
         }
+        _heatPowerFieldSet=true;
     }
 	if(!_fluidTemperatureFieldSet){
         if(_FECalculation){
@@ -120,6 +121,7 @@ void StationaryDiffusionEquation::initialize()
             for(int i =0; i<_Nmailles; i++)
                 _fluidTemperatureField(i) = _fluidTemperature;
         }
+        _fluidTemperatureFieldSet=true;
 	}
 
 	//creation de la matrice
@@ -153,16 +155,7 @@ void StationaryDiffusionEquation::initialize()
 
 double StationaryDiffusionEquation::computeTimeStep(bool & stop){
 	if(!_diffusionMatrixSet)//The diffusion matrix is computed once and for all time steps
-    {
 		computeDiffusionMatrix(stop);
-        //Contribution from the solid/fluid heat exchange
-        if(_heatTransfertCoeff>_precision)
-        {   
-            MatAssemblyBegin(_A, MAT_FINAL_ASSEMBLY);
-            MatAssemblyEnd(_A, MAT_FINAL_ASSEMBLY);
-            MatShift(_A,_heatTransfertCoeff);//Contribution from the liquit/solid heat transfer
-        }
-    }
 
 	_dt_src=computeRHS(stop);
 	stop=false;
@@ -194,7 +187,8 @@ double StationaryDiffusionEquation::computeDiffusionMatrix(bool & stop)
     else
         result=computeDiffusionMatrixFV(stop);
 
-    //Contribution from the solid/fluid heat exchange
+    //Contribution from the solid/fluid heat exchange with assumption of constant heat transfer coefficient
+    //update value here if variable  heat transfer coefficient
     if(_heatTransfertCoeff>_precision)
         MatShift(_A,_heatTransfertCoeff);//Contribution from the liquit/solid heat transfer
         
@@ -396,11 +390,13 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFV(bool & stop){
     return INFINITY;
 }
 
-double StationaryDiffusionEquation::computeRHS(bool & stop){
+double StationaryDiffusionEquation::computeRHS(bool & stop)//Contribution of the PDE RHS ti the linear systemm RHS (boundary conditions do contribute to the system RHS)
+{
 	VecAssemblyBegin(_b);
 
     if(!_FECalculation)
-        for (int i=0; i<_Nmailles;i++){
+        for (int i=0; i<_Nmailles;i++)
+        {
             VecSetValue(_b,i,_heatTransfertCoeff*_fluidTemperatureField(i),ADD_VALUES);
             VecSetValue(_b,i,_heatPowerField(i)                           ,ADD_VALUES);
         }
@@ -408,18 +404,23 @@ double StationaryDiffusionEquation::computeRHS(bool & stop){
         {
             Cell Ci;
             IntTab nodesId;
-            for (int i=0; i<_Nmailles;i++){
+            for (int i=0; i<_Nmailles;i++)
+            {
                 Ci=_mesh.getCell(i);
                 nodesId=Ci.getNodesId();
                 for (int j=0; j<nodesId.size();j++)
-                {
-                    VecSetValue(_b,j-_NboundaryNodes,_heatTransfertCoeff*_fluidTemperatureField(j)*Ci.getMeasure()/(_Ndim+1),ADD_VALUES);
-                    VecSetValue(_b,j-_NboundaryNodes,_heatPowerField(j)*Ci.getMeasure()/(_Ndim+1)                           ,ADD_VALUES);
-                }
+                    if(find(_boundaryNodeIds.begin(),_boundaryNodeIds.end(),nodesId[j])==_boundaryNodeIds.end()) //or for better performance nodeIds[idim]>boundaryNodes.upper_bound()
+                    {
+                        VecSetValue(_b,nodesId[j]-_NboundaryNodes,_heatTransfertCoeff*_fluidTemperatureField(nodesId[j])*Ci.getMeasure()/(_Ndim+1),ADD_VALUES);
+                        VecSetValue(_b,nodesId[j]-_NboundaryNodes,_heatPowerField(nodesId[j])                           *Ci.getMeasure()/(_Ndim+1),ADD_VALUES);
+                    }
             }
         }
     
 	VecAssemblyEnd(_b);
+
+    if(_verbose or _system)
+        VecView(_b,PETSC_VIEWER_STDOUT_SELF);
 
     stop=false ;
 	return INFINITY;
@@ -569,7 +570,7 @@ bool StationaryDiffusionEquation::solveStationaryProblem()
 		throw CdmathException("ProblemCoreFlows::run() call initialize() first");
 	}
 	bool stop=false; // Does the Problem want to stop (error) ?
-	bool converged=false; // has the newton scheme converged (error) ?
+	bool converged=false; // has the newton scheme converged (end) ?
 
 	cout<< "Running test case "<< _fileName << " using ";
     if(!_FECalculation)
@@ -577,27 +578,36 @@ bool StationaryDiffusionEquation::solveStationaryProblem()
     else
         cout<< "Finite elements method"<<endl;
 
-    computeDiffusionMatrix( stop);
-    
 	_runLogFile->open((_fileName+".log").c_str(), ios::out | ios::trunc);;//for creation of a log file to save the history of the simulation
 	*_runLogFile<< "Running test case "<< _fileName<<endl;
 
-	// Newton iteration loop
+    computeDiffusionMatrix( stop);//For the moment the conductivity does not depend on the temperature (linear LHS)
+    computeRHS(stop);//For the moment the heat power does not depend on the unknown temperature (linear RHS)
+    if (stop){
+        cout << "Error : failed computing right hand side, stopping calculation"<< endl;
+        *_runLogFile << "Error : failed computing right hand side, stopping calculation"<< endl;
+        throw CdmathException("Failed computing right hand side");
+    }
+    stop = iterateNewtonStep(converged);
+    if (stop){
+        cout << "Error : failed solving linear system, stopping calculation"<< endl;
+        *_runLogFile << "Error : failed linear system, stopping calculation"<< endl;
+        throw CdmathException("Failed solving linear system");
+    }
+    
+	// Newton iteration loop for non linear problems
+    /*
 	while(!stop and !converged and _NEWTON_its<_maxNewtonIts)
 	{
-        computeRHS(stop);
-        if (stop){
-            cout << "Error : failed computing right hand side at Newton iteration "<<_NEWTON_its<<", stopping calculation"<< endl;
-            *_runLogFile << "Error : failed computing right hand side at Newton iteration "<<_NEWTON_its<<", stopping calculation"<< endl;
-            throw CdmathException("Failed computing right hand side at Newton iteration");
-        }
+        computeDiffusionMatrix( stop);//case when the conductivity depends on the temperature (nonlinear LHS)
+        computeRHS(stop);//case the heat power depends on the unknown temperature (nonlinear RHS)
         stop = iterateNewtonStep(converged);
         _NEWTON_its++;
 	}
     if (stop){
         cout << "Error : failed solving Newton iteration "<<_NEWTON_its<<", stopping calculation"<< endl;
-        *_runLogFile << "Error : failed solving right hand side at Newton iteration "<<_NEWTON_its<<", stopping calculation"<< endl;
-        throw CdmathException("Failed solving right hand side at Newton iteration");
+        *_runLogFile << "Error : failed solving Newton iteration "<<_NEWTON_its<<", stopping calculation"<< endl;
+        throw CdmathException("Failed solving a Newton iteration");
     }
     else if(_NEWTON_its==_maxNewtonIts){
         cout << "Error : no convergence of Newton scheme. Maximum Newton iterations "<<_maxNewtonIts<<" reached, stopping calculation"<< endl;
@@ -609,7 +619,8 @@ bool StationaryDiffusionEquation::solveStationaryProblem()
         *_runLogFile << "Convergence of Newton scheme at iteration "<<_NEWTON_its<<", end of calculation"<< endl;
         save();
     }
-
+    */
+    
 	_runLogFile->close();
 	return !stop;
 }
