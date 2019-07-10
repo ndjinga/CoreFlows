@@ -34,10 +34,16 @@ StationaryDiffusionEquation::StationaryDiffusionEquation(int dim, bool FECalcula
 	_nVar=1;//scalar prolem
 	_dt_src=0;
 	_diffusionMatrixSet=false;
+	_initializedMemory=false;
+
+    //Mesh data
     _neibMaxNbCells=0;    
     _neibMaxNbNodes=0;    
     _meshSet=false;
-	_initializedMemory=false;
+    _neibMaxNbNodes=0;
+    _boundaryNodeIds=std::vector< int >(0,0);
+    _NboundaryNodes=0;
+    _NinteriorNodes=0;
     
     //Linear solver data
 	_precision=1.e-6;
