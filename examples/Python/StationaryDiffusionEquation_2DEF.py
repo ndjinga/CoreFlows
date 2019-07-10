@@ -70,7 +70,7 @@ def StationaryDiffusionEquation_2DEF():
 		print( "Python simulation of " + fileName + "  failed ! " );
 		pass
 
-	print( "------------ End of calculation !!! -----------" );
+	print( "------------ !!! End of calculation !!! -----------" );
 
 	myProblem.terminate();
 	return ok
