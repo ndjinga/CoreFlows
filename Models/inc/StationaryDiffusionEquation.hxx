@@ -115,27 +115,26 @@ protected :
 	Field _VV;
 
 	int _Ndim;//space dimension
-	int _nVar;//Number of equations to sole
-	int _Nmailles;//number of cells for FV calculation
-	int _neibMaxNbCells;//maximum number of cells around a cell
-	int _Nnodes;//number of nodes for FE calculation
-	int _neibMaxNbNodes;//maximum number of nodes around a node
-    //Data for FE calculation
-	int _NinteriorNodes;//number of interior nodes for FE calculation
-	int _NboundaryNodes;//number of boundary nodes for FE calculation
-    bool _FECalculation;
-    std::vector< int > _boundaryNodeIds;/* List of boundary nodes*/
-    std::vector< int > _interiorNodeIds;/* List of interior nodes*/
+	int _nVar;//Number of equations to solve=1
 
+    //Mesh data
 	Mesh _mesh;
     bool _meshSet;
 	bool _initializedMemory;
+	int _Nmailles;//number of cells for FV calculation
+	int _neibMaxNbCells;//maximum number of cells around a cell
+    //Data for FE calculation
+    bool _FECalculation;
+	int _Nnodes;//number of nodes for FE calculation
+	int _neibMaxNbNodes;//maximum number of nodes around a node
+	int _NinteriorNodes;//number of interior nodes for FE calculation
+	int _NboundaryNodes;//number of boundary nodes for FE calculation
+    std::vector< int > _boundaryNodeIds;/* List of boundary nodes*/
+
     
 	double _precision;
 	double _precision_Newton;
 	double _erreur_rel;//norme(Uk+1-Uk)
-	string _fileName;//name of the calculation
-	ofstream * _runLogFile;//for creation of a log file to save the history of the simulation
 
 	//Linear solver and petsc
 	KSP _ksp;
@@ -168,7 +167,9 @@ protected :
 
 	//Display variables
 	bool _verbose, _system;
+	ofstream * _runLogFile;//for creation of a log file to save the history of the simulation
     //saving parameters
+	string _fileName;//name of the calculation
 	string _path;//path to execution directory used for saving results
 	saveFormat _saveFormat;//file saving format : MED, VTK or CSV
 
