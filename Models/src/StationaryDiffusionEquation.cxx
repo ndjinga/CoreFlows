@@ -595,6 +595,8 @@ bool StationaryDiffusionEquation::solveStationaryProblem()
         throw CdmathException("Failed solving linear system");
     }
     
+    save();
+
 	// Newton iteration loop for non linear problems
     /*
 	while(!stop and !converged and _NEWTON_its<_maxNewtonIts)
