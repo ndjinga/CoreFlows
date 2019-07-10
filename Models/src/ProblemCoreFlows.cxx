@@ -361,26 +361,32 @@ void ProblemCoreFlows::setLinearSolver(linearSolver kspType, preconditioner pcTy
 	// set linear solver algorithm
 	if (kspType==GMRES)
 		_ksptype = (char*)&KSPGMRES;
-	else if (kspType==BICGSTAB)
+	else if (kspType==CG)
+		_ksptype = (char*)&KSPCG;
+	else if (kspType==BCGS)
 		_ksptype = (char*)&KSPBCGS;
 	else {
-		cout << "only 'GRMES' or 'BICGSTAB' is acceptable as a linear solver !!!" << endl;
-		*_runLogFile << "only 'GRMES' or 'BICGSTAB' is acceptable as a linear solver !!!" << endl;
+		cout << "!!! Error : only 'GMRES', 'CG' or 'BCGS' is acceptable as a linear solver !!!" << endl;
+		*_runLogFile << "!!! Error : only 'GMRES', 'CG' or 'BCGS' is acceptable as a linear solver !!!" << endl;
 		_runLogFile->close();
-		throw CdmathException("only 'GRMES' or 'BICGSTAB' algorithm is acceptable !!!");
+		throw CdmathException("!!! Error : only 'GMRES', 'CG' or 'BCGS' algorithm is acceptable !!!");
 	}
 	// set preconditioner
-	if (pcType == NONE){
+	if (pcType == NONE)
 		_pctype = (char*)&PCNONE;
-	} else if (pcType ==LU){
+	else if (pcType ==LU)
 		_pctype = (char*)&PCLU;
-	} else if (pcType == ILU){
+	else if (pcType == ILU)
 		_pctype = (char*)&PCILU;
-	} else {
-		cout << "only 'NONE' or 'LU' or 'ILU' preconditioners are acceptable !!!" << endl;
-		*_runLogFile << "only 'NONE' or 'LU' or 'ILU' preconditioners are acceptable !!!" << endl;
+	else if (pcType ==CHOLESKY)
+		_pctype = (char*)&PCCHOLESKY;
+	else if (pcType == ICC)
+		_pctype = (char*)&PCICC;
+	else {
+		cout << "!!! Error : only 'NONE', 'LU', 'ILU', 'CHOLESKY' or 'ICC' preconditioners are acceptable !!!" << endl;
+		*_runLogFile << "!!! Error : only 'NONE' or 'LU' or 'ILU' preconditioners are acceptable !!!" << endl;
 		_runLogFile->close();
-		throw CdmathException("only 'NONE' or 'LU' or 'ILU' preconditioners are acceptable !!!" );
+		throw CdmathException("!!! Error : only 'NONE' or 'LU' or 'ILU' preconditioners are acceptable !!!" );
 	}
 }
 

@@ -74,7 +74,8 @@ enum phaseType
 enum linearSolver
 {
 	GMRES,/**< linearSolver is GMRES */
-	BICGSTAB/**< linearSolver is BiCGSstab */
+	BCGS,/**< linearSolver is BiCGSstab */
+	CG/**< linearSolver is CG */
 };
 
 //! enumeration preconditioner
@@ -82,8 +83,10 @@ enum linearSolver
 enum preconditioner
 {
 	ILU,/**< preconditioner is ILU(0) */
-	LU,/**< preconditioner is actually a direct solver */
-	NONE/**< no preconditioner used */
+	LU,/**< preconditioner is actually a direct solver (LU factorisation)*/
+	NONE,/**< no preconditioner used */
+	ICC,/**< preconditioner is ICC(0) */
+	CHOLESKY/**< preconditioner is actually a direct solver for symmetric matrices (CHOLESKY factorisation)*/
 };
 
 //! enumeration saveFormat
