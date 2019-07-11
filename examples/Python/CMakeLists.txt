@@ -118,4 +118,6 @@ CreatePythonTest(SinglePhase_2DWallHeatedChannel_ChangeSect.py)
 CreatePythonTest(SinglePhase_3DHeatDrivenCavity.py)
 CreatePythonTest(TransportEquation_1DHeatedChannel.py)
 CreatePythonTest(StationaryDiffusionEquation_2DEF.py)
-CreatePythonTest(StationaryDiffusionEquation_2DFV.py)
+CreatePythonTest(StationaryDiffusionEquation_2DFV_StructuredTriangles.py)
+CreatePythonTest(StationaryDiffusionEquation_2DFV_StructuredSquares.py)
+
