@@ -61,7 +61,7 @@ int main(int argc, char** argv)
 	myProblem.setLinearSolver(GMRES,ILU);
 
     /* name the result file */
-	string fileName = "StationnaryDiffusion_2DEF_UnstructuredTriangles";
+	string fileName = "StationnaryDiffusion_2DFV_StructuredTriangles";
 	myProblem.setFileName(fileName);
 
 	/* Run the computation */
