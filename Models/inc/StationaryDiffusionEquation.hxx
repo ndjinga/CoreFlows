@@ -42,6 +42,7 @@ public :
 	_fileName = fileName;
     }
     bool solveStationaryProblem();
+    Field getOutputTemperatureField();
     
 	//Gestion du calcul
 	void initialize();
@@ -135,7 +136,8 @@ protected :
 	double _precision;
 	double _precision_Newton;
 	double _erreur_rel;//norme(Uk+1-Uk)
-
+    bool _computationCompletedSuccessfully;
+    
 	//Linear solver and petsc
 	KSP _ksp;
 	KSPType _ksptype;

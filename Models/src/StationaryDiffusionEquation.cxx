@@ -69,6 +69,7 @@ StationaryDiffusionEquation::StationaryDiffusionEquation(int dim, bool FECalcula
 	getcwd(result, PATH_MAX );
 	_path=string( result );
 	_saveFormat=VTK;
+    _computationCompletedSuccessfully=false;
     
     //heat transfer parameters
 	_conductivity=lambda;
@@ -596,6 +597,11 @@ bool StationaryDiffusionEquation::solveStationaryProblem()
 	*_runLogFile<< "Running test case "<< _fileName<<endl;
 
     computeDiffusionMatrix( stop);//For the moment the conductivity does not depend on the temperature (linear LHS)
+    if (stop){
+        cout << "Error : failed computing diffusion matrix, stopping calculation"<< endl;
+        *_runLogFile << "Error : failed computing diffusion matrix, stopping calculation"<< endl;
+        throw CdmathException("Failed computing diffusion matrix");
+    }
     computeRHS(stop);//For the moment the heat power does not depend on the unknown temperature (linear RHS)
     if (stop){
         cout << "Error : failed computing right hand side, stopping calculation"<< endl;
@@ -609,6 +615,7 @@ bool StationaryDiffusionEquation::solveStationaryProblem()
         throw CdmathException("Failed solving linear system");
     }
     
+    _computationCompletedSuccessfully=true;
     save();
 
 	// Newton iteration loop for non linear problems
@@ -701,6 +708,15 @@ void StationaryDiffusionEquation::save(){
             break;
     }
 }
+Field 
+StationaryDiffusionEquation::getOutputTemperatureField()
+{
+    if(!_computationCompletedSuccessfully)
+        throw("Computation not performed yet or failed. No temperature field available");
+    else
+        return _VV;
+}
+
 void StationaryDiffusionEquation::terminate(){
 	VecDestroy(&_Tk);
 	VecDestroy(&_Tkm1);
