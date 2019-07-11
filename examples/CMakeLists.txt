@@ -99,6 +99,7 @@ CreateTestExecAndInstall(SinglePhase_3DHeatDrivenCavity.cxx  "${libs_for_tests}"
 CreateTestExecAndInstall(SinglePhase_HeatedWire_2Branches.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(TransportEquation_1DHeatedChannel.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(StationaryDiffusionEquation_2DEF.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(StationaryDiffusionEquation_2DFV.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(testEOS.cxx  "${libs_for_tests}" )
 
 
