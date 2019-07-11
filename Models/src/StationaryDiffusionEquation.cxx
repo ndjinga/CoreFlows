@@ -192,6 +192,9 @@ double StationaryDiffusionEquation::computeDiffusionMatrix(bool & stop)
     if(_heatTransfertCoeff>_precision)
         MatShift(_A,_heatTransfertCoeff);//Contribution from the liquit/solid heat transfer
         
+    if(_verbose or _system)
+        MatView(_A,PETSC_VIEWER_STDOUT_SELF);
+
     return  result;
 }
 
@@ -241,7 +244,7 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFE(bool & stop){
                 {
                     if(find(_boundaryNodeIds.begin(),_boundaryNodeIds.end(),nodeIds[jdim])==_boundaryNodeIds.end()) //or for better performance nodeIds[jdim]>boundaryNodes.upper_bound()
                     {
-                        j_int= nodeIds[jdim]-_NboundaryNodes;
+                        j_int= nodeIds[jdim]-_NboundaryNodes;//assumes node numbering starts with interior nodes. otherwise interiorNodes.index(j)
                         MatSetValue(_A,i_int,j_int,_conductivity*(_DiffusionTensor*GradShapeFuncs[idim])*GradShapeFuncs[jdim]/Cj.getMeasure(), ADD_VALUES);
                     }
                     else if (!borderCell)
@@ -411,8 +414,8 @@ double StationaryDiffusionEquation::computeRHS(bool & stop)//Contribution of the
                 for (int j=0; j<nodesId.size();j++)
                     if(find(_boundaryNodeIds.begin(),_boundaryNodeIds.end(),nodesId[j])==_boundaryNodeIds.end()) //or for better performance nodeIds[idim]>boundaryNodes.upper_bound()
                     {
-                        VecSetValue(_b,nodesId[j]-_NboundaryNodes,_heatTransfertCoeff*_fluidTemperatureField(nodesId[j])*Ci.getMeasure()/(_Ndim+1),ADD_VALUES);
-                        VecSetValue(_b,nodesId[j]-_NboundaryNodes,_heatPowerField(nodesId[j])                           *Ci.getMeasure()/(_Ndim+1),ADD_VALUES);
+                        VecSetValue(_b,nodesId[j]-_NboundaryNodes,_heatTransfertCoeff*_fluidTemperatureField(nodesId[j])*Ci.getMeasure()/(_Ndim+1),ADD_VALUES);//assumes node numbering starts with interior nodes. otherwise interiorNodes.index(j)
+                        VecSetValue(_b,nodesId[j]-_NboundaryNodes,_heatPowerField(nodesId[j])                           *Ci.getMeasure()/(_Ndim+1),ADD_VALUES);//assumes node numbering starts with interior nodes. otherwise interiorNodes.index(j)
                     }
             }
         }
@@ -503,6 +506,8 @@ void StationaryDiffusionEquation::setMesh(const Mesh &M)
 	_Nmailles = _mesh.getNumberOfCells();
 	_Nnodes =   _mesh.getNumberOfNodes();
     
+    cout<<"Mesh has "<< _Nmailles << " cells and " << _Nnodes << " nodes"<<endl;
+    
 	// find  maximum nb of neibourghs
     if(!_FECalculation)
     {
@@ -528,6 +533,11 @@ void StationaryDiffusionEquation::setMesh(const Mesh &M)
         _boundaryNodeIds=_mesh.getBoundaryNodeIds();
         _NboundaryNodes=_boundaryNodeIds.size();
         _NinteriorNodes=_Nnodes - _NboundaryNodes;
+        //cout<< "boundaryNodeIds() "<<_mesh.getBoundaryNodeIds().size()<< endl;
+        //for(int i=0;i<_mesh.getBoundaryNodeIds().size();i++)
+            //cout<<" "<<_boundaryNodeIds[i];
+        //cout<<endl;
+        cout<<"Number of interior nodes "<< _NinteriorNodes << ", Number of boundary nodes " << _NboundaryNodes <<endl;
     }
 
 	_meshSet=true;
@@ -663,7 +673,7 @@ void StationaryDiffusionEquation::save(){
 
         Node Ni;
         string nameOfGroup;
-        for(int i=0; i<_NboundaryNodes; i++)
+        for(int i=0; i<_NboundaryNodes; i++)//Assumes node numbering starts with border nodes
         {
             Ni=_mesh.getNode(i);
             if(Ni.isBorder())
