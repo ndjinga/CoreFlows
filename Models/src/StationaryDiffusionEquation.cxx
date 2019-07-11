@@ -239,6 +239,8 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFE(bool & stop){
             if(find(_boundaryNodeIds.begin(),_boundaryNodeIds.end(),nodeIds[idim])==_boundaryNodeIds.end()) //or for better performance nodeIds[idim]>boundaryNodes.upper_bound()
             {
                 i_int=nodeIds[idim]-_NboundaryNodes;//assumes node numbering starts with interior nodes. otherwise interiorNodes.index(j)
+                if(i_int<0)//issue of node numbering 
+                    throw CdmathException("negavite interior node number : problem with numbering");
                 borderCell=false;
                 for (int jdim=0; jdim<_Ndim+1;jdim++)
                 {
@@ -533,10 +535,6 @@ void StationaryDiffusionEquation::setMesh(const Mesh &M)
         _boundaryNodeIds=_mesh.getBoundaryNodeIds();
         _NboundaryNodes=_boundaryNodeIds.size();
         _NinteriorNodes=_Nnodes - _NboundaryNodes;
-        //cout<< "boundaryNodeIds() "<<_mesh.getBoundaryNodeIds().size()<< endl;
-        //for(int i=0;i<_mesh.getBoundaryNodeIds().size();i++)
-            //cout<<" "<<_boundaryNodeIds[i];
-        //cout<<endl;
         cout<<"Number of interior nodes "<< _NinteriorNodes << ", Number of boundary nodes " << _NboundaryNodes <<endl;
     }
 
@@ -679,7 +677,6 @@ void StationaryDiffusionEquation::save(){
             if(Ni.isBorder())
             {
                 nameOfGroup = Ni.getGroupName();
-                cout<<"group name= "<<nameOfGroup<<endl;
                 _VV(i)=_limitField[nameOfGroup].T;//Assumes node numbering starts with border nodes
             }
             else
