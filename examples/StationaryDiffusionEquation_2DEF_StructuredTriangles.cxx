@@ -32,7 +32,7 @@ int main(int argc, char** argv)
 	double T3=0;
 	double T4=0;
 
-	cout<< "Building of a regular triangular 2D mesh from a square mesh with "<< nx<<"x" <<ny<< " cells"<<endl;
+	cout<< "Built of a regular triangular 2D mesh from a square mesh with "<< nx<<"x" <<ny<< " cells"<<endl;
 
     /* Create the problem */
     bool FEComputation=true;
@@ -61,7 +61,7 @@ int main(int argc, char** argv)
 	myProblem.setLinearSolver(GMRES,ILU);
 
     /* name the result file */
-	string fileName = "StationnaryDiffusion_2DEF";
+	string fileName = "StationnaryDiffusion_2DEF_UnstructuredTriangles";
 	myProblem.setFileName(fileName);
 
 	/* Run the computation */
