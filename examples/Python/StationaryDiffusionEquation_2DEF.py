@@ -1,11 +1,19 @@
 #!/usr/bin/env python
 # -*-coding:utf-8 -*
+#===============================================================================================================================
+# Name        : Résolution EF de l'équation de Poisson 2D -\triangle T = f avec conditions aux limites de Dirichlet T=0
+# Author      : Michaël Ndjinga
+# Copyright   : CEA Saclay 2019
+# Description : Utilisation de la méthode des éléménts finis P1 avec champs T et f discrétisés aux noeuds d'un maillage triangulaire
+#		        Création et sauvegarde du champ résultant ainsi que du champ second membre en utilisant la librairie CDMATH
+#               Comparaison de la solution numérique avec la solution exacte T=-sin(pi*x)*sin(pi*y)
+#================================================================================================================================
 
 import CoreFlows as cf
 import cdmath as cm
 from math import sin, pi
 
-def StationaryDiffusionEquation_2DEF():
+def StationaryDiffusionEquation_2DEF_StructuredTriangles():
 	spaceDim = 2;
 	# Prepare for the mesh
 	print("Building mesh " );
@@ -53,7 +61,7 @@ def StationaryDiffusionEquation_2DEF():
 	myProblem.setLinearSolver(cf.GMRES,cf.ILU);
 
     # name of result file
-	fileName = "StationnaryDiffusion_2DEF";
+	fileName = "StationnaryDiffusion_2DEF_StructuredTriangles";
 
     # computation parameters
 	myProblem.setFileName(fileName);
@@ -63,12 +71,27 @@ def StationaryDiffusionEquation_2DEF():
 	print("Running python "+ fileName );
 
 	ok = myProblem.solveStationaryProblem();
-	if (ok):
-		print( "Python simulation of " + fileName + " is successful !" );
-		pass
-	else:
+	if (not ok):
 		print( "Python simulation of " + fileName + "  failed ! " );
 		pass
+	else:
+		####################### Postprocessing #########################
+		my_ResultField = myProblem.getOutputTemperatureField()
+		#The following formulas use the fact that the exact solution is equal the right hand side divided by 2*pi*pi
+		max_abs_sol_exacte=max(my_RHSfield.max(),-my_RHSfield.min())/(2*pi*pi)
+		max_sol_num=my_ResultField.max()
+		min_sol_num=my_ResultField.min()
+		erreur_abs=0
+		for i in range(M.getNumberOfNodes()) :
+			if erreur_abs < abs(my_RHSfield[i]/(2*pi*pi) - my_ResultField[i]) :
+				erreur_abs = abs(my_RHSfield[i]/(2*pi*pi) - my_ResultField[i])
+		
+		print("Absolute error = max(| exact solution - numerical solution |) = ",erreur_abs )
+		print("Relative error = max(| exact solution - numerical solution |)/max(| exact solution |) = ",erreur_abs/max_abs_sol_exacte)
+		print ("Maximum numerical solution = ", max_sol_num, " Minimum numerical solution = ", min_sol_num)
+		
+		assert erreur_abs/max_abs_sol_exacte <1.
+        pass
 
 	print( "------------ !!! End of calculation !!! -----------" );
 
@@ -76,4 +99,4 @@ def StationaryDiffusionEquation_2DEF():
 	return ok
 
 if __name__ == """__main__""":
-    StationaryDiffusionEquation_2DEF()
+    StationaryDiffusionEquation_2DEF_StructuredTriangles()
