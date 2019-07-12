@@ -15,7 +15,7 @@ computeVelocityMCells(const Field& velocity,
 
     for(int i=0;i<nbCells;i++)
     {
-        IntTab facesId=myMesh.getCell(i).getFacesId();
+        std::vector< int > facesId=myMesh.getCell(i).getFacesId();
         velocityMCells(i)=(velocity(facesId[0])+velocity(facesId[1]))/2.;
     }
 }

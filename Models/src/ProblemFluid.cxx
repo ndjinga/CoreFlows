@@ -307,7 +307,7 @@ double ProblemFluid::computeTimeStep(bool & stop){
 
 	VecAssemblyBegin(_b);
 	VecAssemblyBegin(_conservativeVars);
-	IntTab idCells;
+	std::vector< int > idCells;
 	PetscInt idm, idn, size = 1;
 
 	long nbFaces = _mesh.getNumberOfFaces();

@@ -303,7 +303,7 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFV(bool & stop){
 	Vector normale(_Ndim);
 	double dn;
 	PetscInt idm, idn;
-	IntTab idCells;
+	std::vector< int > idCells;
 	MatZeroEntries(_A);
 	VecZeroEntries(_b);
 	for (int j=0; j<nbFaces;j++){
@@ -420,7 +420,7 @@ double StationaryDiffusionEquation::computeRHS(bool & stop)//Contribution of the
     else
         {
             Cell Ci;
-            IntTab nodesId;
+            std::vector< int > nodesId;
             for (int i=0; i<_Nmailles;i++)
             {
                 Ci=_mesh.getCell(i);

@@ -109,7 +109,7 @@ double DiffusionEquation::computeDiffusionMatrix(){
 	Vector normale(_Ndim);
 	double dn;
 	PetscInt idm, idn;
-	IntTab idCells;
+	std::vector< int > idCells;
 	MatZeroEntries(_A);
 	VecZeroEntries(_b0);
 	for (int j=0; j<nbFaces;j++){
