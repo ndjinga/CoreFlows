@@ -10,6 +10,19 @@ int StationaryDiffusionEquation::fact(int n)
 {
   return (n == 1 || n == 0) ? 1 : fact(n - 1) * n;
 }
+int StationaryDiffusionEquation::interiorNodeIndex(int globalIndex, std::vector< int > boundaryNodes)
+{//assumes boundary node numbering is strictly increasing
+    int j=0;
+    int boundarySize=boundaryNodes.size();
+    while(j<boundarySize and boundaryNodes[j]<globalIndex)
+        j++;
+    if(j==boundarySize)
+        return globalIndex-boundarySize;
+    else if (boundaryNodes[j]>globalIndex)
+        return globalIndex-j+1;
+    else
+        throw CdmathException("StationaryDiffusionEquation::interiorNodeIndex : Error : node is a boundary node");
+}
 
 StationaryDiffusionEquation::StationaryDiffusionEquation(int dim, bool FECalculation, double lambda){
 	PetscBool petscInitialized;
@@ -237,17 +250,15 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFE(bool & stop){
             
         for (int idim=0; idim<_Ndim+1;idim++)
         {
-            if(find(_boundaryNodeIds.begin(),_boundaryNodeIds.end(),nodeIds[idim])==_boundaryNodeIds.end()) //or for better performance nodeIds[idim]>boundaryNodes.upper_bound()
+            if(!_mesh.isBorderNode(nodeIds[idim]))//find(_boundaryNodeIds.begin(),_boundaryNodeIds.end(),nodeIds[idim])==_boundaryNodeIds.end()
             {
-                i_int=nodeIds[idim]-_NboundaryNodes;//assumes node numbering starts with interior nodes. otherwise interiorNodes.index(j)
-                if(i_int<0)//issue of node numbering 
-                    throw CdmathException("negavite interior node number : problem with numbering");
+                i_int=interiorNodeIndex(nodeIds[idim], _boundaryNodeIds);//assumes boundary node numbering is strictly increasing
                 borderCell=false;
                 for (int jdim=0; jdim<_Ndim+1;jdim++)
                 {
-                    if(find(_boundaryNodeIds.begin(),_boundaryNodeIds.end(),nodeIds[jdim])==_boundaryNodeIds.end()) //or for better performance nodeIds[jdim]>boundaryNodes.upper_bound()
+                    if(!_mesh.isBorderNode(nodeIds[jdim]))//find(_boundaryNodeIds.begin(),_boundaryNodeIds.end(),nodeIds[jdim])==_boundaryNodeIds.end()
                     {
-                        j_int= nodeIds[jdim]-_NboundaryNodes;//assumes node numbering starts with interior nodes. otherwise interiorNodes.index(j)
+                        j_int= interiorNodeIndex(nodeIds[jdim], _boundaryNodeIds);//assumes boundary node numbering is strictly increasing
                         MatSetValue(_A,i_int,j_int,_conductivity*(_DiffusionTensor*GradShapeFuncs[idim])*GradShapeFuncs[jdim]/Cj.getMeasure(), ADD_VALUES);
                     }
                     else if (!borderCell)
@@ -415,10 +426,10 @@ double StationaryDiffusionEquation::computeRHS(bool & stop)//Contribution of the
                 Ci=_mesh.getCell(i);
                 nodesId=Ci.getNodesId();
                 for (int j=0; j<nodesId.size();j++)
-                    if(find(_boundaryNodeIds.begin(),_boundaryNodeIds.end(),nodesId[j])==_boundaryNodeIds.end()) //or for better performance nodeIds[idim]>boundaryNodes.upper_bound()
+                    if(!_mesh.isBorderNode(nodesId[j])) //or for better performance nodeIds[idim]>boundaryNodes.upper_bound()
                     {
-                        VecSetValue(_b,nodesId[j]-_NboundaryNodes,_heatTransfertCoeff*_fluidTemperatureField(nodesId[j])*Ci.getMeasure()/(_Ndim+1),ADD_VALUES);//assumes node numbering starts with interior nodes. otherwise interiorNodes.index(j)
-                        VecSetValue(_b,nodesId[j]-_NboundaryNodes,_heatPowerField(nodesId[j])                           *Ci.getMeasure()/(_Ndim+1),ADD_VALUES);//assumes node numbering starts with interior nodes. otherwise interiorNodes.index(j)
+                        double coeff = _heatTransfertCoeff*_fluidTemperatureField(nodesId[j]) + _heatPowerField(nodesId[j]);
+                        VecSetValue(_b,interiorNodeIndex(nodesId[j], _boundaryNodeIds), coeff*Ci.getMeasure()/(_Ndim+1),ADD_VALUES);//assumes node numbering starts with interior nodes. otherwise interiorNodes.index(j)
                     }
             }
         }
@@ -670,27 +681,21 @@ void StationaryDiffusionEquation::save(){
             }
     else
     {
+        int globalIndex;
         for(int i=0; i<_NinteriorNodes; i++)
         {
             VecGetValues(_Tk, 1, &i, &Ti);
-            _VV(i+_NboundaryNodes)=Ti;//Assumes node numbering starts with border nodes
+            globalIndex = interiorNodeIndex(i, _boundaryNodeIds);
+            _VV(globalIndex)=Ti;//Assumes node numbering starts with border nodes
         }
 
         Node Ni;
         string nameOfGroup;
         for(int i=0; i<_NboundaryNodes; i++)//Assumes node numbering starts with border nodes
         {
-            Ni=_mesh.getNode(i);
-            if(Ni.isBorder())
-            {
-                nameOfGroup = Ni.getGroupName();
-                _VV(i)=_limitField[nameOfGroup].T;//Assumes node numbering starts with border nodes
-            }
-            else
-            {
-                std::cout<<"Node number i= "<<i <<" is not a boundary node. NboundaryNodes= "<< _NboundaryNodes <<endl;
-                throw CdmathException("Error StationaryDiffusionEquation::save : unusual node numbering : should start with boundary nodes");
-            }
+            Ni=_mesh.getNode(_boundaryNodeIds[i]);
+            nameOfGroup = Ni.getGroupName();
+            _VV(_boundaryNodeIds[i])=_limitField[nameOfGroup].T;
         }
     }
 
