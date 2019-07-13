@@ -12,7 +12,7 @@ int StationaryDiffusionEquation::fact(int n)
 }
 int StationaryDiffusionEquation::interiorNodeIndex(int globalIndex, std::vector< int > boundaryNodes)
 {//assumes boundary node numbering is strictly increasing
-    int j=0;
+    int j=0;//indice de parcours des noeuds frontière
     int boundarySize=boundaryNodes.size();
     while(j<boundarySize and boundaryNodes[j]<globalIndex)
         j++;
@@ -22,6 +22,24 @@ int StationaryDiffusionEquation::interiorNodeIndex(int globalIndex, std::vector<
         return globalIndex-j+1;
     else
         throw CdmathException("StationaryDiffusionEquation::interiorNodeIndex : Error : node is a boundary node");
+}
+
+int StationaryDiffusionEquation::globalNodeIndex(int interiorNodeIndex, std::vector< int > boundaryNodes)
+{//assumes boundary node numbering is strictly increasing
+    int boundarySize=boundaryNodes.size();
+    double interiorNodeMax=0;//max interior node number in the interval [j,j+1]
+    int j=0;//indice de parcours des noeuds frontière
+    //On cherche l'intervale [j,j+1] qui contient le noeud de numéro interieur interiorNodeIndex
+    while(j+1<boundarySize and interiorNodeMax<interiorNodeIndex)
+    {
+        interiorNodeMax += boundaryNodes[j+1]-boundaryNodes[j]-1;
+        j++;
+    }    
+
+    if(j+1==boundarySize)
+        return interiorNodeIndex+boundarySize;
+    else //interiorNodeMax>=interiorNodeIndex) hence our node global number is between boundaryNodes[j-1] and boundaryNodes[j]
+        return interiorNodeMax-interiorNodeIndex + boundaryNodes[j]-1;
 }
 
 StationaryDiffusionEquation::StationaryDiffusionEquation(int dim, bool FECalculation, double lambda){
@@ -685,7 +703,7 @@ void StationaryDiffusionEquation::save(){
         for(int i=0; i<_NinteriorNodes; i++)
         {
             VecGetValues(_Tk, 1, &i, &Ti);
-            globalIndex = interiorNodeIndex(i, _boundaryNodeIds);
+            globalIndex = globalNodeIndex(i, _boundaryNodeIds);
             _VV(globalIndex)=Ti;//Assumes node numbering starts with border nodes
         }
 

@@ -180,9 +180,9 @@ protected :
     /* Functions for finite element method */
     Vector gradientNodal(Matrix M, vector< double > v);//gradient of nodal shape functions
 	double computeDiffusionMatrixFE(bool & stop);
-
     int fact(int n);
     int interiorNodeIndex(int globalIndex, std::vector< int > boundaryNodes);
+    int globalNodeIndex(int interiorIndex, std::vector< int > boundaryNodes);
 };
 
 #endif /* StationaryDiffusionEquation_HXX_ */
