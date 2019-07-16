@@ -27,7 +27,7 @@ int StationaryDiffusionEquation::interiorNodeIndex(int globalIndex, std::vector<
 int StationaryDiffusionEquation::globalNodeIndex(int interiorNodeIndex, std::vector< int > boundaryNodes)
 {//assumes boundary node numbering is strictly increasing
     int boundarySize=boundaryNodes.size();
-    double interiorNodeMax=-1;//max interior node number in the interval [j,j+1]
+    double interiorNodeMax=-1;//max interior node number in the interval between jth and (j+1)th boundary nodes
     int j=0;//indice de parcours des noeuds frontière
     //On cherche l'intervale [j,j+1] qui contient le noeud de numéro interieur interiorNodeIndex
     while(j+1<boundarySize and interiorNodeMax<interiorNodeIndex)
@@ -39,7 +39,7 @@ int StationaryDiffusionEquation::globalNodeIndex(int interiorNodeIndex, std::vec
     if(j+1==boundarySize)
         return interiorNodeIndex+boundarySize;
     else //interiorNodeMax>=interiorNodeIndex) hence our node global number is between boundaryNodes[j-1] and boundaryNodes[j]
-        return interiorNodeMax-interiorNodeIndex + boundaryNodes[j]-1;
+        return interiorNodeIndex - interiorNodeMax + boundaryNodes[j]-1;
 }
 
 StationaryDiffusionEquation::StationaryDiffusionEquation(int dim, bool FECalculation, double lambda){
