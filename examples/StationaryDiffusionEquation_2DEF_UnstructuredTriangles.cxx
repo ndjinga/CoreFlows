@@ -20,7 +20,7 @@ int main(int argc, char** argv)
 	M.setGroupAtPlan(0,1,eps,"Bord3");
 	M.setGroupAtPlan(1,1,eps,"Bord4");
 
-	cout<< "Loaded unstructured 2D mesh with "<< M.getNumberOfCells()<<" cells and" <<M.getNumberOfNodes()<< " nodes"<<endl;
+	cout<< "Loaded unstructured 2D mesh with "<< M.getNumberOfCells()<<" cells and " <<M.getNumberOfNodes()<< " nodes"<<endl;
 
     /* set the boundary values for each boundary */
 	double T1=0;
