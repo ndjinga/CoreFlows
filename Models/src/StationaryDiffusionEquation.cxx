@@ -287,7 +287,14 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFE(bool & stop){
                             if(nodes[kdim].isBorder())
                             {
                                 nameOfGroup = nodes[kdim].getGroupName();
-                                valuesBorder[kdim]=_limitField[nameOfGroup].T;
+                                if(_limitField[nameOfGroup].bcType==Dirichlet)
+                                    valuesBorder[kdim]=_limitField[nameOfGroup].T;
+                                else {
+                                    stop=true ;
+                                    cout<<"Finite elements for stationary diffusion : Boundary condition not accepted for boundary named "<<nameOfGroup<<endl;
+                                    cout<<"Accepted boundary condition is Dirichlet "<<nameOfGroup<<endl;
+                                    throw CdmathException("Unknown boundary condition");
+                                }
                             }
                             else
                                 valuesBorder[kdim]=0;                            
@@ -385,7 +392,7 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFV(bool & stop){
 			}
 			else {
                 stop=true ;
-				cout<<"Boundary condition not treated for boundary named "<<nameOfGroup<<endl;
+				cout<<"Finite volumes for stationary diffusion : Boundary condition not accepted for boundary named "<<nameOfGroup<<endl;
 				cout<<"Accepted boundary condition are Neumann and Dirichlet "<<nameOfGroup<<endl;
 				throw CdmathException("Unknown boundary condition");
 			}
