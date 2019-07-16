@@ -19,7 +19,7 @@ int StationaryDiffusionEquation::interiorNodeIndex(int globalIndex, std::vector<
     if(j==boundarySize)
         return globalIndex-boundarySize;
     else if (boundaryNodes[j]>globalIndex)
-        return globalIndex-j+1;
+        return globalIndex-j;
     else
         throw CdmathException("StationaryDiffusionEquation::interiorNodeIndex : Error : node is a boundary node");
 }
@@ -27,7 +27,7 @@ int StationaryDiffusionEquation::interiorNodeIndex(int globalIndex, std::vector<
 int StationaryDiffusionEquation::globalNodeIndex(int interiorNodeIndex, std::vector< int > boundaryNodes)
 {//assumes boundary node numbering is strictly increasing
     int boundarySize=boundaryNodes.size();
-    double interiorNodeMax=0;//max interior node number in the interval [j,j+1]
+    double interiorNodeMax=-1;//max interior node number in the interval [j,j+1]
     int j=0;//indice de parcours des noeuds frontière
     //On cherche l'intervale [j,j+1] qui contient le noeud de numéro interieur interiorNodeIndex
     while(j+1<boundarySize and interiorNodeMax<interiorNodeIndex)
@@ -265,7 +265,7 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFE(bool & stop){
         }
         for (int idim=0; idim<_Ndim+1;idim++)
             GradShapeFuncs[idim]=gradientNodal(M,values[idim])/fact(_Ndim);
-            
+
         for (int idim=0; idim<_Ndim+1;idim++)
         {
             if(!_mesh.isBorderNode(nodeIds[idim]))//find(_boundaryNodeIds.begin(),_boundaryNodeIds.end(),nodeIds[idim])==_boundaryNodeIds.end()
