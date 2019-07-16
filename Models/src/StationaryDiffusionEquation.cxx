@@ -317,13 +317,15 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFV(bool & stop){
 	Face Fj;
 	Cell Cell1,Cell2;
 	string nameOfGroup;
-	double inv_dxi, inv_dxj, inv_dxij;
+	double inv_dxi, inv_dxj;
+	double barycenterDistance;
 	Vector normale(_Ndim);
 	double dn;
 	PetscInt idm, idn;
 	std::vector< int > idCells;
 	MatZeroEntries(_A);
 	VecZeroEntries(_b);
+
 	for (int j=0; j<nbFaces;j++){
 		Fj = _mesh.getFace(j);
 
@@ -377,8 +379,9 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFV(bool & stop){
 			if (_limitField[nameOfGroup].bcType==Neumann){//Nothing to do
 			}
 			else if(_limitField[nameOfGroup].bcType==Dirichlet){
-				MatSetValue(_A,idm,idm,inv_dxi*dn, ADD_VALUES);
-				VecSetValue(_b,idm,inv_dxi*dn*_limitField[nameOfGroup].T, ADD_VALUES);
+				barycenterDistance=Cell1.getBarryCenter().distance(Fj.getBarryCenter());
+				MatSetValue(_A,idm,idm,dn*inv_dxi/barycenterDistance                           , ADD_VALUES);
+				VecSetValue(_b,idm,    dn*inv_dxi/barycenterDistance*_limitField[nameOfGroup].T, ADD_VALUES);
 			}
 			else {
                 stop=true ;
@@ -403,12 +406,13 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFV(bool & stop){
 				inv_dxj = Fj.getMeasure()/Cell2.getMeasure();
 			else
 				inv_dxj = 1/Cell2.getMeasure();
-			inv_dxij=2/(1/inv_dxi+1/inv_dxj);
+			
+			barycenterDistance=Cell1.getBarryCenter().distance(Cell2.getBarryCenter());
 
-			MatSetValue(_A,idm,idm,inv_dxij*dn, ADD_VALUES);
-			MatSetValue(_A,idm,idn,-inv_dxij*dn, ADD_VALUES);
-			MatSetValue(_A,idn,idn,inv_dxij*dn, ADD_VALUES);
-			MatSetValue(_A,idn,idm,-inv_dxij*dn, ADD_VALUES);
+			MatSetValue(_A,idm,idm, dn*inv_dxi/barycenterDistance, ADD_VALUES);
+			MatSetValue(_A,idm,idn,-dn*inv_dxi/barycenterDistance, ADD_VALUES);
+			MatSetValue(_A,idn,idn, dn*inv_dxj/barycenterDistance, ADD_VALUES);
+			MatSetValue(_A,idn,idm,-dn*inv_dxj/barycenterDistance, ADD_VALUES);
 		}
 		else
 			throw CdmathException("StationaryDiffusionEquation::ComputeTimeStep(): incompatible number of cells around a face");
