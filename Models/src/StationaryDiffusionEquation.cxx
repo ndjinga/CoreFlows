@@ -10,36 +10,36 @@ int StationaryDiffusionEquation::fact(int n)
 {
   return (n == 1 || n == 0) ? 1 : fact(n - 1) * n;
 }
-int StationaryDiffusionEquation::interiorNodeIndex(int globalIndex, std::vector< int > boundaryNodes)
-{//assumes boundary node numbering is strictly increasing
-    int j=0;//indice de parcours des noeuds frontière
-    int boundarySize=boundaryNodes.size();
-    while(j<boundarySize and boundaryNodes[j]<globalIndex)
+int StationaryDiffusionEquation::interiorNodeIndex(int globalIndex, std::vector< int > dirichletNodes)
+{//assumes Dirichlet node numbering is strictly increasing
+    int j=0;//indice de parcours des noeuds frontière avec CL Dirichlet
+    int boundarySize=dirichletNodes.size();
+    while(j<boundarySize and dirichletNodes[j]<globalIndex)
         j++;
     if(j==boundarySize)
         return globalIndex-boundarySize;
-    else if (boundaryNodes[j]>globalIndex)
+    else if (dirichletNodes[j]>globalIndex)
         return globalIndex-j;
     else
-        throw CdmathException("StationaryDiffusionEquation::interiorNodeIndex : Error : node is a boundary node");
+        throw CdmathException("StationaryDiffusionEquation::interiorNodeIndex : Error : node is a Dirichlet boundary node");
 }
 
-int StationaryDiffusionEquation::globalNodeIndex(int interiorNodeIndex, std::vector< int > boundaryNodes)
-{//assumes boundary node numbering is strictly increasing
-    int boundarySize=boundaryNodes.size();
-    double interiorNodeMax=-1;//max interior node number in the interval between jth and (j+1)th boundary nodes
+int StationaryDiffusionEquation::globalNodeIndex(int interiorNodeIndex, std::vector< int > dirichletNodes)
+{//assumes Dirichlet boundary node numbering is strictly increasing
+    int boundarySize=dirichletNodes.size();
+    double interiorNodeMax=-1;//max interior node number in the interval between jth and (j+1)th Dirichlet boundary nodes
     int j=0;//indice de parcours des noeuds frontière
     //On cherche l'intervale [j,j+1] qui contient le noeud de numéro interieur interiorNodeIndex
     while(j+1<boundarySize and interiorNodeMax<interiorNodeIndex)
     {
-        interiorNodeMax += boundaryNodes[j+1]-boundaryNodes[j]-1;
+        interiorNodeMax += dirichletNodes[j+1]-dirichletNodes[j]-1;
         j++;
     }    
 
     if(j+1==boundarySize)
         return interiorNodeIndex+boundarySize;
-    else //interiorNodeMax>=interiorNodeIndex) hence our node global number is between boundaryNodes[j-1] and boundaryNodes[j]
-        return interiorNodeIndex - interiorNodeMax + boundaryNodes[j]-1;
+    else //interiorNodeMax>=interiorNodeIndex) hence our node global number is between dirichletNodes[j-1] and dirichletNodes[j]
+        return interiorNodeIndex - interiorNodeMax + dirichletNodes[j]-1;
 }
 
 StationaryDiffusionEquation::StationaryDiffusionEquation(int dim, bool FECalculation, double lambda){
@@ -69,11 +69,12 @@ StationaryDiffusionEquation::StationaryDiffusionEquation(int dim, bool FECalcula
 
     //Mesh data
     _neibMaxNbCells=0;    
-    _neibMaxNbNodes=0;    
     _meshSet=false;
-    _neibMaxNbNodes=0;
-    _boundaryNodeIds=std::vector< int >(0,0);
+    _neibMaxNbNodes=0;    
+    _boundaryNodeIds=std::vector< int >(0);
+    _dirichletNodeIds=std::vector< int >(0);
     _NboundaryNodes=0;
+    _NdirichletNodes=0;
     _NinteriorNodes=0;
     
     //Linear solver data
@@ -89,12 +90,12 @@ StationaryDiffusionEquation::StationaryDiffusionEquation(int dim, bool FECalcula
 	_conditionNumber=false;
 	_erreur_rel= 0;
 
-    //monitoring simulation
+    //parameters for monitoring simulation
 	_verbose = false;
 	_system = false;
 	_runLogFile=new ofstream;
 
-	//save results
+	//result save parameters
 	_fileName = "StationaryDiffusionProblem";
 	char result[ PATH_MAX ];//extracting current directory
 	getcwd(result, PATH_MAX );
@@ -156,6 +157,16 @@ void StationaryDiffusionEquation::initialize()
         _fluidTemperatureFieldSet=true;
 	}
 
+    /* Détection des noeuds frontière avec une condition limite de Dirichlet */
+    if(_FECalculation)
+    {
+        for(int i=0; i<_NboundaryNodes; i++)
+            if(_limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType==Dirichlet)
+                _dirichletNodeIds.push_back(_boundaryNodeIds[i]);
+        _NdirichletNodes=_dirichletNodeIds.size();
+        _NinteriorNodes=_Nnodes - _NdirichletNodes;
+        cout<<"Number of interior nodes " << _NinteriorNodes <<", Number of boundary nodes " << _NboundaryNodes<< ", Number of Dirichlet boundary nodes " << _NdirichletNodes <<endl;
+    }
 	//creation de la matrice
     if(!_FECalculation)
         MatCreateSeqAIJ(PETSC_COMM_SELF, _Nmailles, _Nmailles, (1+_neibMaxNbCells), PETSC_NULL, &_A);
@@ -284,15 +295,15 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFE(bool & stop){
 
         for (int idim=0; idim<_Ndim+1;idim++)
         {
-            if(!_mesh.isBorderNode(nodeIds[idim]))//find(_boundaryNodeIds.begin(),_boundaryNodeIds.end(),nodeIds[idim])==_boundaryNodeIds.end()
+            if(!_mesh.isBorderNode(nodeIds[idim]))//find(_dirichletNodeIds.begin(),_dirichletNodeIds.end(),nodeIds[idim])==_dirichletNodeIds.end()
             {
-                i_int=interiorNodeIndex(nodeIds[idim], _boundaryNodeIds);//assumes boundary node numbering is strictly increasing
+                i_int=interiorNodeIndex(nodeIds[idim], _dirichletNodeIds);//assumes Dirichlet boundary node numbering is strictly increasing
                 borderCell=false;
                 for (int jdim=0; jdim<_Ndim+1;jdim++)
                 {
-                    if(!_mesh.isBorderNode(nodeIds[jdim]))//find(_boundaryNodeIds.begin(),_boundaryNodeIds.end(),nodeIds[jdim])==_boundaryNodeIds.end()
+                    if(!_mesh.isBorderNode(nodeIds[jdim]))//find(_dirichletNodeIds.begin(),_dirichletNodeIds.end(),nodeIds[jdim])==_dirichletNodeIds.end()
                     {
-                        j_int= interiorNodeIndex(nodeIds[jdim], _boundaryNodeIds);//assumes boundary node numbering is strictly increasing
+                        j_int= interiorNodeIndex(nodeIds[jdim], _dirichletNodeIds);//assumes Dirichlet boundary node numbering is strictly increasing
                         MatSetValue(_A,i_int,j_int,_conductivity*(_DiffusionTensor*GradShapeFuncs[idim])*GradShapeFuncs[jdim]/Cj.getMeasure(), ADD_VALUES);
                     }
                     else if (!borderCell)
@@ -453,10 +464,10 @@ double StationaryDiffusionEquation::computeRHS(bool & stop)//Contribution of the
                 Ci=_mesh.getCell(i);
                 nodesId=Ci.getNodesId();
                 for (int j=0; j<nodesId.size();j++)
-                    if(!_mesh.isBorderNode(nodesId[j])) //or for better performance nodeIds[idim]>boundaryNodes.upper_bound()
+                    if(!_mesh.isBorderNode(nodesId[j])) //or for better performance nodeIds[idim]>dirichletNodes.upper_bound()
                     {
                         double coeff = _heatTransfertCoeff*_fluidTemperatureField(nodesId[j]) + _heatPowerField(nodesId[j]);
-                        VecSetValue(_b,interiorNodeIndex(nodesId[j], _boundaryNodeIds), coeff*Ci.getMeasure()/(_Ndim+1),ADD_VALUES);//assumes node numbering starts with interior nodes. otherwise interiorNodes.index(j)
+                        VecSetValue(_b,interiorNodeIndex(nodesId[j], _dirichletNodeIds), coeff*Ci.getMeasure()/(_Ndim+1),ADD_VALUES);//assumes node numbering starts with interior nodes. otherwise interiorNodes.index(j)
                     }
             }
         }
@@ -571,10 +582,8 @@ void StationaryDiffusionEquation::setMesh(const Mesh &M)
 		_VV=Field ("Temperature", NODES, _mesh, 1);
 
         _neibMaxNbNodes=_mesh.getMaxNbNeighbours(NODES);
-        _boundaryNodeIds=_mesh.getBoundaryNodeIds();
+        _boundaryNodeIds = _mesh.getBoundaryNodeIds();
         _NboundaryNodes=_boundaryNodeIds.size();
-        _NinteriorNodes=_Nnodes - _NboundaryNodes;
-        cout<<"Number of interior nodes "<< _NinteriorNodes << ", Number of boundary nodes " << _NboundaryNodes <<endl;
     }
 
 	_meshSet=true;
@@ -712,17 +721,17 @@ void StationaryDiffusionEquation::save(){
         for(int i=0; i<_NinteriorNodes; i++)
         {
             VecGetValues(_Tk, 1, &i, &Ti);
-            globalIndex = globalNodeIndex(i, _boundaryNodeIds);
+            globalIndex = globalNodeIndex(i, _dirichletNodeIds);
             _VV(globalIndex)=Ti;//Assumes node numbering starts with border nodes
         }
 
         Node Ni;
         string nameOfGroup;
-        for(int i=0; i<_NboundaryNodes; i++)//Assumes node numbering starts with border nodes
+        for(int i=0; i<_NdirichletNodes; i++)//Assumes node numbering starts with border nodes
         {
-            Ni=_mesh.getNode(_boundaryNodeIds[i]);
+            Ni=_mesh.getNode(_dirichletNodeIds[i]);
             nameOfGroup = Ni.getGroupName();
-            _VV(_boundaryNodeIds[i])=_limitField[nameOfGroup].T;
+            _VV(_dirichletNodeIds[i])=_limitField[nameOfGroup].T;
         }
     }
 
