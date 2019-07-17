@@ -16,9 +16,9 @@ int main(int argc, char** argv)
 	double ysup=1.0;
 	double zinf=0.0;
 	double zsup=1.0;
-	int nx=20;
-	int ny=20;
-	int nz=20;
+	int nx=2;
+	int ny=2;
+	int nz=2;
 
     /* Mesh construction */
 	Mesh M(xinf,xsup,nx,yinf,ysup,ny,zinf,zsup,nz,0); //Regular tetrahadral mesh
@@ -29,8 +29,8 @@ int main(int argc, char** argv)
 	M.setGroupAtPlan(xinf,0,eps,"Bord2");
 	M.setGroupAtPlan(ysup,1,eps,"Bord3");
 	M.setGroupAtPlan(yinf,1,eps,"Bord4");
-	M.setGroupAtPlan(ysup,2,eps,"Bord5");
-	M.setGroupAtPlan(yinf,2,eps,"Bord6");
+	M.setGroupAtPlan(zsup,2,eps,"Bord5");
+	M.setGroupAtPlan(zinf,2,eps,"Bord6");
 
     /* set the boundary values for each boundary */
 	double T1=0;
@@ -40,7 +40,7 @@ int main(int argc, char** argv)
 	double T5=0;
 	double T6=0;
 
-	cout<< "Built a regular tetrahadral 3D mesh from a square mesh with "<< nx<<"x" <<ny<< " cells"<<endl;
+	cout<< "Built a regular tetrahadral 3D mesh from a square mesh with "<< nx<<"x" <<ny<<"x" <<nz<< " cells"<<endl;
 
     /* Create the problem */
     bool FEComputation=true;
