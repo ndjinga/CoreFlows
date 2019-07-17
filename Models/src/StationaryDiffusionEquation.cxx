@@ -181,6 +181,22 @@ void StationaryDiffusionEquation::initialize()
 	KSPGetPC(_ksp, &_pc);
 	PCSetType(_pc, _pctype);
 
+    //Checking whether all boundaries are Neumann boundaries
+    map<string, LimitField>::iterator it = _limitField.begin();
+    while(it != _limitField.end() and (it->second).bcType == Neumann)
+        it++;
+    bool onlyNeumannBC = (it == _limitField.end());
+    //If only Neumann BC, then matrix is singular and solution should be sought in space of mean zero vectors
+    if(onlyNeumannBC)
+    {
+		MatNullSpace nullsp;
+		MatNullSpaceCreate(PETSC_COMM_WORLD, PETSC_TRUE, 0, PETSC_NULL, &nullsp);
+		MatSetNullSpace(_A, nullsp);
+		MatNullSpaceDestroy(&nullsp);
+
+        _pctype = (char*)&PCNONE;
+    }
+
 	_initializedMemory=true;
 
 }
@@ -340,37 +356,19 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFV(bool & stop){
 		idCells = Fj.getCellsId();
 		Cell1 = _mesh.getCell(idCells[0]);
 		idm = idCells[0];
-		if (_Ndim >1){
-			for(int l=0; l<Cell1.getNumberOfFaces(); l++){
-				if (j == Cell1.getFacesId()[l]){
-					for (int idim = 0; idim < _Ndim; ++idim)
-						normale[idim] = Cell1.getNormalVector(l,idim);
-					break;
-				}
-			}
-		}else{ // _Ndim = 1 : assume that this is normal mesh : the face index increases in positive direction
-			if (Fj.getNumberOfCells()<2) {
-				if (j==0)
-					normale[0] = -1;
-				else if (j==nbFaces-1)
-					normale[0] = 1;
-				else
-					throw CdmathException("StationaryDiffusionEquation::ComputeTimeStep(): computation of normal vector failed");
-			} else if(Fj.getNumberOfCells()==2){
-				if (idCells[0] < idCells[1])
-					normale[0] = 1;
-				else
-					normale[0] = -1;
-			}
-		}
+        for(int l=0; l<Cell1.getNumberOfFaces(); l++){
+            if (j == Cell1.getFacesId()[l]){
+                for (int idim = 0; idim < _Ndim; ++idim)
+                    normale[idim] = Cell1.getNormalVector(l,idim);
+                break;
+            }
+        }
+
 		//Compute velocity at the face Fj
 		dn=_conductivity*(_DiffusionTensor*normale)*normale;
 
 		// compute 1/dxi = volume of Ci/area of Fj
-		if (_Ndim > 1)
-			inv_dxi = Fj.getMeasure()/Cell1.getMeasure();
-		else
-			inv_dxi = 1/Cell1.getMeasure();
+        inv_dxi = Fj.getMeasure()/Cell1.getMeasure();
 
 		// If Fj is on the boundary
 		if (Fj.getNumberOfCells()==1) {
@@ -422,7 +420,7 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFV(bool & stop){
 			MatSetValue(_A,idn,idm,-dn*inv_dxj/barycenterDistance, ADD_VALUES);
 		}
 		else
-			throw CdmathException("StationaryDiffusionEquation::ComputeTimeStep(): incompatible number of cells around a face");
+			throw CdmathException("StationaryDiffusionEquation::computeDiffusionMatrixFV(): incompatible number of cells around a face");
 	}
 
 	MatAssemblyBegin(_A, MAT_FINAL_ASSEMBLY);

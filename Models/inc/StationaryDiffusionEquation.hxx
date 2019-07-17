@@ -4,13 +4,13 @@
  * \author Michael NDJINGA
  * \version 1.0
  * \date June 2019
- * \brief Stationary heat diffusion equation with finite element. 
+ * \brief Stationary heat diffusion equation solved with either finite elements or finite volume method. 
  * -\lambda\Delta T=\Phi + \lambda_{sf} (T_{fluid}-T)
  * */
 //============================================================================
 
 /*! \class StationaryDiffusionEquation StationaryDiffusionEquation.hxx "StationaryDiffusionEquation.hxx"
- *  \brief Scalar stationary heat equation for the Uranium rods temperature
+ *  \brief Scalar stationary heat equation solved with either finite elements or finite volume method. 
  *  \details see \ref TransportEqPage for more details
  * -\lambda\Delta T=\Phi(T) + \lambda_{sf} (T_{fluid}-T)
  */
