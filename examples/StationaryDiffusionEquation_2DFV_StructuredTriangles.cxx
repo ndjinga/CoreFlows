@@ -1,5 +1,6 @@
 #include "StationaryDiffusionEquation.hxx"
 #include "math.h"
+#include <assert.h>
 
 double pi = M_PI;
 using namespace std;
@@ -67,10 +68,29 @@ int main(int argc, char** argv)
 	/* Run the computation */
 	myProblem.initialize();
 	bool ok = myProblem.solveStationaryProblem();
-	if (ok)
-		cout << "Simulation of "<<fileName<<" is successful !" << endl;
+	if (!ok)
+		cout << "Simulation of "<<fileName<<" failed !" << endl;
 	else
-		cout << "Simulation of "<<fileName<<"  failed ! " << endl;
+	{
+		/********************** Postprocessing and measure od numerical error******************************/
+		Field my_ResultField = myProblem.getOutputTemperatureField();
+		/* The following formulas use the fact that the exact solution is equal the right hand side divided by 2*pi*pi */
+		double max_abs_sol_exacte=max(my_RHSfield.max(),-my_RHSfield.min())/(2*pi*pi);
+		double max_sol_num=my_ResultField.max();
+		double min_sol_num=my_ResultField.min();
+		double erreur_abs=0;
+		for(int i=0; i< M.getNumberOfCells() ; i++)
+			if( erreur_abs < abs(my_RHSfield[i]/(2*pi*pi) - my_ResultField[i]) )
+				erreur_abs = abs(my_RHSfield[i]/(2*pi*pi) - my_ResultField[i]);
+		
+		cout<<"Absolute error = max(| exact solution - numerical solution |) = "<<erreur_abs <<endl;
+		cout<<"Relative error = max(| exact solution - numerical solution |)/max(| exact solution |) = "<<erreur_abs/max_abs_sol_exacte<<endl;
+		cout<<"Maximum numerical solution = "<< max_sol_num<< " Minimum numerical solution = "<< min_sol_num << endl;
+		
+		assert( erreur_abs/max_abs_sol_exacte <1.);
+
+        cout << "Simulation of "<<fileName<<" is successful ! " << endl;
+    }
 
 	cout << "------------ End of calculation !!! -----------" << endl;
 	myProblem.terminate();
