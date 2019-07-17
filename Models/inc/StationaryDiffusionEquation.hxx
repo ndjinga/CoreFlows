@@ -174,7 +174,7 @@ protected :
     bool _FECalculation;
 	int _Nnodes;/* number of nodes for FE calculation */
 	int _neibMaxNbNodes;/* maximum number of nodes around a node */
-	int _NinteriorNodes;/* number of unknown nodes for FE calculation */
+	int _NunknownNodes;/* number of unknown nodes for FE calculation */
 	int _NboundaryNodes;/* total number of boundary nodes */
 	int _NdirichletNodes;/* number of boundary nodes with Dirichlet BC for FE calculation */
     std::vector< int > _boundaryNodeIds;/* List of boundary nodes with Dirichlet BC */
@@ -184,8 +184,8 @@ protected :
     Vector gradientNodal(Matrix M, vector< double > v);//gradient of nodal shape functions
 	double computeDiffusionMatrixFE(bool & stop);
     int fact(int n);
-    int interiorNodeIndex(int globalIndex, std::vector< int > dirichletNodes);
-    int globalNodeIndex(int interiorIndex, std::vector< int > dirichletNodes);
+    int unknownNodeIndex(int globalIndex, std::vector< int > dirichletNodes);
+    int globalNodeIndex(int unknownIndex, std::vector< int > dirichletNodes);
 };
 
 #endif /* StationaryDiffusionEquation_HXX_ */
