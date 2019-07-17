@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*-coding:utf-8 -*
 #===============================================================================================================================
-# Name        : Résolution VF de l'équation de Poisson 3D -\triangle T = f sur uncube avec conditions aux limites de Dirichlet T=0
+# Name        : Résolution VF de l'équation de Poisson 3D -\triangle T = f sur un cube avec conditions aux limites de Dirichlet T=0
 # Author      : Michaël Ndjinga
 # Copyright   : CEA Saclay 2019
 # Description : Utilisation de la méthode des volumes finis avec champs T et f discrétisés aux cellules d'un maillage quelconque
@@ -18,9 +18,9 @@ def StationaryDiffusionEquation_3DFV_StructuredCubes():
 	# Prepare for the mesh
 	print("Building mesh " );
 	xinf = 0 ;
-	xsup=1.0;
-	yinf=0.0;
-	ysup=1.0;
+	xsup = 1.0;
+	yinf = 0.0;
+	ysup = 1.0;
 	zinf = 0.0;
 	zsup = 1.0;
 	nx = 20;
