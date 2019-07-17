@@ -31,7 +31,7 @@ def StationaryDiffusionEquation_2DFV_StructuredTriangles():
 	M.setGroupAtPlan(ysup,1,eps,"Bord3")
 	M.setGroupAtPlan(yinf,1,eps,"Bord4")
 	
-	print "Building of a regular triangular 2D mesh from a square mesh with ", nx,"x" ,ny, " cells"
+	print "Built a regular triangular 2D mesh from a square mesh with ", nx,"x" ,ny, " cells"
 
 	FEComputation=False
 	myProblem = cf.StationaryDiffusionEquation(spaceDim,FEComputation);

@@ -32,7 +32,7 @@ int main(int argc, char** argv)
 	double T3=0;
 	double T4=0;
 
-	cout<< "Building of a regular square 2D mesh with "<< nx<<"x" <<ny<< " cells"<<endl;
+	cout<< "Built a regular square 2D mesh with "<< nx<<"x" <<ny<< " cells"<<endl;
 
     /* Create the problem */
     bool FEComputation=false;
