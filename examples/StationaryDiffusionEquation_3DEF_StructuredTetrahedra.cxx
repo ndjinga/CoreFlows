@@ -20,7 +20,7 @@ int main(int argc, char** argv)
 	int ny=2;
 	int nz=2;
 
-    /* Mesh construction */
+    /* Mesh construction : splitting polity to 0 yield all nodes considered boundary nodes */
 	Mesh M(xinf,xsup,nx,yinf,ysup,ny,zinf,zsup,nz,0); //Regular tetrahadral mesh
 
 	/* set the limit field for each boundary */
