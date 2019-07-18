@@ -23,9 +23,9 @@ def StationaryDiffusionEquation_3DEF_StructuredTriangles():
 	ysup = 1.0;
 	zinf = 0.0;
 	zsup = 1.0;
-	nx = 20;
-	ny = 20; 
-	nz = 20; 
+	nx = 5;
+	ny = 5; 
+	nz = 5; 
 	M=cm.Mesh(xinf,xsup,nx,yinf,ysup,ny,zinf,zsup,nz,1)#Regular tetrahedral mesh
 	# set the limit field for each boundary
 	eps=1e-6;
