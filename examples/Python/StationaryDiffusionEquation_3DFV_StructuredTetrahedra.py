@@ -26,7 +26,7 @@ def StationaryDiffusionEquation_3DFV_StructuredTetrahedra():
 	nx = 5;
 	ny = 5; 
 	nz = 5; 
-	M=cm.Mesh(xinf,xsup,nx,yinf,ysup,ny,zinf,zsup,nz,0)#Regular tetrahedral mesh
+	M=cm.Mesh(xinf,xsup,nx,yinf,ysup,ny,zinf,zsup,nz,1)#Regular tetrahedral mesh
 	# set the limit field for each boundary
 	eps=1e-6;
 	M.setGroupAtPlan(xsup,0,eps,"Bord1")
