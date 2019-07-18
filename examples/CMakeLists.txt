@@ -103,6 +103,7 @@ CreateTestExecAndInstall(StationaryDiffusionEquation_2DEF_UnstructuredTriangles.
 CreateTestExecAndInstall(StationaryDiffusionEquation_2DFV_StructuredTriangles.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(StationaryDiffusionEquation_2DFV_StructuredSquares.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(StationaryDiffusionEquation_3DEF_StructuredTetrahedra.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(StationaryDiffusionEquation_3DFV_StructuredTetrahedra.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(testEOS.cxx  "${libs_for_tests}" )
 
 
