@@ -122,4 +122,5 @@ CreatePythonTest(StationaryDiffusionEquation_2DFV_StructuredTriangles.py)
 CreatePythonTest(StationaryDiffusionEquation_2DFV_StructuredSquares.py)
 CreatePythonTest(StationaryDiffusionEquation_3DEF.py)
 CreatePythonTest(StationaryDiffusionEquation_3DFV_StructuredCubes.py)
+CreatePythonTest(StationaryDiffusionEquation_3DFV_StructuredTetrahedra.py)
 
