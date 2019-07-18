@@ -68,6 +68,17 @@ public :
                                                         vector<double>(_Ndim,0),Temperature,-1,-1,-1);
 	};
 
+	/** \fn setNeumannBoundaryCondition
+			 * \brief adds a new boundary condition of type Neumann
+			 * \details
+			 * \param [in] string : the name of the boundary
+			 * \param [out] void
+			 *  */
+	void setNeumannBoundaryCondition(string groupName){
+		_limitField[groupName]=LimitField(Neumann,-1, vector<double>(0),vector<double>(0),
+                                                      vector<double>(0),-1,-1,-1,-1);
+	};
+
 	void setConductivity(double conductivite){
 		_conductivity=conductivite;
 	};

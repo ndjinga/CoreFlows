@@ -27,6 +27,10 @@ int StationaryDiffusionEquation::unknownNodeIndex(int globalIndex, std::vector< 
 int StationaryDiffusionEquation::globalNodeIndex(int unknownNodeIndex, std::vector< int > dirichletNodes)
 {//assumes Dirichlet boundary node numbering is strictly increasing
     int boundarySize=dirichletNodes.size();
+    /* trivial case where all boundary nodes are Neumann BC */
+    if(boundarySize==0)
+        return unknownNodeIndex;
+        
     double unknownNodeMax=-1;//max unknown node number in the interval between jth and (j+1)th Dirichlet boundary nodes
     int j=0;//indice de parcours des noeuds frontière
     //On cherche l'intervale [j,j+1] qui contient le noeud de numéro interieur unknownNodeIndex
@@ -285,7 +289,7 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFE(bool & stop){
     std::vector< int > nodeIds(_Ndim+1);//cell node Ids
     std::vector< Node > nodes(_Ndim+1);//cell nodes
     int i_int, j_int; //index of nodes j and k considered as unknown nodes
-    bool borderCell;
+    bool dirichletCell_treated;
     
     std::vector< vector< double > > values(_Ndim+1,vector< double >(_Ndim+1,0));//values of shape functions on cell node
     for (int idim=0; idim<_Ndim+1;idim++)
@@ -309,37 +313,27 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFE(bool & stop){
         for (int idim=0; idim<_Ndim+1;idim++)
             GradShapeFuncs[idim]=gradientNodal(M,values[idim])/fact(_Ndim);
 
+        /* Loop on the edges of the cell */
         for (int idim=0; idim<_Ndim+1;idim++)
         {
-            if(!_mesh.isBorderNode(nodeIds[idim]))//find(_dirichletNodeIds.begin(),_dirichletNodeIds.end(),nodeIds[idim])==_dirichletNodeIds.end()
-            {
+            if(find(_dirichletNodeIds.begin(),_dirichletNodeIds.end(),nodeIds[idim])==_dirichletNodeIds.end())//!_mesh.isBorderNode(nodeIds[idim])
+            {//First node of the edge is not Dirichlet node
                 i_int=unknownNodeIndex(nodeIds[idim], _dirichletNodeIds);//assumes Dirichlet boundary node numbering is strictly increasing
-                borderCell=false;
+                dirichletCell_treated=false;
                 for (int jdim=0; jdim<_Ndim+1;jdim++)
                 {
-                    if(!_mesh.isBorderNode(nodeIds[jdim]))//find(_dirichletNodeIds.begin(),_dirichletNodeIds.end(),nodeIds[jdim])==_dirichletNodeIds.end()
-                    {
+                    if(find(_dirichletNodeIds.begin(),_dirichletNodeIds.end(),nodeIds[jdim])==_dirichletNodeIds.end())//!_mesh.isBorderNode(nodeIds[jdim])
+                    {//Second node of the edge is not Dirichlet node
                         j_int= unknownNodeIndex(nodeIds[jdim], _dirichletNodeIds);//assumes Dirichlet boundary node numbering is strictly increasing
                         MatSetValue(_A,i_int,j_int,_conductivity*(_DiffusionTensor*GradShapeFuncs[idim])*GradShapeFuncs[jdim]/Cj.getMeasure(), ADD_VALUES);
                     }
-                    else if (!borderCell)
-                    {
-                        borderCell=true;
+                    else if (!dirichletCell_treated)
+                    {//Second node of the edge is a Dirichlet node
+                        dirichletCell_treated=true;
                         for (int kdim=0; kdim<_Ndim+1;kdim++)
                         {
-                            if(nodes[kdim].isBorder())
-                            {
-                                nameOfGroup = nodes[kdim].getGroupName();
-                                if(_limitField[nameOfGroup].bcType==Dirichlet)
-                                    valuesBorder[kdim]=_limitField[nameOfGroup].T;
-                                else {
-                                    stop=true ;
-                                    cout<<"Error StationaryDiffusionEquation::computeDiffusionMatrixFE"<<endl;
-                                    cout<<"Boundary condition "<< _limitField[nameOfGroup].bcType<<" not accepted for boundary named "<<nameOfGroup<<endl;
-                                    cout<<"Accepted boundary conditions is Dirichlet "<<Dirichlet<<endl;
-                                    throw CdmathException("Unknown boundary condition");
-                                }
-                            }
+                            if(find(_dirichletNodeIds.begin(),_dirichletNodeIds.end(),nodeIds[kdim])!=_dirichletNodeIds.end())
+                                valuesBorder[kdim]=_limitField[nameOfGroup].T;
                             else
                                 valuesBorder[kdim]=0;                            
                         }
