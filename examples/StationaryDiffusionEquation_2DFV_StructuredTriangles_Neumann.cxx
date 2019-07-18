@@ -56,7 +56,7 @@ int main(int argc, char** argv)
 		x = Ci.x();
 		y = Ci.y();
 
-		my_RHSfield[i]=2*pi*pi*sin(pi*x)*sin(pi*y);//mettre la fonction definie au second membre de l'edp
+		my_RHSfield[i]=2*pi*pi*cos(pi*x)*cos(pi*y);//mettre la fonction definie au second membre de l'edp
 	}
 	myProblem.setHeatPowerField(my_RHSfield);
 	myProblem.setLinearSolver(GMRES,ILU);

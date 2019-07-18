@@ -18,7 +18,7 @@ int main(int argc, char** argv)
 	int ny=20;
 
     /* Mesh construction */
-	Mesh M(xinf,xsup,nx,yinf,ysup,ny,1); //Regular triangular mesh
+	Mesh M(xinf,xsup,nx,yinf,ysup,ny,0); //Regular triangular mesh
 
 	/* set the limit field for each boundary */
 	double eps=1e-6;
@@ -56,7 +56,7 @@ int main(int argc, char** argv)
 		x = Ni.x();
 		y = Ni.y();
 
-		my_RHSfield[i]=2*pi*pi*sin(pi*x)*sin(pi*y);//mettre la fonction definie au second membre de l'edp
+		my_RHSfield[i]=2*pi*pi*cos(pi*x)*cos(pi*y);//mettre la fonction definie au second membre de l'edp
 	}
 	myProblem.setHeatPowerField(my_RHSfield);
 	myProblem.setLinearSolver(GMRES,ILU);
