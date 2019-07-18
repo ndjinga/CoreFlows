@@ -40,7 +40,7 @@ int main(int argc, char** argv)
 	double T5=0;
 	double T6=0;
 
-	cout<< "Built a regular tetrahadral 3D mesh from a square mesh with "<< nx<<"x" <<ny<<"x" <<nz<< " cells"<<endl;
+	cout<< "Built a regular tetrahedral 3D mesh from a cube mesh with "<< nx<<"x" <<ny<<"x" <<nz<< " cells"<<endl;
 
     /* Create the problem */
     bool FEComputation=true;
@@ -53,7 +53,7 @@ int main(int argc, char** argv)
 	myProblem.setDirichletBoundaryCondition("Bord3",T3);
 	myProblem.setDirichletBoundaryCondition("Bord4",T4);
 	myProblem.setDirichletBoundaryCondition("Bord5",T5);
-	myProblem.setDirichletBoundaryCondition("Bord5",T6);
+	myProblem.setDirichletBoundaryCondition("Bord6",T6);
 
 	/* Set the right hand side function*/
 	Field my_RHSfield("RHS_field", NODES, M, 1);
@@ -72,7 +72,7 @@ int main(int argc, char** argv)
 	myProblem.setLinearSolver(GMRES,ILU);
 
     /* name the result file */
-	string fileName = "StationaryDiffusion_3DFV_StructuredCubes";
+	string fileName = "StationaryDiffusion_3DFE_StructuredTetrahedra";
 	myProblem.setFileName(fileName);
 
 	/* Run the computation */
