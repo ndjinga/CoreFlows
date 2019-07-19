@@ -682,7 +682,7 @@ protected :
 	int _Ndim;//space dimension
 	int _nVar;//Number of equations to sole
 	int _Nmailles;//number of cells
-	int _neibMaxNb;//maximum number of neighbours aroud a cell
+	int _neibMaxNb;//maximum number of neighbours around a cell
 	Mesh _mesh;
 	Field _perimeters;
 
