@@ -10,12 +10,13 @@
 
 /*! \class DiffusionEquation DiffusionEquation.hxx "DiffusionEquation.hxx"
  *  \brief Scalar heat equation for the Uranium rods temperature
- *  \details see \ref TransportEqPage for more details
+ *  \details see \ref DiffusionEqPage for more details
  */
 #ifndef DiffusionEquation_HXX_
 #define DiffusionEquation_HXX_
 
 #include "ProblemCoreFlows.hxx"
+#include "Node.hxx"
 
 using namespace std;
 
@@ -31,7 +32,7 @@ public :
 			 * \param [in] double : solid conductivity
 			 *  */
 
-	DiffusionEquation( int dim,double rho=10000,double cp=300,double lambda=5);
+	DiffusionEquation( int dim,bool FECalculation=true,double rho=10000,double cp=300,double lambda=5);
 
 	//Gestion du calcul
 	void initialize();
@@ -43,6 +44,10 @@ public :
 	void save();
 	void validateTimeStep();
 
+    /* Boundary conditions */
+	void setBoundaryFields(map<string, LimitField> boundaryFields){
+		_limitField = boundaryFields;
+    };
 	/** \fn setDirichletBoundaryCondition
 			 * \brief adds a new boundary condition of type Dirichlet
 			 * \details
@@ -52,6 +57,16 @@ public :
 			 *  */
 	void setDirichletBoundaryCondition(string groupName,double Temperature){
 		_limitField[groupName]=LimitField(Dirichlet,-1,vector<double>(_Ndim,0),vector<double>(_Ndim,0),vector<double>(_Ndim,0),Temperature,-1,-1,-1);
+	};
+	/** \fn setNeumannBoundaryCondition
+			 * \brief adds a new boundary condition of type Neumann
+			 * \details
+			 * \param [in] string : the name of the boundary
+			 * \param [out] void
+			 *  */
+	void setNeumannBoundaryCondition(string groupName){
+		_limitField[groupName]=LimitField(Neumann,-1, vector<double>(0),vector<double>(0),
+                                                      vector<double>(0),-1,-1,-1,-1);
 	};
 
 	void setRodDensity(double rho){
@@ -77,8 +92,9 @@ public :
 		_DiffusionTensor=DiffusionTensor;
 	};
 protected :
-	double computeDiffusionMatrix();
-	double computeRHS();
+	double computeDiffusionMatrix(bool & stop);
+	double computeDiffusionMatrixFV(bool & stop);
+	double computeRHS(bool & stop);
 
 	Field _fluidTemperatureField;
 	bool _fluidTemperatureFieldSet, _diffusionMatrixSet;
@@ -89,6 +105,24 @@ protected :
 	Matrix _DiffusionTensor;
 	Vec _Tn, _deltaT, _Tk, _Tkm1, _b0;
 	double _dt_diffusion, _dt_src;
+    
+    /************ Data for FE calculation *************/
+    bool _FECalculation;
+	int _Nnodes;/* number of nodes for FE calculation */
+	int _neibMaxNbNodes;/* maximum number of nodes around a node */
+	int _NunknownNodes;/* number of unknown nodes for FE calculation */
+	int _NboundaryNodes;/* total number of boundary nodes */
+	int _NdirichletNodes;/* number of boundary nodes with Dirichlet BC for FE calculation */
+    std::vector< int > _boundaryNodeIds;/* List of boundary nodes */
+    std::vector< int > _dirichletNodeIds;/* List of boundary nodes with Dirichlet BC */
+
+    /*********** Functions for finite element method ***********/
+    Vector gradientNodal(Matrix M, vector< double > v);//gradient of nodal shape functions
+	double computeDiffusionMatrixFE(bool & stop);
+    int fact(int n);
+    int unknownNodeIndex(int globalIndex, std::vector< int > dirichletNodes);
+    int globalNodeIndex(int unknownIndex, std::vector< int > dirichletNodes);
+
 };
 
 #endif /* DiffusionEquation_HXX_ */
