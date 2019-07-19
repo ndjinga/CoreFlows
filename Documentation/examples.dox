@@ -2,18 +2,24 @@
 \page examples CoreFlows example scripts
 
 
-- 1- \subpage ExampleTransportEqPage " The transport equation "
-	+ \ref Trans1 
-	+ \ref Trans1py 
+- 1- \subpage ExampleStationaryDiffusionEqPage " The stationary diffusion equation "
+	+ \ref StationaryDiffus1 
+	+ \ref StationaryDiffus1FV 
+	+ \ref StationaryDiffus1py 
+	+ \ref StationaryDiffus1pyFV 
 
-- 2- \subpage ExampleDiffusionEqPage " The diffusion equation"
+- 2- \subpage ExampleDiffusionEqPage " The diffusion equation "
 	+ \ref Diffus1 
 	+ \ref Diffus1py 
 
-- 3- \subpage ExampleTransportDiffusionEqsCouplingPage " The coupling of transport and diffusion equations "
+- 3- \subpage ExampleTransportEqPage " The transport equation "
+	+ \ref Trans1 
+	+ \ref Trans1py 
+
+- 4- \subpage ExampleTransportDiffusionEqsCouplingPage " The coupling of transport and diffusion equations "
 	+ \ref TransDiffus 
 
-- 4- \subpage ExampleSinglePhase "The Single Phase Examples " 
+- 5- \subpage ExampleSinglePhase "The Single Phase Examples " 
 	+ \ref Single1H 
 	+ \ref Single1Hpy 
 	+ \ref Single1R 
@@ -37,7 +43,7 @@
 	+ \ref Single3d 
 	+ \ref Single3dPy 
 
-- 5- \subpage ExampleDriftModelPage " The Drift Model"
+- 6- \subpage ExampleDriftModelPage " The Drift Model "
 	+ \ref Drift1DRP
 	+ \ref Drift1DRPpy
 	+ \ref Drift1DDepr
@@ -66,7 +72,7 @@
 	+ \ref DriftWirePy 
 	+ \ref Drift3DBoilBarPy
 
-- 6- \subpage ExampleIsothermalPage " The Isothermal TwoFluid model "
+- 7- \subpage ExampleIsothermalPage " The Isothermal TwoFluid model "
 	+ \ref IsoRP
  	+ \ref IsoSed
  	+ \ref IsoSedPy
@@ -76,7 +82,7 @@
 	+ \ref IsoVid2D
 	+ \ref IsoVid2DPy
 
-- 7- \subpage Example5EqPage " The five equations model " 
+- 8- \subpage Example5EqPage " The five equations model " 
 	+ \ref RiemannPrblm5Eq
 	+ \ref BoilingChannel5Eq
 	+ \ref BoilingChannel5EqPy 

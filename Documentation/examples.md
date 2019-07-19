@@ -1,13 +1,31 @@
 CoreFlows example scripts
 =========================
 
-- Transport equation examples
-    - [Problem Transport 1D Heated Channel (C)](../examples/TransportEquation_1DHeatedChannel.cxx) 
-    - [Problem Transport 1D Heated Channel (python)](../examples/Python/TransportEquation_1DHeatedChannel.py)
+- Stationary diffusion equation examples
+    - [Problem Stationary diffusion 2D Finite Elements on structured triangles with Dirichlet boundary conditions (C)](../examples/StationaryDiffusionEquation_2DEF_StructuredTriangles.cxx)
+    - [Problem Stationary diffusion 2D Finite Elements on structured triangles with Neumann boundary conditions (C)](../examples/StationaryDiffusionEquation_2DEF_StructuredTriangles_Neumann.cxx)
+    - [Problem Stationary diffusion 2D Finite Elements on unstructured triangles with Dirichlet boundary conditions (C)](../examples/StationaryDiffusionEquation_2DEF_UnstructuredTriangles.cxx)
+    - [Problem Stationary diffusion 3D Finite Elements on structured tetrahedra with Dirichlet boundary conditions (C)](../examples/StationaryDiffusionEquation_3DEF_StructuredTriangles.cxx)
+    - [Problem Stationary diffusion 2D Finite Volumes on structured squares with Dirichlet boundary conditions (C)](../examples/StationaryDiffusionEquation_2DFV_StructuredSquares.cxx)
+    - [Problem Stationary diffusion 2D Finite Volumes on structured triangles with Dirichlet boundary conditions (C)](../examples/StationaryDiffusionEquation_2DFV_StructuredTriangles.cxx)
+    - [Problem Stationary diffusion 2D Finite Volumes on structured triangles with Neumann boundary conditions (C)](../examples/StationaryDiffusionEquation_2DFV_StructuredTriangles_Neumann.cxx)
+    - [Problem Stationary diffusion 3D Finite Volumes on structured tetrahedra with Dirichlet boundary conditions (C)](../examples/StationaryDiffusionEquation_3DFV_StructuredTetrahedra.cxx)
+    - [Problem Stationary diffusion 2D Finite Elements on structured triangles with Dirichlet boundary conditions (Python)](../examples/Python/StationaryDiffusionEquation_2DEF.py)
+    - [Problem Stationary diffusion 2D Finite Elements on structured triangles with Neumann boundary conditions (Python)](../examples/Python/StationaryDiffusionEquation_2DEF_Neumann.py)
+    - [Problem Stationary diffusion 3D Finite Elements on structured tetrahedra with Dirichlet boundary conditions tetrahedra (Python)](../examples/Python/StationaryDiffusionEquation_3DEF.py)
+    - [Problem Stationary diffusion 2D Finite Volumes on structured squares with Dirichlet boundary conditions (Python)](../examples/Python/StationaryDiffusionEquation_2DVF_StructuredSquares.py)
+    - [Problem Stationary diffusion 2D Finite Volumes on structured squares with Neumann boundary conditions (Python)](../examples/Python/StationaryDiffusionEquation_2DVF_StructuredSquares_Neumann.py)
+    - [Problem Stationary diffusion 2D Finite Volumes on structured triangles with Dirichlet boundary conditions (Python)](../examples/Python/StationaryDiffusionEquation_2DVF_StructuredTriangles.py)
+    - [Problem Stationary diffusion 2D Finite Volumes on structured cubes with Dirichlet boundary conditions (Python)](../examples/Python/StationaryDiffusionEquation_2DVF_StructuredCubes.py)
+    - [Problem Stationary diffusion 2D Finite Volumes on structured tetrahedra with Dirichlet boundary conditions (Python)](../examples/Python/StationaryDiffusionEquation_2DVF_StructuredTetrahedra.py)
 
 - Diffusion equation examples
     - [Problem Diffusion 1D Heated Rod (C)](../examples/DiffusionEquation_1DHeatedRod.cxx)
     - [Problem Diffusion 1D Heated Rod (Python)](../examples/Python/DiffusionEquation_1DHeatedRod.py)
+
+- Transport equation examples
+    - [Problem Transport 1D Heated Channel (C)](../examples/TransportEquation_1DHeatedChannel.cxx) 
+    - [Problem Transport 1D Heated Channel (python)](../examples/Python/TransportEquation_1DHeatedChannel.py)
 
 - Coupling of a transport and a diffusion equations
     - [Coupled Problem Transport Diffusion 1D Heated Channel (C)](../examples/CoupledTransportDiffusionEquations_1DHeatedChannel.cxx)

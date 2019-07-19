@@ -11,7 +11,7 @@
 
 /*! \class StationaryDiffusionEquation StationaryDiffusionEquation.hxx "StationaryDiffusionEquation.hxx"
  *  \brief Scalar stationary heat equation solved with either finite elements or finite volume method. 
- *  \details see \ref TransportEqPage for more details
+ *  \details see \ref StationaryDiffusionEqPage for more details
  * -\lambda\Delta T=\Phi(T) + \lambda_{sf} (T_{fluid}-T)
  */
 #ifndef StationaryDiffusionEquation_HXX_
