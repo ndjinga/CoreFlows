@@ -57,10 +57,10 @@ StationaryDiffusionEquation::StationaryDiffusionEquation(int dim, bool FECalcula
         std::cout<<"conductivity="<<lambda<<endl;
         throw CdmathException("Error : conductivity parameter lambda cannot  be negative");
     }
-    if(dim==0)
+    if(dim<=0)
     {
         std::cout<<"space dimension="<<dim<<endl;
-        throw CdmathException("Error : cparameter dim cannot  be zero");
+        throw CdmathException("Error : parameter dim cannot  be negative");
     }
 
     _FECalculation=FECalculation;
@@ -119,7 +119,7 @@ StationaryDiffusionEquation::StationaryDiffusionEquation(int dim, bool FECalcula
 void StationaryDiffusionEquation::initialize()
 {
 	if(!_meshSet)
-		throw CdmathException("StationaryDiffusionEquation::initialize() set initial data first");
+		throw CdmathException("StationaryDiffusionEquation::initialize() set mesh first");
 	else
     {
 		cout<<"Initialisation of the computation of the temperature diffusion in a solid using ";
@@ -187,11 +187,13 @@ void StationaryDiffusionEquation::initialize()
         _NunknownNodes=_Nnodes - _NdirichletNodes;
         cout<<"Number of unknown nodes " << _NunknownNodes <<", Number of boundary nodes " << _NboundaryNodes<< ", Number of Dirichlet boundary nodes " << _NdirichletNodes <<endl;
     }
+
 	//creation de la matrice
     if(!_FECalculation)
         MatCreateSeqAIJ(PETSC_COMM_SELF, _Nmailles, _Nmailles, (1+_neibMaxNbCells), PETSC_NULL, &_A);
     else
         MatCreateSeqAIJ(PETSC_COMM_SELF, _NunknownNodes, _NunknownNodes, (1+_neibMaxNbNodes), PETSC_NULL, &_A);
+
 	VecCreate(PETSC_COMM_SELF, &_Tk);
 
     if(!_FECalculation)

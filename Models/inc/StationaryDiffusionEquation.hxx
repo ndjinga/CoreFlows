@@ -188,7 +188,7 @@ protected :
 	int _NunknownNodes;/* number of unknown nodes for FE calculation */
 	int _NboundaryNodes;/* total number of boundary nodes */
 	int _NdirichletNodes;/* number of boundary nodes with Dirichlet BC for FE calculation */
-    std::vector< int > _boundaryNodeIds;/* List of boundary nodes with Dirichlet BC */
+    std::vector< int > _boundaryNodeIds;/* List of boundary nodes */
     std::vector< int > _dirichletNodeIds;/* List of boundary nodes with Dirichlet BC */
 
     /*********** Functions for finite element method ***********/
