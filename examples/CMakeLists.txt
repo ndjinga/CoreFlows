@@ -60,6 +60,7 @@ file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/resources DESTINATION ${CMAKE_CURRENT_BINA
 
 CreateTestExecAndInstall(CoupledTransportDiffusionEquations_1DHeatedChannel.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(DiffusionEquation_1DHeatedRod.cxx  "${libs_for_tests}" )
+CreateTestExecAndInstall(DiffusionEquation_1DHeatedRod_FE.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(DriftModel_1DBoilingAssembly.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(DriftModel_1DBoilingChannel.cxx  "${libs_for_tests}" )
 CreateTestExecAndInstall(DriftModel_1DChannelGravity.cxx  "${libs_for_tests}" )
