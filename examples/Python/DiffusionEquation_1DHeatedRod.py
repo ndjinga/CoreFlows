@@ -17,8 +17,9 @@ def DiffusionEquation_1DHeatedRod():
 	cp_ur=300
 	rho_ur=10000
 	lambda_ur=5
-    
-	myProblem = cf.DiffusionEquation(spaceDim,rho_ur,cp_ur,lambda_ur);
+
+	FECalculation=False    
+	myProblem = cf.DiffusionEquation(spaceDim,FECalculation,rho_ur,cp_ur,lambda_ur);
 	nVar = myProblem.getNumberOfVariables();
 
      #Set heat exchanges

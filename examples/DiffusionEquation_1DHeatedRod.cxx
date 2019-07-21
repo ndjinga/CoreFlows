@@ -35,8 +35,9 @@ int main(int argc, char** argv)
 	double cp_ur=300;//Uranium specific heat
 	double rho_ur=10000;//Uranium density
 	double lambda_ur=5;
-
-	DiffusionEquation  myProblem(spaceDim,rho_ur,cp_ur,lambda_ur);
+ 
+    bool FEcalculation=false;
+	DiffusionEquation  myProblem(spaceDim,FEcalculation,rho_ur,cp_ur,lambda_ur);
 	Field VV("Solid temperature", CELLS, M, 1);
 
 	//Set fluid temperature (temperature du fluide)
@@ -64,7 +65,7 @@ int main(int argc, char** argv)
 	myProblem.setNumericalScheme(upwind, Explicit);
 
 	// name result file
-	string fileName = "1DRodTemperature";
+	string fileName = "1DRodTemperature_FV";
 
 	// parameters calculation
 	unsigned MaxNbOfTimeStep =3;
