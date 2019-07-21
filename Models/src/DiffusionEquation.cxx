@@ -182,9 +182,6 @@ void DiffusionEquation::initialize()
             throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect cell types");
         }
 
-		_VV=Field ("Temperature", NODES, _mesh, 1);
-
-        _neibMaxNbNodes=_mesh.getMaxNbNeighbours(NODES);
         _boundaryNodeIds = _mesh.getBoundaryNodeIds();
         _NboundaryNodes=_boundaryNodeIds.size();
 
