@@ -63,9 +63,9 @@ Vector DiffusionEquation::gradientNodal(Matrix M, vector< double > values){
 }
 
 DiffusionEquation::DiffusionEquation(int dim, bool FECalculation,double rho,double cp, double lambda){
-    if(_rho<_precision or cp<_precision)
+    if(rho<_precision or cp<_precision)
     {
-        std::cout<<"rho="<<_rho<<", cp= "<<cp<< ", precision= "<<_precision<<endl;
+        std::cout<<"rho="<<rho<<", cp= "<<cp<< ", precision= "<<_precision;
         throw CdmathException("Error : parameters rho and cp should be strictly positive");
     }
     if(lambda < 0.)
@@ -79,6 +79,12 @@ DiffusionEquation::DiffusionEquation(int dim, bool FECalculation,double rho,doub
         throw CdmathException("Error : parameter dim cannot  be negative");
     }
 
+    cout<<"Diffusion problem with density "<<rho<<", specific heat "<< cp<<", conductivity "<< lambda;
+    if(FECalculation)
+        cout<<" and finite elements method"<<endl;
+    else
+        cout<<" and finite volumes method"<<endl;
+    
     _FECalculation=FECalculation;
     
     /* Finite element data */
@@ -110,11 +116,11 @@ void DiffusionEquation::initialize()
 		throw CdmathException("DiffusionEquation::initialize() set initial data first");
 	else
         {
-            cout<<"Initialising the diffusion of a solid temperature using "<<endl;
+            cout<<"Initialising the diffusion of a solid temperature using ";
             if(!_FECalculation)
                 cout<< "Finite volumes method"<<endl;
             else
-              cout<< "Finite elements method"<<endl;
+                cout<< "Finite elements method"<<endl;
         }
 
 	_DiffusionTensor=Matrix(_Ndim);

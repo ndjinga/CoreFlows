@@ -117,6 +117,8 @@ void ProblemCoreFlows::setInitialField(const Field &VV)
 	_time=_VV.getTime();
 	_mesh=_VV.getMesh();
 	_Nmailles = _mesh.getNumberOfCells();
+	_Nnodes =   _mesh.getNumberOfNodes();
+	_Nfaces =   _mesh.getNumberOfFaces();
 	_perimeters=Field("Perimeters", CELLS, _mesh,1);
 
 	// find _minl and maximum nb of neibourghs
