@@ -293,7 +293,7 @@ double DiffusionEquation::computeDiffusionMatrix(bool & stop)
 double DiffusionEquation::computeDiffusionMatrixFE(bool & stop){
 	Cell Cj;
 	string nameOfGroup;
-	double dn;
+	double dij;//Diffusion coefficients between nodes i and j
 	MatZeroEntries(_A);
 	VecZeroEntries(_b);
     
@@ -338,7 +338,10 @@ double DiffusionEquation::computeDiffusionMatrixFE(bool & stop){
                     if(find(_dirichletNodeIds.begin(),_dirichletNodeIds.end(),nodeIds[jdim])==_dirichletNodeIds.end())//!_mesh.isBorderNode(nodeIds[jdim])
                     {//Second node of the edge is not Dirichlet node
                         j_int= unknownNodeIndex(nodeIds[jdim], _dirichletNodeIds);//assumes Dirichlet boundary node numbering is strictly increasing
-                        MatSetValue(_A,i_int,j_int,_conductivity*(_DiffusionTensor*GradShapeFuncs[idim])*GradShapeFuncs[jdim]/Cj.getMeasure(), ADD_VALUES);
+                        dij=_conductivity*(_DiffusionTensor*GradShapeFuncs[idim])*GradShapeFuncs[jdim]/Cj.getMeasure();
+                        MatSetValue(_A,i_int,j_int,dij, ADD_VALUES);
+                        if(fabs(dij)>_maxvp)
+                            _maxvp=fabs(dij);
                     }
                     else if (!dirichletCell_treated)
                     {//Second node of the edge is a Dirichlet node
@@ -351,8 +354,8 @@ double DiffusionEquation::computeDiffusionMatrixFE(bool & stop){
                                 valuesBorder[kdim]=0;                            
                         }
                         GradShapeFuncBorder=gradientNodal(M,valuesBorder)/fact(_Ndim);
-                        double coeff =-_conductivity*(_DiffusionTensor*GradShapeFuncBorder)*GradShapeFuncs[idim]/Cj.getMeasure();
-                        VecSetValue(_b,i_int,coeff, ADD_VALUES);                        
+                        dij =-_conductivity*(_DiffusionTensor*GradShapeFuncBorder)*GradShapeFuncs[idim]/Cj.getMeasure();
+                        VecSetValue(_b,i_int,dij, ADD_VALUES);                        
                     }
                 }
             }
@@ -371,7 +374,7 @@ double DiffusionEquation::computeDiffusionMatrixFE(bool & stop){
 	if(fabs(_maxvp)<_precision)
 		throw CdmathException("DiffusionEquation::computeDiffusionMatrix(): maximum eigenvalue for time step is zero");
 	else
-		return _cfl*_minl*_minl/_maxvp;
+		return _cfl/_maxvp;
 }
 
 double DiffusionEquation::computeDiffusionMatrixFV(bool & stop){
