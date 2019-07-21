@@ -60,7 +60,8 @@ int main(int argc, char** argv)
 
 	TransportEquation  myTransportEquation(Liquid, around155bars600K,transportVelocity);
 	Field fluidEnthalpy("Enthalpie", CELLS, transportMesh, 1);
-	DiffusionEquation  myDiffusionEquation(spaceDim,rho_ur, cp_ur, lambda_ur);
+	bool FECalculation=false;
+    DiffusionEquation  myDiffusionEquation(spaceDim,FECalculation,rho_ur, cp_ur, lambda_ur);
 
 	Field solidTemp("Solid temperature", CELLS, diffusionMesh, 1);
 	Field fluidTemp("Fluid temperature", CELLS, transportMesh, 1);
