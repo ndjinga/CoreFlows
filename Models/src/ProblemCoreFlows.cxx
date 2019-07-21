@@ -126,33 +126,40 @@ void ProblemCoreFlows::setInitialField(const Field &VV)
 	int nbNeib,indexFace;
 	Cell Ci;
 	Face Fk;
+
 	if(_verbose)
 		cout<<"Computing cell perimeters and mesh minimal diameter"<<endl;
 
-	for (int i=0; i<_mesh.getNumberOfCells(); i++){
-		Ci = _mesh.getCell(i);
-		//Detect mesh with junction
-		nbNeib=0;
-		for(int j=0; j<Ci.getNumberOfFaces(); j++){
-			Fk=_mesh.getFace(Ci.getFacesId()[j]);
-			nbNeib+=Fk.getNumberOfCells()-1;
-		}
-		if(nbNeib>_neibMaxNb)
-			_neibMaxNb=nbNeib;
-		//Compute mesh data
-		if (_Ndim > 1){
-			_perimeters(i)=0;
-			for (int k=0 ; k<Ci.getNumberOfFaces() ; k++){
-				indexFace=Ci.getFacesId()[k];
-				Fk = _mesh.getFace(indexFace);
-				_minl = min(_minl,Ci.getMeasure()/Fk.getMeasure());
-				_perimeters(i)+=Fk.getMeasure();
-			}
-		}else{
-			_minl = min(_minl,Ci.getMeasure());
-			_perimeters(i)=Ci.getNumberOfFaces();
-		}
-	}
+    if(VV.getTypeOfField()==NODES)
+    {
+        _minl = _mesh.getMaxNbNeighbours(NODES);
+        _neibMaxNbNodes=_mesh.getMaxNbNeighbours(NODES);
+    }
+    else
+        for (int i=0; i<_mesh.getNumberOfCells(); i++){
+            Ci = _mesh.getCell(i);
+            //Detect mesh with junction
+            nbNeib=0;
+            for(int j=0; j<Ci.getNumberOfFaces(); j++){
+                Fk=_mesh.getFace(Ci.getFacesId()[j]);
+                nbNeib+=Fk.getNumberOfCells()-1;
+            }
+            if(nbNeib>_neibMaxNb)
+                _neibMaxNb=nbNeib;
+            //Compute mesh data
+            if (_Ndim > 1){
+                _perimeters(i)=0;
+                for (int k=0 ; k<Ci.getNumberOfFaces() ; k++){
+                    indexFace=Ci.getFacesId()[k];
+                    Fk = _mesh.getFace(indexFace);
+                    _minl = min(_minl,Ci.getMeasure()/Fk.getMeasure());
+                    _perimeters(i)+=Fk.getMeasure();
+                }
+            }else{
+                _minl = min(_minl,Ci.getMeasure());
+                _perimeters(i)=Ci.getNumberOfFaces();
+            }
+        }
 	_initialDataSet=true;
 
 	if(_verbose)
