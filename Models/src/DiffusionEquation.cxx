@@ -63,6 +63,7 @@ Vector DiffusionEquation::gradientNodal(Matrix M, vector< double > values){
 }
 
 DiffusionEquation::DiffusionEquation(int dim, bool FECalculation,double rho,double cp, double lambda){
+    /* Control input value are acceptable */
     if(rho<_precision or cp<_precision)
     {
         std::cout<<"rho="<<rho<<", cp= "<<cp<< ", precision= "<<_precision;
@@ -95,19 +96,27 @@ DiffusionEquation::DiffusionEquation(int dim, bool FECalculation,double rho,doub
     _NdirichletNodes=0;
     _NunknownNodes=0;
 
+    /* Physical parameters */
 	_conductivity=lambda;
 	_cp=cp;
 	_rho=rho;
 	_diffusivity=_conductivity/(_rho*_cp);
+	_fluidTemperatureFieldSet=false;
+	_fluidTemperature=0;
+    
+    /* Numerical parameters */
 	_Ndim=dim;
 	_nVar=1;
 	_dt_diffusion=0;
 	_dt_src=0;
-	_fluidTemperatureFieldSet=false;
-	_fluidTemperature=0;
 	_diffusionMatrixSet=false;
 
 	_fileName = "CoreFlowsDiffusionProblem";
+
+    /* Default diffusion tensor is identity matrix */
+   	_DiffusionTensor=Matrix(_Ndim);
+	for(int idim=0;idim<_Ndim;idim++)
+		_DiffusionTensor(idim,idim)=1;
 }
 
 void DiffusionEquation::initialize()
@@ -123,9 +132,6 @@ void DiffusionEquation::initialize()
                 cout<< "Finite elements method"<<endl;
         }
 
-	_DiffusionTensor=Matrix(_Ndim);
-	for(int idim=0;idim<_Ndim;idim++)
-		_DiffusionTensor(idim,idim)=1;
 	/**************** Field creation *********************/
 
 	if(!_heatPowerFieldSet){
