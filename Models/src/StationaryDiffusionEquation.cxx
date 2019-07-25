@@ -181,8 +181,25 @@ void StationaryDiffusionEquation::initialize()
             cout<<"!!!!! Warning : all nodes are boundary nodes !!!!!"<<endl;
 
         for(int i=0; i<_NboundaryNodes; i++)
-            if(_limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType==Dirichlet)
+			if( _mesh.getNode(_boundaryNodeIds[i]).getGroupNames().size()==0 )
+			{
+				cout<<"No boundary set for boundary node " << _boundaryNodeIds[i]<< endl;
+				throw CdmathException("Missing boundary name");
+			}
+            else if(_limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType==NoTypeSpecified)
+			{
+				cout<<"No boundary condition set for boundary node " << _boundaryNodeIds[i]<< endl;
+				throw CdmathException("Missing boundary condition");
+			}
+            else if(_limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType==Dirichlet)
                 _dirichletNodeIds.push_back(_boundaryNodeIds[i]);
+            else if(_limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType!=Neumann)
+			{
+				cout<<"Wrong boundary condition "<< _limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType<< " set for boundary node " << _boundaryNodeIds[i]<< endl;
+				cout<<"Accepted boundary conditions are Dirichlet "<< Dirichlet <<" and Neumann "<< Neumann << endl;
+				throw CdmathException("Wrong boundary condition");
+			}
+			
         _NdirichletNodes=_dirichletNodeIds.size();
         _NunknownNodes=_Nnodes - _NdirichletNodes;
         cout<<"Number of unknown nodes " << _NunknownNodes <<", Number of boundary nodes " << _NboundaryNodes<< ", Number of Dirichlet boundary nodes " << _NdirichletNodes <<endl;
