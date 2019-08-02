@@ -91,7 +91,7 @@ public :
 	 * \param [in] double : the value of the z component of the velocity at the boundary
 	 * \param [out] void
 	 *  */
-	void setWallBoundaryCondition(string groupName,double Temperature,double v_x, double v_y=0, double v_z=0){
+	void setWallBoundaryCondition(string groupName,double Temperature,double v_x=0, double v_y=0, double v_z=0){
 		_limitField[groupName]=LimitField(Wall,-1,vector<double>(1,v_x),vector<double>(1,v_y),vector<double>(1,v_z),Temperature,-1,-1,-1);
 	};
 
