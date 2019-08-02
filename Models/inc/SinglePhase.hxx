@@ -91,8 +91,11 @@ public :
 	 * \param [in] double : the value of the z component of the velocity at the boundary
 	 * \param [out] void
 	 *  */
-	void setWallBoundaryCondition(string groupName,double Temperature,double v_x=0, double v_y=0, double v_z=0){
-		_limitField[groupName]=LimitField(Wall,-1,vector<double>(1,v_x),vector<double>(1,v_y),vector<double>(1,v_z),Temperature,-1,-1,-1);
+	void setWallBoundaryCondition(string groupName,double Temperature=-1, double v_x=0, double v_y=0, double v_z=0){
+		if(Temperature!=-1)
+			_limitField[groupName]=LimitField(Wall,-1,vector<double>(1,v_x),vector<double>(1,v_y),vector<double>(1,v_z),Temperature,-1,-1,-1);
+		else
+			_limitField[groupName]=LimitField(Wall,-1,vector<double>(1,v_x),vector<double>(1,v_y),vector<double>(1,v_z),getReferenceTemperature(),-1,-1,-1);
 	};
 
 	/** \fn computeNewtonVariation
@@ -108,11 +111,16 @@ public :
 	 * */
 	bool iterateTimeStep(bool &ok);
 
+	double getReferencePressure()    { return _Pref; };
+	double getReferenceTemperature() { return _Tref; };
+
 protected :
 	Field _Vitesse;
 	double  _drho_sur_dp,   _drho_sur_dT;//derivatives of the density rho wrt cv, p, T
 	double  _drhoE_sur_dp,  _drhoE_sur_dT;//derivatives of the total energy rho E wrt cv, p, T
 	bool _useDellacherieEOS;
+	double _Tref; //EOS reference temperature
+	double _Pref; //EOS reference pressure
 
 	//!calcule l'etat de Roe de deux etats
 	void convectionState( const long &i, const long &j, const bool &IsBord);
