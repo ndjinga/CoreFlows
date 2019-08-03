@@ -56,10 +56,11 @@ public :
 	 * \param [in] string : the name of the boundary
 	 * \param [in] double : the value of the pressure at the boundary
 	 * \param [in] double : the value of the temperature at the boundary
+	 * \param [in] double : the components of the tangential velocity at the boundary for 2D/3D flows
 	 * \param [out] void
 	 *  */
-	void setInletPressureBoundaryCondition(string groupName, double pressure,double Temperature){
-		_limitField[groupName]=LimitField(InletPressure,pressure,vector<double>(0,0),vector<double>(0,0),vector<double>(0,0),Temperature,-1,-1,-1);
+	void setInletPressureBoundaryCondition(string groupName, double pressure,double Temperature,double v_x=0, double v_y=0, double v_z=0){
+		_limitField[groupName]=LimitField(InletPressure,pressure,vector<double>(1,v_x),vector<double>(1,v_y),vector<double>(1,v_z),Temperature,-1,-1,-1);
 	};
 	/** \fn setIntletPressureBoundaryCondition
 	 * \brief adds a new boundary condition of type InletPressure taking into account the hydrostatic pressure variations

@@ -557,6 +557,29 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 	}
 	else if (_limitField[nameOfGroup].bcType==InletPressure){
 
+        //Contribution from the tangential velocity
+        if(_Ndim>1)
+        {
+            Vector omega(3);
+            omega[0]=_limitField[nameOfGroup].v_x[0];
+            omega[1]=_limitField[nameOfGroup].v_y[0];
+            
+            Vector Normale(3);
+            Normale[0]=normale[0];
+            Normale[1]=normale[1];
+
+            if(_Ndim==3)
+            {
+                omega[2]=_limitField[nameOfGroup].v_z[0];
+                Normale[2]=normale[2];
+            }
+            
+            Vector tangent_vel=omega%Normale;
+ 
+            for(k=0; k<_Ndim; k++)
+                _externalStates[(k+1)]=q_n*normale[k] + tangent_vel[k];
+        }
+
 		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
 		Cell Cj=_mesh.getCell(j);
 		double hydroPress=Cj.x()*_GravityField3d[0];
