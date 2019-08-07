@@ -42,7 +42,7 @@ def SinglePhase_3DVortexTube_WithoutCone():
 	myProblem.setInletPressureBoundaryCondition("Inlet flow", inletPressure, inletTemperature)
 	myProblem.setOutletBoundaryCondition("Hot outlet", outletPressure)
 	myProblem.setOutletBoundaryCondition("cold outlet", outletPressure)
-	setWallBoundaryCondition("Wall", inletTemperature)
+	myProblem.setWallBoundaryCondition("Wall", inletTemperature)
 
     # set physical parameters
 	#myProblem.setViscosity(viscosite);
