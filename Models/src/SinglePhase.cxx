@@ -577,7 +577,7 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
             Vector tangent_vel=omega%Normale;
  
             for(k=0; k<_Ndim; k++)
-                _externalStates[(k+1)]=q_n*normale[k] + tangent_vel[k];
+                _externalStates[(k+1)]=q_n*normale[k] + q_n*tangent_vel[k];
         }
 
 		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
@@ -620,9 +620,11 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 		VecAssemblyEnd(_Uextdiff);
 	}
 	else if (_limitField[nameOfGroup].bcType==Outlet){
-		if(q_n<=0 &&  _nbTimeStep%_freqSave ==0)
-			cout<< "Warning : fluid going in through outlet boundary "<<nameOfGroup<<". Applying Neumann boundary condition for velocity and temperature"<<endl;
-
+		if(q_n < -_precision &&  _nbTimeStep%_freqSave ==0)
+        {
+			cout<< "Warning : fluid going in through outlet boundary "<<nameOfGroup<<" with flow rate "<< q_n<<endl;
+            cout<< "Applying Neumann boundary condition for velocity and temperature"<<endl;
+        }
 		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
 		Cell Cj=_mesh.getCell(j);
 		double hydroPress=Cj.x()*_GravityField3d[0];
