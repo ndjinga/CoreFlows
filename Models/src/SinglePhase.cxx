@@ -577,7 +577,7 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
             Vector tangent_vel=omega%Normale;
  
             for(k=0; k<_Ndim; k++)
-                _externalStates[(k+1)]=q_n*normale[k] + tangent_vel[k];
+                _externalStates[(k+1)]=q_n*normale[k] + q_n*tangent_vel[k];
         }
 
 		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
