@@ -56,7 +56,7 @@ public :
 	 * \param [in] string : the name of the boundary
 	 * \param [in] double : the value of the pressure at the boundary
 	 * \param [in] double : the value of the temperature at the boundary
-	 * \param [in] double : either 1) the components of the tangential velocity at the boundary for 2D flows or 2) the rotational of the inlet velocity for 3D flows
+	 * \param [in] doublethe components of the rotational of the inlet velocity
 	 * \param [out] void
 	 *  */
 	void setInletPressureBoundaryCondition(string groupName, double pressure,double Temperature,double omega_x=0, double omega_y=0, double omega_z=0){
