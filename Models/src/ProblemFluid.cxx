@@ -167,10 +167,10 @@ void ProblemFluid::initialize()
 	VecAssemblyEnd(_primitiveVars);
 	if(_system)
 	{
-		cout << "Variables primitives initiales:" << endl;
+		cout << "Variables primitives initiales : " << endl;
 		VecView(_primitiveVars,  PETSC_VIEWER_STDOUT_WORLD);
 		cout << endl;
-		cout<<"Vecteur _conservativeVars initial "<<endl;
+		cout<<"Variables conservatives initiales : "<<endl;
 		VecView(_conservativeVars,  PETSC_VIEWER_STDOUT_SELF);
 	}
 
@@ -407,7 +407,7 @@ double ProblemFluid::computeTimeStep(bool & stop){
 					Poly.matrixProduct(_AroeMinusImplicit, _nVar, _nVar, _Jcb, _nVar, _nVar, _a);
 					MatSetValuesBlocked(_A, size, &idm, size, &idm, _a, ADD_VALUES);
 
-					if(_system)
+					if(_verbose)
 						displayMatrix(_a, _nVar, "produit A^-*Jcb pour CL");
 
 					//insertion de -A^-
@@ -415,7 +415,7 @@ double ProblemFluid::computeTimeStep(bool & stop){
 						_AroeMinusImplicit[k] *= -1;
 					}
 					MatSetValuesBlocked(_A, size, &idm, size, &idm, _AroeMinusImplicit, ADD_VALUES);
-					if(_system)
+					if(_verbose)
 						displayMatrix(_AroeMinusImplicit, _nVar,"-_AroeMinusImplicit: ");
 
 					//calcul et insertion de D*JcbDiff
@@ -496,7 +496,7 @@ double ProblemFluid::computeTimeStep(bool & stop){
 				MatSetValuesBlocked(_A, size, &idm, size, &idn, _AroeMinusImplicit, ADD_VALUES);
 				MatSetValuesBlocked(_A, size, &idm, size, &idn, _Diffusion, ADD_VALUES);
 
-				if(_system){
+				if(_verbose){
 					displayMatrix(_AroeMinusImplicit, _nVar, "+_AroeMinusImplicit: ");
 					displayMatrix(_Diffusion, _nVar, "+_Diffusion: ");
 				}
@@ -506,7 +506,7 @@ double ProblemFluid::computeTimeStep(bool & stop){
 				}
 				MatSetValuesBlocked(_A, size, &idm, size, &idm, _AroeMinusImplicit, ADD_VALUES);
 				MatSetValuesBlocked(_A, size, &idm, size, &idm, _Diffusion, ADD_VALUES);
-				if(_system){
+				if(_verbose){
 					displayMatrix(_AroeMinusImplicit, _nVar, "-_AroeMinusImplicit: ");
 					displayMatrix(_Diffusion, _nVar, "-_Diffusion: ");
 				}
@@ -517,7 +517,7 @@ double ProblemFluid::computeTimeStep(bool & stop){
 				}
 				MatSetValuesBlocked(_A, size, &idn, size, &idn, _AroePlusImplicit, ADD_VALUES);
 				MatSetValuesBlocked(_A, size, &idn, size, &idn, _Diffusion, ADD_VALUES);
-				if(_system)
+				if(_verbose)
 					displayMatrix(_AroePlusImplicit, _nVar, "+_AroePlusImplicit: ");
 
 				for(int k=0;k<_nVar*_nVar;k++){
@@ -527,7 +527,7 @@ double ProblemFluid::computeTimeStep(bool & stop){
 				MatSetValuesBlocked(_A, size, &idn, size, &idm, _AroePlusImplicit, ADD_VALUES);
 				MatSetValuesBlocked(_A, size, &idn, size, &idm, _Diffusion, ADD_VALUES);
 
-				if(_system)
+				if(_verbose)
 					displayMatrix(_AroePlusImplicit, _nVar, "-_AroePlusImplicit: ");
 			}
 		}
@@ -592,7 +592,7 @@ double ProblemFluid::computeTimeStep(bool & stop){
 						MatSetValuesBlocked(_A, size, &idm, size, &idn, _AroeMinusImplicit, ADD_VALUES);
 						MatSetValuesBlocked(_A, size, &idm, size, &idn, _Diffusion, ADD_VALUES);
 
-						if(_system){
+						if(_verbose){
 							displayMatrix(_AroeMinusImplicit, _nVar, "+_AroeMinusImplicit: ");
 							displayMatrix(_Diffusion, _nVar, "+_Diffusion: ");
 						}
@@ -602,7 +602,7 @@ double ProblemFluid::computeTimeStep(bool & stop){
 						}
 						MatSetValuesBlocked(_A, size, &idm, size, &idm, _AroeMinusImplicit, ADD_VALUES);
 						MatSetValuesBlocked(_A, size, &idm, size, &idm, _Diffusion, ADD_VALUES);
-						if(_system){
+						if(_verbose){
 							displayMatrix(_AroeMinusImplicit, _nVar, "-_AroeMinusImplicit: ");
 							displayMatrix(_Diffusion, _nVar, "-_Diffusion: ");
 						}
@@ -613,7 +613,7 @@ double ProblemFluid::computeTimeStep(bool & stop){
 						}
 						MatSetValuesBlocked(_A, size, &idn, size, &idn, _AroePlusImplicit, ADD_VALUES);
 						MatSetValuesBlocked(_A, size, &idn, size, &idn, _Diffusion, ADD_VALUES);
-						if(_system)
+						if(_verbose)
 							displayMatrix(_AroePlusImplicit, _nVar, "+_AroePlusImplicit: ");
 
 						for(int k=0;k<_nVar*_nVar;k++){
@@ -623,7 +623,7 @@ double ProblemFluid::computeTimeStep(bool & stop){
 						MatSetValuesBlocked(_A, size, &idn, size, &idm, _AroePlusImplicit, ADD_VALUES);
 						MatSetValuesBlocked(_A, size, &idn, size, &idm, _Diffusion, ADD_VALUES);
 
-						if(_system)
+						if(_verbose)
 							displayMatrix(_AroePlusImplicit, _nVar, "-_AroePlusImplicit: ");
 					}
 				}
@@ -943,9 +943,9 @@ void ProblemFluid::addConvectionToSecondMember
 
 			if(_verbose && _nbTimeStep%_freqSave ==0)
 			{
-				cout<<"Etat interfacial conservatif"<<i<<", "<<j<< endl;
+				cout<<"Etat interfacial conservatif "<<i<<", "<<j<< endl;
 				cout<<Uij<<endl;
-				cout<<"Etat interfacial primitif"<<i<<", "<<j<< endl;
+				cout<<"Etat interfacial primitif "<<i<<", "<<j<< endl;
 				cout<<Vij<<endl;
 			}
 		}
@@ -1146,8 +1146,8 @@ void ProblemFluid::addSourceTermToSecondMember
 				for(int q=0; q<_nVar; q++)
 					cout << _Sj[q] << endl;
 				cout << endl;
-				cout<<"ratio surface sur volume i="<<mesureFace/_perimeters(i)<<" perimeter = "<< _perimeters(i)<<endl;
-				cout<<"ratio surface sur volume j="<<mesureFace/_perimeters(j)<<" perimeter = "<< _perimeters(j)<<endl;
+				cout<<"ratio surface sur volume i = "<<mesureFace/_perimeters(i)<<" perimeter = "<< _perimeters(i)<<endl;
+				cout<<"ratio surface sur volume j = "<<mesureFace/_perimeters(j)<<" perimeter = "<< _perimeters(j)<<endl;
 				cout << endl;
 			}
 		}
@@ -1158,10 +1158,10 @@ void ProblemFluid::addSourceTermToSecondMember
 			}
 			if (_verbose && _nbTimeStep%_freqSave ==0)
 			{
-				cout << "Contribution au terme source Si de la cellule i= " << i<<" venant  de la face (i,j), j="<<j<<endl;
+				cout << "Contribution au terme source Si de la cellule i = " << i<<" venant  de la face (i,j), j="<<j<<endl;
 				for(int q=0; q<_nVar; q++)
 					cout << _Si[q] << endl;
-				cout << "Contribution au terme source Sj de la cellule j= " << j<<" venant  de la face (i,j), i="<<i <<endl;
+				cout << "Contribution au terme source Sj de la cellule j = " << j<<" venant  de la face (i,j), i="<<i <<endl;
 				for(int q=0; q<_nVar; q++)
 					cout << _Sj[q] << endl;
 				cout << endl;
@@ -1181,7 +1181,7 @@ void ProblemFluid::addSourceTermToSecondMember
 				cout << "Contribution au terme source Si de la cellule i= " << i<<" venant  (après décentrement) de la face (i,bord)"<<endl;
 				for(int q=0; q<_nVar; q++)
 					cout << _Si[q] << endl;
-				cout<<"ratio surface sur volume i="<<mesureFace/_perimeters(i)<<" perimeter = "<< _perimeters(i)<<endl;
+				cout<<"ratio surface sur volume i ="<<mesureFace/_perimeters(i)<<" perimeter = "<< _perimeters(i)<<endl;
 				cout << endl;
 			}
 		}
@@ -1191,7 +1191,7 @@ void ProblemFluid::addSourceTermToSecondMember
 				_Si[k]=_Si[k]/nbVoisinsi+_pressureLossVector[k]/2+_porosityGradientSourceVector[k]/2;//mesureFace/_perimeters(i);//
 			if (_verbose && _nbTimeStep%_freqSave ==0)
 			{
-				cout << "Contribution au terme source Si de la cellule i= " << i<<" venant de la face (i,bord) "<<endl;
+				cout << "Contribution au terme source Si de la cellule i = " << i<<" venant de la face (i,bord) "<<endl;
 				for(int q=0; q<_nVar; q++)
 					cout << _Si[q] << endl;
 				cout << endl;
@@ -1241,7 +1241,7 @@ void ProblemFluid::updatePrimitives()
 
 	if(_system)
 	{
-		cout << "Nouvelles variables primitives:" << endl;
+		cout << "Nouvelles variables primitives : " << endl;
 		VecView(_primitiveVars,  PETSC_VIEWER_STDOUT_WORLD);
 		cout << endl;
 	}
@@ -1279,7 +1279,7 @@ void ProblemFluid::updateConservatives()
 
 	if(_system)
 	{
-		cout << "Nouvelles variables conservatives:" << endl;
+		cout << "Nouvelles variables conservatives : " << endl;
 		VecView(_conservativeVars,  PETSC_VIEWER_STDOUT_WORLD);
 		cout << endl;
 	}
