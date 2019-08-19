@@ -4,16 +4,16 @@
 
 import CoreFlows as cf
 
-def SinglePhase_3DVortexTube_WithoutCone():
+def SinglePhase_3DVortexTube_WithCone():
 	spaceDim = 3;
 
-	print( "Loading mesh of vortex tube without cone" );
-	inputfile="../resources/VortexTubeWithoutCone.med";	
+	print( "Loading mesh of vortex tube with cone" );
+	inputfile="../resources/VortexTubeWithCone.med";	
  
     # set the limit field for each boundary
-	outletPressure =  1e5;
-	inletPressure  = 10e5;
-	inletTemperature  = 300;
+	outletPressure =  1.e5;
+	inletPressure  =  10.e5;
+	inletTemperature  = 300.;
 	
     # physical constants
 	#viscosite=[0.025];
@@ -29,11 +29,11 @@ def SinglePhase_3DVortexTube_WithoutCone():
 	VV_Constant = [0] * nVar
 
 	# constant vector
-	VV_Constant[0] = 1e5;
+	VV_Constant[0] = 1.e5;
 	VV_Constant[1] = 0 ;
 	VV_Constant[2] = 0;
 	VV_Constant[3] = 0;
-	VV_Constant[4] = 300;
+	VV_Constant[4] = 300.;
 
     #Initial field creation
 	print("Setting mesh and initial data" );
@@ -51,16 +51,16 @@ def SinglePhase_3DVortexTube_WithoutCone():
     # set the numerical method
 	myProblem.setNumericalScheme(cf.upwind, cf.Explicit);
 	myProblem.setNonLinearFormulation(cf.reducedRoe);
-	myProblem.setEntropicCorrection(True)
+	myProblem.setEntropicCorrection(False)
 	#myProblem.setLinearSolver(cf.GMRES,cf.ILU,True);
    
     # name file save
-	fileName = "3DVortexTubeWithoutCone";
+	fileName = "3DVortexTubeWithCone";
 
     # simulation parameters
-	MaxNbOfTimeStep = 10000 ;
-	freqSave = 100;
-	cfl = 1./3;
+	MaxNbOfTimeStep = 100000 ;
+	freqSave = 1;
+	cfl = 0.3;
 	maxTime = 50;
 	precision = 1e-6;
 
@@ -72,6 +72,7 @@ def SinglePhase_3DVortexTube_WithoutCone():
 	myProblem.setFileName(fileName);
 	#myProblem.setNewtonSolver(precision,20);
 	#yProblem.saveConservativeField(True);
+	#myProblem.setVerbose(False,True);
 	if(spaceDim>1):
 		myProblem.saveVelocity();
 		pass
@@ -93,4 +94,4 @@ def SinglePhase_3DVortexTube_WithoutCone():
 	return ok
 
 if __name__ == """__main__""":
-    SinglePhase_3DVortexTube_WithoutCone()
+    SinglePhase_3DVortexTube_WithCone()
