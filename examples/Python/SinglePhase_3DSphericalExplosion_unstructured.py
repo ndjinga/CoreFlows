@@ -2,7 +2,7 @@
 # -*-coding:utf-8 -*
 
 import CoreFlows as cf
-import cdmath as cm
+import cdmath
 
 
 def SinglePhase_3DSphericalExplosion_unstructured():
