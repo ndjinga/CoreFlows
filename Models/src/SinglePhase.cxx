@@ -442,14 +442,14 @@ void SinglePhase::diffusionStateAndMatrices(const long &i,const long &j, const b
 
 }
 void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *normale){
-	int k;
-	double v2=0, q_n=0;//q_n=quantité de mouvement normale à la face frontière;
+	double v2=0;
 	_idm[0] = _nVar*j;
-	for(k=1; k<_nVar; k++)
+	for(int k=1; k<_nVar; k++)
 		_idm[k] = _idm[k-1] + 1;
 
-	VecGetValues(_conservativeVars, _nVar, _idm, _externalStates);//On initialise l'état fantôme avec l'état interne
-	for(k=0; k<_Ndim; k++)
+	VecGetValues(_conservativeVars, _nVar, _idm, _externalStates);//On initialise l'état fantôme avec l'état interne (conditions limites de Neumann)
+	double q_n=0;//q_n=quantité de mouvement normale à la face frontière;
+	for(int k=0; k<_Ndim; k++)
 		q_n+=_externalStates[(k+1)]*normale[k];
 
 	double porosityj=_porosityField(j);
@@ -457,19 +457,24 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 	if(_verbose && _nbTimeStep%_freqSave ==0)
 	{
 		cout << "setBoundaryState for group "<< nameOfGroup << ", inner cell j= "<<j<< " face unit normal vector "<<endl;
-		for(k=0; k<_Ndim; k++){
+		for(int k=0; k<_Ndim; k++){
 			cout<<normale[k]<<", ";
 		}
 		cout<<endl;
 	}
 
 	if (_limitField[nameOfGroup].bcType==Wall){
+		VecGetValues(_conservativeVars, _nVar, _idm, _externalStates);//On initialise l'état fantôme avec l'état interne conservatif
+		double q_n=0;//q_n=quantité de mouvement normale à la face frontière;
+		for(int k=0; k<_Ndim; k++)
+			q_n+=_externalStates[(k+1)]*normale[k];
+			
 		//Pour la convection, inversion du sens de la vitesse normale
-		for(k=0; k<_Ndim; k++)
+		for(int k=0; k<_Ndim; k++)
 			_externalStates[(k+1)]-= 2*q_n*normale[k];
 
 		_idm[0] = 0;
-		for(k=1; k<_nVar; k++)
+		for(int k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
 
 		VecAssemblyBegin(_Uext);
@@ -478,9 +483,9 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 
 		//Pour la diffusion, paroi à vitesse et temperature imposees
 		_idm[0] = _nVar*j;
-		for(k=1; k<_nVar; k++)
+		for(int k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
-		VecGetValues(_primitiveVars, _nVar, _idm, _externalStates);
+		VecGetValues(_primitiveVars, _nVar, _idm, _externalStates);//L'état fantome contient à présent les variables primitives internes
 		double pression=_externalStates[0];
 		double T=_limitField[nameOfGroup].T;
 		double rho=_fluides[0]->getDensity(pression,T);
@@ -500,15 +505,17 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 		}
 		_externalStates[_nVar-1] = _externalStates[0]*(_fluides[0]->getInternalEnergy(_limitField[nameOfGroup].T,rho) + v2/2);
 		_idm[0] = 0;
-		for(k=1; k<_nVar; k++)
+		for(int k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
 		VecAssemblyBegin(_Uextdiff);
 		VecSetValues(_Uextdiff, _nVar, _idm, _externalStates, INSERT_VALUES);
 		VecAssemblyEnd(_Uextdiff);
 	}
 	else if (_limitField[nameOfGroup].bcType==Neumann){
+		VecGetValues(_conservativeVars, _nVar, _idm, _externalStates);//On prend l'état fantôme égal à l'état interne (conditions limites de Neumann)
+
 		_idm[0] = 0;
-		for(k=1; k<_nVar; k++)
+		for(int k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
 
 		VecAssemblyBegin(_Uext);
@@ -520,33 +527,112 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 		VecAssemblyEnd(_Uextdiff);
 	}
 	else if (_limitField[nameOfGroup].bcType==Inlet){
+		VecGetValues(_conservativeVars, _nVar, _idm, _externalStates);//On initialise l'état fantôme avec l'état interne (conditions limites de Neumann)
+		double q_int_n=0;//q_int_n=composante normale de la quantité de mouvement à la face frontière;
+		for(int k=0; k<_Ndim; k++)
+			q_int_n+=_externalStates[(k+1)]*normale[k];//On calcule la vitesse normale sortante
 
-		if(q_n<=0){
-			VecGetValues(_primitiveVars, _nVar, _idm, _externalStates);
+		double q_ext_n=_limitField[nameOfGroup].v_x[0]*normale[0];
+		if(_Ndim>1)
+			{
+				q_ext_n+=_limitField[nameOfGroup].v_y[0]*normale[1];
+				if(_Ndim>2)
+						q_ext_n+=_limitField[nameOfGroup].v_z[0]*normale[2];
+			}
+
+		if(q_int_n+q_ext_n<=0){//Interfacial velocity goes inward
+			VecGetValues(_primitiveVars, _nVar, _idm, _externalStates);//On met à jour l'état fantome avec les variables primitives internes
 			double pression=_externalStates[0];
 			double T=_limitField[nameOfGroup].T;
 			double rho=_fluides[0]->getDensity(pression,T);
 
-			_externalStates[0]=porosityj*rho;
-			_externalStates[1]=_externalStates[0]*(_limitField[nameOfGroup].v_x[0]);
+			_externalStates[0]=porosityj*rho;//Composante fantome de masse
+			_externalStates[1]=_externalStates[0]*(_limitField[nameOfGroup].v_x[0]);//Composante fantome de qdm x
 			v2 +=(_limitField[nameOfGroup].v_x[0])*(_limitField[nameOfGroup].v_x[0]);
 			if(_Ndim>1)
 			{
 				v2 +=_limitField[nameOfGroup].v_y[0]*_limitField[nameOfGroup].v_y[0];
-				_externalStates[2]=_externalStates[0]*_limitField[nameOfGroup].v_y[0];
+				_externalStates[2]=_externalStates[0]*_limitField[nameOfGroup].v_y[0];//Composante fantome de qdm y
 				if(_Ndim==3)
 				{
-					_externalStates[3]=_externalStates[0]*_limitField[nameOfGroup].v_z[0];
+					_externalStates[3]=_externalStates[0]*_limitField[nameOfGroup].v_z[0];//Composante fantome de qdm z
 					v2 +=_limitField[nameOfGroup].v_z[0]*_limitField[nameOfGroup].v_z[0];
+				}
+			}
+			_externalStates[_nVar-1] = _externalStates[0]*(_fluides[0]->getInternalEnergy(_limitField[nameOfGroup].T,rho) + v2/2);//Composante fantome de l'nrj
+		}
+		else if(_nbTimeStep%_freqSave ==0)
+			cout<< "Warning : fluid possibly going out through inlet boundary "<<nameOfGroup<<". Applying Neumann boundary condition"<<endl;
+
+		_idm[0] = 0;
+		for(int k=1; k<_nVar; k++)
+			_idm[k] = _idm[k-1] + 1;
+		VecAssemblyBegin(_Uext);
+		VecAssemblyBegin(_Uextdiff);
+		VecSetValues(_Uext, _nVar, _idm, _externalStates, INSERT_VALUES);
+		VecSetValues(_Uextdiff, _nVar, _idm, _externalStates, INSERT_VALUES);
+		VecAssemblyEnd(_Uext);
+		VecAssemblyEnd(_Uextdiff);
+	}
+	else if (_limitField[nameOfGroup].bcType==InletRotationVelocity){
+		VecGetValues(_primitiveVars, _nVar, _idm, _externalStates);
+		double u_int_n=0;//u_int_n=composante normale de la vitesse intérieure à la face frontière;
+		for(int k=0; k<_Ndim; k++)
+			u_int_n+=_externalStates[(k+1)]*normale[k];
+
+		double u_ext_n;
+        //ghost velocity
+        if(_Ndim>1)
+        {
+            Vector omega(3);
+            omega[0]=_limitField[nameOfGroup].v_x[0];
+            omega[1]=_limitField[nameOfGroup].v_y[0];
+            
+            Vector Normale(3);
+            Normale[0]=normale[0];
+            Normale[1]=normale[1];
+
+            if(_Ndim==3)
+            {
+                omega[2]=_limitField[nameOfGroup].v_z[0];
+                Normale[2]=normale[2];
+            }
+            
+            Vector tangent_vel=omega%Normale;
+			u_ext_n=0.01*tangent_vel.norm();
+			//Changing external state velocity
+            for(int k=0; k<_Ndim; k++)
+                _externalStates[(k+1)]=u_ext_n*normale[k] + tangent_vel[k];
+        }
+
+		if(u_ext_n + u_int_n <= 0){
+			double pression=_externalStates[0];
+			double T=_limitField[nameOfGroup].T;
+			double rho=_fluides[0]->getDensity(pression,T);
+
+			v2 +=_externalStates[1]*_externalStates[1];//v_x*v_x
+			_externalStates[0]=porosityj*rho;
+			_externalStates[1]*=_externalStates[0];
+			if(_Ndim>1)
+			{
+				v2 +=_externalStates[2]*_externalStates[2];//+v_y*v_y
+				_externalStates[2]*=_externalStates[0];
+				if(_Ndim==3)
+				{
+					v2 +=_externalStates[3]*_externalStates[3];//+v_z*v_z
+					_externalStates[3]*=_externalStates[0];
 				}
 			}
 			_externalStates[_nVar-1] = _externalStates[0]*(_fluides[0]->getInternalEnergy(_limitField[nameOfGroup].T,rho) + v2/2);
 		}
 		else if(_nbTimeStep%_freqSave ==0)
+		{
+			VecGetValues(_conservativeVars, _nVar, _idm, _externalStates);//On définit l'état fantôme avec l'état interne
 			cout<< "Warning : fluid going out through inlet boundary "<<nameOfGroup<<". Applying Neumann boundary condition"<<endl;
+		}
 
 		_idm[0] = 0;
-		for(k=1; k<_nVar; k++)
+		for(int k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
 		VecAssemblyBegin(_Uext);
 		VecAssemblyBegin(_Uextdiff);
@@ -556,6 +642,23 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 		VecAssemblyEnd(_Uextdiff);
 	}
 	else if (_limitField[nameOfGroup].bcType==InletPressure){
+		VecGetValues(_conservativeVars, _nVar, _idm, _externalStates);//On initialise l'état fantôme avec l'état interne
+
+		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
+		Cell Cj=_mesh.getCell(j);
+		double hydroPress=Cj.x()*_GravityField3d[0];
+		if(_Ndim>1){
+			hydroPress+=Cj.y()*_GravityField3d[1];
+			if(_Ndim>2)
+				hydroPress+=Cj.z()*_GravityField3d[2];
+		}
+		hydroPress*=_externalStates[0]/porosityj;//multiplication by rho the total density
+
+		//Building the primitive external state
+		VecGetValues(_primitiveVars, _nVar, _idm, _externalStates);
+		double u_n=0;//u_n=vitesse normale à la face frontière;
+		for(int k=0; k<_Ndim; k++)
+			u_n+=_externalStates[(k+1)]*normale[k];
 
         //Contribution from the tangential velocity
         if(_Ndim>1)
@@ -575,42 +678,31 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
             }
             
             Vector tangent_vel=omega%Normale;
- 
-            for(k=0; k<_Ndim; k++)
-                _externalStates[(k+1)]=q_n*normale[k] + q_n*tangent_vel[k];
+
+			//Changing external state velocity
+            for(int k=0; k<_Ndim; k++)
+                _externalStates[(k+1)]=u_n*normale[k] + u_n*tangent_vel[k];
         }
-
-		//Computation of the hydrostatic contribution : scalar product between gravity vector and position vector
-		Cell Cj=_mesh.getCell(j);
-		double hydroPress=Cj.x()*_GravityField3d[0];
-		if(_Ndim>1){
-			hydroPress+=Cj.y()*_GravityField3d[1];
-			if(_Ndim>2)
-				hydroPress+=Cj.z()*_GravityField3d[2];
-		}
-		hydroPress*=_externalStates[0]/porosityj;//multiplication by rho the total density
-
-		//Building the external state
-		VecGetValues(_primitiveVars, _nVar, _idm, _externalStates);
-		if(q_n<=0){
+        
+		if(u_n<=0){
 			_externalStates[0]=porosityj*_fluides[0]->getDensity(_limitField[nameOfGroup].p+hydroPress,_limitField[nameOfGroup].T);
 		}
 		else{
 			if(_nbTimeStep%_freqSave ==0)
-				cout<< "Warning : fluid going out through inletPressure boundary "<<nameOfGroup<<". Applying Neumann boundary condition for velocity and temperature"<<endl;
+				cout<< "Warning : fluid going out through inletPressure boundary "<<nameOfGroup<<". Applying Neumann boundary condition for velocity and temperature (only pressure value is imposed as in outlet BC)."<<endl;
 			_externalStates[0]=porosityj*_fluides[0]->getDensity(_limitField[nameOfGroup].p+hydroPress, _externalStates[_nVar-1]);
 		}
 
-		for(k=0; k<_Ndim; k++)
+		for(int k=0; k<_Ndim; k++)
 		{
 			v2+=_externalStates[(k+1)]*_externalStates[(k+1)];
-			_externalStates[(k+1)]*=_externalStates[0] ;
+			_externalStates[(k+1)]*=_externalStates[0] ;//qdm component
 		}
-		_externalStates[_nVar-1] = _externalStates[0]*(_fluides[0]->getInternalEnergy( _externalStates[_nVar-1],_externalStates[0]) + v2/2);
+		_externalStates[_nVar-1] = _externalStates[0]*(_fluides[0]->getInternalEnergy( _externalStates[_nVar-1],_externalStates[0]) + v2/2);//nrj component
 
 
 		_idm[0] = 0;
-		for(k=1; k<_nVar; k++)
+		for(int k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
 		VecAssemblyBegin(_Uext);
 		VecAssemblyBegin(_Uextdiff);
@@ -620,6 +712,11 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 		VecAssemblyEnd(_Uextdiff);
 	}
 	else if (_limitField[nameOfGroup].bcType==Outlet){
+		VecGetValues(_conservativeVars, _nVar, _idm, _externalStates);//On initialise l'état fantôme avec l'état interne conservatif
+		double q_n=0;//q_n=quantité de mouvement normale à la face frontière;
+		for(int k=0; k<_Ndim; k++)
+			q_n+=_externalStates[(k+1)]*normale[k];
+
 		if(q_n < -_precision &&  _nbTimeStep%_freqSave ==0)
         {
 			cout<< "Warning : fluid going in through outlet boundary "<<nameOfGroup<<" with flow rate "<< q_n<<endl;
@@ -642,19 +739,19 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 		}
 		//Building the external state
 		_idm[0] = _nVar*j;// Kieu
-		for(k=1; k<_nVar; k++)
+		for(int k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
 		VecGetValues(_primitiveVars, _nVar, _idm, _externalStates);
 
 		_externalStates[0]=porosityj*_fluides[0]->getDensity(_limitField[nameOfGroup].p+hydroPress, _externalStates[_nVar-1]);
-		for(k=0; k<_Ndim; k++)
+		for(int k=0; k<_Ndim; k++)
 		{
 			v2+=_externalStates[(k+1)]*_externalStates[(k+1)];
 			_externalStates[(k+1)]*=_externalStates[0] ;
 		}
 		_externalStates[_nVar-1] = _externalStates[0]*(_fluides[0]->getInternalEnergy( _externalStates[_nVar-1],_externalStates[0]) + v2/2);
 		_idm[0] = 0;
-		for(k=1; k<_nVar; k++)
+		for(int k=1; k<_nVar; k++)
 			_idm[k] = _idm[k-1] + 1;
 		VecAssemblyBegin(_Uext);
 		VecAssemblyBegin(_Uextdiff);

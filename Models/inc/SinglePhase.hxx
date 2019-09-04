@@ -50,13 +50,24 @@ public :
 	void setInletBoundaryCondition(string groupName,double Temperature,double v_x=0, double v_y=0, double v_z=0){
 		_limitField[groupName]=LimitField(Inlet,-1,vector<double>(1,v_x),vector<double>(1,v_y),vector<double>(1,v_z),Temperature,-1,-1,-1);
 	};
+	/** \fn setIntletRotationBoundaryCondition
+	 * \brief adds a new boundary condition of type InletRotationVelocity
+	 * \details
+	 * \param [in] string : the name of the boundary
+	 * \param [in] double : the value of the temperature at the boundary
+	 * \param [in] double : the components of the rotational of the inlet velocity
+	 * \param [out] void
+	 *  */
+	void setInletRotationBoundaryCondition(string groupName,double Temperature,double omega_x=0, double omega_y=0, double omega_z=0){
+		_limitField[groupName]=LimitField(InletRotationVelocity,0,vector<double>(1,omega_x),vector<double>(1,omega_y),vector<double>(1,omega_z),Temperature,-1,-1,-1);
+	};
 	/** \fn setIntletPressureBoundaryCondition
 	 * \brief adds a new boundary condition of type InletPressure
 	 * \details
 	 * \param [in] string : the name of the boundary
 	 * \param [in] double : the value of the pressure at the boundary
 	 * \param [in] double : the value of the temperature at the boundary
-	 * \param [in] doublethe components of the rotational of the inlet velocity
+	 * \param [in] double : the components of the rotational of the inlet velocity
 	 * \param [out] void
 	 *  */
 	void setInletPressureBoundaryCondition(string groupName, double pressure,double Temperature,double omega_x=0, double omega_y=0, double omega_z=0){
