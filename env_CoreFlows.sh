@@ -1,13 +1,13 @@
 #!/bin/bash
 
+source $CDMATH_DIR/env_CDMATH.sh
+
 export CoreFlows_INSTALL=@CMAKE_INSTALL_PREFIX@
 export CDMATH_DIR=@CDMATH_DIR@
 export PETSC_DIR=@PETSC_DIR@
 export PETSC_ARCH=@PETSC_ARCH@
 export PETSC_INCLUDES=@PETSC_INCLUDES@
 export PETSC_LIBRARIES=@PETSC_LIBRARIES@
-
-source $CDMATH_DIR/env_CDMATH.sh
 
 #------------------------------------------------------------------------------------------------------------------- 
 export CoreFlows=$CoreFlows_INSTALL/bin/Executable/CoreFlowsMainExe
