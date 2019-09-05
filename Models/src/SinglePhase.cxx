@@ -624,8 +624,16 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 		}
 		else if(_nbTimeStep%_freqSave ==0)
 		{
+			/*
+			 * cout<< "Warning : fluid going out through inlet boundary "<<nameOfGroup<<". Applying Neumann boundary condition"<<endl;
+			 */ 
 			VecGetValues(_conservativeVars, _nVar, _idm, _externalStates);//On définit l'état fantôme avec l'état interne
-			cout<< "Warning : fluid going out through inlet boundary "<<nameOfGroup<<". Applying Neumann boundary condition"<<endl;
+			if(_nbTimeStep%_freqSave ==0)
+				cout<< "Warning : fluid going out through inletPressure boundary "<<nameOfGroup<<". Applying Wall boundary condition."<<endl;
+			
+			//Changing external state momentum
+            for(int k=0; k<_Ndim; k++)
+                _externalStates[(k+1)]-=2*_externalStates[0]*u_int_n*normale[k];
 		}
 
 		_idm[0] = 0;
