@@ -442,15 +442,9 @@ void SinglePhase::diffusionStateAndMatrices(const long &i,const long &j, const b
 
 }
 void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *normale){
-	double v2=0;
 	_idm[0] = _nVar*j;
 	for(int k=1; k<_nVar; k++)
 		_idm[k] = _idm[k-1] + 1;
-
-	VecGetValues(_conservativeVars, _nVar, _idm, _externalStates);//On initialise l'état fantôme avec l'état interne (conditions limites de Neumann)
-	double q_n=0;//q_n=quantité de mouvement normale à la face frontière;
-	for(int k=0; k<_Ndim; k++)
-		q_n+=_externalStates[(k+1)]*normale[k];
 
 	double porosityj=_porosityField(j);
 
@@ -492,6 +486,7 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 
 		_externalStates[0]=porosityj*rho;
 		_externalStates[1]=_externalStates[0]*_limitField[nameOfGroup].v_x[0];
+		double v2=0;
 		v2 +=_limitField[nameOfGroup].v_x[0]*_limitField[nameOfGroup].v_x[0];
 		if(_Ndim>1)
 		{
@@ -548,6 +543,7 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 
 			_externalStates[0]=porosityj*rho;//Composante fantome de masse
 			_externalStates[1]=_externalStates[0]*(_limitField[nameOfGroup].v_x[0]);//Composante fantome de qdm x
+			double v2=0;
 			v2 +=(_limitField[nameOfGroup].v_x[0])*(_limitField[nameOfGroup].v_x[0]);
 			if(_Ndim>1)
 			{
@@ -610,6 +606,7 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 			double T=_limitField[nameOfGroup].T;
 			double rho=_fluides[0]->getDensity(pression,T);
 
+			double v2=0;
 			v2 +=_externalStates[1]*_externalStates[1];//v_x*v_x
 			_externalStates[0]=porosityj*rho;
 			_externalStates[1]*=_externalStates[0];
@@ -659,40 +656,50 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 		double u_n=0;//u_n=vitesse normale à la face frontière;
 		for(int k=0; k<_Ndim; k++)
 			u_n+=_externalStates[(k+1)]*normale[k];
-
-        //Contribution from the tangential velocity
-        if(_Ndim>1)
-        {
-            Vector omega(3);
-            omega[0]=_limitField[nameOfGroup].v_x[0];
-            omega[1]=_limitField[nameOfGroup].v_y[0];
-            
-            Vector Normale(3);
-            Normale[0]=normale[0];
-            Normale[1]=normale[1];
-
-            if(_Ndim==3)
-            {
-                omega[2]=_limitField[nameOfGroup].v_z[0];
-                Normale[2]=normale[2];
-            }
-            
-            Vector tangent_vel=omega%Normale;
-
-			//Changing external state velocity
-            for(int k=0; k<_Ndim; k++)
-                _externalStates[(k+1)]=-abs(u_n)*normale[k] + abs(u_n)*tangent_vel[k];
-        }
         
-		if(u_n<=0){
+		if(u_n<=0)
+		{
 			_externalStates[0]=porosityj*_fluides[0]->getDensity(_limitField[nameOfGroup].p+hydroPress,_limitField[nameOfGroup].T);
+			
+	        //Contribution from the tangential velocity
+	        if(_Ndim>1)
+	        {
+	            Vector omega(3);
+	            omega[0]=_limitField[nameOfGroup].v_x[0];
+	            omega[1]=_limitField[nameOfGroup].v_y[0];
+	            
+	            Vector Normale(3);
+	            Normale[0]=normale[0];
+	            Normale[1]=normale[1];
+	
+	            if(_Ndim==3)
+	            {
+	                omega[2]=_limitField[nameOfGroup].v_z[0];
+	                Normale[2]=normale[2];
+	            }
+	            
+	            Vector tangent_vel=omega%Normale;
+	
+				//Changing external state velocity
+	            for(int k=0; k<_Ndim; k++)
+	                _externalStates[(k+1)]=u_n*normale[k] + abs(u_n)*tangent_vel[k];
+	        }
 		}
 		else{
+			/*
 			if(_nbTimeStep%_freqSave ==0)
 				cout<< "Warning : fluid going out through inletPressure boundary "<<nameOfGroup<<". Applying Neumann boundary condition for velocity and temperature (only pressure value is imposed as in outlet BC)."<<endl;
 			_externalStates[0]=porosityj*_fluides[0]->getDensity(_limitField[nameOfGroup].p+hydroPress, _externalStates[_nVar-1]);
+			*/
+			if(_nbTimeStep%_freqSave ==0)
+				cout<< "Warning : fluid going out through inletPressure boundary "<<nameOfGroup<<". Applying Wall boundary condition."<<endl;
+			_externalStates[0]=porosityj*_fluides[0]->getDensity(_externalStates[0]+hydroPress, _externalStates[_nVar-1]);
+			//Changing external state velocity
+            for(int k=0; k<_Ndim; k++)
+                _externalStates[(k+1)]-=2*u_n*normale[k];
 		}
 
+		double v2=0;
 		for(int k=0; k<_Ndim; k++)
 		{
 			v2+=_externalStates[(k+1)]*_externalStates[(k+1)];
@@ -744,6 +751,7 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 		VecGetValues(_primitiveVars, _nVar, _idm, _externalStates);
 
 		_externalStates[0]=porosityj*_fluides[0]->getDensity(_limitField[nameOfGroup].p+hydroPress, _externalStates[_nVar-1]);
+		double v2=0;
 		for(int k=0; k<_Ndim; k++)
 		{
 			v2+=_externalStates[(k+1)]*_externalStates[(k+1)];
