@@ -580,7 +580,7 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 		for(int k=0; k<_Ndim; k++)
 			u_int_n+=_externalStates[(k+1)]*normale[k];
 
-		double u_ext_n;
+		double u_ext_n=0;
         //ghost velocity
         if(_Ndim>1)
         {
@@ -681,7 +681,7 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 
 			//Changing external state velocity
             for(int k=0; k<_Ndim; k++)
-                _externalStates[(k+1)]=abs(u_n)*normale[k] + abs(u_n)*tangent_vel[k];
+                _externalStates[(k+1)]=-abs(u_n)*normale[k] + abs(u_n)*tangent_vel[k];
         }
         
 		if(u_n<=0){
