@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 # -*-coding:utf-8 -*
 #===============================================================================================================================
 # Name        : Résolution VF de l'équation de Laplace 3D -\Delta T = 0 avec conditions aux limites de Dirichlet u non nulle (fenetre et radiateur)
