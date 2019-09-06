@@ -754,7 +754,8 @@ void IsothermalTwoFluid::setBoundaryState(string nameOfGroup, const int &j,doubl
 		VecAssemblyEnd(_Uextdiff);
 	}
 	else{
-		cout<<"Boundary condition not set for boundary named"<<nameOfGroup<<endl;
+		cout<<"!!!!!!!!!!!!!!!!! Error IsothermalTwoFluid::setBoundaryState !!!!!!!!!!"<<endl;
+		cout<<"!!!!!!!!!!!!! Boundary condition not set for boundary named"<<nameOfGroup<< ", _limitField[nameOfGroup].bcType= "<<_limitField[nameOfGroup].bcType<<endl;
 		cout<<"Accepted boundary condition are Neumann, Wall, Inlet, and Outlet"<<endl;
 		throw CdmathException("Unknown boundary condition");
 	}

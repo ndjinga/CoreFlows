@@ -16,7 +16,7 @@ def StationaryDiffusionEquation_3DEF_RoomCooling():
 	
 	#Chargement du maillage tétraédrique du domaine
 	#==============================================
-	my_mesh = cdmath.Mesh("./RoomWithTetras2488.med")
+	my_mesh = cdmath.Mesh("../resources/RoomWithTetras2488.med")
 	
 	print "Loaded unstructured 3D mesh"
 	

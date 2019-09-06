@@ -431,10 +431,10 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFV(bool & stop){
 			}
 			else {
                 stop=true ;
-				cout<<"Error StationaryDiffusionEquation::computeDiffusionMatrixFV"<<endl;
-                cout<<"Boundary condition "<< _limitField[nameOfGroup].bcType<<" not accepted for boundary named "<<nameOfGroup<<endl;
+				cout<<"!!!!!!!!!!!!!!! Error StationaryDiffusionEquation::computeDiffusionMatrixFV !!!!!!!!!!"<<endl;
+                cout<<"!!!!!! Boundary condition not accepted for boundary named !!!!!!!!!!"<<nameOfGroup<< ", _limitField[nameOfGroup].bcType= "<<_limitField[nameOfGroup].bcType<<endl;
 				cout<<"Accepted boundary conditions are Neumann "<<Neumann<< " and Dirichlet "<<Dirichlet<<endl;
-				throw CdmathException("Unknown boundary condition");
+				throw CdmathException("Boundary condition not accepted");
 			}
 
 			// if Fj is inside the domain

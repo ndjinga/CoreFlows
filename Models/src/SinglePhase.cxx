@@ -776,7 +776,7 @@ void SinglePhase::setBoundaryState(string nameOfGroup, const int &j,double *norm
 		VecAssemblyEnd(_Uext);
 		VecAssemblyEnd(_Uextdiff);
 	}else {
-		cout<<"Boundary condition not set for boundary named "<<nameOfGroup<<endl;
+		cout<<"Boundary condition not set for boundary named "<<nameOfGroup<< " _limitField[nameOfGroup].bcType= "<<_limitField[nameOfGroup].bcType<<endl;
 		cout<<"Accepted boundary condition are Neumann, Wall, Inlet, and Outlet"<<endl;
 		*_runLogFile<<"Boundary condition not set for boundary named. Accepted boundary condition are Neumann, Wall, Inlet, and Outlet"<<endl;
 		_runLogFile->close();

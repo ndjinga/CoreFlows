@@ -778,7 +778,8 @@ void DriftModel::setBoundaryState(string nameOfGroup, const int &j,double *norma
 		VecAssemblyEnd(_Uextdiff);
 	}
 	else {
-		cout<<"Boundary condition not set for boundary named "<<nameOfGroup<<endl;
+		cout<<"!!!!!!!!!!!!!!! Error DriftModel::setBoundaryState !!!!!!!!!!"<<endl;
+		cout<<"!!!!!!!!!!!!!!!!!!!!!!!!!!!!! Boundary condition not set for boundary named "<<nameOfGroup<< ", _limitField[nameOfGroup].bcType= "<<_limitField[nameOfGroup].bcType<<endl;
 		cout<<"Accepted boundary condition are Neumann, Wall, InnerWall, Inlet, and Outlet"<<endl;
 		*_runLogFile<<"Boundary condition not set for boundary named "<<nameOfGroup<<"Accepted boundary condition are Neumann,Wall, InnerWall, Inlet, and Outlet"<<endl;
 		_runLogFile->close();
