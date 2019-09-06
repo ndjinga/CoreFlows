@@ -601,12 +601,12 @@ void StationaryDiffusionEquation::setMesh(const Mesh &M)
     {
         if(_Ndim==3 and not M.isTetrahedral())
         {
-            cout<<"Dimension is "<<_Ndim<< ", mesh should be tetrahedral"<<endl;
+            cout<<"Finite elements in dimension "<<_Ndim<< ", mesh should be tetrahedral"<<endl;
             throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect cell types");
         }
         if(_Ndim==2 and not M.isTriangular())
         {
-            cout<<"Dimension is "<<_Ndim<< ", mesh should be triangular"<<endl;
+            cout<<"Finite elements in dimension "<<_Ndim<< ", mesh should be triangular"<<endl;
             throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect cell types");
         }
 
