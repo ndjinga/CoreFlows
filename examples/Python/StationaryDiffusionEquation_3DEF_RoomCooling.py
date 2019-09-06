@@ -16,7 +16,7 @@ def StationaryDiffusionEquation_3DEF_RoomCooling():
 	
 	#Chargement du maillage tétraédrique du domaine
 	#==============================================
-	my_mesh = cdmath.Mesh("../resources/RoomWithTetras2488.med")
+	my_mesh = cdmath.Mesh("./RoomWithTetras2488.med")
 	
 	print "Loaded unstructured 3D mesh"
 	
@@ -30,10 +30,10 @@ def StationaryDiffusionEquation_3DEF_RoomCooling():
 	myProblem.setMesh(my_mesh);
 	
 	myProblem.setDirichletBoundaryCondition("Fenetre",Tfenetre)
-	myProblem.setDirichletBoundaryCondition("Radiateur_sous-fenetre",Tradiateur)
+	myProblem.setDirichletBoundaryCondition("Radiateur_sous_fenetre",Tradiateur)
 	myProblem.setDirichletBoundaryCondition("Radiateur_Devant",Tmur)
 	myProblem.setDirichletBoundaryCondition("Radiateur_droit",Tmur)
-	myProblem.setDirichletBoundaryCondition("Mur",Tmur)
+	myProblem.setDirichletBoundaryCondition("Murs",Tmur)
 
     # name of result file
 	fileName = "StationnaryDiffusion_3DEF_UnstructuredTetrahedra";

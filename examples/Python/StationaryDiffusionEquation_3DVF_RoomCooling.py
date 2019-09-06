@@ -16,7 +16,7 @@ def StationaryDiffusionEquation_3DVF_RoomCooling():
 	
 	#Chargement du maillage cartésien du domaine
 	#==============================================
-	my_mesh = cdmath.Mesh("../resources/RoomWithCubes480.med")
+	my_mesh = cdmath.Mesh("./RoomWithCubes480.med")
 	
 	print "Loaded Structured 3D mesh"
 	
@@ -30,9 +30,9 @@ def StationaryDiffusionEquation_3DVF_RoomCooling():
 	myProblem.setMesh(my_mesh);
 	
 	myProblem.setDirichletBoundaryCondition("Fenetre",Tfenetre)
-	myProblem.setDirichletBoundaryCondition("Radiateur_sous-fenetre",Tradiateur)
+	myProblem.setDirichletBoundaryCondition("Radiateur_sous_fenetre",Tradiateur)
 	myProblem.setDirichletBoundaryCondition("Radiateur_Devant",Tmur)
-	myProblem.setDirichletBoundaryCondition("Radiateur_droit",Tmur)
+	myProblem.setDirichletBoundaryCondition("Radiateur_droite",Tmur)
 	myProblem.setDirichletBoundaryCondition("Mur",Tmur)
 
     # name of result file
