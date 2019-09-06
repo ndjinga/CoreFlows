@@ -203,6 +203,8 @@ void StationaryDiffusionEquation::initialize()
         _NdirichletNodes=_dirichletNodeIds.size();
         _NunknownNodes=_Nnodes - _NdirichletNodes;
         cout<<"Number of unknown nodes " << _NunknownNodes <<", Number of boundary nodes " << _NboundaryNodes<< ", Number of Dirichlet boundary nodes " << _NdirichletNodes <<endl;
+		*_runLogFile<<"Number of unknown nodes " << _NunknownNodes <<", Number of boundary nodes " << _NboundaryNodes<< ", Number of Dirichlet boundary nodes " << _NdirichletNodes <<endl;
+		_runLogFile->close();
     }
 
 	//creation de la matrice
@@ -536,6 +538,8 @@ bool StationaryDiffusionEquation::iterateNewtonStep(bool &converged)
     if(_PetscIts>=_maxPetscIts)
     {
         cout<<"Systeme lineaire : pas de convergence de Petsc. Itérations maximales "<<_maxPetscIts<<" atteintes"<<endl;
+		*_runLogFile<<"Systeme lineaire : pas de convergence de Petsc. Itérations maximales "<<_maxPetscIts<<" atteintes"<<endl;
+		_runLogFile->close();
         converged = false;
         stop = true;
     }
@@ -580,6 +584,7 @@ void StationaryDiffusionEquation::setMesh(const Mesh &M)
 {
 	if(_Ndim != M.getSpaceDimension() or _Ndim!=M.getMeshDimension()){
         cout<< "Problem : dim = "<<_Ndim<< " but mesh dim= "<<M.getMeshDimension()<<", mesh space dim= "<<M.getSpaceDimension()<<endl;
+		*_runLogFile<< "Problem : dim = "<<_Ndim<< " but mesh dim= "<<M.getMeshDimension()<<", mesh space dim= "<<M.getSpaceDimension()<<endl;
 		*_runLogFile<<"StationaryDiffusionEquation::setMesh: mesh has incorrect dimension"<<endl;
 		_runLogFile->close();
 		throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect space dimension");
@@ -590,6 +595,8 @@ void StationaryDiffusionEquation::setMesh(const Mesh &M)
 	_Nnodes =   _mesh.getNumberOfNodes();
     
     cout<<"Mesh has "<< _Nmailles << " cells and " << _Nnodes << " nodes"<<endl;
+	*_runLogFile<<"Mesh has "<< _Nmailles << " cells and " << _Nnodes << " nodes"<<endl;
+	_runLogFile->close();
     
 	// find  maximum nb of neibourghs
     if(!_FECalculation)
@@ -602,11 +609,13 @@ void StationaryDiffusionEquation::setMesh(const Mesh &M)
         if(_Ndim==3 and not M.isTetrahedral())
         {
             cout<<"Finite elements in dimension "<<_Ndim<< ", mesh should be tetrahedral"<<endl;
+			*_runLogFile<<"StationaryDiffusionEquation::setMesh: mesh has incorrect cell types"<<endl;
             throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect cell types");
         }
         if(_Ndim==2 and not M.isTriangular())
         {
             cout<<"Finite elements in dimension "<<_Ndim<< ", mesh should be triangular"<<endl;
+			*_runLogFile<<"StationaryDiffusionEquation::setMesh: mesh has incorrect cell types"<<endl;
             throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect cell types");
         }
 
@@ -657,8 +666,11 @@ void StationaryDiffusionEquation::setLinearSolver(linearSolver kspType, precondi
 
 bool StationaryDiffusionEquation::solveStationaryProblem()
 {
+	_runLogFile->open((_fileName+".log").c_str(), ios::out | ios::trunc);;//for creation of a log file to save the history of the simulation
+
 	if(!_initializedMemory)
 	{
+		*_runLogFile<< "ProblemCoreFlows::run() call initialize() first"<< _fileName<<endl;
 		_runLogFile->close();
 		throw CdmathException("ProblemCoreFlows::run() call initialize() first");
 	}
@@ -666,13 +678,18 @@ bool StationaryDiffusionEquation::solveStationaryProblem()
 	bool converged=false; // has the newton scheme converged (end) ?
 
 	cout<< "Running test case "<< _fileName << " using ";
-    if(!_FECalculation)
-        cout<< "Finite volumes method"<<endl;
-    else
-        cout<< "Finite elements method"<<endl;
-
-	_runLogFile->open((_fileName+".log").c_str(), ios::out | ios::trunc);;//for creation of a log file to save the history of the simulation
 	*_runLogFile<< "Running test case "<< _fileName<<endl;
+
+    if(!_FECalculation)
+    {
+        cout<< "Finite volumes method"<<endl;
+		*_runLogFile<< "Finite volumes method"<< _fileName<<endl;
+	}
+    else
+	{
+        cout<< "Finite elements method"<<endl;
+		*_runLogFile<< "Finite elements method"<< _fileName<<endl;
+	}
 
     computeDiffusionMatrix( stop);//For the moment the conductivity does not depend on the temperature (linear LHS)
     if (stop){
