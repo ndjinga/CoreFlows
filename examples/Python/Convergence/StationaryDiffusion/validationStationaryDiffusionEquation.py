@@ -125,7 +125,6 @@ def SolveStationaryDiffusionEquation(my_mesh,resolution,MeshType,method,BC):
 			T6=0;
 			myProblem.setDirichletBoundaryCondition("Front",T5)
 			myProblem.setDirichletBoundaryCondition("Back",T6)
-		myProblem.setLinearSolver(cf.GMRES,cf.LU);#ILU
 	elif BC =='Neumann':
 		test_desc["Boundary_conditions"]="Neumann"
 		myProblem.setNeumannBoundaryCondition("Right")
@@ -135,7 +134,6 @@ def SolveStationaryDiffusionEquation(my_mesh,resolution,MeshType,method,BC):
 		if spaceDim == 3:
 			myProblem.setNeumannBoundaryCondition("Front")
 			myProblem.setNeumannBoundaryCondition("Back")
-		myProblem.setLinearSolver(cf.GMRES,cf.ILU);#ILU
 
 	if spaceDim == 2 : 
 		test_desc["Geometry"]="Square"
