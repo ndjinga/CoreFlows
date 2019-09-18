@@ -49,7 +49,7 @@ def convergence_StationaryDiffusion_2DFV_Dirichlet_DelaunayTriangles():
     plt.legend()
     plt.xlabel('Position on diagonal line')
     plt.ylabel('Value on diagonal line')
-    plt.title('Plot over diagonal line for finite volumes for Poisson problem \n on 2D triangular Delaunay triangles with Dirichlet BC')
+    plt.title('Plot over diagonal line for finite volumes for Poisson problem \n on 2D Delaunay triangles with Dirichlet BC')
     plt.savefig(mesh_name+"_2DFV_StatDiffusion_Dirichlet_PlotOverDiagonalLine.png")
 
     # Least square linear regression
@@ -77,7 +77,7 @@ def convergence_StationaryDiffusion_2DFV_Dirichlet_DelaunayTriangles():
     plt.plot(mesh_size_tab, error_tab)
     plt.xlabel('log(sqrt(number of cells))')
     plt.ylabel('log(error)')
-    plt.title('Convergence of finite volumes for Poisson problem \n on 2D triangular Delaunay triangles meshes with Dirichlet BC')
+    plt.title('Convergence of finite volumes for Poisson problem \n on 2D Delaunay triangles meshes with Dirichlet BC')
     plt.savefig(mesh_name+"_2DFV_StatDiffusion_Dirichlet_ConvergenceCurve.png")
 
     # Plot of computational time
@@ -86,7 +86,7 @@ def convergence_StationaryDiffusion_2DFV_Dirichlet_DelaunayTriangles():
     plt.legend()
     plt.xlabel('log(sqrt(number of cells))')
     plt.ylabel('log(cpu time)')
-    plt.title('Computational time of finite volumes for Poisson problem \n on 2D triangular Delaunay triangles meshes with Dirichlet BC')
+    plt.title('Computational time of finite volumes for Poisson problem \n on 2D Delaunay triangles meshes with Dirichlet BC')
     plt.savefig(mesh_name+"_2DFV_StatDiffusion_Dirichlet_ComputationalTime.png")
     
     plt.close('all')
