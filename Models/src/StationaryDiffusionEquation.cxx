@@ -90,7 +90,7 @@ StationaryDiffusionEquation::StationaryDiffusionEquation(int dim, bool FECalcula
 	_NEWTON_its=0;
 	int _PetscIts=0;//the number of iterations of the linear solver
 	_ksptype = (char*)&KSPGMRES;
-	_pctype = (char*)&PCLU;
+	_pctype = (char*)&PCCHOLESKY;
 	_conditionNumber=false;
 	_erreur_rel= 0;
 
@@ -242,13 +242,12 @@ void StationaryDiffusionEquation::initialize()
     if(onlyNeumannBC)
     {
         std::cout<<"Warning all boundary condition are Neumann. System matrix is not invertible since constant vectors are in the kernel."<<std::endl;
-        std::cout<<"As a consequence we seek a zero mean solution, and no preconditioner can be applied."<<std::endl;
+        std::cout<<"As a consequence we seek a zero mean solution, and exact (LU avd CHOLESKY) and incomplete factorisations (ILU and ICC) may fail due to zero pivot."<<std::endl;
 		MatNullSpace nullsp;
 		MatNullSpaceCreate(PETSC_COMM_WORLD, PETSC_TRUE, 0, PETSC_NULL, &nullsp);
 		MatSetNullSpace(_A, nullsp);
+		MatSetTransposeNullSpace(_A, nullsp);
 		MatNullSpaceDestroy(&nullsp);
-
-        _pctype = (char*)&PCNONE;
     }
 
 	_initializedMemory=true;
