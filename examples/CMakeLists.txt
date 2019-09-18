@@ -1,7 +1,5 @@
 project(test)
 
-add_subdirectory (${CoreFlows_EXAMPLES}/Python)
-
 INCLUDE_DIRECTORIES(
   ${PETSC_INCLUDES} 
   ${CDMATH_INCLUDES} 
@@ -22,26 +20,27 @@ if(CMAKE_COMPILER_IS_GNUCXX)
 endif()
 
 
-file(GLOB NICE_EXAMPLES_TO_INSTALL resources Python )
+file(GLOB NICE_EXAMPLES_TO_INSTALL resources )
 install(DIRECTORY ${NICE_EXAMPLES_TO_INSTALL} DESTINATION share/examples)
 
 ##################################### test generation with ctest
 
 # this function creates a target and a ctest test
 function(CreateTestExec SourceTestFile libList)
+     message("Setting cpp test ${EXECNAME}")
      get_filename_component( FILE_BASENAME ${SourceTestFile} NAME_WE) # <path>/testxxx.c --> testxxx
      set( EXECNAME "${FILE_BASENAME}.exe" )                     # testxxx          --> testxxx.exe
      add_executable(${EXECNAME} ${SourceTestFile})                    # compilation of the testxxx.exe 
      set_target_properties(${EXECNAME} PROPERTIES COMPILE_FLAGS "")
      target_link_libraries(${EXECNAME} ${libList})              # provide required lib for testxxx.exe 
      add_test(${FILE_BASENAME} ${EXECNAME} "./${EXECNAME}")     # adding a ctest Test
-     message("setting test ${EXECNAME}")
 endfunction(CreateTestExec)
 
 # this function creates a target and a ctest test
 # and also create install rules for copying the example
 # in the install dir
 function(CreateTestExecAndInstall SourceTestFile libList)
+     message("Setting cpp test ${EXECNAME}")
      get_filename_component( FILE_BASENAME ${SourceTestFile} NAME_WE) # <path>/testxxx.c --> testxxx
      set( EXECNAME "${FILE_BASENAME}.exe" )                     # testxxx          --> testxxx.exe
      add_executable(${EXECNAME} ${SourceTestFile})                    # compilation of the testxxx.exe 
@@ -49,7 +48,6 @@ function(CreateTestExecAndInstall SourceTestFile libList)
      target_link_libraries(${EXECNAME} ${libList})              # provide required lib for testxxx.exe 
      add_test(NAME ${EXECNAME} COMMAND "./${EXECNAME}")     # adding a ctest Test
      install(TARGETS ${EXECNAME} DESTINATION share/examples)
-     message("setting test ${EXECNAME}")
 endfunction(CreateTestExecAndInstall)
 
 
@@ -111,3 +109,14 @@ CreateTestExecAndInstall(testEOS.cxx  "${libs_for_tests}" )
 
 
 #TODO: install for tests and test data
+
+if (COREFLOWS_WITH_PYTHON )
+
+  add_subdirectory (${CoreFlows_EXAMPLES}/Python)
+
+  file(GLOB PYTHON_EXAMPLES_TO_INSTALL Python )
+  install(DIRECTORY ${PYTHON_EXAMPLES_TO_INSTALL} DESTINATION share/examples)
+
+endif (COREFLOWS_WITH_PYTHON )
+
+
