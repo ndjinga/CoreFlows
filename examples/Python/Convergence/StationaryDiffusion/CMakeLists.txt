@@ -1,3 +1,15 @@
 
 add_subdirectory (2DFE_Dirichlet_DelaunayTriangles)
+add_subdirectory (2DFE_Dirichlet_RightTriangles)
+add_subdirectory (2DFV_Dirichlet_DelaunayTriangles)
+add_subdirectory (2DFV_Dirichlet_EquilateralTriangles)
+add_subdirectory (2DFV_Dirichlet_RightTriangles)
+add_subdirectory (2DFV_Dirichlet_Squares)
+add_subdirectory (2DFV_Neumann_RightTriangles)
+add_subdirectory (2DFV_Neumann_Squares)
+add_subdirectory (3DFE_Dirichlet_DelaunayTetrahedra)
+add_subdirectory (3DFE_Dirichlet_RegularTetrahedra)
+add_subdirectory (3DFV_Dirichlet_DelaunayTetrahedra)
+add_subdirectory (3DFV_Dirichlet_RegularCubes)
+add_subdirectory (3DFV_Dirichlet_RegularTetrahedra)
 
