@@ -241,6 +241,8 @@ void StationaryDiffusionEquation::initialize()
     //If only Neumann BC, then matrix is singular and solution should be sought in space of mean zero vectors
     if(onlyNeumannBC)
     {
+        std::cout<<"Warning all boundary condition are Neumann. System matrix is not invertible since constant vectors are in the kernel."<<std::endl;
+        std::cout<<"As a consequence we seek a zero mean solution, and no preconditioner can be applied."<<std::endl;
 		MatNullSpace nullsp;
 		MatNullSpaceCreate(PETSC_COMM_WORLD, PETSC_TRUE, 0, PETSC_NULL, &nullsp);
 		MatSetNullSpace(_A, nullsp);
@@ -537,8 +539,10 @@ bool StationaryDiffusionEquation::iterateNewtonStep(bool &converged)
         _MaxIterLinearSolver = _PetscIts;
     if(_PetscIts>=_maxPetscIts)
     {
-        cout<<"Systeme lineaire : pas de convergence de Petsc. Itérations maximales "<<_maxPetscIts<<" atteintes"<<endl;
-		*_runLogFile<<"Systeme lineaire : pas de convergence de Petsc. Itérations maximales "<<_maxPetscIts<<" atteintes"<<endl;
+        double residu;
+        KSPGetResidualNorm(_ksp,&residu);
+        cout<<"Systeme lineaire : pas de convergence de Petsc. Itérations maximales "<<_maxPetscIts<<" atteintes, residu="<<residu<<", précision demandée= "<<_precision<<endl;
+		*_runLogFile<<"Systeme lineaire : pas de convergence de Petsc. Itérations maximales "<<_maxPetscIts<<" atteintes, residu="<<residu<<", précision demandée= "<<_precision<<endl;
 		_runLogFile->close();
         converged = false;
         stop = true;
