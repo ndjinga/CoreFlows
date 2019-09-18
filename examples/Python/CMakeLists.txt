@@ -142,8 +142,6 @@ function(CreatePythonConvergenceTest model convergenceTest pythonSolver MESHES_A
     SET_PROPERTY(TEST convergence_${model}_${convergenceTest} PROPERTY ENVIRONMENT LD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/lib:${CDMATH_DIR}/lib:${CDMATH_DIR}/lib/med:${CDMATH_DIR}/lib/medcoupling:${PETSC_DIR}/${PETSC_ARCH}/lib:${PV_LIB_DIR})
     SET_PROPERTY(TEST convergence_${model}_${convergenceTest} APPEND PROPERTY ENVIRONMENT PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}:${CMAKE_INSTALL_PREFIX}/lib:${CMAKE_INSTALL_PREFIX}/lib/CoreFlows_Python:${CMAKE_INSTALL_PREFIX}/bin/CoreFlows_Python:${CDMATH_DIR}/lib:${CDMATH_DIR}/lib/cdmath:${CDMATH_DIR}/bin/cdmath:${CDMATH_DIR}/lib/med:${CDMATH_DIR}/lib/medcoupling:${CDMATH_DIR}/bin/cdmath/postprocessing:${PV_PYTHON_DIR})
      message("setting python convergence test convergence_${model}_${convergenceTest}")
-message ( STATUS ${PV_LIB_DIR} )
-message ( STATUS ${PV_PYTHON_DIR} )
 endfunction(CreatePythonConvergenceTest)
 
 add_subdirectory (Convergence/StationaryDiffusion)
