@@ -6,7 +6,7 @@ import cdmath as cm
 import matplotlib.pyplot as plt
 import numpy as np
 from math import log10, sqrt
-import time, json
+import time, json, os
 
 convergence_synthesis=dict(validationStationaryDiffusionEquation.test_desc)
 
@@ -18,7 +18,7 @@ def convergence_StationaryDiffusion_2DFV_Dirichlet_EquilateralTriangles():
     method = 'FV'
     BC = 'Dirichlet'
     meshList=['squareWithEquilateralTriangles5','squareWithEquilateralTriangles20','squareWithEquilateralTriangles50','squareWithEquilateralTriangles100','squareWithEquilateralTriangles200']
-    mesh_path='../../../CDMATH/CDMATH_SRC/tests/ressources/2DEquilateralTriangles/'
+    mesh_path=os.environ['CDMATH_INSTALL']+'/share/meshes/2DEquilateralTriangles/'
     mesh_name='squareWithEquilateralTriangles'
     meshType="Structured_triangles"
     nbMeshes=len(meshList)

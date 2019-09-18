@@ -6,7 +6,7 @@ import cdmath as cm
 import matplotlib.pyplot as plt
 import numpy as np
 from math import log10, sqrt
-import time, json
+import time, json, os
 
 convergence_synthesis=dict(validationStationaryDiffusionEquation.test_desc)
 
@@ -16,7 +16,7 @@ def convergence_StationaryDiffusion_3DFV_Dirichlet_DelaunayTetrahedra():
     method = 'FV'
     BC = 'Dirichlet'
     meshList=['meshCubeTetrahedra_0','meshCubeTetrahedra_1','meshCubeTetrahedra_2','meshCubeTetrahedra_3','meshCubeTetrahedra_4']
-    mesh_path='../../../CDMATH/CDMATH_SRC/tests/ressources/3DTetrahedra/'
+    mesh_path=os.environ['CDMATH_INSTALL']+'/share/meshes/3DTetrahedra/'
     mesh_name='cubeWithDelaunayTetrahedra'
     meshType="Unstructured_Tetrahedra"
     nbMeshes=len(meshList)
