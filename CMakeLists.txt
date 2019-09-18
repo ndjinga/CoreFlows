@@ -72,25 +72,31 @@ endif ()
 
 
 
-# Base directories
-set (CoreFlows_SRC ${CoreFlows_SOURCE_DIR}/Models ) 
-set (CoreFlows_EXAMPLES ${CoreFlows_SOURCE_DIR}/examples)
-add_subdirectory (${CoreFlows_SRC})
-add_subdirectory (${CoreFlows_EXAMPLES})
-
-
 # Swig interface -------------------------------------------------------------------------------------------#
                                                                                                             #
 if (COREFLOWS_WITH_PYTHON)                                                                                  #
    find_package (PYTHON REQUIRED)                                                                           #
    find_package (SWIG REQUIRED)                                                                             #
+   set (PV_LIB_DIR /usr/lib/python2.7/dist-packages/:/usr/lib/python3.7/dist-packages/:/usr/lib64/paraview/)
+   set (PV_PYTHON_DIR /usr/lib/python2.7/dist-packages:/usr/lib64/paraview/site-packages/:/usr/lib64/paraview/site-packages/paraview/:/usr/lib64/paraview/site-packages/vtk/:/usr/lib64/paraview/python2.7/site-packages/:/usr/lib64/paraview/python2.7/site-packages/paraview/:/usr/lib64/paraview/python2.7/site-packages/vtkmodules:/usr/lib64/paraview/python3.7/site-packages/:/usr/lib64/paraview/python3.7/site-packages/paraview/:/usr/lib64/paraview/python3.7/site-packages/vtkmodules)
    set (CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, python-dev, python-numpy, swig")     #
    set (CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, python-devel, numpy, swig")              #
    set (CoreFlows_SWIG_DIR ${CoreFlows_SOURCE_DIR}/swig)                                                    #
-   add_subdirectory (${CoreFlows_SWIG_DIR})                                                                 #
 endif ()                                                                                                    #
                                                                                                             #
 #-----------------------------------------------------------------------------------------------------------#
+
+
+# Base directories
+set (CoreFlows_SRC ${CoreFlows_SOURCE_DIR}/Models ) 
+set (CoreFlows_EXAMPLES ${CoreFlows_SOURCE_DIR}/examples)
+add_subdirectory (${CoreFlows_SRC})
+add_subdirectory (${CoreFlows_EXAMPLES})
+if (COREFLOWS_WITH_PYTHON)                                                                                  #
+   add_subdirectory (${CoreFlows_SWIG_DIR})                                                                 #
+endif ()                                                                                                    #
+
+
 
 # Documentation --------------------------------------------------------------------------------------------#
                                                                                                             #
