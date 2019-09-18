@@ -11,7 +11,7 @@
 
 import CoreFlows as cf
 import cdmath as cm
-from math import sin, pi
+from math import cos, pi
 
 def StationaryDiffusionEquation_2DEF_StructuredTriangles_Neumann():
 	spaceDim = 2;
