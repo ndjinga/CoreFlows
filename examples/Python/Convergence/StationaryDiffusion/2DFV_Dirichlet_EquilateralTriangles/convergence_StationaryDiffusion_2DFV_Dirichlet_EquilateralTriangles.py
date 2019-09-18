@@ -10,6 +10,8 @@ import time, json
 
 convergence_synthesis=dict(validationStationaryDiffusionEquation.test_desc)
 
+# !!!!!!!!!! Warning : result is affected by the fact that the mesh if not strictly a partition of the domain. BC should be adapted to find an order 2 of convergence as is the case in CDMATH !!!!!!!!!!!!!
+
 def convergence_StationaryDiffusion_2DFV_Dirichlet_EquilateralTriangles():
     start = time.time() 
     ### 2D FV Equilateral triangle meshes
@@ -33,7 +35,6 @@ def convergence_StationaryDiffusion_2DFV_Dirichlet_EquilateralTriangles():
     for filename in meshList:
 		my_mesh=cm.Mesh(mesh_path+filename+".med")
 		error_tab[i], mesh_size_tab[i], diag_data[i], min_sol_num, max_sol_num, time_tab[i] =validationStationaryDiffusionEquation.SolveStationaryDiffusionEquation(my_mesh,resolution,meshType,method,BC)
-
 		assert min_sol_num>-1 
 		assert max_sol_num<1.2
 		plt.plot(curv_abs, diag_data[i], label= str(mesh_size_tab[i]) + ' cells')
@@ -77,7 +78,7 @@ def convergence_StationaryDiffusion_2DFV_Dirichlet_EquilateralTriangles():
     plt.plot(mesh_size_tab, error_tab)
     plt.xlabel('log(sqrt(number of cells))')
     plt.ylabel('log(error)')
-    plt.title('Convergence of finite volumes for Poisson problem \n on 2D equilateral triangles meshes with Dirichlet BC')
+    plt.title('Convergence of finite elements for Poisson problem \n on 2D equilateral triangles meshes with Dirichlet BC \n Warning : result is affected by the fact that the mesh if not strictly a partition of the domain')
     plt.savefig(mesh_name+"_2DFV_StatDiffusion_Dirichlet_ConvergenceCurve.png")
 
     # Plot of computational time

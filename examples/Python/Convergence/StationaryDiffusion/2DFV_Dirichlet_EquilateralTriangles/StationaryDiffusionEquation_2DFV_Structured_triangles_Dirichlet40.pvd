@@ -1,3 +1,0 @@
-<VTKFile type="Collection" version="0.1" byte_order="LittleEndian"><Collection>
-<DataSet timestep="0" group="" part="0" file="/home/ndjinga/Logiciels/CDMATH-CoreFlows/Tests/2DFV_Dirichlet_EquilateralTriangles/StationaryDiffusionEquation_2DFV_Structured_triangles_Dirichlet40_0.vtu"/>
-</Collection></VTKFile>
