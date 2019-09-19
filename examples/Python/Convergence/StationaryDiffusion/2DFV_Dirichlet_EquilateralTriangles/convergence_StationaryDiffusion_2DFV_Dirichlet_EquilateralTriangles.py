@@ -99,10 +99,12 @@ def convergence_StationaryDiffusion_2DFV_Dirichlet_EquilateralTriangles():
     convergence_synthesis["Mesh_sizes"]=[10**x for x in mesh_size_tab]
     convergence_synthesis["Space_dimension"]=2
     convergence_synthesis["Mesh_dimension"]=2
-    convergence_synthesis["Mesh_cell_type"]="Squares"
+    convergence_synthesis["Mesh_cell_type"]="Triangles"
     convergence_synthesis["Errors"]=[10**x for x in error_tab]
     convergence_synthesis["Scheme_order"]=-a
     convergence_synthesis["Test_color"]=testColor
+    convergence_synthesis["PDE_model"]='Poisson'
+    convergence_synthesis["Numerical_method_name"]=method
     convergence_synthesis["Computational_time"]=end-start
 
     with open('Convergence_Poisson_2DFV_'+mesh_name+'.json', 'w') as outfile:  

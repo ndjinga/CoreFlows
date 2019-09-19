@@ -95,8 +95,8 @@ def convergence_StationaryDiffusion_3DFV_Dirichlet_RegularCubes():
     #convergence_synthesis["Mesh_path"]=mesh_path
     convergence_synthesis["Mesh_description"]=mesh_name
     convergence_synthesis["Mesh_sizes"]=[10**x for x in mesh_size_tab]
-    convergence_synthesis["Space_dimension"]=2
-    convergence_synthesis["Mesh_dimension"]=2
+    convergence_synthesis["Space_dimension"]=3
+    convergence_synthesis["Mesh_dimension"]=3
     convergence_synthesis["Mesh_cell_type"]="Cubes"
     convergence_synthesis["Errors"]=[10**x for x in error_tab]
     convergence_synthesis["Scheme_order"]=-a
