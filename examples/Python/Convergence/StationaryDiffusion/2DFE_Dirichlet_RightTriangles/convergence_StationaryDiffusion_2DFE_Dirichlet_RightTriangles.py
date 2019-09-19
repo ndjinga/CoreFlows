@@ -104,7 +104,7 @@ def convergence_StationaryDiffusion_2DFE_Dirichlet_RightTriangles():
     convergence_synthesis["PDE_model"]='Poisson'
     convergence_synthesis["Num_method"]=method
     convergence_synthesis["Bound_cond"]=BC
-    convergence_synthesis["Comput_time"]=end-start
+    convergence_synthesis["Comput_time"]=round(end-start,3)
 
     with open('Convergence_Poisson_2DFE_'+mesh_name+'.json', 'w') as outfile:  
         json.dump(convergence_synthesis, outfile)
