@@ -99,7 +99,7 @@ def convergence_StationaryDiffusion_3DFE_Dirichlet_DelaunayTetrahedra():
     convergence_synthesis["Mesh_dim"]=3
     convergence_synthesis["Mesh_cell_type"]="Tetrahedron"
     convergence_synthesis["Errors"]=[10**x for x in error_tab]
-    convergence_synthesis["Scheme_order"]=-a
+    convergence_synthesis["Scheme_order"]=round(-a,4)
     convergence_synthesis["Test_color"]=testColor
     convergence_synthesis["PDE_model"]='Poisson'
     convergence_synthesis["Bound_cond"]=BC

@@ -97,7 +97,7 @@ def convergence_StationaryDiffusion_2DFV_Dirichlet_Squares():
     convergence_synthesis["Mesh_dim"]=2
     convergence_synthesis["Mesh_cell_type"]="Squares"
     convergence_synthesis["Errors"]=[10**x for x in error_tab]
-    convergence_synthesis["Scheme_order"]=-a
+    convergence_synthesis["Scheme_order"]=round(-a,4)
     convergence_synthesis["Test_color"]=testColor
     convergence_synthesis["PDE_model"]='Poisson'
     convergence_synthesis["Num_method"]=method
