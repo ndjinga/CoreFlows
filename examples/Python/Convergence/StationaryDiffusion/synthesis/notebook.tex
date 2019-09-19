@@ -553,11 +553,11 @@ Done writing file test\_synthesis\_StationaryDiffusion\_short.xlsx
 \section{Convergence study table}\label{convergence-study-table}}
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}9}]:} \PY{n}{convergence\PYZus{}files} \PY{o}{=} \PY{n}{glob}\PY{o}{.}\PY{n}{glob}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{../*/Convergence\PYZus{}*.json}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-        
-        \PY{k}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{The following convergence description files : }\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-        \PY{k}{print}\PY{p}{(}\PY{n}{convergence\PYZus{}files}\PY{p}{)}
-        \PY{k}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{will be imported}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}14}]:} \PY{n}{convergence\PYZus{}files} \PY{o}{=} \PY{n}{glob}\PY{o}{.}\PY{n}{glob}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{../*/Convergence\PYZus{}*.json}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+         
+         \PY{k}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{The following convergence description files : }\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+         \PY{k}{print}\PY{p}{(}\PY{n}{convergence\PYZus{}files}\PY{p}{)}
+         \PY{k}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{will be imported}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
 \end{Verbatim}
 
 
@@ -569,7 +569,7 @@ will be imported
     \end{Verbatim}
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}10}]:} \PY{c+c1}{\PYZsh{} Let\PYZsq{}s import all json files into a list of dictionaries}
+{\color{incolor}In [{\color{incolor}15}]:} \PY{c+c1}{\PYZsh{} Let\PYZsq{}s import all json files into a list of dictionaries}
          \PY{n}{convergence\PYZus{}descriptions} \PY{o}{=} \PY{p}{[}\PY{p}{]}
          
          \PY{k}{for} \PY{n}{file\PYZus{}name} \PY{o+ow}{in} \PY{n}{convergence\PYZus{}files}\PY{p}{:}
@@ -586,10 +586,10 @@ convergence json files have been imported
     \end{Verbatim}
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}11}]:} \PY{c+c1}{\PYZsh{} Let\PYZsq{}s create a pandas dataframe out of the convergence dictionary}
+{\color{incolor}In [{\color{incolor}16}]:} \PY{c+c1}{\PYZsh{} Let\PYZsq{}s create a pandas dataframe out of the convergence dictionary}
          \PY{n}{df\PYZus{}convergence} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{DataFrame}\PY{p}{(}\PY{n}{convergence\PYZus{}descriptions}\PY{p}{)}
          \PY{k}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{The convergence pandas dataframe has been created}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-         \PY{n}{df\PYZus{}convergence}\PY{o}{.}\PY{n}{sort\PYZus{}values}\PY{p}{(}\PY{n}{by}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{PDE\PYZus{}model}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Numerical\PYZus{}method\PYZus{}name}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mesh\PYZus{}dimension}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mesh\PYZus{}type}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mesh\PYZus{}cell\PYZus{}type}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Test\PYZus{}color}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{n}{inplace}\PY{o}{=}\PY{n+nb+bp}{True}\PY{p}{)}
+         \PY{n}{df\PYZus{}convergence}\PY{o}{.}\PY{n}{sort\PYZus{}values}\PY{p}{(}\PY{n}{by}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{PDE\PYZus{}model}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Numerical\PYZus{}method\PYZus{}name}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mesh\PYZus{}dimension}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mesh\PYZus{}type}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Boundary\PYZus{}condition}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mesh\PYZus{}cell\PYZus{}type}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Test\PYZus{}color}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{n}{inplace}\PY{o}{=}\PY{n+nb+bp}{True}\PY{p}{)}
          
          \PY{n}{list\PYZus{}of\PYZus{}all\PYZus{}columns\PYZus{}convergence} \PY{o}{=} \PY{n}{df\PYZus{}convergence}\PY{o}{.}\PY{n}{columns}
          \PY{k}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Printing the columns of the dataframe : these are the parameters of the database}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
@@ -600,9 +600,10 @@ convergence json files have been imported
     \begin{Verbatim}[commandchars=\\\{\}]
 The convergence pandas dataframe has been created
 Printing the columns of the dataframe : these are the parameters of the database
-Index([u'Computational\_time', u'Errors', u'Initial\_data', u'Mesh\_cell\_type',
-       u'Mesh\_description', u'Mesh\_dimension', u'Mesh\_is\_unstructured',
-       u'Mesh\_names', u'Mesh\_sizes', u'Mesh\_type', u'Numerical\_method\_name',
+Index([u'Boundary\_condition', u'Computational\_time', u'Errors',
+       u'Initial\_data', u'Mesh\_cell\_type', u'Mesh\_description',
+       u'Mesh\_dimension', u'Mesh\_is\_unstructured', u'Mesh\_names',
+       u'Mesh\_sizes', u'Mesh\_type', u'Numerical\_method\_name',
        u'Numerical\_method\_time\_discretization', u'PDE\_is\_stationary',
        u'PDE\_model', u'PDE\_search\_for\_stationary\_solution',
        u'Part\_of\_mesh\_convergence\_analysis', u'Scheme\_order',
@@ -612,8 +613,8 @@ Index([u'Computational\_time', u'Errors', u'Initial\_data', u'Mesh\_cell\_type',
     \end{Verbatim}
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}12}]:} \PY{c+c1}{\PYZsh{} Extract the most interesting column from df\PYZus{}convergence into a second dataframe df2\PYZus{}convergence}
-         \PY{n}{df2\PYZus{}convergence}\PY{o}{=}\PY{n}{df\PYZus{}convergence}\PY{p}{[}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{PDE\PYZus{}model}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Numerical\PYZus{}method\PYZus{}name}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mesh\PYZus{}dimension}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mesh\PYZus{}type}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Scheme\PYZus{}order}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mesh\PYZus{}cell\PYZus{}type}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Test\PYZus{}color}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Computational\PYZus{}time}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{]}
+{\color{incolor}In [{\color{incolor}18}]:} \PY{c+c1}{\PYZsh{} Extract the most interesting column from df\PYZus{}convergence into a second dataframe df2\PYZus{}convergence}
+         \PY{n}{df2\PYZus{}convergence}\PY{o}{=}\PY{n}{df\PYZus{}convergence}\PY{p}{[}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{PDE\PYZus{}model}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Numerical\PYZus{}method\PYZus{}name}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mesh\PYZus{}dimension}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mesh\PYZus{}type}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Boundary\PYZus{}condition}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Scheme\PYZus{}order}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mesh\PYZus{}cell\PYZus{}type}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Test\PYZus{}color}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Computational\PYZus{}time}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{]}
          
          \PY{c+c1}{\PYZsh{} Let\PYZsq{}s create a jupyter table widget from the convergenc dataframe}
          \PY{n}{qgrid\PYZus{}widget\PYZus{}convergence}\PY{o}{=}\PY{n}{qgrid}\PY{o}{.}\PY{n}{show\PYZus{}grid}\PY{p}{(}\PY{n}{df2\PYZus{}convergence}\PY{p}{,} \PY{n}{grid\PYZus{}options}\PY{o}{=}\PY{n}{gopt}\PY{p}{,} \PY{n}{show\PYZus{}toolbar}\PY{o}{=}\PY{n+nb+bp}{False}\PY{p}{)}
@@ -631,7 +632,7 @@ UWdyaWRXaWRnZXQoZ3JpZF9vcHRpb25zPXsnZGVmYXVsdENvbHVtbldpZHRoJzogMTUwLCAnaGlnaGxp
 
     
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}13}]:} \PY{c+c1}{\PYZsh{}Now export convergence study table}
+{\color{incolor}In [{\color{incolor}19}]:} \PY{c+c1}{\PYZsh{}Now export convergence study table}
          \PY{n}{df\PYZus{}convergence}\PY{o}{.}\PY{n}{to\PYZus{}csv}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{convergence\PYZus{}synthesis\PYZus{}StationaryDiffusion\PYZus{}all.csv}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{c+c1}{\PYZsh{}Saving using csv format}
          \PY{n}{output\PYZus{}file\PYZus{}name}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{convergence\PYZus{}synthesis\PYZus{}StationaryDiffusion\PYZus{}all.xlsx}\PY{l+s+s1}{\PYZsq{}}
          \PY{n}{writer} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{ExcelWriter}\PY{p}{(}\PY{n}{output\PYZus{}file\PYZus{}name}\PY{p}{)}

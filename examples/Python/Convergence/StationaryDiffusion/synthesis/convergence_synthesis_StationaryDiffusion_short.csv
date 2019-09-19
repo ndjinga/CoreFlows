@@ -1,14 +1,14 @@
-,PDE_model,Numerical_method_name,Mesh_dimension,Mesh_type,Boundary_condition,Scheme_order,Mesh_cell_type,Test_color,Computational_time
-2,Poisson,FE,2,Regular_RightTriangles,Dirichlet,2.0039412540895807,Triangles,Green,109.47715711593628
-3,Poisson,FE,2,Unstructured_triangles,Dirichlet,2.0156086444601446,Triangles,Green,6.233874082565308
-6,Poisson,FE,3,Regular_Tetrahedra,Dirichlet,1.340336836145038,Tetrahedron,Green,208.52189087867737
-7,Poisson,FE,3,Unstructured_Tetrahedra,Dirichlet,0.6690820358074518,Tetrahedron,Green,12.181833028793335
-1,Poisson,FV,2,RegularSquares,Dirichlet,2.0039412135353034,Squares,Green,10.150546073913574
-11,Poisson,FV,2,RegularSquares,Neumann,2.0039412115511825,Squares,Green,9.985594987869263
-4,Poisson,FV,2,Regular_RightTriangles,Dirichlet,0.02119663100406134,Triangles,Green,18.92783284187317
-0,Poisson,FV,2,Regular_RightTriangles,Neumann,-0.005617740418916485,Triangles,Orange(order 0),18.37629008293152
-5,Poisson,FV,2,Structured_triangles,Dirichlet,0.8952237869134417,Triangles,Green,4.93955397605896
-8,Poisson,FV,2,Unstructured_triangles,Dirichlet,0.6137798580984465,Triangles,Green,2.6160519123077393
-10,Poisson,FV,3,Regular_Cubes,Dirichlet,1.3403368361320993,Cubes,Green,5.918725967407227
-9,Poisson,FV,3,Regular_Tetrahedra,Dirichlet,0.006535470643459771,Tetrahedron,Green,64.21971893310547
-12,Poisson,FV,3,Unstructured_Tetrahedra,Dirichlet,0.5358788100873692,Tetrahedron,Green,3.7558979988098145
+,PDE_model,Num_method,Mesh_dim,Mesh_type,Bound_cond,Scheme_order,Mesh_cell_type,Test_color,Comput_time
+2,Poisson,FE,2,Regular_RightTriangles,Dirichlet,2.0039,Triangles,Green,108.14553999900818
+3,Poisson,FE,2,Unstructured_triangles,Dirichlet,2.0156,Triangles,Green,6.762243032455444
+6,Poisson,FE,3,Regular_Tetrahedra,Dirichlet,1.3403,Tetrahedron,Green,210.4683861732483
+7,Poisson,FE,3,Unstructured_Tetrahedra,Dirichlet,0.6691,Tetrahedron,Green,11.9149010181427
+1,Poisson,FV,2,RegularSquares,Dirichlet,2.0039,Squares,Green,9.832487106323242
+11,Poisson,FV,2,RegularSquares,Neumann,2.0039,Squares,Green,9.859630107879639
+4,Poisson,FV,2,Regular_RightTriangles,Dirichlet,0.0212,Triangles,Green,15.655019998550415
+0,Poisson,FV,2,Regular_RightTriangles,Neumann,-0.0056,Triangles,Orange(order 0),15.789921998977661
+8,Poisson,FV,2,Unstructured_triangles,Dirichlet,0.6138,Triangles,Green,2.600184917449951
+10,Poisson,FV,3,Regular_Cubes,,1.3403,Cubes,Green,5.900697946548462
+9,Poisson,FV,3,Regular_Tetrahedra,Dirichlet,0.0065,Tetrahedron,Green,62.560988903045654
+12,Poisson,FV,3,Unstructured_Tetrahedra,Dirichlet,0.5359,Tetrahedron,Green,3.7825000286102295
+5,Poisson,,2,Structured_triangles,Dirichlet,0.8952,Triangles,Green,4.790747165679932
