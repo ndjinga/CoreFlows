@@ -96,16 +96,16 @@ def convergence_StationaryDiffusion_2DFV_Neumann_DelaunayTriangles():
     #convergence_synthesis["Mesh_path"]=mesh_path
     convergence_synthesis["Mesh_description"]=mesh_name
     convergence_synthesis["Mesh_sizes"]=[10**x for x in mesh_size_tab]
-    convergence_synthesis["Space_dimension"]=2
-    convergence_synthesis["Mesh_dimension"]=2
+    convergence_synthesis["Space_dim"]=2
+    convergence_synthesis["Mesh_dim"]=2
     convergence_synthesis["Mesh_cell_type"]="Squares"
     convergence_synthesis["Errors"]=[10**x for x in error_tab]
     convergence_synthesis["Scheme_order"]=-a
     convergence_synthesis["Test_color"]=testColor
     convergence_synthesis["PDE_model"]='Poisson'
-    convergence_synthesis["Numerical_method_name"]=method
-    convergence_synthesis["Boundary_condition"]=BC
-    convergence_synthesis["Computational_time"]=end-start
+    convergence_synthesis["Num_method"]=method
+    convergence_synthesis["Bound_cond"]=BC
+    convergence_synthesis["Comput_time"]=end-start
 
     with open('Convergence_Poisson_2DFV_'+mesh_name+'.json', 'w') as outfile:  
         json.dump(convergence_synthesis, outfile)
