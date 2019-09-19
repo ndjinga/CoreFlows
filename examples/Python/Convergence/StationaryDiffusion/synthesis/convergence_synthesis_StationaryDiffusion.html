@@ -12140,10 +12140,10 @@ First extract the most interesting columns and visualise them in a widget.</p>
 
  
  
-<div id="a510ddb5-4dcc-419f-aa97-bacb39f8dde0"></div>
+<div id="1ab524af-a587-4629-842d-96e7946f2c54"></div>
 <div class="output_subarea output_widget_view ">
 <script type="text/javascript">
-var element = $('#a510ddb5-4dcc-419f-aa97-bacb39f8dde0');
+var element = $('#1ab524af-a587-4629-842d-96e7946f2c54');
 </script>
 <script type="application/vnd.jupyter.widget-view+json">
 {"model_id": "46b7053f5e64474d99cd399dafce0e37", "version_major": 2, "version_minor": 0}
@@ -12258,7 +12258,7 @@ var element = $('#a510ddb5-4dcc-419f-aa97-bacb39f8dde0');
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[9]:</div>
+<div class="prompt input_prompt">In&nbsp;[14]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="n">convergence_files</span> <span class="o">=</span> <span class="n">glob</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;../*/Convergence_*.json&#39;</span><span class="p">)</span>
@@ -12295,7 +12295,7 @@ will be imported
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[10]:</div>
+<div class="prompt input_prompt">In&nbsp;[15]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># Let&#39;s import all json files into a list of dictionaries</span>
@@ -12333,13 +12333,13 @@ will be imported
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[11]:</div>
+<div class="prompt input_prompt">In&nbsp;[16]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># Let&#39;s create a pandas dataframe out of the convergence dictionary</span>
 <span class="n">df_convergence</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">convergence_descriptions</span><span class="p">)</span>
 <span class="k">print</span><span class="p">(</span><span class="s2">&quot;The convergence pandas dataframe has been created&quot;</span><span class="p">)</span>
-<span class="n">df_convergence</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;PDE_model&#39;</span><span class="p">,</span><span class="s1">&#39;Numerical_method_name&#39;</span><span class="p">,</span><span class="s1">&#39;Mesh_dimension&#39;</span><span class="p">,</span><span class="s1">&#39;Mesh_type&#39;</span><span class="p">,</span><span class="s1">&#39;Mesh_cell_type&#39;</span><span class="p">,</span><span class="s1">&#39;Test_color&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
+<span class="n">df_convergence</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;PDE_model&#39;</span><span class="p">,</span><span class="s1">&#39;Numerical_method_name&#39;</span><span class="p">,</span><span class="s1">&#39;Mesh_dimension&#39;</span><span class="p">,</span><span class="s1">&#39;Mesh_type&#39;</span><span class="p">,</span><span class="s1">&#39;Boundary_condition&#39;</span><span class="p">,</span><span class="s1">&#39;Mesh_cell_type&#39;</span><span class="p">,</span><span class="s1">&#39;Test_color&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="bp">True</span><span class="p">)</span>
 
 <span class="n">list_of_all_columns_convergence</span> <span class="o">=</span> <span class="n">df_convergence</span><span class="o">.</span><span class="n">columns</span>
 <span class="k">print</span><span class="p">(</span><span class="s2">&quot;Printing the columns of the dataframe : these are the parameters of the database&quot;</span><span class="p">)</span>
@@ -12362,9 +12362,10 @@ will be imported
 <div class="output_subarea output_stream output_stdout output_text">
 <pre>The convergence pandas dataframe has been created
 Printing the columns of the dataframe : these are the parameters of the database
-Index([u&#39;Computational_time&#39;, u&#39;Errors&#39;, u&#39;Initial_data&#39;, u&#39;Mesh_cell_type&#39;,
-       u&#39;Mesh_description&#39;, u&#39;Mesh_dimension&#39;, u&#39;Mesh_is_unstructured&#39;,
-       u&#39;Mesh_names&#39;, u&#39;Mesh_sizes&#39;, u&#39;Mesh_type&#39;, u&#39;Numerical_method_name&#39;,
+Index([u&#39;Boundary_condition&#39;, u&#39;Computational_time&#39;, u&#39;Errors&#39;,
+       u&#39;Initial_data&#39;, u&#39;Mesh_cell_type&#39;, u&#39;Mesh_description&#39;,
+       u&#39;Mesh_dimension&#39;, u&#39;Mesh_is_unstructured&#39;, u&#39;Mesh_names&#39;,
+       u&#39;Mesh_sizes&#39;, u&#39;Mesh_type&#39;, u&#39;Numerical_method_name&#39;,
        u&#39;Numerical_method_time_discretization&#39;, u&#39;PDE_is_stationary&#39;,
        u&#39;PDE_model&#39;, u&#39;PDE_search_for_stationary_solution&#39;,
        u&#39;Part_of_mesh_convergence_analysis&#39;, u&#39;Scheme_order&#39;,
@@ -12380,11 +12381,11 @@ Index([u&#39;Computational_time&#39;, u&#39;Errors&#39;, u&#39;Initial_data&#39;
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[12]:</div>
+<div class="prompt input_prompt">In&nbsp;[18]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1"># Extract the most interesting column from df_convergence into a second dataframe df2_convergence</span>
-<span class="n">df2_convergence</span><span class="o">=</span><span class="n">df_convergence</span><span class="p">[[</span><span class="s1">&#39;PDE_model&#39;</span><span class="p">,</span><span class="s1">&#39;Numerical_method_name&#39;</span><span class="p">,</span><span class="s1">&#39;Mesh_dimension&#39;</span><span class="p">,</span><span class="s1">&#39;Mesh_type&#39;</span><span class="p">,</span><span class="s1">&#39;Scheme_order&#39;</span><span class="p">,</span><span class="s1">&#39;Mesh_cell_type&#39;</span><span class="p">,</span><span class="s1">&#39;Test_color&#39;</span><span class="p">,</span><span class="s1">&#39;Computational_time&#39;</span><span class="p">]]</span>
+<span class="n">df2_convergence</span><span class="o">=</span><span class="n">df_convergence</span><span class="p">[[</span><span class="s1">&#39;PDE_model&#39;</span><span class="p">,</span><span class="s1">&#39;Numerical_method_name&#39;</span><span class="p">,</span><span class="s1">&#39;Mesh_dimension&#39;</span><span class="p">,</span><span class="s1">&#39;Mesh_type&#39;</span><span class="p">,</span><span class="s1">&#39;Boundary_condition&#39;</span><span class="p">,</span><span class="s1">&#39;Scheme_order&#39;</span><span class="p">,</span><span class="s1">&#39;Mesh_cell_type&#39;</span><span class="p">,</span><span class="s1">&#39;Test_color&#39;</span><span class="p">,</span><span class="s1">&#39;Computational_time&#39;</span><span class="p">]]</span>
 
 <span class="c1"># Let&#39;s create a jupyter table widget from the convergenc dataframe</span>
 <span class="n">qgrid_widget_convergence</span><span class="o">=</span><span class="n">qgrid</span><span class="o">.</span><span class="n">show_grid</span><span class="p">(</span><span class="n">df2_convergence</span><span class="p">,</span> <span class="n">grid_options</span><span class="o">=</span><span class="n">gopt</span><span class="p">,</span> <span class="n">show_toolbar</span><span class="o">=</span><span class="bp">False</span><span class="p">)</span>
@@ -12411,13 +12412,13 @@ Index([u&#39;Computational_time&#39;, u&#39;Errors&#39;, u&#39;Initial_data&#39;
 
  
  
-<div id="b82f7548-a280-4fd2-bf9b-124c582d9701"></div>
+<div id="f05a7812-59b6-45f4-b566-40b9d5b7a752"></div>
 <div class="output_subarea output_widget_view ">
 <script type="text/javascript">
-var element = $('#b82f7548-a280-4fd2-bf9b-124c582d9701');
+var element = $('#f05a7812-59b6-45f4-b566-40b9d5b7a752');
 </script>
 <script type="application/vnd.jupyter.widget-view+json">
-{"model_id": "c85b27a4907942579ee68eefa91422a8", "version_major": 2, "version_minor": 0}
+{"model_id": "9a6b1805d4ea41f5b0d8d390cc568e1e", "version_major": 2, "version_minor": 0}
 </script>
 </div>
 
@@ -12429,7 +12430,7 @@ var element = $('#b82f7548-a280-4fd2-bf9b-124c582d9701');
 </div>
 <div class="cell border-box-sizing code_cell rendered">
 <div class="input">
-<div class="prompt input_prompt">In&nbsp;[13]:</div>
+<div class="prompt input_prompt">In&nbsp;[19]:</div>
 <div class="inner_cell">
     <div class="input_area">
 <div class=" highlight hl-ipython2"><pre><span></span><span class="c1">#Now export convergence study table</span>
