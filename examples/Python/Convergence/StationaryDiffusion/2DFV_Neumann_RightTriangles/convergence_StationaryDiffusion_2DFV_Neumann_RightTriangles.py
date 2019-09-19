@@ -27,7 +27,7 @@ def convergence_StationaryDiffusion_2DFV_Neumann_RightTriangles():
     curv_abs=np.linspace(0,sqrt(2),resolution+1)
     plt.close('all')
     i=0
-    testColor="Orange"#Convergence of the linear solver if direct solver. Scheme seems to diverge (order -0.005)
+    testColor="Orange(order 0)"#Convergence of the linear solver if direct solver. Scheme seems to diverge (order -0.005)
     # Storing of numerical errors, mesh sizes and diagonal values
     for nx in meshList:
 		my_mesh=cm.Mesh(0,1,nx,0,1,nx,1)
