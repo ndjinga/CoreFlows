@@ -1,19 +1,19 @@
-\begin{tabular}{lllrlrllr}
+\begin{tabular}{lllrllrllr}
 \toprule
-{} & PDE\_model & Numerical\_method\_name &  Mesh\_dimension &                Mesh\_type &  Scheme\_order & Mesh\_cell\_type &       Test\_color &  Computational\_time \\
+{} & PDE\_model & Numerical\_method\_name &  Mesh\_dimension &                Mesh\_type & Boundary\_condition &  Scheme\_order & Mesh\_cell\_type &       Test\_color &  Computational\_time \\
 \midrule
-2  &   Poisson &                    FE &               2 &   Regular\_RightTriangles &      2.003941 &      Triangles &            Green &          119.564748 \\
-3  &   Poisson &                    FE &               2 &   Unstructured\_triangles &      2.015609 &      Triangles &            Green &            6.094478 \\
-6  &   Poisson &                    FE &               3 &       Regular\_Tetrahedra &      1.340337 &    Tetrahedron &            Green &          208.459231 \\
-7  &   Poisson &                    FE &               3 &  Unstructured\_Tetrahedra &      0.669082 &    Tetrahedron &            Green &           11.909316 \\
-1  &   Poisson &                    FV &               2 &           RegularSquares &      2.003941 &        Squares &            Green &            9.851322 \\
-11 &   Poisson &                    FV &               2 &           RegularSquares &      2.003941 &        Squares &            Green &            9.898462 \\
-4  &   Poisson &                    FV &               2 &   Regular\_RightTriangles &      0.021197 &      Triangles &            Green &           15.681825 \\
-0  &   Poisson &                    FV &               2 &   Regular\_RightTriangles &     -0.005618 &      Triangles &  Orange(order 0) &           15.865311 \\
-5  &   Poisson &                    FV &               2 &     Structured\_triangles &      0.895224 &      Triangles &            Green &            4.744688 \\
-8  &   Poisson &                    FV &               2 &   Unstructured\_triangles &      0.613780 &      Triangles &            Green &            2.505468 \\
-10 &   Poisson &                    FV &               3 &            Regular\_Cubes &      1.340337 &          Cubes &            Green &            5.868787 \\
-9  &   Poisson &                    FV &               3 &       Regular\_Tetrahedra &      0.006535 &    Tetrahedron &            Green &           62.126393 \\
-12 &   Poisson &                    FV &               3 &  Unstructured\_Tetrahedra &      0.535879 &    Tetrahedron &            Green &            3.679363 \\
+2  &   Poisson &                    FE &               2 &   Regular\_RightTriangles &          Dirichlet &      2.003941 &      Triangles &            Green &          109.477157 \\
+3  &   Poisson &                    FE &               2 &   Unstructured\_triangles &          Dirichlet &      2.015609 &      Triangles &            Green &            6.233874 \\
+6  &   Poisson &                    FE &               3 &       Regular\_Tetrahedra &          Dirichlet &      1.340337 &    Tetrahedron &            Green &          208.521891 \\
+7  &   Poisson &                    FE &               3 &  Unstructured\_Tetrahedra &          Dirichlet &      0.669082 &    Tetrahedron &            Green &           12.181833 \\
+1  &   Poisson &                    FV &               2 &           RegularSquares &          Dirichlet &      2.003941 &        Squares &            Green &           10.150546 \\
+11 &   Poisson &                    FV &               2 &           RegularSquares &            Neumann &      2.003941 &        Squares &            Green &            9.985595 \\
+4  &   Poisson &                    FV &               2 &   Regular\_RightTriangles &          Dirichlet &      0.021197 &      Triangles &            Green &           18.927833 \\
+0  &   Poisson &                    FV &               2 &   Regular\_RightTriangles &            Neumann &     -0.005618 &      Triangles &  Orange(order 0) &           18.376290 \\
+5  &   Poisson &                    FV &               2 &     Structured\_triangles &          Dirichlet &      0.895224 &      Triangles &            Green &            4.939554 \\
+8  &   Poisson &                    FV &               2 &   Unstructured\_triangles &          Dirichlet &      0.613780 &      Triangles &            Green &            2.616052 \\
+10 &   Poisson &                    FV &               3 &            Regular\_Cubes &          Dirichlet &      1.340337 &          Cubes &            Green &            5.918726 \\
+9  &   Poisson &                    FV &               3 &       Regular\_Tetrahedra &          Dirichlet &      0.006535 &    Tetrahedron &            Green &           64.219719 \\
+12 &   Poisson &                    FV &               3 &  Unstructured\_Tetrahedra &          Dirichlet &      0.535879 &    Tetrahedron &            Green &            3.755898 \\
 \bottomrule
 \end{tabular}

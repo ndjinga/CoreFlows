@@ -281,20 +281,20 @@
 
     
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}68}]:} \PY{k+kn}{import} \PY{n+nn}{glob}
-         \PY{k+kn}{import} \PY{n+nn}{json}
-         \PY{k+kn}{import} \PY{n+nn}{pandas} \PY{k+kn}{as} \PY{n+nn}{pd}
+{\color{incolor}In [{\color{incolor}1}]:} \PY{k+kn}{import} \PY{n+nn}{glob}
+        \PY{k+kn}{import} \PY{n+nn}{json}
+        \PY{k+kn}{import} \PY{n+nn}{pandas} \PY{k+kn}{as} \PY{n+nn}{pd}
 \end{Verbatim}
 
 
     Let us gather the name of all json files into a list
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}69}]:} \PY{n}{description\PYZus{}files} \PY{o}{=} \PY{n}{glob}\PY{o}{.}\PY{n}{glob}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{../*/test\PYZus{}*.json}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-         
-         \PY{k}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{The following test description files : }\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-         \PY{k}{print}\PY{p}{(}\PY{n}{description\PYZus{}files}\PY{p}{)}
-         \PY{k}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{will be imported}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}2}]:} \PY{n}{description\PYZus{}files} \PY{o}{=} \PY{n}{glob}\PY{o}{.}\PY{n}{glob}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{../*/test\PYZus{}*.json}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        
+        \PY{k}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{The following test description files : }\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+        \PY{k}{print}\PY{p}{(}\PY{n}{description\PYZus{}files}\PY{p}{)}
+        \PY{k}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{will be imported}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
 \end{Verbatim}
 
 
@@ -309,14 +309,14 @@ will be imported
 dict will be gathered into a list called \texttt{all\_descriptions}
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}70}]:} \PY{c+c1}{\PYZsh{} Let\PYZsq{}s import all json files into a list of dictionaries}
-         \PY{n}{all\PYZus{}descriptions} \PY{o}{=} \PY{p}{[}\PY{p}{]}
-         
-         \PY{k}{for} \PY{n}{file\PYZus{}name} \PY{o+ow}{in} \PY{n}{description\PYZus{}files}\PY{p}{:}
-             \PY{k}{with} \PY{n+nb}{open}\PY{p}{(}\PY{n}{file\PYZus{}name}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{r}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)} \PY{k}{as} \PY{n}{fd}\PY{p}{:}
-                 \PY{n}{all\PYZus{}descriptions}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{n}{json}\PY{o}{.}\PY{n}{load}\PY{p}{(}\PY{n}{fd}\PY{p}{)}\PY{p}{)}
-         
-         \PY{k}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{json files have been imported}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}3}]:} \PY{c+c1}{\PYZsh{} Let\PYZsq{}s import all json files into a list of dictionaries}
+        \PY{n}{all\PYZus{}descriptions} \PY{o}{=} \PY{p}{[}\PY{p}{]}
+        
+        \PY{k}{for} \PY{n}{file\PYZus{}name} \PY{o+ow}{in} \PY{n}{description\PYZus{}files}\PY{p}{:}
+            \PY{k}{with} \PY{n+nb}{open}\PY{p}{(}\PY{n}{file\PYZus{}name}\PY{p}{,} \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{r}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)} \PY{k}{as} \PY{n}{fd}\PY{p}{:}
+                \PY{n}{all\PYZus{}descriptions}\PY{o}{.}\PY{n}{append}\PY{p}{(}\PY{n}{json}\PY{o}{.}\PY{n}{load}\PY{p}{(}\PY{n}{fd}\PY{p}{)}\PY{p}{)}
+        
+        \PY{k}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{json files have been imported}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
 \end{Verbatim}
 
 
@@ -329,19 +329,19 @@ json files have been imported
 python package
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}71}]:} \PY{k+kn}{import} \PY{n+nn}{pprint} \PY{k+kn}{as} \PY{n+nn}{pp}
-         \PY{c+c1}{\PYZsh{}pp.pprint(all\PYZus{}descriptions)}
+{\color{incolor}In [{\color{incolor}4}]:} \PY{k+kn}{import} \PY{n+nn}{pprint} \PY{k+kn}{as} \PY{n+nn}{pp}
+        \PY{c+c1}{\PYZsh{}pp.pprint(all\PYZus{}descriptions)}
 \end{Verbatim}
 
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}72}]:} \PY{c+c1}{\PYZsh{} Let\PYZsq{}s create a pandas dataframe out of our dict list}
-         \PY{n}{df} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{DataFrame}\PY{p}{(}\PY{n}{all\PYZus{}descriptions}\PY{p}{)}
-         \PY{k}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{The pandas dataframe has been created}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-         
-         \PY{n}{list\PYZus{}of\PYZus{}all\PYZus{}columns} \PY{o}{=} \PY{n}{df}\PY{o}{.}\PY{n}{columns}
-         \PY{k}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Printing the columns of the dataframe : these are the parameters of the database}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-         \PY{n}{pp}\PY{o}{.}\PY{n}{pprint}\PY{p}{(}\PY{n}{list\PYZus{}of\PYZus{}all\PYZus{}columns}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}5}]:} \PY{c+c1}{\PYZsh{} Let\PYZsq{}s create a pandas dataframe out of our dict list}
+        \PY{n}{df} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{DataFrame}\PY{p}{(}\PY{n}{all\PYZus{}descriptions}\PY{p}{)}
+        \PY{k}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{The pandas dataframe has been created}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+        
+        \PY{n}{list\PYZus{}of\PYZus{}all\PYZus{}columns} \PY{o}{=} \PY{n}{df}\PY{o}{.}\PY{n}{columns}
+        \PY{k}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Printing the columns of the dataframe : these are the parameters of the database}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+        \PY{n}{pp}\PY{o}{.}\PY{n}{pprint}\PY{p}{(}\PY{n}{list\PYZus{}of\PYZus{}all\PYZus{}columns}\PY{p}{)}
 \end{Verbatim}
 
 
@@ -468,36 +468,36 @@ Let's play with \texttt{qgrid\ now}. First extract the most interesting
 columns and visualise them in a widget.
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}76}]:} \PY{k+kn}{import} \PY{n+nn}{qgrid}
-         
-         \PY{c+c1}{\PYZsh{} here\PYZsq{}s a cool dictionnary of options for displaying data}
-         \PY{n}{gopt}\PY{o}{=}\PY{p}{\PYZob{}}
-             \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fullWidthRows}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n+nb+bp}{True}\PY{p}{,}
-             \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{syncColumnCellResize}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n+nb+bp}{True}\PY{p}{,}
-             \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{forceFitColumns}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n+nb+bp}{True}\PY{p}{,}
-             \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{defaultColumnWidth}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{150}\PY{p}{,}
-             \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{rowHeight}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{28}\PY{p}{,}
-             \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{enableColumnReorder}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n+nb+bp}{True}\PY{p}{,}
-             \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{enableTextSelectionOnCells}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n+nb+bp}{True}\PY{p}{,}
-             \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{editable}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n+nb+bp}{False}\PY{p}{,}
-             \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{autoEdit}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n+nb+bp}{False}\PY{p}{,}
-             \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{explicitInitialization}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n+nb+bp}{True}\PY{p}{,}
-             \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{maxVisibleRows}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{40}\PY{p}{,}
-             \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{minVisibleRows}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{8}\PY{p}{,}
-             \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{sortable}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n+nb+bp}{True}\PY{p}{,}
-             \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{filterable}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n+nb+bp}{True}\PY{p}{,}
-             \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{highlightSelectedCell}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n+nb+bp}{False}\PY{p}{,}
-             \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{highlightSelectedRow}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n+nb+bp}{True}
-         \PY{p}{\PYZcb{}}
-         
-         \PY{c+c1}{\PYZsh{} Extract the most interesting column from df into a second dataframe df2}
-         \PY{n}{df2}\PY{o}{=}\PY{n}{df}\PY{p}{[}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{PDE\PYZus{}model}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Numerical\PYZus{}method\PYZus{}name}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mesh\PYZus{}dimension}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mesh\PYZus{}cell\PYZus{}type}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mesh\PYZus{}number\PYZus{}of\PYZus{}elements}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Computational\PYZus{}time\PYZus{}taken\PYZus{}by\PYZus{}run}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{]}
-         
-         \PY{c+c1}{\PYZsh{} Let\PYZsq{}s create a jupyter table widget from the dataframe df2}
-         \PY{n}{qgrid\PYZus{}widget}\PY{o}{=}\PY{n}{qgrid}\PY{o}{.}\PY{n}{show\PYZus{}grid}\PY{p}{(}\PY{n}{df2}\PY{p}{,} \PY{n}{grid\PYZus{}options}\PY{o}{=}\PY{n}{gopt}\PY{p}{,} \PY{n}{show\PYZus{}toolbar}\PY{o}{=}\PY{n+nb+bp}{False}\PY{p}{)}
-         
-         \PY{c+c1}{\PYZsh{} let\PYZsq{}s output this widget}
-         \PY{n}{qgrid\PYZus{}widget}
+{\color{incolor}In [{\color{incolor}6}]:} \PY{k+kn}{import} \PY{n+nn}{qgrid}
+        
+        \PY{c+c1}{\PYZsh{} here\PYZsq{}s a cool dictionnary of options for displaying data}
+        \PY{n}{gopt}\PY{o}{=}\PY{p}{\PYZob{}}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{fullWidthRows}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n+nb+bp}{True}\PY{p}{,}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{syncColumnCellResize}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n+nb+bp}{True}\PY{p}{,}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{forceFitColumns}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n+nb+bp}{True}\PY{p}{,}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{defaultColumnWidth}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{150}\PY{p}{,}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{rowHeight}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{28}\PY{p}{,}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{enableColumnReorder}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n+nb+bp}{True}\PY{p}{,}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{enableTextSelectionOnCells}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n+nb+bp}{True}\PY{p}{,}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{editable}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n+nb+bp}{False}\PY{p}{,}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{autoEdit}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n+nb+bp}{False}\PY{p}{,}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{explicitInitialization}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n+nb+bp}{True}\PY{p}{,}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{maxVisibleRows}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{40}\PY{p}{,}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{minVisibleRows}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{l+m+mi}{8}\PY{p}{,}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{sortable}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n+nb+bp}{True}\PY{p}{,}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{filterable}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n+nb+bp}{True}\PY{p}{,}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{highlightSelectedCell}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n+nb+bp}{False}\PY{p}{,}
+            \PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{highlightSelectedRow}\PY{l+s+s1}{\PYZsq{}}\PY{p}{:} \PY{n+nb+bp}{True}
+        \PY{p}{\PYZcb{}}
+        
+        \PY{c+c1}{\PYZsh{} Extract the most interesting column from df into a second dataframe df2}
+        \PY{n}{df2}\PY{o}{=}\PY{n}{df}\PY{p}{[}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{PDE\PYZus{}model}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Numerical\PYZus{}method\PYZus{}name}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mesh\PYZus{}dimension}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mesh\PYZus{}cell\PYZus{}type}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mesh\PYZus{}number\PYZus{}of\PYZus{}elements}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Computational\PYZus{}time\PYZus{}taken\PYZus{}by\PYZus{}run}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{]}
+        
+        \PY{c+c1}{\PYZsh{} Let\PYZsq{}s create a jupyter table widget from the dataframe df2}
+        \PY{n}{qgrid\PYZus{}widget}\PY{o}{=}\PY{n}{qgrid}\PY{o}{.}\PY{n}{show\PYZus{}grid}\PY{p}{(}\PY{n}{df2}\PY{p}{,} \PY{n}{grid\PYZus{}options}\PY{o}{=}\PY{n}{gopt}\PY{p}{,} \PY{n}{show\PYZus{}toolbar}\PY{o}{=}\PY{n+nb+bp}{False}\PY{p}{)}
+        
+        \PY{c+c1}{\PYZsh{} let\PYZsq{}s output this widget}
+        \PY{n}{qgrid\PYZus{}widget}
 \end{Verbatim}
 
 
@@ -517,12 +517,12 @@ format}\label{exporting-validation-test-table-to-csv-and-excel-format}}
 Let us first export the large database df.
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}77}]:} \PY{n}{df}\PY{o}{.}\PY{n}{to\PYZus{}csv}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{test\PYZus{}synthesis\PYZus{}StationaryDiffusion\PYZus{}all.csv}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{c+c1}{\PYZsh{}Saving using csv format}
-         \PY{n}{output\PYZus{}file\PYZus{}name}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{test\PYZus{}synthesis\PYZus{}StationaryDiffusion\PYZus{}all.xlsx}\PY{l+s+s1}{\PYZsq{}}
-         \PY{n}{writer} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{ExcelWriter}\PY{p}{(}\PY{n}{output\PYZus{}file\PYZus{}name}\PY{p}{)}
-         \PY{n}{df}\PY{o}{.}\PY{n}{to\PYZus{}excel}\PY{p}{(}\PY{n}{writer}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Sheet1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-         \PY{n}{writer}\PY{o}{.}\PY{n}{save}\PY{p}{(}\PY{p}{)}\PY{c+c1}{\PYZsh{}Saving using excel format}
-         \PY{k}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Done writing file }\PY{l+s+s2}{\PYZdq{}}\PY{o}{+}\PY{n}{output\PYZus{}file\PYZus{}name}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}7}]:} \PY{n}{df}\PY{o}{.}\PY{n}{to\PYZus{}csv}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{test\PYZus{}synthesis\PYZus{}StationaryDiffusion\PYZus{}all.csv}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{c+c1}{\PYZsh{}Saving using csv format}
+        \PY{n}{output\PYZus{}file\PYZus{}name}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{test\PYZus{}synthesis\PYZus{}StationaryDiffusion\PYZus{}all.xlsx}\PY{l+s+s1}{\PYZsq{}}
+        \PY{n}{writer} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{ExcelWriter}\PY{p}{(}\PY{n}{output\PYZus{}file\PYZus{}name}\PY{p}{)}
+        \PY{n}{df}\PY{o}{.}\PY{n}{to\PYZus{}excel}\PY{p}{(}\PY{n}{writer}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Sheet1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{writer}\PY{o}{.}\PY{n}{save}\PY{p}{(}\PY{p}{)}\PY{c+c1}{\PYZsh{}Saving using excel format}
+        \PY{k}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Done writing file }\PY{l+s+s2}{\PYZdq{}}\PY{o}{+}\PY{n}{output\PYZus{}file\PYZus{}name}\PY{p}{)}
 \end{Verbatim}
 
 
@@ -534,13 +534,13 @@ Done writing file test\_synthesis\_StationaryDiffusion\_all.xlsx
     Let us now export the short database df2.
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}78}]:} \PY{n}{df2}\PY{o}{.}\PY{n}{to\PYZus{}csv}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{test\PYZus{}synthesis\PYZus{}StationaryDiffusion\PYZus{}short.csv}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{c+c1}{\PYZsh{}Saving using csv format}
-         \PY{n}{df2}\PY{o}{.}\PY{n}{to\PYZus{}latex}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{test\PYZus{}synthesis\PYZus{}StationaryDiffusion\PYZus{}short.tex}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{c+c1}{\PYZsh{}Saving using latex format}
-         \PY{n}{output\PYZus{}file\PYZus{}name}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{test\PYZus{}synthesis\PYZus{}StationaryDiffusion\PYZus{}short.xlsx}\PY{l+s+s1}{\PYZsq{}}
-         \PY{n}{writer} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{ExcelWriter}\PY{p}{(}\PY{n}{output\PYZus{}file\PYZus{}name}\PY{p}{)}
-         \PY{n}{df2}\PY{o}{.}\PY{n}{to\PYZus{}excel}\PY{p}{(}\PY{n}{writer}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Sheet1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-         \PY{n}{writer}\PY{o}{.}\PY{n}{save}\PY{p}{(}\PY{p}{)}\PY{c+c1}{\PYZsh{}Saving using excel format}
-         \PY{k}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Done writing file }\PY{l+s+s2}{\PYZdq{}}\PY{o}{+}\PY{n}{output\PYZus{}file\PYZus{}name}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}8}]:} \PY{n}{df2}\PY{o}{.}\PY{n}{to\PYZus{}csv}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{test\PYZus{}synthesis\PYZus{}StationaryDiffusion\PYZus{}short.csv}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{c+c1}{\PYZsh{}Saving using csv format}
+        \PY{n}{df2}\PY{o}{.}\PY{n}{to\PYZus{}latex}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{test\PYZus{}synthesis\PYZus{}StationaryDiffusion\PYZus{}short.tex}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{c+c1}{\PYZsh{}Saving using latex format}
+        \PY{n}{output\PYZus{}file\PYZus{}name}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{test\PYZus{}synthesis\PYZus{}StationaryDiffusion\PYZus{}short.xlsx}\PY{l+s+s1}{\PYZsq{}}
+        \PY{n}{writer} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{ExcelWriter}\PY{p}{(}\PY{n}{output\PYZus{}file\PYZus{}name}\PY{p}{)}
+        \PY{n}{df2}\PY{o}{.}\PY{n}{to\PYZus{}excel}\PY{p}{(}\PY{n}{writer}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Sheet1}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        \PY{n}{writer}\PY{o}{.}\PY{n}{save}\PY{p}{(}\PY{p}{)}\PY{c+c1}{\PYZsh{}Saving using excel format}
+        \PY{k}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{Done writing file }\PY{l+s+s2}{\PYZdq{}}\PY{o}{+}\PY{n}{output\PYZus{}file\PYZus{}name}\PY{p}{)}
 \end{Verbatim}
 
 
@@ -553,11 +553,11 @@ Done writing file test\_synthesis\_StationaryDiffusion\_short.xlsx
 \section{Convergence study table}\label{convergence-study-table}}
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}79}]:} \PY{n}{convergence\PYZus{}files} \PY{o}{=} \PY{n}{glob}\PY{o}{.}\PY{n}{glob}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{../*/Convergence\PYZus{}*.json}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
-         
-         \PY{k}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{The following convergence description files : }\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
-         \PY{k}{print}\PY{p}{(}\PY{n}{convergence\PYZus{}files}\PY{p}{)}
-         \PY{k}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{will be imported}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+{\color{incolor}In [{\color{incolor}9}]:} \PY{n}{convergence\PYZus{}files} \PY{o}{=} \PY{n}{glob}\PY{o}{.}\PY{n}{glob}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{../*/Convergence\PYZus{}*.json}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}
+        
+        \PY{k}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{The following convergence description files : }\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
+        \PY{k}{print}\PY{p}{(}\PY{n}{convergence\PYZus{}files}\PY{p}{)}
+        \PY{k}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{will be imported}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
 \end{Verbatim}
 
 
@@ -569,7 +569,7 @@ will be imported
     \end{Verbatim}
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}80}]:} \PY{c+c1}{\PYZsh{} Let\PYZsq{}s import all json files into a list of dictionaries}
+{\color{incolor}In [{\color{incolor}10}]:} \PY{c+c1}{\PYZsh{} Let\PYZsq{}s import all json files into a list of dictionaries}
          \PY{n}{convergence\PYZus{}descriptions} \PY{o}{=} \PY{p}{[}\PY{p}{]}
          
          \PY{k}{for} \PY{n}{file\PYZus{}name} \PY{o+ow}{in} \PY{n}{convergence\PYZus{}files}\PY{p}{:}
@@ -586,7 +586,7 @@ convergence json files have been imported
     \end{Verbatim}
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}81}]:} \PY{c+c1}{\PYZsh{} Let\PYZsq{}s create a pandas dataframe out of the convergence dictionary}
+{\color{incolor}In [{\color{incolor}11}]:} \PY{c+c1}{\PYZsh{} Let\PYZsq{}s create a pandas dataframe out of the convergence dictionary}
          \PY{n}{df\PYZus{}convergence} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{DataFrame}\PY{p}{(}\PY{n}{convergence\PYZus{}descriptions}\PY{p}{)}
          \PY{k}{print}\PY{p}{(}\PY{l+s+s2}{\PYZdq{}}\PY{l+s+s2}{The convergence pandas dataframe has been created}\PY{l+s+s2}{\PYZdq{}}\PY{p}{)}
          \PY{n}{df\PYZus{}convergence}\PY{o}{.}\PY{n}{sort\PYZus{}values}\PY{p}{(}\PY{n}{by}\PY{o}{=}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{PDE\PYZus{}model}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Numerical\PYZus{}method\PYZus{}name}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mesh\PYZus{}dimension}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mesh\PYZus{}type}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mesh\PYZus{}cell\PYZus{}type}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Test\PYZus{}color}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{,} \PY{n}{inplace}\PY{o}{=}\PY{n+nb+bp}{True}\PY{p}{)}
@@ -612,7 +612,7 @@ Index([u'Computational\_time', u'Errors', u'Initial\_data', u'Mesh\_cell\_type',
     \end{Verbatim}
 
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}83}]:} \PY{c+c1}{\PYZsh{} Extract the most interesting column from df\PYZus{}convergence into a second dataframe df2\PYZus{}convergence}
+{\color{incolor}In [{\color{incolor}12}]:} \PY{c+c1}{\PYZsh{} Extract the most interesting column from df\PYZus{}convergence into a second dataframe df2\PYZus{}convergence}
          \PY{n}{df2\PYZus{}convergence}\PY{o}{=}\PY{n}{df\PYZus{}convergence}\PY{p}{[}\PY{p}{[}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{PDE\PYZus{}model}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Numerical\PYZus{}method\PYZus{}name}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mesh\PYZus{}dimension}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mesh\PYZus{}type}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Scheme\PYZus{}order}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Mesh\PYZus{}cell\PYZus{}type}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Test\PYZus{}color}\PY{l+s+s1}{\PYZsq{}}\PY{p}{,}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{Computational\PYZus{}time}\PY{l+s+s1}{\PYZsq{}}\PY{p}{]}\PY{p}{]}
          
          \PY{c+c1}{\PYZsh{} Let\PYZsq{}s create a jupyter table widget from the convergenc dataframe}
@@ -631,7 +631,7 @@ UWdyaWRXaWRnZXQoZ3JpZF9vcHRpb25zPXsnZGVmYXVsdENvbHVtbldpZHRoJzogMTUwLCAnaGlnaGxp
 
     
     \begin{Verbatim}[commandchars=\\\{\}]
-{\color{incolor}In [{\color{incolor}84}]:} \PY{c+c1}{\PYZsh{}Now export convergence study table}
+{\color{incolor}In [{\color{incolor}13}]:} \PY{c+c1}{\PYZsh{}Now export convergence study table}
          \PY{n}{df\PYZus{}convergence}\PY{o}{.}\PY{n}{to\PYZus{}csv}\PY{p}{(}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{convergence\PYZus{}synthesis\PYZus{}StationaryDiffusion\PYZus{}all.csv}\PY{l+s+s1}{\PYZsq{}}\PY{p}{)}\PY{c+c1}{\PYZsh{}Saving using csv format}
          \PY{n}{output\PYZus{}file\PYZus{}name}\PY{o}{=}\PY{l+s+s1}{\PYZsq{}}\PY{l+s+s1}{convergence\PYZus{}synthesis\PYZus{}StationaryDiffusion\PYZus{}all.xlsx}\PY{l+s+s1}{\PYZsq{}}
          \PY{n}{writer} \PY{o}{=} \PY{n}{pd}\PY{o}{.}\PY{n}{ExcelWriter}\PY{p}{(}\PY{n}{output\PYZus{}file\PYZus{}name}\PY{p}{)}
