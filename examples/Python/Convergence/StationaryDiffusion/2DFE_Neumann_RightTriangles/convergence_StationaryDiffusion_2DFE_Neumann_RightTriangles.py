@@ -27,7 +27,7 @@ def convergence_StationaryDiffusion_2DFE_Neumann_RightTriangles():
     curv_abs=np.linspace(0,sqrt(2),resolution+1)
     plt.close('all')
     i=0
-    testColor="Red"#Nan and inf. Bug or bad resolution of the linear system ?
+    testColor="Orange (ILU)"#LU solver breaks down
     # Storing of numerical errors, mesh sizes and diagonal values
     for nx in meshList:
 		my_mesh=cm.Mesh(0,1,nx,0,1,nx,1)
