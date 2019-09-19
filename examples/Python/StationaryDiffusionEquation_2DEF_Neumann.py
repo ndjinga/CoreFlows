@@ -37,12 +37,7 @@ def StationaryDiffusionEquation_2DEF_StructuredTriangles_Neumann():
 	myProblem = cf.StationaryDiffusionEquation(spaceDim,FEComputation);
 	myProblem.setMesh(M);
 
-    # set the limit value for each boundary
-	T1=0;
-	T2=0;
-	T3=0;
-	T4=0;
-    
+    # set the boundary condition for each boundary  
 	myProblem.setNeumannBoundaryCondition("Bord1")
 	myProblem.setNeumannBoundaryCondition("Bord2")
 	myProblem.setNeumannBoundaryCondition("Bord3")
