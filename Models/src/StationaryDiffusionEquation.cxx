@@ -90,7 +90,7 @@ StationaryDiffusionEquation::StationaryDiffusionEquation(int dim, bool FECalcula
 	_NEWTON_its=0;
 	int _PetscIts=0;//the number of iterations of the linear solver
 	_ksptype = (char*)&KSPGMRES;
-	_pctype = (char*)&PCLU;
+	_pctype = (char*)&PCILU;
 	_conditionNumber=false;
 	_erreur_rel= 0;
 
