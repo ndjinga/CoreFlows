@@ -1,6 +1,7 @@
 
 add_subdirectory (2DFE_Dirichlet_DelaunayTriangles)
 add_subdirectory (2DFE_Dirichlet_RightTriangles)
+add_subdirectory (2DFE_Neumann_RightTriangles)
 add_subdirectory (2DFV_Dirichlet_DelaunayTriangles)
 add_subdirectory (2DFV_Dirichlet_EquilateralTriangles)
 add_subdirectory (2DFV_Dirichlet_RightTriangles)
