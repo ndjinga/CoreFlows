@@ -1,0 +1,14 @@
+,PDE_model,Numerical_method_name,Mesh_dimension,Mesh_type,Scheme_order,Mesh_cell_type,Test_color,Computational_time
+2,Poisson,FE,2,Regular_RightTriangles,2.0039412540895807,Triangles,Green,107.77647686004639
+6,Poisson,FE,2,Regular_Tetrahedra,1.340336836145038,Tetrahedron,Green,208.24612593650818
+7,Poisson,FE,2,Unstructured_Tetrahedra,0.6690820358074518,Tetrahedron,Green,11.921674013137817
+3,Poisson,FE,2,Unstructured_triangles,2.0156086444601446,Squares,Green,6.3847880363464355
+1,Poisson,FV,2,RegularSquares,2.0039412135353034,Squares,Green,10.834294080734253
+11,Poisson,FV,2,RegularSquares,2.0039412115511825,Squares,Green,11.395648002624512
+10,Poisson,FV,2,Regular_Cubes,1.3403368361320993,Cubes,Green,5.916706800460815
+4,Poisson,FV,2,Regular_RightTriangles,0.02119663100406134,Triangles,Green,16.731478929519653
+0,Poisson,FV,2,Regular_RightTriangles,-0.005617740418916485,Triangles,Orange(order 0),16.028679847717285
+9,Poisson,FV,2,Regular_Tetrahedra,0.006535470643459771,Tetrahedron,Green,62.7276930809021
+12,Poisson,FV,2,Unstructured_Tetrahedra,0.5358788100873692,Tetrahedron,Green,3.7627179622650146
+8,Poisson,FV,2,Unstructured_triangles,0.6137798580984465,Squares,Green,2.9429969787597656
+5,Poisson,,2,Structured_triangles,0.8952237869134417,Squares,Green,6.52453088760376
