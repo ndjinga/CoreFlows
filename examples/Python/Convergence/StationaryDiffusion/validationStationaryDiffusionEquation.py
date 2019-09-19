@@ -82,7 +82,6 @@ def SolveStationaryDiffusionEquation(my_mesh,resolution,MeshType,method,BC):
 				elif spaceDim == 3 : 
 					z = Ni.z()
 					my_RHSfield[i]=2*pi*pi*cos(pi*x)*cos(pi*y)*cos(pi*z)#set the function define in the right hand side 				
-				myProblem.setLinearSolver(cf.GMRES,cf.ILU);#LU solvers breaks down
 	elif method == 'FV':
 		test_desc["Numerical_method_name"]="FV5"
 		test_desc["Numerical_method_space_discretization"]="Finite volumes"
@@ -135,6 +134,8 @@ def SolveStationaryDiffusionEquation(my_mesh,resolution,MeshType,method,BC):
 		if spaceDim == 3:
 			myProblem.setNeumannBoundaryCondition("Front")
 			myProblem.setNeumannBoundaryCondition("Back")
+		if method == 'FE' :
+			myProblem.setLinearSolver(cf.GMRES,cf.ILU);#LU solvers breaks down
 
 	if spaceDim == 2 : 
 		test_desc["Geometry"]="Square"
