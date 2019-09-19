@@ -248,6 +248,7 @@ void StationaryDiffusionEquation::initialize()
 		MatSetNullSpace(_A, nullsp);
 		MatSetTransposeNullSpace(_A, nullsp);
 		MatNullSpaceDestroy(&nullsp);
+		PCFactorSetShiftType(_pc,MAT_SHIFT_NONZERO);
     }
 
 	_initializedMemory=true;
