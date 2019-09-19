@@ -100,6 +100,8 @@ def convergence_StationaryDiffusion_3DFE_Dirichlet_RegularTetrahedra():
     convergence_synthesis["Errors"]=[10**x for x in error_tab]
     convergence_synthesis["Scheme_order"]=-a
     convergence_synthesis["Test_color"]=testColor
+    convergence_synthesis["PDE_model"]='Poisson'
+    convergence_synthesis["Numerical_method_name"]=method
     convergence_synthesis["Computational_time"]=end-start
 
     with open('Convergence_Poisson_3DFE_'+mesh_name+'.json', 'w') as outfile:  
