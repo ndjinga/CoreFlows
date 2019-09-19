@@ -104,7 +104,7 @@ def convergence_StationaryDiffusion_2DFV_Dirichlet_EquilateralTriangles():
     convergence_synthesis["Scheme_order"]=round(-a,4)
     convergence_synthesis["Test_color"]=testColor
     convergence_synthesis["PDE_model"]='Poisson'
-    convergence_synthesis["Num_methode"]=method
+    convergence_synthesis["Num_method"]=method
     convergence_synthesis["Bound_cond"]=BC
     convergence_synthesis["Comput_time"]=end-start
 
