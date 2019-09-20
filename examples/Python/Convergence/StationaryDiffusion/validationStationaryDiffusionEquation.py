@@ -134,8 +134,6 @@ def SolveStationaryDiffusionEquation(my_mesh,resolution,MeshType,method,BC):
 		if spaceDim == 3:
 			myProblem.setNeumannBoundaryCondition("Front")
 			myProblem.setNeumannBoundaryCondition("Back")
-		if method == 'FE' :
-			myProblem.setLinearSolver(cf.GMRES,cf.ILU);#LU solvers breaks down
 
 	if spaceDim == 2 : 
 		test_desc["Geometry"]="Square"
