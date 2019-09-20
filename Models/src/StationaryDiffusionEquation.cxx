@@ -481,16 +481,13 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFV(bool & stop){
     return INFINITY;
 }
 
-double StationaryDiffusionEquation::computeRHS(bool & stop)//Contribution of the PDE RHS ti the linear systemm RHS (boundary conditions do contribute to the system RHS)
+double StationaryDiffusionEquation::computeRHS(bool & stop)//Contribution of the PDE RHS to the linear systemm RHS (boundary conditions do contribute to the system RHS)
 {
 	VecAssemblyBegin(_b);
 
     if(!_FECalculation)
         for (int i=0; i<_Nmailles;i++)
-        {
-            VecSetValue(_b,i,_heatTransfertCoeff*_fluidTemperatureField(i),ADD_VALUES);
-            VecSetValue(_b,i,_heatPowerField(i)                           ,ADD_VALUES);
-        }
+            VecSetValue(_b,i,_heatTransfertCoeff*_fluidTemperatureField(i) + _heatPowerField(i),ADD_VALUES);
     else
         {
             Cell Ci;
