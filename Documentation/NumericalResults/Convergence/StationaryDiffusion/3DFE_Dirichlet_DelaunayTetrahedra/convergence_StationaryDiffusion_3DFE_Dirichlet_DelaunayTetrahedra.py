@@ -6,7 +6,7 @@ import cdmath as cm
 import matplotlib.pyplot as plt
 import numpy as np
 from math import log10, sqrt
-import time, json
+import time, json, os
 
 convergence_synthesis=dict(validationStationaryDiffusionEquation.test_desc)
 
@@ -16,7 +16,7 @@ def convergence_StationaryDiffusion_3DFE_Dirichlet_DelaunayTetrahedra():
     method = 'FE'
     BC = 'Dirichlet'
     meshList=['meshCubeTetrahedra_0','meshCubeTetrahedra_1','meshCubeTetrahedra_2','meshCubeTetrahedra_3','meshCubeTetrahedra_4']
-    mesh_path='../../../CDMATH/CDMATH_SRC/tests/ressources/3DTetrahedra/'
+    mesh_path=os.environ['CDMATH_INSTALL']+'/share/meshes/3DTetrahedra/'
     mesh_name='cubeWithDelaunayTetrahedra'
     meshType="Unstructured_Tetrahedra"
     nbMeshes=len(meshList)
@@ -95,13 +95,16 @@ def convergence_StationaryDiffusion_3DFE_Dirichlet_DelaunayTetrahedra():
     #convergence_synthesis["Mesh_path"]=mesh_path
     convergence_synthesis["Mesh_description"]=mesh_name
     convergence_synthesis["Mesh_sizes"]=[10**x for x in mesh_size_tab]
-    convergence_synthesis["Space_dimension"]=2
-    convergence_synthesis["Mesh_dimension"]=2
+    convergence_synthesis["Space_dim"]=3
+    convergence_synthesis["Mesh_dim"]=3
     convergence_synthesis["Mesh_cell_type"]="Tetrahedron"
     convergence_synthesis["Errors"]=[10**x for x in error_tab]
-    convergence_synthesis["Scheme_order"]=-a
+    convergence_synthesis["Scheme_order"]=round(-a,4)
     convergence_synthesis["Test_color"]=testColor
-    convergence_synthesis["Computational_time"]=end-start
+    convergence_synthesis["PDE_model"]='Poisson'
+    convergence_synthesis["Bound_cond"]=BC
+    convergence_synthesis["Num_method"]=method
+    convergence_synthesis["Comput_time"]=round(end-start,3)
 
     with open('Convergence_Poisson_3DFE_'+mesh_name+'.json', 'w') as outfile:  
         json.dump(convergence_synthesis, outfile)

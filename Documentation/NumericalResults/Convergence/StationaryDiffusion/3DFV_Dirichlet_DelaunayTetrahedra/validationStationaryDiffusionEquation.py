@@ -45,20 +45,20 @@ def SolveStationaryDiffusionEquation(my_mesh,resolution,MeshType,method,BC):
 	
 	#set the boundary groups
 	eps=1e-6;
-	my_mesh.setGroupAtPlan(xsup,0,eps,"Bord1")
-	my_mesh.setGroupAtPlan(xinf,0,eps,"Bord2")
-	my_mesh.setGroupAtPlan(ysup,1,eps,"Bord3")
-	my_mesh.setGroupAtPlan(yinf,1,eps,"Bord4")
+	my_mesh.setGroupAtPlan(xsup,0,eps,"Right")
+	my_mesh.setGroupAtPlan(xinf,0,eps,"Left")
+	my_mesh.setGroupAtPlan(ysup,1,eps,"Top")
+	my_mesh.setGroupAtPlan(yinf,1,eps,"Bottom")
 	if spaceDim == 3:
-		my_mesh.setGroupAtPlan(zsup,2,eps,"Bord5")
-		my_mesh.setGroupAtPlan(zinf,2,eps,"Bord6")
+		my_mesh.setGroupAtPlan(zsup,2,eps,"Front")
+		my_mesh.setGroupAtPlan(zinf,2,eps,"Back")
 	
 	nbCells = my_mesh.getNumberOfCells()	
 
 	test_desc["Space_dimension"]=my_mesh.getSpaceDimension()
 	test_desc["Mesh_dimension"]=my_mesh.getMeshDimension()
 	test_desc["Mesh_number_of_elements"]=my_mesh.getNumberOfCells()
-	#test_desc["Mesh_cell_type"]=my_mesh.getElementTypes()
+	test_desc["Mesh_cell_type"]=my_mesh.getElementTypesNames()
 		
 	#Define the right hand side function
 	if method == 'FE':
@@ -116,26 +116,26 @@ def SolveStationaryDiffusionEquation(my_mesh,resolution,MeshType,method,BC):
 		T2=0;
 		T3=0;
 		T4=0;
-		myProblem.setDirichletBoundaryCondition("Bord1",T1)
-		myProblem.setDirichletBoundaryCondition("Bord2",T2)
-		myProblem.setDirichletBoundaryCondition("Bord3",T3)
-		myProblem.setDirichletBoundaryCondition("Bord4",T4)
+		myProblem.setDirichletBoundaryCondition("Right",T1)
+		myProblem.setDirichletBoundaryCondition("Left",T2)
+		myProblem.setDirichletBoundaryCondition("Top",T3)
+		myProblem.setDirichletBoundaryCondition("Bottom",T4)
 		if spaceDim == 3:
 			T5=0;
 			T6=0;
-			myProblem.setDirichletBoundaryCondition("Bord5",T5)
-			myProblem.setDirichletBoundaryCondition("Bord6",T6)
-		myProblem.setLinearSolver(cf.GMRES,cf.LU);#ILU
+			myProblem.setDirichletBoundaryCondition("Front",T5)
+			myProblem.setDirichletBoundaryCondition("Back",T6)
 	elif BC =='Neumann':
 		test_desc["Boundary_conditions"]="Neumann"
-		myProblem.setNeumannBoundaryCondition("Bord1")
-		myProblem.setNeumannBoundaryCondition("Bord2")
-		myProblem.setNeumannBoundaryCondition("Bord3")
-		myProblem.setNeumannBoundaryCondition("Bord4")
+		myProblem.setNeumannBoundaryCondition("Right")
+		myProblem.setNeumannBoundaryCondition("Left")
+		myProblem.setNeumannBoundaryCondition("Top")
+		myProblem.setNeumannBoundaryCondition("Bottom")
 		if spaceDim == 3:
-			myProblem.setNeumannBoundaryCondition("Bord5")
-			myProblem.setNeumannBoundaryCondition("Bord6")
-		myProblem.setLinearSolver(cf.GMRES,cf.ILU);#ILU
+			myProblem.setNeumannBoundaryCondition("Front")
+			myProblem.setNeumannBoundaryCondition("Back")
+		if method == 'FE' :
+			myProblem.setLinearSolver(cf.GMRES,cf.ILU);#LU solvers breaks down
 
 	if spaceDim == 2 : 
 		test_desc["Geometry"]="Square"
@@ -198,20 +198,19 @@ def SolveStationaryDiffusionEquation(my_mesh,resolution,MeshType,method,BC):
 	
 	#Postprocessing :
     #================
-	# Extraction of the diagonal data
-	diag_data=VTK_routines.Extract_field_data_over_line_to_numpyArray(my_ResultField,[0,0,0],[1,1,1],resolution)
-    # save picture
 	if spaceDim == 2 :
+		diag_data=VTK_routines.Extract_field_data_over_line_to_numpyArray(my_ResultField,[0,0,0],[1,1,0],resolution)
 		if method =='FE':
-			PV_routines.Save_PV_data_to_picture_file("StationaryDiffusionEquation_"+str(spaceDim)+'D'+str(method)+'_'+str(MeshType)+'_'+str(BC)+str(nbCells)+'_0.vtu',"Temperature",'NODES',"StationaryDiffusionEquation_"+str(spaceDim)+str(method)+str(MeshType)+str(BC)+str(nbCells))
+			PV_routines.Save_PV_data_to_picture_file("StationaryDiffusionEquation_"+str(spaceDim)+'D'+str(method)+'_'+str(MeshType)+'_'+str(BC)+str(nbCells)+'_0.vtu',"Temperature",'NODES',"StationaryDiffusionEquation_"+str(spaceDim)+'D'+str(method)+str(MeshType)+str(BC)+str(nbCells))
 		else:
-			PV_routines.Save_PV_data_to_picture_file("StationaryDiffusionEquation_"+str(spaceDim)+'D'+str(method)+'_'+str(MeshType)+'_'+str(BC)+str(nbCells)+'_0.vtu',"Temperature",'CELLS',"StationaryDiffusionEquation_"+str(spaceDim)+str(method)+str(MeshType)+str(BC)+str(nbCells))
+			PV_routines.Save_PV_data_to_picture_file("StationaryDiffusionEquation_"+str(spaceDim)+'D'+str(method)+'_'+str(MeshType)+'_'+str(BC)+str(nbCells)+'_0.vtu',"Temperature",'CELLS',"StationaryDiffusionEquation_"+str(spaceDim)+'D'+str(method)+str(MeshType)+str(BC)+str(nbCells))
 	else:
+		diag_data=VTK_routines.Extract_field_data_over_line_to_numpyArray(my_ResultField,[0,0,0],[1,1,1],resolution)
 		VTK_routines.Clip_VTK_data_to_VTK("StationaryDiffusionEquation_"+str(spaceDim)+'D'+str(method)+'_'+str(MeshType)+'_'+str(BC)+str(nbCells)+'_0.vtu',"Clip_VTK_data_to_VTK_"+ "StationaryDiffusionEquation_"+str(spaceDim)+'D'+str(method)+'_'+str(MeshType)+'_'+str(BC)+str(nbCells)+'_0.vtu',[0.5,0.5,0.5], [-0.5,-0.5,-0.5],resolution )
 		if method =='FE':
-			PV_routines.Save_PV_data_to_picture_file("Clip_VTK_data_to_VTK_"+"StationaryDiffusionEquation_"+str(spaceDim)+'D'+str(method)+'_'+str(MeshType)+'_'+str(BC)+str(nbCells)+'_0.vtu',"Temperature",'NODES',"Clip_VTK_data_to_VTK_"+"StationaryDiffusionEquation_"+str(spaceDim)+str(method)+str(MeshType)+str(BC)+str(nbCells))
+			PV_routines.Save_PV_data_to_picture_file("Clip_VTK_data_to_VTK_"+"StationaryDiffusionEquation_"+str(spaceDim)+'D'+str(method)+'_'+str(MeshType)+'_'+str(BC)+str(nbCells)+'_0.vtu',"Temperature",'NODES',"Clip_VTK_data_to_VTK_"+"StationaryDiffusionEquation_"+str(spaceDim)+'D'+str(method)+str(MeshType)+str(BC)+str(nbCells))
 		else:
-			PV_routines.Save_PV_data_to_picture_file("Clip_VTK_data_to_VTK_"+"StationaryDiffusionEquation_"+str(spaceDim)+'D'+str(method)+'_'+str(MeshType)+'_'+str(BC)+str(nbCells)+'_0.vtu',"Temperature",'CELLS',"Clip_VTK_data_to_VTK_"+"StationaryDiffusionEquation_"+str(spaceDim)+str(method)+str(MeshType)+str(BC)+str(nbCells))
+			PV_routines.Save_PV_data_to_picture_file("Clip_VTK_data_to_VTK_"+"StationaryDiffusionEquation_"+str(spaceDim)+'D'+str(method)+'_'+str(MeshType)+'_'+str(BC)+str(nbCells)+'_0.vtu',"Temperature",'CELLS',"Clip_VTK_data_to_VTK_"+"StationaryDiffusionEquation_"+str(spaceDim)+'D'+str(method)+str(MeshType)+str(BC)+str(nbCells))
 
 	with open('test_Poisson'+str(my_mesh.getMeshDimension())+'D_'+str(method)+'_'+str(nbCells)+'Cells'+ '_' +str(BC)+'_'+str(MeshType)+".json", 'w') as outfile:  
 		json.dump(test_desc, outfile)

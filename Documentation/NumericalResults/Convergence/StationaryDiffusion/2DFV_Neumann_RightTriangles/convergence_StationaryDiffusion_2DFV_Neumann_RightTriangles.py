@@ -27,13 +27,13 @@ def convergence_StationaryDiffusion_2DFV_Neumann_RightTriangles():
     curv_abs=np.linspace(0,sqrt(2),resolution+1)
     plt.close('all')
     i=0
-    testColor="Orange"#Non convergence of the linear solver
+    testColor="Orange \n (suspicious order 0 convergence)"#Convergence of the linear solver if direct solver. Scheme seems to diverge (order -0.005)
     # Storing of numerical errors, mesh sizes and diagonal values
     for nx in meshList:
 		my_mesh=cm.Mesh(0,1,nx,0,1,nx,1)
 		error_tab[i], mesh_size_tab[i], diag_data[i], min_sol_num, max_sol_num, time_tab[i] =validationStationaryDiffusionEquation.SolveStationaryDiffusionEquation(my_mesh,resolution,meshType,method,BC)
 
-		assert min_sol_num>-1.16
+		assert min_sol_num>-1.22
 		assert max_sol_num<1.
 		plt.plot(curv_abs, diag_data[i], label= str(mesh_size_tab[i]) + ' cells')
 		error_tab[i]=log10(error_tab[i])
@@ -66,7 +66,7 @@ def convergence_StationaryDiffusion_2DFV_Neumann_RightTriangles():
     b=(-a2*b1+a1*b2)/det
     
     print "FV for diffusion on 2D right triangle meshes: scheme order is ", -a
-    assert abs(a+0.02)<0.01
+    assert abs(a-0.005)<0.01
     
     # Plot of convergence curve
     plt.close()
@@ -95,13 +95,16 @@ def convergence_StationaryDiffusion_2DFV_Neumann_RightTriangles():
     #convergence_synthesis["Mesh_path"]=mesh_path
     convergence_synthesis["Mesh_description"]=mesh_name
     convergence_synthesis["Mesh_sizes"]=[10**x for x in mesh_size_tab]
-    convergence_synthesis["Space_dimension"]=2
-    convergence_synthesis["Mesh_dimension"]=2
+    convergence_synthesis["Space_dim"]=2
+    convergence_synthesis["Mesh_dim"]=2
     convergence_synthesis["Mesh_cell_type"]="Triangles"
     convergence_synthesis["Errors"]=[10**x for x in error_tab]
-    convergence_synthesis["Scheme_order"]=-a
+    convergence_synthesis["Scheme_order"]=round(-a,4)
     convergence_synthesis["Test_color"]=testColor
-    convergence_synthesis["Computational_time"]=end-start
+    convergence_synthesis["PDE_model"]='Poisson'
+    convergence_synthesis["Num_method"]=method
+    convergence_synthesis["Bound_cond"]=BC
+    convergence_synthesis["Comput_time"]=round(end-start,3)
 
     with open('Convergence_Poisson_2DFV_'+mesh_name+'.json', 'w') as outfile:  
         json.dump(convergence_synthesis, outfile)

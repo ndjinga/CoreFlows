@@ -6,7 +6,7 @@ import cdmath as cm
 import matplotlib.pyplot as plt
 import numpy as np
 from math import log10, sqrt
-import time, json
+import time, json, os
 
 convergence_synthesis=dict(validationStationaryDiffusionEquation.test_desc)
 
@@ -16,7 +16,7 @@ def convergence_StationaryDiffusion_2DFE_Dirichlet_DelaunayTriangles():
     method = 'FE'
     BC = 'Dirichlet'
     meshList=['squareWithTriangles_1','squareWithTriangles_2','squareWithTriangles_3','squareWithTriangles_4','squareWithTriangles_5']
-    mesh_path='../../../CDMATH/CDMATH_SRC/tests/ressources/2DTriangles/'
+    mesh_path=os.environ['CDMATH_INSTALL']+'/share/meshes/2DTriangles/'
     mesh_name='squareWithDelaunayTriangles'
     meshType="Unstructured_triangles"
     nbMeshes=len(meshList)
@@ -49,7 +49,7 @@ def convergence_StationaryDiffusion_2DFE_Dirichlet_DelaunayTriangles():
     plt.legend()
     plt.xlabel('Position on diagonal line')
     plt.ylabel('Value on diagonal line')
-    plt.title('Plot over diagonal line for finite elements for Poisson problem \n on 2D triangular Delaunay triangles with Dirichlet BC')
+    plt.title('Plot over diagonal line for finite elements for Poisson problem \n on 2D Delaunay triangles with Dirichlet BC')
     plt.savefig(mesh_name+"_2DFE_StatDiffusion_Dirichlet_PlotOverDiagonalLine.png")
 
     # Least square linear regression
@@ -77,7 +77,7 @@ def convergence_StationaryDiffusion_2DFE_Dirichlet_DelaunayTriangles():
     plt.plot(mesh_size_tab, error_tab)
     plt.xlabel('log(sqrt(number of cells))')
     plt.ylabel('log(error)')
-    plt.title('Convergence of finite elements for Poisson problem \n on 2D triangular Delaunay triangles meshes with Dirichlet BC')
+    plt.title('Convergence of finite elements for Poisson problem \n on 2D Delaunay triangles meshes with Dirichlet BC')
     plt.savefig(mesh_name+"_2DFE_StatDiffusion_Dirichlet_ConvergenceCurve.png")
 
     # Plot of computational time
@@ -86,7 +86,7 @@ def convergence_StationaryDiffusion_2DFE_Dirichlet_DelaunayTriangles():
     plt.legend()
     plt.xlabel('log(sqrt(number of cells))')
     plt.ylabel('log(cpu time)')
-    plt.title('Computational time of finite elements for Poisson problem \n on 2D triangular Delaunay triangles meshes with Dirichlet BC')
+    plt.title('Computational time of finite elements for Poisson problem \n on 2D Delaunay triangles meshes with Dirichlet BC')
     plt.savefig(mesh_name+"_2DFE_StatDiffusion_Dirichlet_ComputationalTime.png")
     
     plt.close('all')
@@ -96,13 +96,16 @@ def convergence_StationaryDiffusion_2DFE_Dirichlet_DelaunayTriangles():
     #convergence_synthesis["Mesh_path"]=mesh_path
     convergence_synthesis["Mesh_description"]=mesh_name
     convergence_synthesis["Mesh_sizes"]=[10**x for x in mesh_size_tab]
-    convergence_synthesis["Space_dimension"]=2
-    convergence_synthesis["Mesh_dimension"]=2
-    convergence_synthesis["Mesh_cell_type"]="Squares"
+    convergence_synthesis["Space_dim"]=2
+    convergence_synthesis["Mesh_dim"]=2
+    convergence_synthesis["Mesh_cell_type"]="Triangles"
     convergence_synthesis["Errors"]=[10**x for x in error_tab]
-    convergence_synthesis["Scheme_order"]=-a
+    convergence_synthesis["Scheme_order"]=round(-a,4)
     convergence_synthesis["Test_color"]=testColor
-    convergence_synthesis["Computational_time"]=end-start
+    convergence_synthesis["PDE_model"]='Poisson'
+    convergence_synthesis["Num_method"]=method
+    convergence_synthesis["Bound_cond"]=BC
+    convergence_synthesis["Comput_time"]=round(end-start,3)
 
     with open('Convergence_Poisson_2DFE_'+mesh_name+'.json', 'w') as outfile:  
         json.dump(convergence_synthesis, outfile)

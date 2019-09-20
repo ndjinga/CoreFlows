@@ -6,9 +6,11 @@ import cdmath as cm
 import matplotlib.pyplot as plt
 import numpy as np
 from math import log10, sqrt
-import time, json
+import time, json, os
 
 convergence_synthesis=dict(validationStationaryDiffusionEquation.test_desc)
+
+# !!!!!!!!!! Warning : result is affected by the fact that the mesh if not strictly a partition of the domain. BC should be adapted to find an order 2 of convergence as is the case in CDMATH !!!!!!!!!!!!!
 
 def convergence_StationaryDiffusion_2DFV_Dirichlet_EquilateralTriangles():
     start = time.time() 
@@ -16,7 +18,7 @@ def convergence_StationaryDiffusion_2DFV_Dirichlet_EquilateralTriangles():
     method = 'FV'
     BC = 'Dirichlet'
     meshList=['squareWithEquilateralTriangles5','squareWithEquilateralTriangles20','squareWithEquilateralTriangles50','squareWithEquilateralTriangles100','squareWithEquilateralTriangles200']
-    mesh_path='../../../CDMATH/CDMATH_SRC/tests/ressources/2DEquilateralTriangles/'
+    mesh_path=os.environ['CDMATH_INSTALL']+'/share/meshes/2DEquilateralTriangles/'
     mesh_name='squareWithEquilateralTriangles'
     meshType="Structured_triangles"
     nbMeshes=len(meshList)
@@ -28,12 +30,11 @@ def convergence_StationaryDiffusion_2DFV_Dirichlet_EquilateralTriangles():
     curv_abs=np.linspace(0,sqrt(2),resolution+1)
     plt.close('all')
     i=0
-    testColor="Green"
+    testColor="Orange \n (BC don't fit the domain)"
     # Storing of numerical errors, mesh sizes and diagonal values
     for filename in meshList:
 		my_mesh=cm.Mesh(mesh_path+filename+".med")
 		error_tab[i], mesh_size_tab[i], diag_data[i], min_sol_num, max_sol_num, time_tab[i] =validationStationaryDiffusionEquation.SolveStationaryDiffusionEquation(my_mesh,resolution,meshType,method,BC)
-
 		assert min_sol_num>-1 
 		assert max_sol_num<1.2
 		plt.plot(curv_abs, diag_data[i], label= str(mesh_size_tab[i]) + ' cells')
@@ -77,7 +78,7 @@ def convergence_StationaryDiffusion_2DFV_Dirichlet_EquilateralTriangles():
     plt.plot(mesh_size_tab, error_tab)
     plt.xlabel('log(sqrt(number of cells))')
     plt.ylabel('log(error)')
-    plt.title('Convergence of finite volumes for Poisson problem \n on 2D equilateral triangles meshes with Dirichlet BC')
+    plt.title('Convergence of finite elements for Poisson problem \n on 2D equilateral triangles meshes with Dirichlet BC \n Warning : result is affected by the fact that the mesh if not strictly a partition of the domain')
     plt.savefig(mesh_name+"_2DFV_StatDiffusion_Dirichlet_ConvergenceCurve.png")
 
     # Plot of computational time
@@ -96,13 +97,16 @@ def convergence_StationaryDiffusion_2DFV_Dirichlet_EquilateralTriangles():
     #convergence_synthesis["Mesh_path"]=mesh_path
     convergence_synthesis["Mesh_description"]=mesh_name
     convergence_synthesis["Mesh_sizes"]=[10**x for x in mesh_size_tab]
-    convergence_synthesis["Space_dimension"]=2
-    convergence_synthesis["Mesh_dimension"]=2
-    convergence_synthesis["Mesh_cell_type"]="Squares"
+    convergence_synthesis["Space_dim"]=2
+    convergence_synthesis["Mesh_dim"]=2
+    convergence_synthesis["Mesh_cell_type"]="Triangles"
     convergence_synthesis["Errors"]=[10**x for x in error_tab]
-    convergence_synthesis["Scheme_order"]=-a
+    convergence_synthesis["Scheme_order"]=round(-a,4)
     convergence_synthesis["Test_color"]=testColor
-    convergence_synthesis["Computational_time"]=end-start
+    convergence_synthesis["PDE_model"]='Poisson'
+    convergence_synthesis["Num_method"]=method
+    convergence_synthesis["Bound_cond"]=BC
+    convergence_synthesis["Comput_time"]=round(end-start,3)
 
     with open('Convergence_Poisson_2DFV_'+mesh_name+'.json', 'w') as outfile:  
         json.dump(convergence_synthesis, outfile)
