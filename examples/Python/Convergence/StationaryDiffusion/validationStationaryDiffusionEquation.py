@@ -201,16 +201,16 @@ def SolveStationaryDiffusionEquation(my_mesh,resolution,MeshType,method,BC):
 	if spaceDim == 2 :
 		diag_data=VTK_routines.Extract_field_data_over_line_to_numpyArray(my_ResultField,[0,0,0],[1,1,0],resolution)
 		if method =='FE':
-			PV_routines.Save_PV_data_to_picture_file("StationaryDiffusionEquation_"+str(spaceDim)+'D'+str(method)+'_'+str(MeshType)+'_'+str(BC)+str(nbCells)+'_0.vtu',"Temperature",'NODES',"StationaryDiffusionEquation_"+str(spaceDim)+str(method)+str(MeshType)+str(BC)+str(nbCells))
+			PV_routines.Save_PV_data_to_picture_file("StationaryDiffusionEquation_"+str(spaceDim)+'D'+str(method)+'_'+str(MeshType)+'_'+str(BC)+str(nbCells)+'_0.vtu',"Temperature",'NODES',"StationaryDiffusionEquation_"+str(spaceDim)+'D'+str(method)+str(MeshType)+str(BC)+str(nbCells))
 		else:
-			PV_routines.Save_PV_data_to_picture_file("StationaryDiffusionEquation_"+str(spaceDim)+'D'+str(method)+'_'+str(MeshType)+'_'+str(BC)+str(nbCells)+'_0.vtu',"Temperature",'CELLS',"StationaryDiffusionEquation_"+str(spaceDim)+str(method)+str(MeshType)+str(BC)+str(nbCells))
+			PV_routines.Save_PV_data_to_picture_file("StationaryDiffusionEquation_"+str(spaceDim)+'D'+str(method)+'_'+str(MeshType)+'_'+str(BC)+str(nbCells)+'_0.vtu',"Temperature",'CELLS',"StationaryDiffusionEquation_"+str(spaceDim)+'D'+str(method)+str(MeshType)+str(BC)+str(nbCells))
 	else:
 		diag_data=VTK_routines.Extract_field_data_over_line_to_numpyArray(my_ResultField,[0,0,0],[1,1,1],resolution)
 		VTK_routines.Clip_VTK_data_to_VTK("StationaryDiffusionEquation_"+str(spaceDim)+'D'+str(method)+'_'+str(MeshType)+'_'+str(BC)+str(nbCells)+'_0.vtu',"Clip_VTK_data_to_VTK_"+ "StationaryDiffusionEquation_"+str(spaceDim)+'D'+str(method)+'_'+str(MeshType)+'_'+str(BC)+str(nbCells)+'_0.vtu',[0.5,0.5,0.5], [-0.5,-0.5,-0.5],resolution )
 		if method =='FE':
-			PV_routines.Save_PV_data_to_picture_file("Clip_VTK_data_to_VTK_"+"StationaryDiffusionEquation_"+str(spaceDim)+'D'+str(method)+'_'+str(MeshType)+'_'+str(BC)+str(nbCells)+'_0.vtu',"Temperature",'NODES',"Clip_VTK_data_to_VTK_"+"StationaryDiffusionEquation_"+str(spaceDim)+str(method)+str(MeshType)+str(BC)+str(nbCells))
+			PV_routines.Save_PV_data_to_picture_file("Clip_VTK_data_to_VTK_"+"StationaryDiffusionEquation_"+str(spaceDim)+'D'+str(method)+'_'+str(MeshType)+'_'+str(BC)+str(nbCells)+'_0.vtu',"Temperature",'NODES',"Clip_VTK_data_to_VTK_"+"StationaryDiffusionEquation_"+str(spaceDim)+'D'+str(method)+str(MeshType)+str(BC)+str(nbCells))
 		else:
-			PV_routines.Save_PV_data_to_picture_file("Clip_VTK_data_to_VTK_"+"StationaryDiffusionEquation_"+str(spaceDim)+'D'+str(method)+'_'+str(MeshType)+'_'+str(BC)+str(nbCells)+'_0.vtu',"Temperature",'CELLS',"Clip_VTK_data_to_VTK_"+"StationaryDiffusionEquation_"+str(spaceDim)+str(method)+str(MeshType)+str(BC)+str(nbCells))
+			PV_routines.Save_PV_data_to_picture_file("Clip_VTK_data_to_VTK_"+"StationaryDiffusionEquation_"+str(spaceDim)+'D'+str(method)+'_'+str(MeshType)+'_'+str(BC)+str(nbCells)+'_0.vtu',"Temperature",'CELLS',"Clip_VTK_data_to_VTK_"+"StationaryDiffusionEquation_"+str(spaceDim)+'D'+str(method)+str(MeshType)+str(BC)+str(nbCells))
 
 	with open('test_Poisson'+str(my_mesh.getMeshDimension())+'D_'+str(method)+'_'+str(nbCells)+'Cells'+ '_' +str(BC)+'_'+str(MeshType)+".json", 'w') as outfile:  
 		json.dump(test_desc, outfile)
