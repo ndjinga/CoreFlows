@@ -30,7 +30,7 @@ def convergence_StationaryDiffusion_2DFV_Dirichlet_EquilateralTriangles():
     curv_abs=np.linspace(0,sqrt(2),resolution+1)
     plt.close('all')
     i=0
-    testColor="Green"
+    testColor="Orange \n (BC don't fit the domain)"
     # Storing of numerical errors, mesh sizes and diagonal values
     for filename in meshList:
 		my_mesh=cm.Mesh(mesh_path+filename+".med")
