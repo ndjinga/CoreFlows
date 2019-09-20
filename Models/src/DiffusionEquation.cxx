@@ -237,22 +237,6 @@ void DiffusionEquation::initialize()
 	KSPGetPC(_ksp, &_pc);
 	PCSetType(_pc, _pctype);
 
-    //Checking whether all boundaries are Neumann boundaries
-    map<string, LimitField>::iterator it = _limitField.begin();
-    while(it != _limitField.end() and (it->second).bcType == Neumann)
-        it++;
-    bool onlyNeumannBC = (it == _limitField.end());
-    //If only Neumann BC, then matrix is singular and solution should be sought in space of mean zero vectors
-    if(onlyNeumannBC)
-    {
-		MatNullSpace nullsp;
-		MatNullSpaceCreate(PETSC_COMM_WORLD, PETSC_TRUE, 0, PETSC_NULL, &nullsp);
-		MatSetNullSpace(_A, nullsp);
-		MatNullSpaceDestroy(&nullsp);
-
-        _pctype = (char*)&PCNONE;
-    }
-
 	_initializedMemory=true;
 	save();//save initial data
 }
@@ -511,7 +495,7 @@ double DiffusionEquation::computeRHS(bool & stop){
                     if(!_mesh.isBorderNode(nodesId[j])) //or for better performance nodeIds[idim]>dirichletNodes.upper_bound()
                     {
                         double coeff = _heatTransfertCoeff*_fluidTemperatureField(nodesId[j]) + _heatPowerField(nodesId[j]);
-                        VecSetValue(_b,unknownNodeIndex(nodesId[j], _dirichletNodeIds), coeff*Ci.getMeasure()/(_Ndim+1),ADD_VALUES);//assumes node numbering starts with unknown nodes. otherwise unknownNodes.index(j)
+                        VecSetValue(_b,unknownNodeIndex(nodesId[j], _dirichletNodeIds), coeff*Ci.getMeasure()/(_Ndim+1),ADD_VALUES);
                     }
             }
         }
