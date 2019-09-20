@@ -66,7 +66,7 @@ def convergence_StationaryDiffusion_2DFE_Neumann_RightTriangles():
     b=(-a2*b1+a1*b2)/det
     
     print "FE for diffusion on 2D right triangle meshes: scheme order is ", -a
-    assert abs(a+0.02)<0.01
+    assert abs(a+0.91)<0.01
     
     # Plot of convergence curve
     plt.close()

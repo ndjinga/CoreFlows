@@ -67,7 +67,7 @@ def convergence_StationaryDiffusion_2DFE_Neumann_DelaunayTriangles():
     b=(-a2*b1+a1*b2)/det
     
     print "FE for diffusion on 2D Delaunay triangle meshes: scheme order is ", -a
-    assert abs(a+0.6)<0.02
+    assert abs(a+0.82)<0.02
     
     # Plot of convergence curve
     plt.close()
