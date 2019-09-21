@@ -98,7 +98,7 @@ def convergence_StationaryDiffusion_2DFE_Neumann_DelaunayTriangles():
     convergence_synthesis["Mesh_sizes"]=[10**x for x in mesh_size_tab]
     convergence_synthesis["Space_dim"]=2
     convergence_synthesis["Mesh_dim"]=2
-    convergence_synthesis["Mesh_cell_type"]="Squares"
+    convergence_synthesis["Mesh_cell_type"]="Triangles"
     convergence_synthesis["Errors"]=[10**x for x in error_tab]
     convergence_synthesis["Scheme_order"]=round(-a,4)
     convergence_synthesis["Test_color"]=testColor
