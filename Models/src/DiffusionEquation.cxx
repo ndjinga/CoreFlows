@@ -113,6 +113,8 @@ DiffusionEquation::DiffusionEquation(int dim, bool FECalculation,double rho,doub
 
 	_fileName = "CoreFlowsDiffusionProblem";
 
+	_runLogFile=new ofstream;
+
     /* Default diffusion tensor is identity matrix */
    	_DiffusionTensor=Matrix(_Ndim);
 	for(int idim=0;idim<_Ndim;idim++)
@@ -121,15 +123,24 @@ DiffusionEquation::DiffusionEquation(int dim, bool FECalculation,double rho,doub
 
 void DiffusionEquation::initialize()
 {
+	_runLogFile->open((_fileName+".log").c_str(), ios::out | ios::trunc);;//for creation of a log file to save the history of the simulation
+
 	if(!_initialDataSet)
 		throw CdmathException("DiffusionEquation::initialize() set initial data first");
 	else
         {
             cout<<"Initialising the diffusion of a solid temperature using ";
+            *_runLogFile<<"Initialising the diffusion of a solid temperature using ";
             if(!_FECalculation)
-                cout<< "Finite volumes method"<<endl;
+            {
+                cout<< "Finite volumes method"<<endl<<endl;
+                *_runLogFile<< "Finite volumes method"<<endl<<endl;
+            }
             else
-                cout<< "Finite elements method"<<endl;
+            {
+                cout<< "Finite elements method"<<endl<<endl;
+                *_runLogFile<< "Finite elements method"<<endl<<endl;
+            }
         }
 
 	/**************** Field creation *********************/
@@ -199,7 +210,8 @@ void DiffusionEquation::initialize()
                 _dirichletNodeIds.push_back(_boundaryNodeIds[i]);
         _NdirichletNodes=_dirichletNodeIds.size();
         _NunknownNodes=_Nnodes - _NdirichletNodes;
-        cout<<"Number of unknown nodes " << _NunknownNodes <<", Number of boundary nodes " << _NboundaryNodes<< ", Number of Dirichlet boundary nodes " << _NdirichletNodes <<endl;
+        cout<<"Number of unknown nodes " << _NunknownNodes <<", Number of boundary nodes " << _NboundaryNodes<< ", Number of Dirichlet boundary nodes " << _NdirichletNodes <<endl<<endl;
+        *_runLogFile<<"Number of unknown nodes " << _NunknownNodes <<", Number of boundary nodes " << _NboundaryNodes<< ", Number of Dirichlet boundary nodes " << _NdirichletNodes <<endl<<endl;
     }
 
 	//creation de la matrice
@@ -421,6 +433,7 @@ double DiffusionEquation::computeDiffusionMatrixFV(bool & stop){
 				cout<<"!!!!!!!!!!!!!!!!! Error DiffusionEquation::computeDiffusionMatrixFV !!!!!!!!!!"<<endl;
                 cout<<"Boundary condition not accepted for boundary named "<<nameOfGroup<< ", _limitField[nameOfGroup].bcType= "<<_limitField[nameOfGroup].bcType<<endl;
 				cout<<"Accepted boundary conditions are Neumann "<<Neumann<< " and Dirichlet "<<Dirichlet<<endl;
+                *_runLogFile<<"Boundary condition not accepted for boundary named "<<nameOfGroup<< ", _limitField[nameOfGroup].bcType= "<<_limitField[nameOfGroup].bcType<<endl;
 				throw CdmathException("Boundary condition not accepted");
 			}
 
@@ -596,6 +609,7 @@ bool DiffusionEquation::iterateTimeStep(bool &converged)
 		if(_PetscIts>=_maxPetscIts)
 		{
 			cout<<"Systeme lineaire : pas de convergence de Petsc. Itérations maximales "<<_maxPetscIts<<" atteintes"<<endl;
+			*_runLogFile<<"Systeme lineaire : pas de convergence de Petsc. Itérations maximales "<<_maxPetscIts<<" atteintes"<<endl;
 			converged=false;
 			return false;
 		}
@@ -669,6 +683,9 @@ void DiffusionEquation::validateTimeStep()
 }
 
 void DiffusionEquation::save(){
+    cout<< "Saving numerical results"<<endl<<endl;
+    *_runLogFile<< "Saving numerical results"<< endl<<endl;
+
 	string resultFile(_path+"/DiffusionEquation");//Results
 
 	resultFile+="_";
