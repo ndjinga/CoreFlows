@@ -28,7 +28,7 @@ def convergence_StationaryDiffusion_3DFE_Dirichlet_DelaunayTetrahedra():
     curv_abs=np.linspace(0,sqrt(2),resolution+1)
     plt.close('all')
     i=0
-    testColor="Green"
+    testColor="Orange (not order 2)"
     # Storing of numerical errors, mesh sizes and diagonal values
     for filename in meshList:
 		my_mesh=cm.Mesh(mesh_path+filename+".med")
