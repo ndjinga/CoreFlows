@@ -157,7 +157,8 @@ protected :
 	bool _conditionNumber;//computes an estimate of the condition number
 
 	map<string, LimitField> _limitField;
-
+    bool _onlyNeumannBC;//if true then the linear system is singular and should be solved up to a constant vector
+    
 	bool _diffusionMatrixSet;
 	Vector _normale;
 	Matrix _DiffusionTensor;
