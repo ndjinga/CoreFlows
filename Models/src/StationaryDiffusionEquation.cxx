@@ -379,11 +379,11 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFE(bool & stop){
                         dirichletCell_treated=true;
                         for (int kdim=0; kdim<_Ndim+1;kdim++)
                         {
-                            if(find(_dirichletNodeIds.begin(),_dirichletNodeIds.end(),nodeIds[kdim])!=_dirichletNodeIds.end())
+                            std::vector<int>::iterator it=find(_dirichletNodeIds.begin(),_dirichletNodeIds.end(),nodeIds[kdim]);
+                            if( it != _dirichletNodeIds.end())
                             {
-                                std::map<int,double>::iterator it=_dirichletBoundaryValues.find(nodeIds[kdim]);
-                                if( it != _dirichletNodeIds.end() )
-                                    valuesBorder[kdim]=_dirichletBoundaryValues[nodeIds[kdim]];
+                                if( _dirichletValuesSet )
+                                    valuesBorder[kdim]=_dirichletBoundaryValues[std::distance(_dirichletNodeIds.begin(),it)];
                                 else    
                                     valuesBorder[kdim]=_limitField[_mesh.getNode(nodeIds[kdim]).getGroupName()].T;
                             }
@@ -460,7 +460,7 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFV(bool & stop){
             {
                 barycenterDistance=Cell1.getBarryCenter().distance(Fj.getBarryCenter());
                 MatSetValue(_A,idm,idm,dn*inv_dxi/barycenterDistance                                     , ADD_VALUES);
-                VecSetValue(_b,idm,    dn*inv_dxi/barycenterDistance*_dirichletBoundaryValues[j], ADD_VALUES);
+                VecSetValue(_b,idm,    dn*inv_dxi/barycenterDistance*_dirichletBoundaryValues[std::distance(_dirichletNodeIds.begin(),it)], ADD_VALUES);
             }
             else
             {

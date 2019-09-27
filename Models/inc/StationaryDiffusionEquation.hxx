@@ -79,7 +79,7 @@ public :
                                                       vector<double>(0),-1,-1,-1,-1);
 	};
 
-    void setDirichletValues(std::vector<int> dirichletBoundaryNodes,std::vector<double> dirichletBoundaryValues)
+    void setDirichletValues(std::vector<int> dirichletBoundaryNodes,std::vector<double> dirichletBoundaryValues);
 
 	void setConductivity(double conductivite){
 		_conductivity=conductivite;
