@@ -122,7 +122,7 @@ def SolveStationaryDiffusionEquation(my_mesh,resolution,MeshType,method,BC):
 		boundaryFaces = my_mesh.getBoundaryFaceIds()
 		boundaryValues = {}
 		print("Setting Dirichlet boundary values")
-		for i in boundaryFaces) :
+		for i in boundaryFaces :
 			Fi=my_mesh.getFace(i)
 			x=Fi.x()
 			y=Fi.y()
