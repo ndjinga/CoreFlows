@@ -26,11 +26,11 @@ def StationaryDiffusionEquation_2DFV_EquilateralTriangles():
 	boundaryFaces = M.getBoundaryFaceIds()
 	boundaryValues = {}
 	print("Setting Dirichlet boundary values")
-	for i in range(len(boundaryFaces)) :
+	for i in boundaryFaces :
 		Fi=M.getFace(i)
 		x=Fi.x()
 		y=Fi.y()
-		boundaryValues[boundaryFaces[i]] = sin(pi*x)*sin(pi*y)
+		boundaryValues[i] = sin(pi*x)*sin(pi*y)
 		
 	FEComputation=False
 	myProblem = cf.StationaryDiffusionEquation(spaceDim,FEComputation);
