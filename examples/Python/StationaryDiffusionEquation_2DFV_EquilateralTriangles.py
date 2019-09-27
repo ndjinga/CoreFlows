@@ -14,7 +14,7 @@ import cdmath as cm
 from math import sin, pi
 import os
 
-def StationaryDiffusionEquation_2DFV_StructuredTriangles():
+def StationaryDiffusionEquation_2DFV_EquilateralTriangles():
 	spaceDim = 2;
 	# Prepare for the mesh
 	print("Loading mesh " );
@@ -24,19 +24,19 @@ def StationaryDiffusionEquation_2DFV_StructuredTriangles():
 
 	# set the limit field 
 	boundaryFaces = M.getBoundaryFaceIds()
-	boundaryValues = [0]*len(M.getBoundaryFaceIds())
+	boundaryValues = {}
 	print("Setting Dirichlet boundary values")
 	for i in range(len(boundaryFaces)) :
 		Fi=M.getFace(i)
 		x=Fi.x()
 		y=Fi.y()
-		boundaryValues[i] = sin(pi*x)*sin(pi*y)
+		boundaryValues[boundaryFaces[i]] = sin(pi*x)*sin(pi*y)
 		
 	
 	FEComputation=False
 	myProblem = cf.StationaryDiffusionEquation(spaceDim,FEComputation);
 	myProblem.setMesh(M);
-	myProblem.setDirichletValues(boundaryValues)
+	myProblem.setDirichletValues(cf.MapIntDouble(boundaryValues))
 	
 	#Set the right hand side function
 	my_RHSfield = cm.Field("RHS_field", cm.CELLS, M, 1)
@@ -90,4 +90,4 @@ def StationaryDiffusionEquation_2DFV_StructuredTriangles():
 	return ok
 
 if __name__ == """__main__""":
-	StationaryDiffusionEquation_2DFV_StructuredTriangles()
+	StationaryDiffusionEquation_2DFV_EquilateralTriangles()
