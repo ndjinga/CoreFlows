@@ -457,12 +457,12 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFV(bool & stop){
 				cout << ") "<<endl;
 			}
 
-            std::vector<int>::iterator it=find(_dirichletNodeIds.begin(),_dirichletNodeIds.end(),j);
-            if( it != _dirichletNodeIds.end() )
+            std::map<int,double>::iterator it=_dirichletBoundaryValues.find(j);
+            if( it != _dirichletBoundaryValues.end() )
             {
                 barycenterDistance=Cell1.getBarryCenter().distance(Fj.getBarryCenter());
                 MatSetValue(_A,idm,idm,dn*inv_dxi/barycenterDistance                                     , ADD_VALUES);
-                VecSetValue(_b,idm,    dn*inv_dxi/barycenterDistance*_dirichletBoundaryValues[std::distance(_dirichletNodeIds.begin(),it)], ADD_VALUES);
+                VecSetValue(_b,idm,    dn*inv_dxi/barycenterDistance*it->second, ADD_VALUES);
             }
             else
             {
