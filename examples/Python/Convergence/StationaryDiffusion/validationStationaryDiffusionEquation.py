@@ -82,6 +82,19 @@ def SolveStationaryDiffusionEquation(my_mesh,resolution,MeshType,method,BC):
 				elif spaceDim == 3 : 
 					z = Ni.z()
 					my_RHSfield[i]=2*pi*pi*cos(pi*x)*cos(pi*y)*cos(pi*z)#set the function define in the right hand side 				
+		# set the limit field 
+		boundaryNodes = my_mesh.getBoundaryNodeIds()
+		boundaryValues = {}
+		print("Setting Dirichlet boundary values")
+		for i in boundaryNodes :
+			Ni=my_mesh.getNode(i)
+			x=Ni.x()
+			y=Ni.y()
+			if spaceDim == 2 : 
+				boundaryValues[i] = sin(pi*x)*sin(pi*y)
+			elif spaceDim == 3 : 
+				z = Ni.z()
+				boundaryValues[i] = sin(pi*x)*sin(pi*y)*sin(pi*z)
 	elif method == 'FV':
 		test_desc["Numerical_method_name"]="FV5"
 		test_desc["Numerical_method_space_discretization"]="Finite volumes"
@@ -105,9 +118,24 @@ def SolveStationaryDiffusionEquation(my_mesh,resolution,MeshType,method,BC):
 					z = Ci.z()
 					my_RHSfield[i]=2*pi*pi*cos(pi*x)*cos(pi*y)*cos(pi*z)#set the function define in the right hand side 
 				
+		# set the limit field 
+		boundaryFaces = my_mesh.getBoundaryFaceIds()
+		boundaryValues = {}
+		print("Setting Dirichlet boundary values")
+		for i in boundaryFaces) :
+			Fi=my_mesh.getFace(i)
+			x=Fi.x()
+			y=Fi.y()
+			if spaceDim == 2 : 
+				boundaryValues[i] = sin(pi*x)*sin(pi*y)
+			elif spaceDim == 3 : 
+				z = Fi.z()
+				boundaryValues[i] = sin(pi*x)*sin(pi*y)*sin(pi*z)
+
 	myProblem = cf.StationaryDiffusionEquation(spaceDim,FEComputation);
 	myProblem.setMesh(my_mesh);
 	myProblem.setHeatPowerField(my_RHSfield)
+	myProblem.setDirichletValues(cf.MapIntDouble(boundaryValues))
 
 	#Set the boundary conditions
 	if BC == 'Dirichlet' :	
