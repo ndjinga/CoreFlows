@@ -79,8 +79,7 @@ public :
                                                       vector<double>(0),-1,-1,-1,-1);
 	};
 
-    void setDirichletValues(map< int, double> dirichletBoundaryValues);
-    void setDirichletValues(std::vector<double> dirichletBoundaryValues){_dirichletValues=dirichletBoundaryValues;};
+    void setDirichletValues(std::vector<int> dirichletBoundaryNodes,std::vector<double> dirichletBoundaryValues)
 
 	void setConductivity(double conductivite){
 		_conductivity=conductivite;
@@ -203,8 +202,8 @@ protected :
     int globalNodeIndex(int unknownIndex, std::vector< int > dirichletNodes);
 
     /********* Possibility to set a boundary field as Dirichlet boundary condition *********/
-    map< int, double> _dirichletBoundaryValues;
-    std::vector<double> _dirichletValues;
+    bool _dirichletValuesSet;
+    std::vector<double> _dirichletBoundaryValues;
 };
 
 #endif /* StationaryDiffusionEquation_HXX_ */

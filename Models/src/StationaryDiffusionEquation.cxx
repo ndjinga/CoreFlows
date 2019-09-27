@@ -76,11 +76,14 @@ StationaryDiffusionEquation::StationaryDiffusionEquation(int dim, bool FECalcula
     _neibMaxNbCells=0;    
     _meshSet=false;
     _neibMaxNbNodes=0;    
+
+    //Boundary conditions
     _boundaryNodeIds=std::vector< int >(0);
     _dirichletNodeIds=std::vector< int >(0);
     _NboundaryNodes=0;
     _NdirichletNodes=0;
     _NunknownNodes=0;
+    _dirichletValuesSet=false;   
     
     //Linear solver data
 	_precision=1.e-6;
@@ -190,37 +193,35 @@ void StationaryDiffusionEquation::initialize()
         if(_NboundaryNodes==_Nnodes)
             cout<<"!!!!! Warning : all nodes are boundary nodes !!!!!"<<endl<<endl;
 
-        for(int i=0; i<_NboundaryNodes; i++)
-        {
-            std::map<int,double>::iterator it=_dirichletBoundaryValues.find(_boundaryNodeIds[i]);
-            if( it != _dirichletBoundaryValues.end() )
-                _dirichletNodeIds.push_back(_boundaryNodeIds[i]);
-			else if( _mesh.getNode(_boundaryNodeIds[i]).getGroupNames().size()==0 )
-			{
-				cout<<"!!! No boundary value set for boundary node" << _boundaryNodeIds[i]<< endl;
-                *_runLogFile<< "!!! No boundary value set for boundary node" << _boundaryNodeIds[i]<<endl;
-                _runLogFile->close();
-				throw CdmathException("Missing boundary value name");
-			}
-            else if(_limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType==NoTypeSpecified)
-			{
-				cout<<"!!! No boundary condition set for boundary node " << _boundaryNodeIds[i]<< endl;
-                *_runLogFile<< "!!!No boundary condition set for boundary node " << _boundaryNodeIds[i]<<endl;
-                _runLogFile->close();
-				throw CdmathException("Missing boundary condition");
-			}
-            else if(_limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType==Dirichlet)
-                _dirichletNodeIds.push_back(_boundaryNodeIds[i]);
-            else if(_limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType!=Neumann)
-			{
-				cout<<"!!! Wrong boundary condition "<< _limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType<< " set for boundary node " << _boundaryNodeIds[i]<< endl;
-				cout<<"!!! Accepted boundary conditions are Dirichlet "<< Dirichlet <<" and Neumann "<< Neumann << endl;
-                *_runLogFile<< "Wrong boundary condition "<< _limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType<< " set for boundary node " << _boundaryNodeIds[i]<<endl;
-                *_runLogFile<< "Accepted boundary conditions are Dirichlet "<< Dirichlet <<" and Neumann "<< Neumann <<endl;
-                _runLogFile->close();
-				throw CdmathException("Wrong boundary condition");
-			}
-		}	
+        if(!_dirichletValuesSet)
+            for(int i=0; i<_NboundaryNodes; i++)
+            {
+                if( _mesh.getNode(_boundaryNodeIds[i]).getGroupNames().size()==0 )
+                {
+                    cout<<"!!! No boundary value set for boundary node" << _boundaryNodeIds[i]<< endl;
+                    *_runLogFile<< "!!! No boundary value set for boundary node" << _boundaryNodeIds[i]<<endl;
+                    _runLogFile->close();
+                    throw CdmathException("Missing boundary value");
+                }
+                else if(_limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType==NoTypeSpecified)
+                {
+                    cout<<"!!! No boundary condition set for boundary node " << _boundaryNodeIds[i]<< endl;
+                    *_runLogFile<< "!!!No boundary condition set for boundary node " << _boundaryNodeIds[i]<<endl;
+                    _runLogFile->close();
+                    throw CdmathException("Missing boundary condition");
+                }
+                else if(_limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType==Dirichlet)
+                    _dirichletNodeIds.push_back(_boundaryNodeIds[i]);
+                else if(_limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType!=Neumann)
+                {
+                    cout<<"!!! Wrong boundary condition "<< _limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType<< " set for boundary node " << _boundaryNodeIds[i]<< endl;
+                    cout<<"!!! Accepted boundary conditions are Dirichlet "<< Dirichlet <<" and Neumann "<< Neumann << endl;
+                    *_runLogFile<< "Wrong boundary condition "<< _limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType<< " set for boundary node " << _boundaryNodeIds[i]<<endl;
+                    *_runLogFile<< "Accepted boundary conditions are Dirichlet "<< Dirichlet <<" and Neumann "<< Neumann <<endl;
+                    _runLogFile->close();
+                    throw CdmathException("Wrong boundary condition");
+                }
+            }	
         _NdirichletNodes=_dirichletNodeIds.size();
         _NunknownNodes=_Nnodes - _NdirichletNodes;
         cout<<"Number of unknown nodes " << _NunknownNodes <<", Number of boundary nodes " << _NboundaryNodes<< ", Number of Dirichlet boundary nodes " << _NdirichletNodes <<endl<<endl;
@@ -381,7 +382,7 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFE(bool & stop){
                             if(find(_dirichletNodeIds.begin(),_dirichletNodeIds.end(),nodeIds[kdim])!=_dirichletNodeIds.end())
                             {
                                 std::map<int,double>::iterator it=_dirichletBoundaryValues.find(nodeIds[kdim]);
-                                if( it != _dirichletBoundaryValues.end() )
+                                if( it != _dirichletNodeIds.end() )
                                     valuesBorder[kdim]=_dirichletBoundaryValues[nodeIds[kdim]];
                                 else    
                                     valuesBorder[kdim]=_limitField[_mesh.getNode(nodeIds[kdim]).getGroupName()].T;
@@ -454,8 +455,8 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFV(bool & stop){
 				cout << ") "<<endl;
 			}
 
-            std::map<int,double>::iterator it=_dirichletBoundaryValues.find(j);
-            if( it != _dirichletBoundaryValues.end() )
+            std::vector<int>::iterator it=find(_dirichletNodeIds.begin(),_dirichletNodeIds.end(),j);
+            if( it != _dirichletNodeIds.end() )
             {
                 barycenterDistance=Cell1.getBarryCenter().distance(Fj.getBarryCenter());
                 MatSetValue(_A,idm,idm,dn*inv_dxi/barycenterDistance                                     , ADD_VALUES);
@@ -873,10 +874,13 @@ void StationaryDiffusionEquation::terminate()
 	VecDestroy(&_b);
 	MatDestroy(&_A);
 }
-
 void 
-StationaryDiffusionEquation::setDirichletValues(map< int, double> dirichletBoundaryValues)
+StationaryDiffusionEquation::setDirichletValues(std::vector<int> dirichletBoundaryNodes,std::vector<double> dirichletBoundaryValues)
 {
+    if(dirichletBoundaryNodes.size()!=dirichletBoundaryValues.size())
+        throw CdmathException("StationaryDiffusionEquation::setDirichletValues : Dirichlet nodes and Dirichlet values array do not have the same size");
+    _dirichletValuesSet=true;
+    _dirichletNodeIds=dirichletBoundaryNodes;
     _dirichletBoundaryValues=dirichletBoundaryValues;
 }
 
