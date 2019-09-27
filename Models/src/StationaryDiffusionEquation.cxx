@@ -260,7 +260,7 @@ void StationaryDiffusionEquation::initialize()
     map<string, LimitField>::iterator it = _limitField.begin();
     while(it != _limitField.end() and (it->second).bcType == Neumann)
         it++;
-    _onlyNeumannBC = (it == _limitField.end());
+    _onlyNeumannBC = (it == _limitField.end() && _limitField.size()>0);
     //If only Neumann BC, then matrix is singular and solution should be sought in space of mean zero vectors
     if(_onlyNeumannBC)
     {
