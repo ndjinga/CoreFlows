@@ -67,7 +67,7 @@ def convergence_StationaryDiffusion_2DFV_Dirichlet_Hexagons():
     b=(-a2*b1+a1*b2)/det
     
     print "FV for diffusion on 2D  hexagon meshes: scheme order is ", -a
-    assert abs(a+0.946)<0.01
+    assert abs(a+1.94)<0.01
     
     # Plot of convergence curve
     plt.close()
