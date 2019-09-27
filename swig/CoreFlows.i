@@ -2,11 +2,14 @@
 
 %include std_string.i
 %include std_vector.i
+%include std_map.i
 
 %apply bool& INOUT {bool &stop}
 
 namespace std {
  %template(VectorDouble) vector<double>;
+ %template(VectorInt) vector<int>;
+ %template(MapIntDouble) map<int,double>;
 };
 
 %{
