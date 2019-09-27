@@ -20,7 +20,7 @@ def convergence_StationaryDiffusion_2DFV_Dirichlet_EquilateralTriangles():
     meshList=['squareWithEquilateralTriangles5','squareWithEquilateralTriangles20','squareWithEquilateralTriangles50','squareWithEquilateralTriangles100','squareWithEquilateralTriangles200']
     mesh_path=os.environ['CDMATH_INSTALL']+'/share/meshes/2DEquilateralTriangles/'
     mesh_name='squareWithEquilateralTriangles'
-    meshType="Structured_triangles"
+    meshType="Equilateral_triangles"
     nbMeshes=len(meshList)
     error_tab=[0]*nbMeshes
     mesh_size_tab=[0]*nbMeshes
@@ -68,7 +68,7 @@ def convergence_StationaryDiffusion_2DFV_Dirichlet_EquilateralTriangles():
     b=(-a2*b1+a1*b2)/det
     
     print "FV for diffusion on 2D Equilateral triangle meshes: scheme order is ", -a
-    assert abs(a+0.895)<0.01
+    assert abs(a+1.97)<0.01
     
     # Plot of convergence curve
     plt.close()
