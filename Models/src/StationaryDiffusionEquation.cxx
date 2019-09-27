@@ -193,10 +193,12 @@ void StationaryDiffusionEquation::initialize()
         if(_NboundaryNodes==_Nnodes)
             cout<<"!!!!! Warning : all nodes are boundary nodes !!!!!"<<endl<<endl;
 
-        if(!_dirichletValuesSet)
             for(int i=0; i<_NboundaryNodes; i++)
             {
-                if( _mesh.getNode(_boundaryNodeIds[i]).getGroupNames().size()==0 )
+                std::map<int,double>::iterator it=_dirichletBoundaryValues.find(_boundaryNodeIds[i]);
+                if( it != _dirichletBoundaryValues.end() )
+                    _dirichletNodeIds.push_back(_boundaryNodeIds[i]);
+	    		else if( _mesh.getNode(_boundaryNodeIds[i]).getGroupNames().size()==0 )
                 {
                     cout<<"!!! No boundary value set for boundary node" << _boundaryNodeIds[i]<< endl;
                     *_runLogFile<< "!!! No boundary value set for boundary node" << _boundaryNodeIds[i]<<endl;
@@ -379,11 +381,11 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFE(bool & stop){
                         dirichletCell_treated=true;
                         for (int kdim=0; kdim<_Ndim+1;kdim++)
                         {
-                            std::vector<int>::iterator it=find(_dirichletNodeIds.begin(),_dirichletNodeIds.end(),nodeIds[kdim]);
-                            if( it != _dirichletNodeIds.end())
+							std::map<int,double>::iterator it=_dirichletBoundaryValues.find(nodeIds[kdim]);
+							if( it != _dirichletBoundaryValues.end() )
                             {
                                 if( _dirichletValuesSet )
-                                    valuesBorder[kdim]=_dirichletBoundaryValues[std::distance(_dirichletNodeIds.begin(),it)];
+                                    valuesBorder[kdim]=_dirichletBoundaryValues[it->second];
                                 else    
                                     valuesBorder[kdim]=_limitField[_mesh.getNode(nodeIds[kdim]).getGroupName()].T;
                             }
@@ -875,12 +877,9 @@ void StationaryDiffusionEquation::terminate()
 	MatDestroy(&_A);
 }
 void 
-StationaryDiffusionEquation::setDirichletValues(std::vector<int> dirichletBoundaryNodes,std::vector<double> dirichletBoundaryValues)
+StationaryDiffusionEquation::setDirichletValues(map< int, double> dirichletBoundaryValues)
 {
-    if(dirichletBoundaryNodes.size()!=dirichletBoundaryValues.size())
-        throw CdmathException("StationaryDiffusionEquation::setDirichletValues : Dirichlet nodes and Dirichlet values array do not have the same size");
     _dirichletValuesSet=true;
-    _dirichletNodeIds=dirichletBoundaryNodes;
     _dirichletBoundaryValues=dirichletBoundaryValues;
 }
 
