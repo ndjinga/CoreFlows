@@ -20,7 +20,7 @@ def StationaryDiffusionEquation_2DFV_EquilateralTriangles():
 	print("Loading mesh " );
 	M=cm.Mesh(os.environ['CDMATH_INSTALL']+'/share/meshes/2DEquilateralTriangles/squareWithEquilateralTriangles20.med')#Equilateral triangular mesh
 	
-	print "Loaded 2D equilateral triangle mesh with ", M.getNumberOfCells(), " cells"
+	print( "Loaded 2D equilateral triangle mesh with ", M.getNumberOfCells(), " cells")
 
 	# set the limit field 
 	boundaryFaces = M.getBoundaryFaceIds()
@@ -32,7 +32,6 @@ def StationaryDiffusionEquation_2DFV_EquilateralTriangles():
 		y=Fi.y()
 		boundaryValues[boundaryFaces[i]] = sin(pi*x)*sin(pi*y)
 		
-	
 	FEComputation=False
 	myProblem = cf.StationaryDiffusionEquation(spaceDim,FEComputation);
 	myProblem.setMesh(M);
