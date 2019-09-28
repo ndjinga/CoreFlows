@@ -18,7 +18,7 @@ def convergence_StationaryDiffusion_2DFV_Dirichlet_Hexagons():
     meshList=['squareWithHexagons_1','squareWithHexagons_2','squareWithHexagons_3','squareWithHexagons_4','squareWithHexagons_5']
     mesh_path=os.environ['CDMATH_INSTALL']+'/share/meshes//2DHexagons/'
     mesh_name='squareWithHexagons'
-    meshType="Unstructured_hexagons"
+    meshType="Structured_hexagons"
     nbMeshes=len(meshList)
     error_tab=[0]*nbMeshes
     mesh_size_tab=[0]*nbMeshes
