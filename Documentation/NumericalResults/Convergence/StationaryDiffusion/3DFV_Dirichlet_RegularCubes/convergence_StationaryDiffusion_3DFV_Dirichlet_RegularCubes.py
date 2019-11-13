@@ -15,7 +15,7 @@ def convergence_StationaryDiffusion_3DFV_Dirichlet_RegularCubes():
     ### 3D FV Regular Cubes meshes
     method = 'FV'
     BC = 'Dirichlet'
-    meshList=[5,10,20,30]
+    meshList=[5,20,50,100]
     mesh_name='cubeWithRegularCubes'
     meshType="Regular_Cubes"
     nbMeshes=len(meshList)
@@ -27,7 +27,7 @@ def convergence_StationaryDiffusion_3DFV_Dirichlet_RegularCubes():
     curv_abs=np.linspace(0,sqrt(2),resolution+1)
     plt.close('all')
     i=0
-    testColor="Green"
+    testColor="Orange (not order 2)"
     # Storing of numerical errors, mesh sizes and diagonal values
     for nx in meshList:
 		my_mesh=cm.Mesh(0,1,nx,0,1,nx,0,1,nx)

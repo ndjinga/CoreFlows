@@ -15,7 +15,7 @@ def convergence_StationaryDiffusion_3DFE_Dirichlet_DelaunayTetrahedra():
     ### 3D FE Delaunay Tetrahedra meshes
     method = 'FE'
     BC = 'Dirichlet'
-    meshList=['meshCubeTetrahedra_0','meshCubeTetrahedra_1','meshCubeTetrahedra_2','meshCubeTetrahedra_3','meshCubeTetrahedra_4']
+    meshList=['meshCubeTetrahedra_0','meshCubeTetrahedra_1','meshCubeTetrahedra_2','meshCubeTetrahedra_3','meshCubeTetrahedra_4','meshCubeTetrahedra_5','meshCubeTetrahedra_6']
     mesh_path=os.environ['CDMATH_INSTALL']+'/share/meshes/3DTetrahedra/'
     mesh_name='cubeWithDelaunayTetrahedra'
     meshType="Unstructured_Tetrahedra"
@@ -28,7 +28,7 @@ def convergence_StationaryDiffusion_3DFE_Dirichlet_DelaunayTetrahedra():
     curv_abs=np.linspace(0,sqrt(2),resolution+1)
     plt.close('all')
     i=0
-    testColor="Green"
+    testColor="Orange (not order 2)"
     # Storing of numerical errors, mesh sizes and diagonal values
     for filename in meshList:
 		my_mesh=cm.Mesh(mesh_path+filename+".med")
@@ -66,7 +66,7 @@ def convergence_StationaryDiffusion_3DFE_Dirichlet_DelaunayTetrahedra():
     b=(-a2*b1+a1*b2)/det
     
     print "FE for diffusion on 3D Delaunay tetrahedron meshes: scheme order is ", -a
-    assert abs(a+0.669)<0.01
+    assert abs(a+0.627)<0.01
     
     # Plot of convergence curve
     plt.close()
