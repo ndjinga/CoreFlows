@@ -661,9 +661,9 @@ void StationaryDiffusionEquation::setMesh(const Mesh &M)
     }
     else
     {
-        if(_Ndim==3 and not M.isTetrahedral())
+        if(_Ndim==1 and not M.is1DNetwork())//Mesh should be composed of segments without Gauss points
         {
-            cout<<"Finite elements in dimension "<<_Ndim<< ", mesh should be tetrahedral"<<endl;
+            cout<<"Finite elements in dimension "<<_Ndim<< ", mesh should be made of segments (no gauss points)"<<endl;
 			*_runLogFile<<"StationaryDiffusionEquation::setMesh: mesh has incorrect cell types"<<endl;
             _runLogFile->close();
             throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect cell types");
@@ -671,6 +671,13 @@ void StationaryDiffusionEquation::setMesh(const Mesh &M)
         if(_Ndim==2 and not M.isTriangular())
         {
             cout<<"Finite elements in dimension "<<_Ndim<< ", mesh should be triangular"<<endl;
+			*_runLogFile<<"StationaryDiffusionEquation::setMesh: mesh has incorrect cell types"<<endl;
+            _runLogFile->close();
+            throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect cell types");
+        }
+        if(_Ndim==3 and not M.isTetrahedral())
+        {
+            cout<<"Finite elements in dimension "<<_Ndim<< ", mesh should be tetrahedral"<<endl;
 			*_runLogFile<<"StationaryDiffusionEquation::setMesh: mesh has incorrect cell types"<<endl;
             _runLogFile->close();
             throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect cell types");

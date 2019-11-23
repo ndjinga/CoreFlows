@@ -188,14 +188,19 @@ void DiffusionEquation::initialize()
             cout<<", "<<_boundaryNodeIds[i];
         cout<<endl;
         */
-        if(_Ndim==3 and not _mesh.isTetrahedral())
+        if(_Ndim==1 and not _mesh.is1DNetwork())
         {
-            cout<<"Dimension is "<<_Ndim<< ", mesh should be tetrahedral"<<endl;
+            cout<<"Dimension is "<<_Ndim<< ", mesh should be triangular"<<endl;
             throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect cell types");
         }
         if(_Ndim==2 and not _mesh.isTriangular())
         {
             cout<<"Dimension is "<<_Ndim<< ", mesh should be triangular"<<endl;
+            throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect cell types");
+        }
+        if(_Ndim==3 and not _mesh.isTetrahedral())
+        {
+            cout<<"Dimension is "<<_Ndim<< ", mesh should be tetrahedral"<<endl;
             throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect cell types");
         }
 
