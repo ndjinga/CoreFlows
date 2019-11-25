@@ -638,12 +638,13 @@ bool StationaryDiffusionEquation::iterateNewtonStep(bool &converged)
 
 void StationaryDiffusionEquation::setMesh(const Mesh &M)
 {
-	if(_Ndim != M.getSpaceDimension() or _Ndim!=M.getMeshDimension()){
-        cout<< "Problem : dim = "<<_Ndim<< " but mesh dim= "<<M.getMeshDimension()<<", mesh space dim= "<<M.getSpaceDimension()<<endl;
+	if(_Ndim != M.getSpaceDimension() or _Ndim!=M.getMeshDimension())//for the moment we must have space dim=mesh dim
+	{
+        cout<< "Problem : dimension defined is "<<_Ndim<< " but mesh dimension= "<<M.getMeshDimension()<<", and space dimension is "<<M.getSpaceDimension()<<endl;
 		*_runLogFile<< "Problem : dim = "<<_Ndim<< " but mesh dim= "<<M.getMeshDimension()<<", mesh space dim= "<<M.getSpaceDimension()<<endl;
 		*_runLogFile<<"StationaryDiffusionEquation::setMesh: mesh has incorrect dimension"<<endl;
 		_runLogFile->close();
-		throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect space dimension");
+		throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect  dimension");
 	}
 
 	_mesh=M;
@@ -661,26 +662,37 @@ void StationaryDiffusionEquation::setMesh(const Mesh &M)
     }
     else
     {
-        if(_Ndim==1 and not M.is1DNetwork())//Mesh should be composed of segments without Gauss points
+        if(_Ndim==1 )//The 1D cdmath mesh is necessarily made of segments
+			cout<<"1D Finite element method on segments"<<endl;
+        else if(_Ndim==2)
         {
-            cout<<"Finite elements in dimension "<<_Ndim<< ", mesh should be made of segments (no gauss points)"<<endl;
-			*_runLogFile<<"StationaryDiffusionEquation::setMesh: mesh has incorrect cell types"<<endl;
-            _runLogFile->close();
-            throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect cell types");
+			if( _mesh.isTriangular() )//Mesh dim=2
+				cout<<"2D Finite element method on triangles"<<endl;
+			else if (_mesh.getMeshDimension()==1)//Mesh dim=1
+				cout<<"1D Finite element method on a 2D network : space dimension is "<<_Ndim<< ", mesh dimension is "<<_mesh.getMeshDimension()<<endl;			
+			else
+			{
+				cout<<"Error Finite element with Space dimension "<<_Ndim<< ", and mesh dimension  "<<_mesh.getMeshDimension()<< ", mesh should be either triangular either 1D network"<<endl;
+				*_runLogFile<<"StationaryDiffusionEquation::setMesh: mesh has incorrect dimension"<<endl;
+				_runLogFile->close();
+				throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect cell types");
+			}
         }
-        if(_Ndim==2 and not M.isTriangular())
+        else if(_Ndim==3)
         {
-            cout<<"Finite elements in dimension "<<_Ndim<< ", mesh should be triangular"<<endl;
-			*_runLogFile<<"StationaryDiffusionEquation::setMesh: mesh has incorrect cell types"<<endl;
-            _runLogFile->close();
-            throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect cell types");
-        }
-        if(_Ndim==3 and not M.isTetrahedral())
-        {
-            cout<<"Finite elements in dimension "<<_Ndim<< ", mesh should be tetrahedral"<<endl;
-			*_runLogFile<<"StationaryDiffusionEquation::setMesh: mesh has incorrect cell types"<<endl;
-            _runLogFile->close();
-            throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect cell types");
+			if( _mesh.isTetrahedral() )//Mesh dim=3
+				cout<<"3D Finite element method on tetrahedra"<<endl;
+			else if (_mesh.getMeshDimension()==2 and _mesh.isTriangular())//Mesh dim=2
+				cout<<"2D Finite element method on a 3D surface : space dimension is "<<_Ndim<< ", mesh dimension is "<<_mesh.getMeshDimension()<<endl;			
+			else if (_mesh.getMeshDimension()==1)//Mesh dim=1
+				cout<<"1D Finite element method on a 3D network : space dimension is "<<_Ndim<< ", mesh dimension is "<<_mesh.getMeshDimension()<<endl;			
+			else
+			{
+				cout<<"Error Finite element with Space dimension "<<_Ndim<< ", and mesh dimension  "<<_mesh.getMeshDimension()<< ", mesh should be either tetrahedral, either a triangularised surface or 1D network"<<endl;
+				*_runLogFile<<"StationaryDiffusionEquation::setMesh: mesh has incorrect dimension"<<endl;
+				_runLogFile->close();
+				throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect cell types");
+			}
         }
 
 		_VV=Field ("Temperature", NODES, _mesh, 1);

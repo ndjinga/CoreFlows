@@ -125,6 +125,15 @@ void DiffusionEquation::initialize()
 {
 	_runLogFile->open((_fileName+".log").c_str(), ios::out | ios::trunc);;//for creation of a log file to save the history of the simulation
 
+	if(_Ndim != _mesh.getSpaceDimension() or _Ndim!=_mesh.getMeshDimension())//for the moment we must have space dim=mesh dim
+	{
+        cout<< "Problem : dimension defined is "<<_Ndim<< " but mesh dimension= "<<_mesh.getMeshDimension()<<", and space dimension is "<<_mesh.getSpaceDimension()<<endl;
+		*_runLogFile<< "Problem : dim = "<<_Ndim<< " but mesh dim= "<<_mesh.getMeshDimension()<<", mesh space dim= "<<_mesh.getSpaceDimension()<<endl;
+		*_runLogFile<<"DiffusionEquation::initialize: mesh has incorrect dimension"<<endl;
+		_runLogFile->close();
+		throw CdmathException("DiffusionEquation::initialize: mesh has incorrect  dimension");
+	}
+
 	if(!_initialDataSet)
 		throw CdmathException("DiffusionEquation::initialize() set initial data first");
 	else
@@ -175,35 +184,39 @@ void DiffusionEquation::initialize()
     /* Détection des noeuds frontière avec une condition limite de Dirichlet */
     if(_FECalculation)
     {
-        /*
-        vector<int> _boundaryFaceIds = _mesh.getBoundaryFaceIds();
-
-        cout <<"Total number of faces " <<_mesh.getNumberOfFaces()<<", Number of boundary faces " << _boundaryFaceIds.size()<<endl;
-        for(int i=0; i<_boundaryFaceIds.size(); i++)
-            cout<<", "<<_boundaryFaceIds[i];
-        cout<<endl;
-
-        cout <<"Total number of nodes " <<_mesh.getNumberOfNodes()<<", Number of boundary nodes " << _NboundaryNodes<<endl;
-        for(int i=0; i<_NboundaryNodes; i++)
-            cout<<", "<<_boundaryNodeIds[i];
-        cout<<endl;
-        */
-        if(_Ndim==1 and not _mesh.is1DNetwork())
+        if(_Ndim==1 )//The 1D cdmath mesh is necessarily made of segments
+			cout<<"1D Finite element method on segments"<<endl;
+        else if(_Ndim==2)
         {
-            cout<<"Dimension is "<<_Ndim<< ", mesh should be triangular"<<endl;
-            throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect cell types");
+			if( _mesh.isTriangular() )//Mesh dim=2
+				cout<<"2D Finite element method on triangles"<<endl;
+			else if (_mesh.getMeshDimension()==1)//Mesh dim=1
+				cout<<"1D Finite element method on a 2D network : space dimension is "<<_Ndim<< ", mesh dimension is "<<_mesh.getMeshDimension()<<endl;			
+			else
+			{
+				cout<<"Error Finite element with Space dimension "<<_Ndim<< ", and mesh dimension  "<<_mesh.getMeshDimension()<< ", mesh should be either triangular either 1D network"<<endl;
+				*_runLogFile<<"DiffusionEquation::initialize mesh has incorrect dimension"<<endl;
+				_runLogFile->close();
+				throw CdmathException("DiffusionEquation::initialize: mesh has incorrect cell types");
+			}
         }
-        if(_Ndim==2 and not _mesh.isTriangular())
+        else if(_Ndim==3)
         {
-            cout<<"Dimension is "<<_Ndim<< ", mesh should be triangular"<<endl;
-            throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect cell types");
+			if( _mesh.isTetrahedral() )//Mesh dim=3
+				cout<<"3D Finite element method on tetrahedra"<<endl;
+			else if (_mesh.getMeshDimension()==2 and _mesh.isTriangular())//Mesh dim=2
+				cout<<"2D Finite element method on a 3D surface : space dimension is "<<_Ndim<< ", mesh dimension is "<<_mesh.getMeshDimension()<<endl;			
+			else if (_mesh.getMeshDimension()==1)//Mesh dim=1
+				cout<<"1D Finite element method on a 3D network : space dimension is "<<_Ndim<< ", mesh dimension is "<<_mesh.getMeshDimension()<<endl;			
+			else
+			{
+				cout<<"Error Finite element with Space dimension "<<_Ndim<< ", and mesh dimension  "<<_mesh.getMeshDimension()<< ", mesh should be either tetrahedral, either a triangularised surface or 1D network"<<endl;
+				*_runLogFile<<"DiffusionEquation::initialize mesh has incorrect dimension"<<endl;
+				_runLogFile->close();
+				throw CdmathException("DiffusionEquation::initialize: mesh has incorrect cell types");
+			}
         }
-        if(_Ndim==3 and not _mesh.isTetrahedral())
-        {
-            cout<<"Dimension is "<<_Ndim<< ", mesh should be tetrahedral"<<endl;
-            throw CdmathException("StationaryDiffusionEquation::setMesh: mesh has incorrect cell types");
-        }
-
+			
         _boundaryNodeIds = _mesh.getBoundaryNodeIds();
         _NboundaryNodes=_boundaryNodeIds.size();
 
