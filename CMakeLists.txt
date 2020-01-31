@@ -26,7 +26,6 @@ endif ()												   #
 #----------------------------------------------------------------------------------------------------------#
 
 list (APPEND CMAKE_MODULE_PATH "${CoreFlows_SOURCE_DIR}/cmake_files")                                       #  
-#list (APPEND CMAKE_PREFIX_PATH "${CoreFlows_SOURCE_DIR}/cmake_files")                                       #  
 
 # CDMATH ---------------------------------------------------------------------------------------------------#
 find_package (CDMATH REQUIRED)                                                                              #
@@ -63,8 +62,8 @@ if ( NOT DEFINED ENV{PETSC_DIR} AND IS_DIRECTORY "/usr/include/petsc/" AND EXIST
 
 else ()
   find_package (PETSc 3.4 REQUIRED)
-  string(REPLACE ";" ":"  PETSC_INCLUDES_PATH PETSC_INCLUDES)
   petsc_get_version ()
+  string(REPLACE ";" ":"  PETSC_INCLUDES_PATH "${PETSC_INCLUDES}")# use colon instead of semicolon in environment file env_CoreFlows.sh
 endif ()
 
 if (${PETSC_VERSION} VERSION_GREATER 3.5)
@@ -172,6 +171,7 @@ INSTALL(TARGETS CoreFlowsMainExe DESTINATION bin/Executable)						    #
 configure_file(
     ${PROJECT_SOURCE_DIR}/env_CoreFlows.sh
     ${CMAKE_INSTALL_PREFIX}/env_CoreFlows.sh
+    @ONLY
 )
 													    
 													    
