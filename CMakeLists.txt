@@ -41,6 +41,7 @@ if ( NOT DEFINED ENV{PETSC_DIR} AND IS_DIRECTORY "/usr/include/petsc/" AND EXIST
   message ( STATUS "PETSC library found in /usr/lib64" )
   set(PETSC_DIR /usr/)
   set(PETSC_INCLUDES  /usr/include/petsc /usr/include/petsc/petsc/mpiuni)
+  set(PETSC_INCLUDES_PATH  /usr/include/petsc:/usr/include/petsc/petsc/mpiuni)
   set(PETSC_LIBRARIES /usr/lib64/libpetsc.so)
   set(PETSC_VERSION "3.7") #3.7 for fedora 25/26 , 3.9 for fedora 29
   set (CPACK_RPM_PACKAGE_REQUIRES   "${CPACK_RPM_PACKAGE_REQUIRES}, petsc-devel (>= 3.4)") # This is not fully working yet. 
@@ -56,11 +57,13 @@ if ( NOT DEFINED ENV{PETSC_DIR} AND IS_DIRECTORY "/usr/include/petsc/" AND EXIST
 #  message ( STATUS "PETSC found in /usr/local/lib/python2.7/dist-packages/petsc" )
 #  set(PETSC_DIR /usr/local/lib/python2.7/dist-packages/petsc)
 #  set(PETSC_INCLUDES  /usr/local/lib/python2.7/dist-packages/petsc/include /usr/include/openmpi)
+#  set(PETSC_INCLUDES_PATH  /usr/local/lib/python2.7/dist-packages/petsc/include:/usr/include/openmpi)
 #  set(PETSC_LIBRARIES /usr/local/lib/python2.7/dist-packages/petsc/lib/libpetsc.so)
 #  set(PETSC_VERSION "3.8") #value for Ubuntu 16.04 
 
 else ()
   find_package (PETSc 3.4 REQUIRED)
+  string(REPLACE ";" ":"  PETSC_INCLUDES_PATH PETSC_INCLUDES)
   petsc_get_version ()
 endif ()
 
@@ -169,7 +172,6 @@ INSTALL(TARGETS CoreFlowsMainExe DESTINATION bin/Executable)						    #
 configure_file(
     ${PROJECT_SOURCE_DIR}/env_CoreFlows.sh
     ${CMAKE_INSTALL_PREFIX}/env_CoreFlows.sh
-    @ONLY
 )
 													    
 													    

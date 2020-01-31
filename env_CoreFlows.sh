@@ -6,7 +6,7 @@ source $CDMATH_DIR/env_CDMATH.sh
 export CoreFlows_INSTALL=@CMAKE_INSTALL_PREFIX@
 export PETSC_DIR=@PETSC_DIR@
 export PETSC_ARCH=@PETSC_ARCH@
-export PETSC_INCLUDES=@PETSC_INCLUDES@
+export PETSC_INCLUDES=@PETSC_INCLUDES_PATH@
 export PETSC_LIBRARIES=@PETSC_LIBRARIES@
 
 #------------------------------------------------------------------------------------------------------------------- 
