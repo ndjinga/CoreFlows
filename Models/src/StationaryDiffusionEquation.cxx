@@ -271,7 +271,7 @@ void StationaryDiffusionEquation::initialize()
 
 		//Check that the matrix is symmetric
 		PetscBool isSymetric;
-		MatIsSymmetric(_mat,_precision,&isSymetric);
+		MatIsSymmetric(_A,_precision,&isSymetric);
 		if(!isSymetric)
 			{
 				cout<<"Singular matrix is not symmetric, tolerance= "<< _precision<<endl;
