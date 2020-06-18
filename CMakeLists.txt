@@ -89,17 +89,23 @@ endif ()                                                                        
                                                                                                             #
 #-----------------------------------------------------------------------------------------------------------#
 
-
 # Base directories
 set (CoreFlows_SRC ${CoreFlows_SOURCE_DIR}/Models ) 
 set (CoreFlows_EXAMPLES ${CoreFlows_SOURCE_DIR}/examples)
+
+set( CoreFlows_INCLUDES 
+  ${CDMATH_INCLUDES}											    #
+  ${MED_INCLUDES}											    #
+  ${MEDCOUPLING_INCLUDES}										    #
+  ${PETSC_INCLUDES}											    #
+  ${CoreFlows_SRC}/inc											    #    
+  )													    #
+
 add_subdirectory (${CoreFlows_SRC})
 add_subdirectory (${CoreFlows_EXAMPLES})
 if (COREFLOWS_WITH_PYTHON)                                                                                  #
    add_subdirectory (${CoreFlows_SWIG_DIR})                                                                 #
 endif ()                                                                                                    #
-
-
 
 # Documentation --------------------------------------------------------------------------------------------#
                                                                                                             #
@@ -133,14 +139,6 @@ if (COREFLOWS_WITH_GUI)											    					  														    #
 endif ()                                                                                                    #
 													    #
 # ------------- --------------------------------------------------------------------------------------------#
-
-set( CoreFlows_INCLUDES 
-  ${CDMATH_INCLUDES}											    #
-  ${MED_INCLUDES}											    #
-  ${MEDCOUPLING_INCLUDES}										    #
-  ${PETSC_INCLUDES}											    #
-  ${CoreFlows_SRC}/inc											    #    
-  )													    #
 
 #--------------------- COMPILATION MAIN --------------------------------------------------------------------#
 													    #
