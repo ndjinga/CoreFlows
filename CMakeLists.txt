@@ -134,21 +134,24 @@ endif ()                                                                        
 													    #
 # ------------- --------------------------------------------------------------------------------------------#
 
+set( CoreFlows_INCLUDES 
+  ${CDMATH_INCLUDES}											    #
+  ${MED_INCLUDES}											    #
+  ${MEDCOUPLING_INCLUDES}										    #
+  ${PETSC_INCLUDES}											    #
+  ${CoreFlows_SRC}/inc											    #    
+  )													    #
+
 #--------------------- COMPILATION MAIN --------------------------------------------------------------------#
 													    #
 INCLUDE_DIRECTORIES(						   					    #
-													    #
-  ${PETSC_INCLUDES}											    #
-  ${CDMATH_INCLUDES}											    #
-  ${CDMATH_INCLUDES}/med											    #
-  ${CDMATH_INCLUDES}/medcoupling											    #
-  ${CoreFlows_SRC}/inc											    #    
+  ${CoreFlows_INCLUDES}											    #
   )													    #
 													    #
 SET(CoreFlowsMain_SOURCES										    #
     ${CoreFlows_SRC}/src/Fluide.cxx									    #
     ${CoreFlows_SRC}/src/DiffusionEquation.cxx								    #
-    ${CoreFlows_SRC}/src/StationaryDiffusionEquation.cxx								    #
+    ${CoreFlows_SRC}/src/StationaryDiffusionEquation.cx							    #
     ${CoreFlows_SRC}/src/ProblemFluid.cxx								    #
     ${CoreFlows_SRC}/src/IsothermalTwoFluid.cxx								    #
     ${CoreFlows_SRC}/src/utilitaire_algebre.cxx								    #
