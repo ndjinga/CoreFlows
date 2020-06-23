@@ -930,3 +930,19 @@ StationaryDiffusionEquation::getEigenvectors(int nev, EPSWhich which, double tol
   SparseMatrixPetsc A = SparseMatrixPetsc(_A);
   return A.getEigenvectors( nev, which, tol);
 }
+Field 
+StationaryDiffusionEquation::getEigenvectorsField(int nev, EPSWhich which, double tol) const
+{
+  SparseMatrixPetsc A = SparseMatrixPetsc(_A);
+  MEDCoupling::DataArrayDouble * d = A.getEigenvectorsDataArrayDouble( nev, which, tol);
+  Field my_eigenfield;
+  
+  if(_FECalculation)
+    my_eigenfield = Field("Eigenvectors field", NODES, _mesh, nev);
+  else
+    my_eigenfield = Field("Eigenvectors field", CELLS, _mesh, nev);
+
+  my_eigenfield.setFieldByDataArrayDouble(d);
+  
+  return my_eigenfield;
+}

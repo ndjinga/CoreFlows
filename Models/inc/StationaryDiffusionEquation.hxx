@@ -19,6 +19,7 @@
 
 #include "ProblemCoreFlows.hxx"
 #include "Node.hxx"
+
 #include <slepceps.h>
 #include <slepcsvd.h>
 
@@ -45,11 +46,12 @@ public :
     bool solveStationaryProblem();
     Field getOutputTemperatureField();
     
-    //Linear system
+    //Linear system and spectrum
     void setLinearSolver(linearSolver kspType, preconditioner pcType);
     double getConditionNumber(bool isSingular=false, double tol=1e-6) const;
     std::vector< double > getEigenvalues (int nev, EPSWhich which=EPS_SMALLEST_MAGNITUDE, double tol=1e-6) const;
     std::vector< Vector > getEigenvectors(int nev, EPSWhich which=EPS_SMALLEST_MAGNITUDE, double tol=1e-6) const;
+    Field getEigenvectorsField(int nev, EPSWhich which=EPS_SMALLEST_MAGNITUDE, double tol=1e-6) const;
 
 	//Gestion du calcul
 	void initialize();
