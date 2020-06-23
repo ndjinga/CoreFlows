@@ -11,6 +11,8 @@
 //============================================================================
 
 #include "ProblemCoreFlows.hxx"
+#include "SparseMatrixPetsc.hxx"
+
 #include <limits.h>
 #include <unistd.h>
 
@@ -42,6 +44,7 @@ ProblemCoreFlows::ProblemCoreFlows()
 	_spaceScheme=upwind;
 	_timeScheme=Explicit;
 	_wellBalancedCorrection=false;
+    _FECalculation=false;
 	_maxPetscIts=50;
 	_MaxIterLinearSolver=0;//During several newton iterations, stores the max petssc interations
 	_maxNewtonIts=50;
@@ -577,4 +580,39 @@ ProblemCoreFlows::~ProblemCoreFlows()
 		PetscFinalize();
 	 */
 	delete _runLogFile;
+}
+
+double 
+ProblemCoreFlows::getConditionNumber(bool isSingular, double tol) const
+{
+  SparseMatrixPetsc A = SparseMatrixPetsc(_A);
+  return A.getConditionNumber( isSingular, tol);
+}
+std::vector< double > 
+ProblemCoreFlows::getEigenvalues(int nev, EPSWhich which, double tol) const
+{
+  SparseMatrixPetsc A = SparseMatrixPetsc(_A);
+  return A.getEigenvalues( nev, which, tol);
+}
+std::vector< Vector > 
+ProblemCoreFlows::getEigenvectors(int nev, EPSWhich which, double tol) const
+{
+  SparseMatrixPetsc A = SparseMatrixPetsc(_A);
+  return A.getEigenvectors( nev, which, tol);
+}
+Field 
+ProblemCoreFlows::getEigenvectorsField(int nev, EPSWhich which, double tol) const
+{
+  SparseMatrixPetsc A = SparseMatrixPetsc(_A);
+  MEDCoupling::DataArrayDouble * d = A.getEigenvectorsDataArrayDouble( nev, which, tol);
+  Field my_eigenfield;
+  
+  if(_FECalculation)
+    my_eigenfield = Field("Eigenvectors field", NODES, _mesh, nev);
+  else
+    my_eigenfield = Field("Eigenvectors field", CELLS, _mesh, nev);
+
+  my_eigenfield.setFieldByDataArrayDouble(d);
+  
+  return my_eigenfield;
 }
