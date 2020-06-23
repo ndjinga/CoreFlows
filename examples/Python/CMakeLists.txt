@@ -56,14 +56,16 @@ endif (COREFLOWS_WITH_GUI)                                                      
 #---------------------------------------------------------------------------------------------------------------#
 
 
+SET(TESTS_LIBRARY_PATH ${CMAKE_CURRENT_BINARY_DIR}/Models/src:${CDMATH_DIR}/lib:${MEDCOUPLING_LIBRARIES}:${MEDFILE_C_LIBRARIES}:${PETSC_DIR}/${PETSC_ARCH}/lib:${PV_LIB_DIR} )
+SET(TESTS_PYTHON_PATH  ${CMAKE_CURRENT_BINARY_DIR}/Models/src:${CMAKE_CURRENT_BINARY_DIR}/swig:${CDMATH_DIR}/lib:${CDMATH_DIR}/lib/cdmath:${CDMATH_DIR}/bin/cdmath:${CDMATH_DIR}/bin/cdmath/postprocessing:${MEDCOUPLING_LIBRARIES}:${MEDFILE_C_LIBRARIES}:${PETSC_DIR}/${PETSC_ARCH}/lib:${PV_PYTHON_DIR} )
 
 ############# python example tests
 
 function(CreatePythonTest pythonFile)
     add_test(${pythonFile} ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/${pythonFile})
-    SET_PROPERTY(TEST ${pythonFile} PROPERTY ENVIRONMENT LD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/lib:${CDMATH_DIR}/lib:${CDMATH_DIR}/lib/med:${CDMATH_DIR}/lib/medcoupling:${PETSC_DIR}/${PETSC_ARCH}/lib)
-    SET_PROPERTY(TEST ${pythonFile} APPEND PROPERTY ENVIRONMENT PYTHONPATH=${CMAKE_INSTALL_PREFIX}/lib:${CMAKE_INSTALL_PREFIX}/lib/CoreFlows_Python:${CMAKE_INSTALL_PREFIX}/bin/CoreFlows_Python:${CDMATH_DIR}/lib:${CDMATH_DIR}/lib/cdmath:${CDMATH_DIR}/bin/cdmath:${CDMATH_DIR}/lib/med:${CDMATH_DIR}/lib/medcoupling)
-     message("setting python example test ${pythonFile}")
+    SET_PROPERTY(TEST ${pythonFile}        PROPERTY ENVIRONMENT LD_LIBRARY_PATH=${TESTS_LIBRARY_PATH} )
+    SET_PROPERTY(TEST ${pythonFile} APPEND PROPERTY ENVIRONMENT      PYTHONPATH=${TESTS_PYTHON_PATH}  )
+     message("Setting python example test ${pythonFile}")
 endfunction(CreatePythonTest)
 
 # copy all *.py tests files before build
@@ -140,9 +142,10 @@ function(CreatePythonConvergenceTest model convergenceTest pythonSolver MESHES_A
     file(COPY convergence_${model}_${convergenceTest}.py ../${pythonSolver} ${MY_MESHES_AND_PICTURES} DESTINATION ${CMAKE_CURRENT_BINARY_DIR} FILE_PERMISSIONS OWNER_EXECUTE OWNER_READ OWNER_WRITE )
 
     add_test(convergence_${model}_${convergenceTest} ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/convergence_${model}_${convergenceTest}.py)
-    SET_PROPERTY(TEST convergence_${model}_${convergenceTest} PROPERTY ENVIRONMENT LD_LIBRARY_PATH=${CMAKE_INSTALL_PREFIX}/lib:${CDMATH_DIR}/lib:${CDMATH_DIR}/lib/med:${CDMATH_DIR}/lib/medcoupling:${PETSC_DIR}/${PETSC_ARCH}/lib:${PV_LIB_DIR})
-    SET_PROPERTY(TEST convergence_${model}_${convergenceTest} APPEND PROPERTY ENVIRONMENT PYTHONPATH=${CMAKE_CURRENT_BINARY_DIR}:${CMAKE_INSTALL_PREFIX}/lib:${CMAKE_INSTALL_PREFIX}/lib/CoreFlows_Python:${CMAKE_INSTALL_PREFIX}/bin/CoreFlows_Python:${CDMATH_DIR}/lib:${CDMATH_DIR}/lib/cdmath:${CDMATH_DIR}/bin/cdmath:${CDMATH_DIR}/lib/med:${CDMATH_DIR}/lib/medcoupling:${CDMATH_DIR}/bin/cdmath/postprocessing:${PV_PYTHON_DIR})
-     message("setting python convergence test convergence_${model}_${convergenceTest}")
+    SET_PROPERTY(TEST convergence_${model}_${convergenceTest}        PROPERTY ENVIRONMENT LD_LIBRARY_PATH=${TESTS_LIBRARY_PATH} )
+    SET_PROPERTY(TEST convergence_${model}_${convergenceTest} APPEND PROPERTY ENVIRONMENT      PYTHONPATH=${TESTS_PYTHON_PATH} )
+
+    message("Setting python convergence test convergence_${model}_${convergenceTest}")
 endfunction(CreatePythonConvergenceTest)
 
 add_subdirectory (Convergence/StationaryDiffusion)
