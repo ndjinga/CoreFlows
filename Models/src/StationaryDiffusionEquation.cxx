@@ -1,4 +1,5 @@
 #include "StationaryDiffusionEquation.hxx"
+#include "SparseMatrixPetsc.hxx"
 #include "math.h"
 #include <algorithm> 
 #include <fstream>
@@ -911,3 +912,9 @@ StationaryDiffusionEquation::setDirichletValues(map< int, double> dirichletBound
     _dirichletBoundaryValues=dirichletBoundaryValues;
 }
 
+double 
+StationaryDiffusionEquation::getConditionNumber(bool isSingular, double tol) const
+{
+  SparseMatrixPetsc A = SparseMatrixPetsc(_A);
+  return A.getConditionNumber( isSingular, tol);
+}

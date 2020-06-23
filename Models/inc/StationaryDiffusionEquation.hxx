@@ -38,6 +38,7 @@ public :
 
     void setMesh(const Mesh &M);
     void setLinearSolver(linearSolver kspType, preconditioner pcType);
+    double getConditionNumber(bool isSingular=false, double tol=1e-6) const;
     void setFileName(string fileName){
 	_fileName = fileName;
     }

@@ -18,6 +18,6 @@ SET(src_models_CXX
   )
 
 ADD_LIBRARY(CoreFlows SHARED ${src_models_CXX})
-target_link_libraries(CoreFlows ${CDMATH_LIBRARIES} ${PETSC_LIBRARIES})
+target_link_libraries(CoreFlows ${CDMATH_LIBRARIES} ${PETSC_LIBRARIES} ${SLEPC_LIBRARIES})
 
 INSTALL(TARGETS CoreFlows DESTINATION lib)
