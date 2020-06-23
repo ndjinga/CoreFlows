@@ -74,12 +74,12 @@ find_library (CDMATHMESH_LIB NAMES mesh PATHS ${CDMATH_LIBDIR})
 find_library (MEDC_LIB NAMES medC PATHS ${CDMATH_DIR}/share/med/lib)
 find_library (MEDLOADER_LIB NAMES medloader PATHS ${CDMATH_DIR}/share/medcoupling/lib/)
 find_library (MEDCOUPLING_LIB NAMES medcoupling PATHS ${CDMATH_DIR}/share/medcoupling/lib/)
-#find_library (CDMATHLINEARSOLVER_LIB NAMES linearsolver PATHS ${CDMATH_LIBDIR})
+find_library (CDMATHLINEARSOLVER_LIB NAMES linearsolver PATHS ${CDMATH_LIBDIR})
 set (CDMATH_LIBRARIES
 	${MEDC_LIB} 
 	${MEDLOADER_LIB} 
 	${MEDCOUPLING_LIB}
 	${CDMATHBASE_LIB} 
 	${CDMATHMESH_LIB} 
-#	${CDMATHLINEARSOLVER_LIB}
+	${CDMATHLINEARSOLVER_LIB}
 	)
