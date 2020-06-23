@@ -11,6 +11,6 @@ export PETSC_LIBRARIES=@PETSC_LIBRARIES@
 
 #------------------------------------------------------------------------------------------------------------------- 
 export CoreFlows=$CoreFlows_INSTALL/bin/Executable/CoreFlowsMainExe
-export LD_LIBRARY_PATH=$PETSC_DIR/$PETSC_ARCH/lib:${PETSC_DIR}/lib:/usr/lib64/:$CoreFlows_INSTALL/lib:$PETSC_LIBRARIES:${LD_LIBRARY_PATH}
-export PYTHONPATH=$CoreFlows_INSTALL/lib:$CoreFlows_INSTALL/lib/CoreFlows_Python:$CoreFlows_INSTALL/bin/CoreFlows_Python:$CoreFlows_INSTALL/lib/python2.7/site-packages/salome:${PYTHONPATH}
+export LD_LIBRARY_PATH=$CoreFlows_INSTALL/lib:$CDMATH_DIR/lib:$PETSC_DIR/$PETSC_ARCH/lib:$PETSC_DIR/lib:/usr/lib64/:${PETSC_LIBRARIES}:${MEDCOUPLING_LIBRARIES}:${MEDFILE_C_LIBRARIES}:${LD_LIBRARY_PATH}
+export PYTHONPATH=$CoreFlows_INSTALL/lib:$CoreFlows_INSTALL/lib/CoreFlows_Python:$CoreFlows_INSTALL/bin/CoreFlows_Python:$CoreFlows_INSTALL/lib/python2.7/site-packages/salome:$CDMATH_DIR/lib/cdmath:$CDMATH_DIR/bin/cdmath:$CDMATH_DIR/bin/cdmath/postprocessing:$PETSC_DIR/$PETSC_ARCH/lib:$PETSC_DIR/lib:/usr/lib64/:${PETSC_LIBRARIES}:${MEDCOUPLING_LIBRARIES}:${MEDFILE_C_LIBRARIES}:${PYTHONPATH}
 export CoreFlowsGUI=$CoreFlows_INSTALL/bin/salome/CoreFlows_Standalone.py
