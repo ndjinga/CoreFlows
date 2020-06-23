@@ -918,3 +918,15 @@ StationaryDiffusionEquation::getConditionNumber(bool isSingular, double tol) con
   SparseMatrixPetsc A = SparseMatrixPetsc(_A);
   return A.getConditionNumber( isSingular, tol);
 }
+std::vector< double > 
+StationaryDiffusionEquation::getEigenvalues(int nev, EPSWhich which, double tol) const
+{
+  SparseMatrixPetsc A = SparseMatrixPetsc(_A);
+  return A.getEigenvalues( nev, which, tol);
+}
+std::vector< Vector > 
+StationaryDiffusionEquation::getEigenvectors(int nev, EPSWhich which, double tol) const
+{
+  SparseMatrixPetsc A = SparseMatrixPetsc(_A);
+  return A.getEigenvectors( nev, which, tol);
+}
