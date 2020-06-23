@@ -44,6 +44,7 @@ if   ( NOT PETSC_DIR AND NOT DEFINED ENV{PETSC_DIR} AND IS_DIRECTORY "/usr/inclu
   message ( STATUS "PETSC includes found in /usr/include/petsc/" )
   message ( STATUS "PETSC library found in /usr/lib64" )
   set(PETSC_DIR /usr/)
+  set(PETSC_ARCH lib64)
   set(PETSC_INCLUDES  /usr/include/petsc /usr/include/petsc/petsc/mpiuni)
   set(PETSC_INCLUDES_PATH  /usr/include/petsc:/usr/include/petsc/petsc/mpiuni)
   set(PETSC_LIBRARIES /usr/lib64/libpetsc.so)
@@ -65,16 +66,18 @@ if   ( NOT PETSC_DIR AND NOT DEFINED ENV{PETSC_DIR} AND IS_DIRECTORY "/usr/inclu
 #elseif ( IS_DIRECTORY "/usr/lib/petsc/") #Case ubuntu/debian system install
 #  message ( STATUS "PETSC found in /usr/lib/petsc/" )
 #  set(PETSC_DIR /usr/lib/petsc/)
+#  set(PETSC_ARCH )
 #  find_package (PETSc 3.4 REQUIRED)
 #  petsc_get_version ()
 #  set (CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, petsc-dev   (>= 3.4)") # This is not fully working yet. 
 
 #elseif ( IS_DIRECTORY "/usr/local/lib/python2.7/dist-packages/petsc") #Case ubuntu/debian system pip install
 #  message ( STATUS "PETSC found in /usr/local/lib/python2.7/dist-packages/petsc" )
-#  set(PETSC_DIR /usr/local/lib/python2.7/dist-packages/petsc)
-#  set(PETSC_INCLUDES  /usr/local/lib/python2.7/dist-packages/petsc/include /usr/include/openmpi)
-#  set(PETSC_INCLUDES_PATH  /usr/local/lib/python2.7/dist-packages/petsc/include:/usr/include/openmpi)
-#  set(PETSC_LIBRARIES /usr/local/lib/python2.7/dist-packages/petsc/lib/libpetsc.so)
+#  set(PETSC_DIR /usr/local/lib/python2.7/dist-packages/petsc/)
+#  set(PETSC_ARCH lib)
+#  set(PETSC_INCLUDES       $PETSC_DIR/include /usr/include/openmpi)
+#  set(PETSC_INCLUDES_PATH  $PETSC_DIR/include:/usr/include/openmpi)
+#  set(PETSC_LIBRARIES      $PETSC_DIR/lib/libpetsc.so)
 #  set(PETSC_VERSION "3.8") #value for Ubuntu 16.04 
 
 else ( NOT PETSC_DIR AND NOT DEFINED ENV{PETSC_DIR} AND IS_DIRECTORY "/usr/include/petsc/" AND EXISTS "/usr/lib64/libpetsc.so")
@@ -109,6 +112,15 @@ endif( NOT PETSC_DIR AND NOT DEFINED ENV{PETSC_DIR} AND IS_DIRECTORY "/usr/inclu
 if (${PETSC_VERSION} VERSION_GREATER 3.5)
   add_definitions(-DPETSC_VERSION_GREATER_3_5)
 endif ()
+
+set(PETSC_INSTALL ${CMAKE_INSTALL_PREFIX}/share/petsc)#folder to copy petsc libraries and include files
+set(PETSC_INCLUDES_INSTALL   ${PETSC_INSTALL}/include)#for environment file env_CoreFlows.sh
+set(PETSC_LIBRARIES_INSTALL  ${PETSC_INSTALL}/lib    )#for environment file env_CoreFlows.sh 
+
+INSTALL(DIRECTORY ${PETSC_DIR}/${PETSC_ARCH}/include DESTINATION share/petsc/) 
+INSTALL(DIRECTORY ${PETSC_DIR}/include               DESTINATION share/petsc/) 
+INSTALL(DIRECTORY ${PETSC_DIR}/include/petsc/mpiuni  DESTINATION share/petsc/include) 
+INSTALL(DIRECTORY ${PETSC_DIR}/${PETSC_ARCH}/lib     DESTINATION share/petsc/) 
 
 #-----------------------------------------------------------------------------------------------------------#
 
