@@ -112,15 +112,6 @@ if (${PETSC_VERSION} VERSION_GREATER 3.5)
   add_definitions(-DPETSC_VERSION_GREATER_3_5)
 endif ()
 
-set(PETSC_INSTALL ${CMAKE_INSTALL_PREFIX}/share/petsc)#folder to copy petsc libraries and include files
-set(PETSC_INCLUDES_INSTALL   ${PETSC_INSTALL}/include)#for environment file env_CoreFlows.sh
-set(PETSC_LIBRARIES_INSTALL  ${PETSC_INSTALL}/lib    )#for environment file env_CoreFlows.sh 
-
-INSTALL(DIRECTORY ${PETSC_DIR}/${PETSC_ARCH}/include DESTINATION share/petsc/) 
-INSTALL(DIRECTORY ${PETSC_DIR}/include               DESTINATION share/petsc/) 
-INSTALL(DIRECTORY ${PETSC_DIR}/include/petsc/mpiuni  DESTINATION share/petsc/include) 
-INSTALL(DIRECTORY ${PETSC_DIR}/${PETSC_ARCH}/lib     DESTINATION share/petsc/) 
-
 #-----------------------------------------------------------------------------------------------------------#
 
 
