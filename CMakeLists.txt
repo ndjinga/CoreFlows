@@ -15,7 +15,6 @@ option (COREFLOWS_WITH_PACKAGE "Generate RPM, Debian and tarball packages." OFF)
 
 #Path to installed libraries
 set (PETSC_DIR            OFF CACHE STRING "PETSc library path" )
-set (PETSC_ARCH           OFF CACHE STRING "PETSc library build architecture" )
 set (SLEPC_DIR            OFF CACHE STRING "SLEPc library path" )
 
 enable_testing()											   #
