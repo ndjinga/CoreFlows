@@ -1,4 +1,5 @@
 #include "StationaryDiffusionEquation.hxx"
+#include "SparseMatrixPetsc.hxx"
 #include "math.h"
 #include <algorithm> 
 #include <fstream>
@@ -193,37 +194,37 @@ void StationaryDiffusionEquation::initialize()
         if(_NboundaryNodes==_Nnodes)
             cout<<"!!!!! Warning : all nodes are boundary nodes !!!!!"<<endl<<endl;
 
-            for(int i=0; i<_NboundaryNodes; i++)
+        for(int i=0; i<_NboundaryNodes; i++)
+        {
+            std::map<int,double>::iterator it=_dirichletBoundaryValues.find(_boundaryNodeIds[i]);
+            if( it != _dirichletBoundaryValues.end() )
+                _dirichletNodeIds.push_back(_boundaryNodeIds[i]);
+            else if( _mesh.getNode(_boundaryNodeIds[i]).getGroupNames().size()==0 )
             {
-                std::map<int,double>::iterator it=_dirichletBoundaryValues.find(_boundaryNodeIds[i]);
-                if( it != _dirichletBoundaryValues.end() )
-                    _dirichletNodeIds.push_back(_boundaryNodeIds[i]);
-	    		else if( _mesh.getNode(_boundaryNodeIds[i]).getGroupNames().size()==0 )
-                {
-                    cout<<"!!! No boundary value set for boundary node" << _boundaryNodeIds[i]<< endl;
-                    *_runLogFile<< "!!! No boundary value set for boundary node" << _boundaryNodeIds[i]<<endl;
-                    _runLogFile->close();
-                    throw CdmathException("Missing boundary value");
-                }
-                else if(_limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType==NoTypeSpecified)
-                {
-                    cout<<"!!! No boundary condition set for boundary node " << _boundaryNodeIds[i]<< endl;
-                    *_runLogFile<< "!!!No boundary condition set for boundary node " << _boundaryNodeIds[i]<<endl;
-                    _runLogFile->close();
-                    throw CdmathException("Missing boundary condition");
-                }
-                else if(_limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType==Dirichlet)
-                    _dirichletNodeIds.push_back(_boundaryNodeIds[i]);
-                else if(_limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType!=Neumann)
-                {
-                    cout<<"!!! Wrong boundary condition "<< _limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType<< " set for boundary node " << _boundaryNodeIds[i]<< endl;
-                    cout<<"!!! Accepted boundary conditions are Dirichlet "<< Dirichlet <<" and Neumann "<< Neumann << endl;
-                    *_runLogFile<< "Wrong boundary condition "<< _limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType<< " set for boundary node " << _boundaryNodeIds[i]<<endl;
-                    *_runLogFile<< "Accepted boundary conditions are Dirichlet "<< Dirichlet <<" and Neumann "<< Neumann <<endl;
-                    _runLogFile->close();
-                    throw CdmathException("Wrong boundary condition");
-                }
-            }	
+                cout<<"!!! No boundary value set for boundary node" << _boundaryNodeIds[i]<< endl;
+                *_runLogFile<< "!!! No boundary value set for boundary node" << _boundaryNodeIds[i]<<endl;
+                _runLogFile->close();
+                throw CdmathException("Missing boundary value");
+            }
+            else if(_limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType==NoTypeSpecified)
+            {
+                cout<<"!!! No boundary condition set for boundary node " << _boundaryNodeIds[i]<< endl;
+                *_runLogFile<< "!!!No boundary condition set for boundary node " << _boundaryNodeIds[i]<<endl;
+                _runLogFile->close();
+                throw CdmathException("Missing boundary condition");
+            }
+            else if(_limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType==Dirichlet)
+                _dirichletNodeIds.push_back(_boundaryNodeIds[i]);
+            else if(_limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType!=Neumann)
+            {
+                cout<<"!!! Wrong boundary condition "<< _limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType<< " set for boundary node " << _boundaryNodeIds[i]<< endl;
+                cout<<"!!! Accepted boundary conditions are Dirichlet "<< Dirichlet <<" and Neumann "<< Neumann << endl;
+                *_runLogFile<< "Wrong boundary condition "<< _limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType<< " set for boundary node " << _boundaryNodeIds[i]<<endl;
+                *_runLogFile<< "Accepted boundary conditions are Dirichlet "<< Dirichlet <<" and Neumann "<< Neumann <<endl;
+                _runLogFile->close();
+                throw CdmathException("Wrong boundary condition");
+            }
+        }	
         _NdirichletNodes=_dirichletNodeIds.size();
         _NunknownNodes=_Nnodes - _NdirichletNodes;
         cout<<"Number of unknown nodes " << _NunknownNodes <<", Number of boundary nodes " << _NboundaryNodes<< ", Number of Dirichlet boundary nodes " << _NdirichletNodes <<endl<<endl;
@@ -268,13 +269,22 @@ void StationaryDiffusionEquation::initialize()
         std::cout<<"## As a consequence we seek a zero sum solution, and exact (LU and CHOLESKY) and incomplete factorisations (ILU and ICC) may fail."<<std::endl<<endl;
         *_runLogFile<<"## Warning all boundary condition are Neumann. System matrix is not invertible since constant vectors are in the kernel."<<std::endl;
         *_runLogFile<<"## As a consequence we seek a zero sum solution, and exact (LU and CHOLESKY) and incomplete factorisations (ILU and ICC) may fail."<<std::endl<<endl;
+
+		//Check that the matrix is symmetric
+		PetscBool isSymetric;
+		MatIsSymmetric(_A,_precision,&isSymetric);
+		if(!isSymetric)
+			{
+				cout<<"Singular matrix is not symmetric, tolerance= "<< _precision<<endl;
+				throw CdmathException("Singular matrix should be symmetric with kernel composed of constant vectors");
+			}
 		MatNullSpace nullsp;
 		MatNullSpaceCreate(PETSC_COMM_WORLD, PETSC_TRUE, 0, PETSC_NULL, &nullsp);
 		MatSetNullSpace(_A, nullsp);
 		MatSetTransposeNullSpace(_A, nullsp);
 		MatNullSpaceDestroy(&nullsp);
-		PCFactorSetShiftType(_pc,MAT_SHIFT_NONZERO);
-		PCFactorSetShiftAmount(_pc,1e-10);
+		//PCFactorSetShiftType(_pc,MAT_SHIFT_NONZERO);
+		//PCFactorSetShiftAmount(_pc,1e-10);
     }
 
 	_initializedMemory=true;
@@ -902,3 +912,37 @@ StationaryDiffusionEquation::setDirichletValues(map< int, double> dirichletBound
     _dirichletBoundaryValues=dirichletBoundaryValues;
 }
 
+double 
+StationaryDiffusionEquation::getConditionNumber(bool isSingular, double tol) const
+{
+  SparseMatrixPetsc A = SparseMatrixPetsc(_A);
+  return A.getConditionNumber( isSingular, tol);
+}
+std::vector< double > 
+StationaryDiffusionEquation::getEigenvalues(int nev, EPSWhich which, double tol) const
+{
+  SparseMatrixPetsc A = SparseMatrixPetsc(_A);
+  return A.getEigenvalues( nev, which, tol);
+}
+std::vector< Vector > 
+StationaryDiffusionEquation::getEigenvectors(int nev, EPSWhich which, double tol) const
+{
+  SparseMatrixPetsc A = SparseMatrixPetsc(_A);
+  return A.getEigenvectors( nev, which, tol);
+}
+Field 
+StationaryDiffusionEquation::getEigenvectorsField(int nev, EPSWhich which, double tol) const
+{
+  SparseMatrixPetsc A = SparseMatrixPetsc(_A);
+  MEDCoupling::DataArrayDouble * d = A.getEigenvectorsDataArrayDouble( nev, which, tol);
+  Field my_eigenfield;
+  
+  if(_FECalculation)
+    my_eigenfield = Field("Eigenvectors field", NODES, _mesh, nev);
+  else
+    my_eigenfield = Field("Eigenvectors field", CELLS, _mesh, nev);
+
+  my_eigenfield.setFieldByDataArrayDouble(d);
+  
+  return my_eigenfield;
+}

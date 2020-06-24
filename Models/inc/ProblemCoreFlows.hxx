@@ -23,6 +23,8 @@
 #include <map>
 
 #include <petsc.h>
+#include <slepceps.h>
+#include <slepcsvd.h>
 
 #include "Field.hxx"
 #include "Mesh.hxx"
@@ -657,6 +659,12 @@ public :
 		_system = system;
 	};
 
+    //Spectrum analysis
+    double getConditionNumber(bool isSingular=false, double tol=1e-6) const;
+    std::vector< double > getEigenvalues (int nev, EPSWhich which=EPS_SMALLEST_MAGNITUDE, double tol=1e-6) const;
+    std::vector< Vector > getEigenvectors(int nev, EPSWhich which=EPS_SMALLEST_MAGNITUDE, double tol=1e-6) const;
+    Field getEigenvectorsField(int nev, EPSWhich which=EPS_SMALLEST_MAGNITUDE, double tol=1e-6) const;
+
 	//  some supplementary functions
 
 	/** \fn displayMatrix
@@ -697,6 +705,7 @@ protected :
 	double _cfl;
 	double _maxvp;//valeur propre max pour calcul cfl
 	double _minl;//minimum cell diameter
+    bool _FECalculation;
 	map<string, LimitField> _limitField;
 	TimeScheme _timeScheme;
 	SpaceScheme _spaceScheme;

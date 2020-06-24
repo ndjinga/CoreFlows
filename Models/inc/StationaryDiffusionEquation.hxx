@@ -20,6 +20,9 @@
 #include "ProblemCoreFlows.hxx"
 #include "Node.hxx"
 
+#include <slepceps.h>
+#include <slepcsvd.h>
+
 using namespace std;
 
 class StationaryDiffusionEquation
@@ -37,13 +40,19 @@ public :
 	StationaryDiffusionEquation( int dim,bool FECalculation=true,double lambda=1);
 
     void setMesh(const Mesh &M);
-    void setLinearSolver(linearSolver kspType, preconditioner pcType);
     void setFileName(string fileName){
 	_fileName = fileName;
     }
     bool solveStationaryProblem();
     Field getOutputTemperatureField();
     
+    //Linear system and spectrum
+    void setLinearSolver(linearSolver kspType, preconditioner pcType);
+    double getConditionNumber(bool isSingular=false, double tol=1e-6) const;
+    std::vector< double > getEigenvalues (int nev, EPSWhich which=EPS_SMALLEST_MAGNITUDE, double tol=1e-6) const;
+    std::vector< Vector > getEigenvectors(int nev, EPSWhich which=EPS_SMALLEST_MAGNITUDE, double tol=1e-6) const;
+    Field getEigenvectorsField(int nev, EPSWhich which=EPS_SMALLEST_MAGNITUDE, double tol=1e-6) const;
+
 	//Gestion du calcul
 	void initialize();
 	void terminate();//vide la mémoire et enregistre le résultat final
