@@ -65,7 +65,6 @@ function(CreatePythonTest pythonFile)
     add_test(${pythonFile} ${PYTHON_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/${pythonFile})
     SET_PROPERTY(TEST ${pythonFile}        PROPERTY ENVIRONMENT LD_LIBRARY_PATH=${TESTS_LIBRARY_PATH} )
     SET_PROPERTY(TEST ${pythonFile} APPEND PROPERTY ENVIRONMENT      PYTHONPATH=${TESTS_PYTHON_PATH}  )
-    message("Setting python example test ${pythonFile}")
 endfunction(CreatePythonTest)
 
 # copy all *.py tests files before build
@@ -154,7 +153,6 @@ function(CreatePythonConvergenceTest model convergenceTest pythonSolver MESHES_A
     SET_PROPERTY(TEST convergence_${model}_${convergenceTest}        PROPERTY ENVIRONMENT LD_LIBRARY_PATH=${TESTS_LIBRARY_PATH} )
     SET_PROPERTY(TEST convergence_${model}_${convergenceTest} APPEND PROPERTY ENVIRONMENT      PYTHONPATH=${TESTS_PYTHON_PATH} )
 
-    message("Setting python convergence test convergence_${model}_${convergenceTest}")
 endfunction(CreatePythonConvergenceTest)
 
 add_subdirectory (Convergence/StationaryDiffusion)

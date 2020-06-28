@@ -20,7 +20,6 @@ endif()
 
 # this function creates a target and a ctest test
 function(CreateTestExec SourceTestFile libList)
-     message("Setting cpp test ${EXECNAME}")
      get_filename_component( FILE_BASENAME ${SourceTestFile} NAME_WE) # <path>/testxxx.c --> testxxx
      set( EXECNAME "${FILE_BASENAME}.exe" )                     # testxxx          --> testxxx.exe
      add_executable(${EXECNAME} ${SourceTestFile})                    # compilation of the testxxx.exe 
@@ -33,7 +32,6 @@ endfunction(CreateTestExec)
 # and also create install rules for copying the example
 # in the install dir
 function(CreateTestExecAndInstall SourceTestFile libList)
-     message("Setting cpp test ${EXECNAME}")
      get_filename_component( FILE_BASENAME ${SourceTestFile} NAME_WE) # <path>/testxxx.c --> testxxx
      set( EXECNAME "${FILE_BASENAME}.exe" )                     # testxxx          --> testxxx.exe
      add_executable(${EXECNAME} ${SourceTestFile})                    # compilation of the testxxx.exe 
