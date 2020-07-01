@@ -40,7 +40,7 @@ def SinglePhase_2DPoiseuilleFlow():
 		y=Ci.y()
 		initial_field[i,0] =  outletPressure + a*(y - ysup )
 		initial_field[i,1] =  0  #x component of the velocity
-		initial_field[i,2] =  a/(2/viscosity)*( (x-(xsup+xinf)/2)*(x-(xsup+xinf)/2) - (xsup-xinf)*(xsup-xinf)/4)  #y component of the velocity
+		initial_field[i,2] =  a/(2*viscosity)*( (x-(xsup+xinf)/2)*(x-(xsup+xinf)/2) - (xsup-xinf)*(xsup-xinf)/4)  #y component of the velocity
 		initial_field[i,3] =  initialTemperature  
         
         
