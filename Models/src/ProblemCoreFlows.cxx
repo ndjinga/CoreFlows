@@ -451,12 +451,15 @@ bool ProblemCoreFlows::run()
 
 			if (!ok)   // The resolution failed, try with a new time interval.
 			{
-				abortTimeStep();
 				if(_dt>_precision){
-					cout << "Failed solving time step "<<_nbTimeStep<<", time = " << _time <<" _dt= "<<_dt<<", cfl= "<<_cfl<<", trying again with cfl/2"<< endl;
-					*_runLogFile << "Failed solving time step "<<_nbTimeStep<<", time = " << _time <<" _dt= "<<_dt<<", cfl= "<<_cfl<<", trying again with cfl/2"<< endl;
-					_dt*=0.5;
-					_cfl*=0.5;
+					cout<<"ComputeTimeStep returned _dt="<<_dt<<endl;
+					cout << "Failed solving time step "<<_nbTimeStep<<", time = " << _time <<" _dt= "<<_dt<<", cfl= "<<_cfl<<", trying again with dt/2"<< endl;
+					*_runLogFile << "Failed solving time step "<<_nbTimeStep<<", time = " << _time <<" _dt= "<<_dt<<", cfl= "<<_cfl<<", trying again with dt/2"<< endl;
+					double dt=_dt/2;//We chose to divide the time step by 2
+					abortTimeStep();//Cancel the initTimeStep
+					_dt=dt;//new value of time step is previous time step divided by 2 (we do not call computeTimeStep
+					//_cfl*=0.5;//If we change the cfl, we must compute the new time step with computeTimeStep
+					//_dt=computeTimeStep(stop);
 				}
 				else{
 					cout << "Failed solving time step "<<_nbTimeStep<<", _time = " << _time<<" _dt= "<<_dt<<", cfl= "<<_cfl <<", stopping calculation"<< endl;
