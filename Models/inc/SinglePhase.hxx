@@ -134,6 +134,15 @@ public :
 
 	double getReferencePressure()    { return _Pref; };
 	double getReferenceTemperature() { return _Tref; };
+	
+	//get output fields for postprocessing or coupling
+	Field getPressureField();
+	Field getVelocityField();
+	Field getTemperatureField();
+	Field getDensityField();
+	Field getMomentumField();
+	Field getTotalEnergyField();
+	Field getEnthalpyField();
 
 protected :
 	Field _Vitesse;
