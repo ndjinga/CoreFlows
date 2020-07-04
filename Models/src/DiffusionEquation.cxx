@@ -742,7 +742,9 @@ void DiffusionEquation::save(){
 	_VV.setTime(_time,_nbTimeStep);
 
 	// create mesh and component info
-	if (_nbTimeStep ==0){
+	if (_nbTimeStep ==0 || _restartWithNewFileName){
+		if (_restartWithNewFileName)
+			_restartWithNewFileName=false;
 		string suppress ="rm -rf "+resultFile+"_*";
 		system(suppress.c_str());//Nettoyage des précédents calculs identiques
         

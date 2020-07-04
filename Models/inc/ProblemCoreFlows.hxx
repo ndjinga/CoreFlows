@@ -732,6 +732,7 @@ protected :
 	bool _initialDataSet;
 	bool _initializedMemory;
 	bool _restartWithNewTimeScheme;
+	bool _restartWithNewFileName;
 	double _timeMax,_time;
 	int _maxNbOfTimeStep,_nbTimeStep;
 	double _precision;

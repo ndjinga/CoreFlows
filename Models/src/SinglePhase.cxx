@@ -2732,7 +2732,7 @@ void SinglePhase::save(){
 	_VV.setTime(_time,_nbTimeStep);
 
 	// create mesh and component info
-	if (_nbTimeStep ==0){
+	if (_nbTimeStep ==0 || _restartWithNewFileName){		
 		string prim_suppress ="rm -rf "+prim+"_*";
 		string cons_suppress ="rm -rf "+cons+"_*";
 
@@ -2782,6 +2782,7 @@ void SinglePhase::save(){
 			_VV.writeCSV(prim);
 			break;
 		}
+	cout<<"coucou3!!!!!!!!!!!!!!!!!!"<<endl;
 	}
 	// do not create mesh
 	else{
@@ -2824,7 +2825,7 @@ void SinglePhase::save(){
 				_Vitesse(i,j)=0;
 		}
 		_Vitesse.setTime(_time,_nbTimeStep);
-		if (_nbTimeStep ==0){
+		if (_nbTimeStep ==0 || _restartWithNewFileName){		
 			_Vitesse.setInfoOnComponent(0,"Velocity_x_(m/s)");
 			_Vitesse.setInfoOnComponent(1,"Velocity_y_(m/s)");
 			_Vitesse.setInfoOnComponent(2,"Velocity_z_(m/s)");
@@ -2905,4 +2906,7 @@ void SinglePhase::save(){
 			}
 		}
 	}
+
+	if (_restartWithNewFileName)
+		_restartWithNewFileName=false;
 }

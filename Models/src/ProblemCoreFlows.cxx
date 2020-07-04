@@ -42,6 +42,7 @@ ProblemCoreFlows::ProblemCoreFlows()
 	_initialDataSet=false;
 	_initializedMemory=false;
 	_restartWithNewTimeScheme=false;
+	_restartWithNewFileName=false;
 	_spaceScheme=upwind;
 	_timeScheme=Explicit;
 	_wellBalancedCorrection=false;
@@ -528,6 +529,8 @@ void ProblemCoreFlows::displayVector(double *vector, int size, string name)
 	cout << endl;
 }
 void ProblemCoreFlows::setFileName(string fileName){
+	if( _nbTimeStep>0 && fileName!=_fileName)//This is a change of file name during a simulation
+		_restartWithNewFileName=true;
 	_fileName = fileName;
 }
 
