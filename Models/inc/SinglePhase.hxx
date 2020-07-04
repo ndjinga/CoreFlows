@@ -27,6 +27,15 @@ public :
 	 * \param [in] bool : There are two possible equations of state for the fluid
 	 *  */
 	SinglePhase(phaseType fluid, pressureEstimate pEstimate,int dim,bool useDellacherieEOS=false);
+
+	/** \fn setViscosity
+	 * \brief sets the viscosity
+	 * @param viscosite : value of the dynamic viscosity
+	 * 	 * */
+	void setViscosityConstant( double viscosite ){
+		_fluides[0]->setViscosity(viscosite);
+	};
+
 	//! system initialisation
 	void initialize();
 
