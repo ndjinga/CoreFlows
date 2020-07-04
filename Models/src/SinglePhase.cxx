@@ -3005,7 +3005,7 @@ Field SinglePhase::getTotalEnergyField()
 
 Field SinglePhase::getEnthalpyField()
 {
-	Field EnthalpyField=Field("Temperature",CELLS,_mesh,1);
+	Field EnthalpyField=Field("Enthalpy",CELLS,_mesh,1);
 	int Ii;
 	double p,T,rho;
 	for (long i = 0; i < _Nmailles; i++){
