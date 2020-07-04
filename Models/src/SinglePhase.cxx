@@ -71,7 +71,7 @@ void SinglePhase::initialize(){
 bool SinglePhase::iterateTimeStep(bool &converged)
 {
 	if(_timeScheme == Explicit || !_usePrimitiveVarsInNewton)
-		ProblemFluid::iterateTimeStep(converged);
+		return ProblemFluid::iterateTimeStep(converged);
 	else
 	{
 		bool stop=false;
