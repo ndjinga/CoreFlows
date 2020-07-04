@@ -41,6 +41,7 @@ ProblemCoreFlows::ProblemCoreFlows()
 	_freqSave = 1;
 	_initialDataSet=false;
 	_initializedMemory=false;
+	_restartWithNewTimeScheme=false;
 	_spaceScheme=upwind;
 	_timeScheme=Explicit;
 	_wellBalancedCorrection=false;
@@ -97,6 +98,8 @@ void ProblemCoreFlows::setPrecision(double precision)
 	_precision=precision;
 }
 void ProblemCoreFlows::setNumericalScheme(SpaceScheme spaceScheme, TimeScheme timeScheme){
+	if( _nbTimeStep>0 && timeScheme!=_timeScheme)//This is a change of time scheme during a simulation
+		_restartWithNewTimeScheme=true;
 	_timeScheme = timeScheme;
 	_spaceScheme = spaceScheme;
 }
@@ -407,7 +410,7 @@ void ProblemCoreFlows::setLinearSolver(linearSolver kspType, preconditioner pcTy
 // Elle peut etre utilisee si le probleme n'est couple a aucun autre.
 // (s'il n'a besoin d'aucun champ d'entree).
 // Precondition: initialize
-// Seule la methode terminate peut etre appelee apres
+// Seule la methode terminate peut etre appelée apres
 bool ProblemCoreFlows::run()
 {
 	if(!_initializedMemory)

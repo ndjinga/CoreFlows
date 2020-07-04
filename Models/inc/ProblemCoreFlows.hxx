@@ -731,6 +731,7 @@ protected :
 	bool _isStationary;
 	bool _initialDataSet;
 	bool _initializedMemory;
+	bool _restartWithNewTimeScheme;
 	double _timeMax,_time;
 	int _maxNbOfTimeStep,_nbTimeStep;
 	double _precision;
