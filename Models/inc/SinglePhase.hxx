@@ -136,13 +136,15 @@ public :
 	double getReferenceTemperature() { return _Tref; };
 	
 	//get output fields for postprocessing or coupling
-	Field getPressureField();
-	Field getVelocityField();
-	Field getTemperatureField();
-	Field getDensityField();
-	Field getMomentumField();
-	Field getTotalEnergyField();
-	Field getEnthalpyField();
+	vector<string> getOutputFieldsNames() ;//liste tous les champs que peut fournir le code pour le postraitement
+	Field&         getOutputField(const string& nameField );//Renvoie un champs pour le postraitement
+	Field& getPressureField();
+	Field& getVelocityField();
+	Field& getTemperatureField();
+	Field& getDensityField();
+	Field& getMomentumField();
+	Field& getTotalEnergyField();
+	Field& getEnthalpyField();
 
 protected :
 	Field _Vitesse;

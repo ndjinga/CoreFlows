@@ -2911,7 +2911,7 @@ void SinglePhase::save(){
 		_restartWithNewFileName=false;
 }
 
-Field SinglePhase::getPressureField()
+Field& SinglePhase::getPressureField()
 {
 	Field PressureField=Field("Pressure",CELLS,_mesh,1);
 	int Ii;
@@ -2924,7 +2924,7 @@ Field SinglePhase::getPressureField()
 	return PressureField;
 }
 
-Field SinglePhase::getTemperatureField()
+Field& SinglePhase::getTemperatureField()
 {
 	Field TemperatureField=Field("Temperature",CELLS,_mesh,1);
 	int Ii;
@@ -2937,7 +2937,7 @@ Field SinglePhase::getTemperatureField()
 	return TemperatureField;
 }
 
-Field SinglePhase::getVelocityField()
+Field& SinglePhase::getVelocityField()
 {
 	Field VelocityField=Field("Velocity",CELLS,_mesh,3);
 	int Ii;
@@ -2959,7 +2959,7 @@ Field SinglePhase::getVelocityField()
 	return VelocityField;
 }
 
-Field SinglePhase::getDensityField()
+Field& SinglePhase::getDensityField()
 {
 	Field DensityField=Field("Density",CELLS,_mesh,1);
 	int Ii;
@@ -2972,7 +2972,7 @@ Field SinglePhase::getDensityField()
 	return DensityField;
 }
 
-Field SinglePhase::getMomentumField()
+Field& SinglePhase::getMomentumField()
 {
 	Field MomentumField=Field("Momentum",CELLS,_mesh,_Ndim);
 	int Ii;
@@ -2990,7 +2990,7 @@ Field SinglePhase::getMomentumField()
 	return MomentumField;
 }
 
-Field SinglePhase::getTotalEnergyField()
+Field& SinglePhase::getTotalEnergyField()
 {
 	Field TotalEnergyField=Field("TotalEnergy",CELLS,_mesh,1);
 	int Ii;
@@ -3003,7 +3003,7 @@ Field SinglePhase::getTotalEnergyField()
 	return TotalEnergyField;
 }
 
-Field SinglePhase::getEnthalpyField()
+Field& SinglePhase::getEnthalpyField()
 {
 	Field EnthalpyField=Field("Enthalpy",CELLS,_mesh,1);
 	int Ii;
@@ -3022,3 +3022,35 @@ Field SinglePhase::getEnthalpyField()
 	return EnthalpyField;
 }
 
+vector<string> SinglePhase::getOutputFieldsNames()
+{
+	vector<string> result(7);
+	
+	result[0]="Pressure";
+	result[1]="Velocity";
+	result[2]="Temperature";
+	result[3]="Density";
+	result[4]="Momentum";
+	result[5]="TotalEnergy";
+	result[5]="Enthalpy";
+	
+	return result;
+}
+
+Field& SinglePhase::getOutputField(const string& nameField )
+{
+	if(nameField=="Pressure" || nameField=="PRESSURE" || nameField=="PRESSION" || nameField=="Pression" )
+		return getPressureField();
+	else if(nameField=="Velocity" || nameField=="VELOCITY" || nameField=="Vitesse" || nameField=="VITESSE" )
+		return getVelocityField();
+	else if(nameField=="Temperature" || nameField=="TEMPERATURE" )
+		return getTemperatureField();
+	else if(nameField=="Density" || nameField=="DENSITY" || nameField=="Densite" || nameField=="DENSITE" )
+		return getDensityField();
+	else if(nameField=="Momentum" || nameField=="MOMENTUM" || nameField=="Qdm" || nameField=="QDM" )
+		return getMomentumField();
+	else if(nameField=="Enthalpy" || nameField=="ENTHALPY" || nameField=="Enthalpie" || nameField=="ENTHALPIE" )
+		return getEnthalpyField();
+	else if(nameField=="TotalEnergy" || nameField=="TOTALENERGY" || nameField=="ENERGIETOTALE" || nameField=="EnergieTotale" )
+		return getTotalEnergyField();
+}
