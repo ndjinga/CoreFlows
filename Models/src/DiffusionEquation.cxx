@@ -805,3 +805,26 @@ void DiffusionEquation::terminate(){
 	MatDestroy(&_A);
 }
 
+vector<string> DiffusionEquation::getOutputFieldsNames()
+{
+	vector<string> result(2);
+	
+	result[0]="FluidTemperature";
+	result[1]="RodTemperature";
+	
+	return result;
+}
+
+Field& DiffusionEquation::getOutputField(const string& nameField )
+{
+	if(nameField=="FluidTemperature" || nameField=="FLUIDTEMPERATURE" || nameField=="TemperatureFluide" || nameField=="TEMPERATUREFLUIDE" )
+		return getFluidTemperatureField();
+	else if(nameField=="RodTemperature" || nameField=="RODTEMPERATURE" || nameField=="TEMPERATURECOMBUSTIBLE" || nameField=="TemperatureCombustible" )
+		return getRodTemperatureField();
+    else
+    {
+        cout<<"Error : Field name "<< nameField << " does not exist, call getOutputFieldsNames first" << endl;
+        throw CdmathException("DiffusionEquation::getOutputField error : Unknown Field name");
+    }
+}
+

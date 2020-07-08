@@ -53,10 +53,6 @@ public :
 	};
 
 	/*Physical parameters*/
-	Field& getFluidTemperatureField(){
-		return _TT;
-	}
-
 	void setLiqSatEnthalpy(double hsatl){
 		_hsatl=hsatl;
 	};
@@ -72,6 +68,19 @@ public :
 	void setTransportVelocity(Vector v){
 		_vitesseTransport=v;
 	};
+
+	//get output fields for postprocessing or coupling
+	vector<string> getOutputFieldsNames() ;//liste tous les champs que peut fournir le code pour le postraitement
+	Field&         getOutputField(const string& nameField );//Renvoie un champs pour le postraitement
+
+	Field& getTemperatureField(){
+		return _TT;
+	}
+
+	Field& getEnthalpyField(){
+		return _VV;
+	}
+
 protected :
 	double computeTransportMatrix();
 	double computeRHS();

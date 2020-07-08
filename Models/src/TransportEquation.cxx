@@ -507,3 +507,27 @@ void TransportEquation::save(){
 		}
 	}
 }
+
+vector<string> TransportEquation::getOutputFieldsNames()
+{
+	vector<string> result(2);
+	
+	result[0]="Enthalpy";
+	result[1]="Temperature";
+	
+	return result;
+}
+
+Field& TransportEquation::getOutputField(const string& nameField )
+{
+	if(nameField=="Temperature" || nameField=="TEMPERATURE" )
+		return getTemperatureField();
+	else if(nameField=="Enthalpy" || nameField=="ENTHALPY" || nameField=="Enthalpie" || nameField=="ENTHALPY" )
+		return getEnthalpyField();
+    else
+    {
+        cout<<"Error : Field name "<< nameField << " does not exist, call getOutputFieldsNames first" << endl;
+        throw CdmathException("TransportEquation::getOutputField error : Unknown Field name");
+    }
+}
+

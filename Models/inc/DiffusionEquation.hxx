@@ -79,18 +79,26 @@ public :
 		_fluidTemperatureField=coupledTemperatureField;
 		_fluidTemperatureFieldSet=true;
 	};
+
+	void setDiffusiontensor(Matrix DiffusionTensor){
+		_DiffusionTensor=DiffusionTensor;
+	};
+
 	void setFluidTemperature(double fluidTemperature){
 	_fluidTemperature=fluidTemperature;
 	}
+
+	//get output fields for postprocessing or coupling
+	vector<string> getOutputFieldsNames() ;//liste tous les champs que peut fournir le code pour le postraitement
+	Field&         getOutputField(const string& nameField );//Renvoie un champs pour le postraitement
+
 	Field& getRodTemperatureField(){
 		return _VV;
 	}
 	Field& getFluidTemperatureField(){
 		return _fluidTemperatureField;
 	}
-	void setDiffusiontensor(Matrix DiffusionTensor){
-		_DiffusionTensor=DiffusionTensor;
-	};
+
 protected :
 	double computeDiffusionMatrix(bool & stop);
 	double computeDiffusionMatrixFV(bool & stop);
