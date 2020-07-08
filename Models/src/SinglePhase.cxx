@@ -3053,4 +3053,9 @@ Field& SinglePhase::getOutputField(const string& nameField )
 		return getEnthalpyField();
 	else if(nameField=="TotalEnergy" || nameField=="TOTALENERGY" || nameField=="ENERGIETOTALE" || nameField=="EnergieTotale" )
 		return getTotalEnergyField();
+    else
+    {
+        cout<<"Error : Field name "<< nameField << " does not exist, call getOutputFieldsNames first" << endl;
+        throw CdmathException("SinglePhase::getOutputField error : Unknown Field name");
+    }
 }
