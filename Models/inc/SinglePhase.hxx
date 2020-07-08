@@ -208,5 +208,8 @@ protected :
 	*/
 	void getDensityDerivatives( double pressure, double temperature, double v2);
 
-};
+	bool _saveAllFields;
+	Field _Enthalpy, _Pressure, _Density, _Temperature, _VitesseX, _VitesseY, _VitesseZ;
+
+	};
 #endif /* SINGLEPHASE_HXX_*/

@@ -16,6 +16,7 @@ SinglePhase::SinglePhase(phaseType fluid, pressureEstimate pEstimate, int dim, b
 	_dragCoeffs=vector<double>(1,0);
 	_fluides.resize(1);
 	_useDellacherieEOS=useDellacherieEOS;
+	_saveAllFields=false;
 
 	if(pEstimate==around1bar300K){//EOS at 1 bar and 300K
 		_Tref=300;
@@ -61,6 +62,21 @@ void SinglePhase::initialize(){
 	_GravityImplicitationMatrix = new PetscScalar[_nVar*_nVar];
 	if(_saveVelocity)
 		_Vitesse=Field("Velocity",CELLS,_mesh,3);//Forcement en dimension 3 pour le posttraitement des lignes de courant
+
+	if(_saveAllFields)
+	{
+		_Enthalpy=Field("Enthalpy",CELLS,_mesh,1);
+		_Pressure=Field("Pressure",CELLS,_mesh,1);
+		_Density=Field("Density",CELLS,_mesh,1);
+		_Temperature=Field("Temperature",CELLS,_mesh,1);
+		_VitesseX=Field("Velocity x",CELLS,_mesh,1);
+		if(_Ndim>1)
+		{
+			_VitesseY=Field("Velocity y",CELLS,_mesh,1);
+			if(_Ndim>2)
+				_VitesseZ=Field("Velocity z",CELLS,_mesh,1);
+		}
+	}
 
 	if(_entropicCorrection)
 		_entropicShift=vector<double>(3,0);//at most 3 distinct eigenvalues
@@ -2708,8 +2724,10 @@ void SinglePhase::getDensityDerivatives( double pressure, double temperature, do
 void SinglePhase::save(){
 	string prim(_path+"/SinglePhasePrim_");///Results
 	string cons(_path+"/SinglePhaseCons_");
+	string allFields(_path+"/");
 	prim+=_fileName;
 	cons+=_fileName;
+	allFields+=_fileName;
 
 	PetscInt Ii;
 	for (long i = 0; i < _Nmailles; i++){
@@ -2858,6 +2876,145 @@ void SinglePhase::save(){
 			}
 		}
 	}
+
+	if(_saveAllFields)
+	{
+		double p,T,rho, h, vx,vy,vz;
+		int Ii;
+		for (long i = 0; i < _Nmailles; i++){
+			Ii = i*_nVar;
+			VecGetValues(_conservativeVars,1,&Ii,&rho);
+			Ii = i*_nVar;
+			VecGetValues(_primitiveVars,1,&Ii,&p);
+			Ii = i*_nVar +_nVar-1;
+			VecGetValues(_primitiveVars,1,&Ii,&T);
+			Ii = i*_nVar + 1;
+			VecGetValues(_primitiveVars,1,&Ii,&vx);
+			if(_Ndim>1)
+			{
+				Ii = i*_nVar + 2;
+				VecGetValues(_primitiveVars,1,&Ii,&vy);
+				if(_Ndim>2){
+					Ii = i*_nVar + 3;
+					VecGetValues(_primitiveVars,1,&Ii,&vz);
+				}
+			}
+
+			h   = _fluides[0]->getEnthalpy(T,rho);
+
+			_Enthalpy(i)=h;
+			_Density(i)=rho;
+			_Pressure(i)=p;
+			_Temperature(i)=T;
+			_VitesseX(i)=vx;
+			if(_Ndim>1)
+			{
+				_VitesseY(i)=vy;
+				if(_Ndim>2)
+					_VitesseZ(i)=vz;
+			}
+		}
+		_Enthalpy.setTime(_time,_nbTimeStep);
+		_Density.setTime(_time,_nbTimeStep);
+		_Pressure.setTime(_time,_nbTimeStep);
+		_Temperature.setTime(_time,_nbTimeStep);
+		_VitesseX.setTime(_time,_nbTimeStep);
+		if(_Ndim>1)
+		{
+			_VitesseY.setTime(_time,_nbTimeStep);
+			if(_Ndim>2)
+				_VitesseZ.setTime(_time,_nbTimeStep);
+		}
+		if (_nbTimeStep ==0 || _restartWithNewFileName){		
+			switch(_saveFormat)
+			{
+			case VTK :
+				_Enthalpy.writeVTK(allFields+"_Enthalpy");
+				_Density.writeVTK(allFields+"_Density");
+				_Pressure.writeVTK(allFields+"_Pressure");
+				_Temperature.writeVTK(allFields+"_Temperature");
+				_VitesseX.writeVTK(allFields+"_VelocityX");
+				if(_Ndim>1)
+				{
+					_VitesseY.writeVTK(allFields+"_VelocityY");
+					if(_Ndim>2)
+						_VitesseZ.writeVTK(allFields+"_VelocityZ");
+				}
+				break;
+			case MED :
+				_Enthalpy.writeMED(allFields+"_Enthalpy");
+				_Density.writeMED(allFields+"_Density");
+				_Pressure.writeMED(allFields+"_Pressure");
+				_Temperature.writeMED(allFields+"_Temperature");
+				_VitesseX.writeMED(allFields+"_VelocityX");
+				if(_Ndim>1)
+				{
+					_VitesseY.writeMED(allFields+"_VelocityY");
+					if(_Ndim>2)
+						_VitesseZ.writeMED(allFields+"_VelocityZ");
+				}
+				break;
+			case CSV :
+				_Enthalpy.writeCSV(allFields+"_Enthalpy");
+				_Density.writeCSV(allFields+"_Density");
+				_Pressure.writeCSV(allFields+"_Pressure");
+				_Temperature.writeCSV(allFields+"_Temperature");
+				_VitesseX.writeCSV(allFields+"_VelocityX");
+				if(_Ndim>1)
+				{
+					_VitesseY.writeCSV(allFields+"_VelocityY");
+					if(_Ndim>2)
+						_VitesseZ.writeCSV(allFields+"_VelocityZ");
+				}
+				break;
+			}
+		}
+		else{
+			switch(_saveFormat)
+			{
+			case VTK :
+				_Enthalpy.writeVTK(allFields+"_Enthalpy",false);
+				_Density.writeVTK(allFields+"_Density",false);
+				_Pressure.writeVTK(allFields+"_Pressure",false);
+				_Temperature.writeVTK(allFields+"_Temperature",false);
+				_VitesseX.writeVTK(allFields+"_VelocityX",false);
+				if(_Ndim>1)
+				{
+					_VitesseY.writeVTK(allFields+"_VelocityY",false);
+					if(_Ndim>2)
+						_VitesseZ.writeVTK(allFields+"_VelocityZ",false);
+				}
+				break;
+			case MED :
+				_Enthalpy.writeMED(allFields+"_Enthalpy",false);
+				_Density.writeMED(allFields+"_Density",false);
+				_Pressure.writeMED(allFields+"_Pressure",false);
+				_Temperature.writeMED(allFields+"_Temperature",false);
+				_VitesseX.writeMED(allFields+"_VelocityX",false);
+				if(_Ndim>1)
+				{
+					_VitesseY.writeMED(allFields+"_VelocityY",false);
+					if(_Ndim>2)
+						_VitesseZ.writeMED(allFields+"_VelocityZ",false);
+				}
+				break;
+			case CSV :
+				_Enthalpy.writeCSV(allFields+"_Enthalpy");
+				_Density.writeCSV(allFields+"_Density");
+				_Pressure.writeCSV(allFields+"_Pressure");
+				_Temperature.writeCSV(allFields+"_Temperature");
+				_VitesseX.writeCSV(allFields+"_VelocityX");
+				if(_Ndim>1)
+				{
+					_VitesseY.writeCSV(allFields+"_VelocityY");
+					if(_Ndim>2)
+						_VitesseZ.writeCSV(allFields+"_VelocityZ");
+				}
+				break;
+			}
+		}
+	}
+
 	if(_isStationary)
 	{
 		prim+="_Stat";
