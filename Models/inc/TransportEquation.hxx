@@ -73,7 +73,7 @@ public :
 	vector<string> getOutputFieldsNames() ;//liste tous les champs que peut fournir le code pour le postraitement
 	Field&         getOutputField(const string& nameField );//Renvoie un champs pour le postraitement
 
-	Field& getTemperatureField(){
+	Field& getFluidTemperatureField(){
 		return _TT;
 	}
 

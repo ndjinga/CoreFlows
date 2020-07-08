@@ -513,15 +513,15 @@ vector<string> TransportEquation::getOutputFieldsNames()
 	vector<string> result(2);
 	
 	result[0]="Enthalpy";
-	result[1]="Temperature";
+	result[1]="FluidTemperature";
 	
 	return result;
 }
 
 Field& TransportEquation::getOutputField(const string& nameField )
 {
-	if(nameField=="Temperature" || nameField=="TEMPERATURE" )
-		return getTemperatureField();
+	if(nameField=="FluidTemperature" || nameField=="FLUIDTEMPERATURE" )
+		return getFluidTemperatureField();
 	else if(nameField=="Enthalpy" || nameField=="ENTHALPY" || nameField=="Enthalpie" || nameField=="ENTHALPY" )
 		return getEnthalpyField();
     else
