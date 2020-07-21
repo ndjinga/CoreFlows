@@ -3224,21 +3224,21 @@ vector<string> SinglePhase::getOutputFieldsNames()
 
 Field& SinglePhase::getOutputField(const string& nameField )
 {
-	if(nameField=="Pressure" || nameField=="PRESSURE" || nameField=="PRESSION" || nameField=="Pression" )
+	if(nameField=="pressure" || nameField=="Pressure" || nameField=="PRESSURE" || nameField=="PRESSION" || nameField=="Pression" )
 		return getPressureField();
-	else if(nameField=="Velocity" || nameField=="VELOCITY" || nameField=="Vitesse" || nameField=="VITESSE" )
+	else if(nameField=="velocity" || nameField=="Velocity" || nameField=="VELOCITY" || nameField=="Vitesse" || nameField=="VITESSE" )
 		return getVelocityField();
-	else if(nameField=="VelocityX" || nameField=="VELOCITYX" || nameField=="VitesseX" || nameField=="VITESSEX" )
+	else if(nameField=="velocityX" || nameField=="VelocityX" || nameField=="VELOCITYX" || nameField=="VitesseX" || nameField=="VITESSEX" )
 		return getVelocityXField();
-	else if(nameField=="Temperature" || nameField=="TEMPERATURE" )
+	else if(nameField=="temperature" || nameField=="Temperature" || nameField=="TEMPERATURE" )
 		return getTemperatureField();
-	else if(nameField=="Density" || nameField=="DENSITY" || nameField=="Densite" || nameField=="DENSITE" )
+	else if(nameField=="density" || nameField=="Density" || nameField=="DENSITY" || nameField=="Densite" || nameField=="DENSITE" )
 		return getDensityField();
-	else if(nameField=="Momentum" || nameField=="MOMENTUM" || nameField=="Qdm" || nameField=="QDM" )
+	else ifnameField=="momentum" || (nameField=="Momentum" || nameField=="MOMENTUM" || nameField=="Qdm" || nameField=="QDM" )
 		return getMomentumField();
-	else if(nameField=="Enthalpy" || nameField=="ENTHALPY" || nameField=="Enthalpie" || nameField=="ENTHALPIE" )
+	else if(nameField=="enthalpy" || nameField=="Enthalpy" || nameField=="ENTHALPY" || nameField=="Enthalpie" || nameField=="ENTHALPIE" )
 		return getEnthalpyField();
-	else if(nameField=="TotalEnergy" || nameField=="TOTALENERGY" || nameField=="ENERGIETOTALE" || nameField=="EnergieTotale" )
+	else if(nameField=="totalEnergy" || nameField=="TotalEnergy" || nameField=="TOTALENERGY" || nameField=="ENERGIETOTALE" || nameField=="EnergieTotale" )
 		return getTotalEnergyField();
     else
     {
