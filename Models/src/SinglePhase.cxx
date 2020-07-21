@@ -3234,7 +3234,7 @@ Field& SinglePhase::getOutputField(const string& nameField )
 		return getTemperatureField();
 	else if(nameField=="density" || nameField=="Density" || nameField=="DENSITY" || nameField=="Densite" || nameField=="DENSITE" || nameField=="densite" )
 		return getDensityField();
-	else ifnameField=="momentum" || (nameField=="Momentum" || nameField=="MOMENTUM" || nameField=="Qdm" || nameField=="QDM" || nameField=="qdm" )
+	else if(nameField=="momentum" || nameField=="Momentum" || nameField=="MOMENTUM" || nameField=="Qdm" || nameField=="QDM" || nameField=="qdm" )
 		return getMomentumField();
 	else if(nameField=="enthalpy" || nameField=="Enthalpy" || nameField=="ENTHALPY" || nameField=="Enthalpie" || nameField=="ENTHALPIE" || nameField=="enthalpie" )
 		return getEnthalpyField();
