@@ -56,8 +56,8 @@ endif (COREFLOWS_WITH_GUI)                                                      
 #---------------------------------------------------------------------------------------------------------------#
 
 
-SET(TESTS_LIBRARY_PATH ${CMAKE_CURRENT_BINARY_DIR}/Models/src:${CDMATH_DIR}/lib:${MEDCOUPLING_LIBRARIES}:${MEDFILE_C_LIBRARIES}:${PETSC_DIR}/${PETSC_ARCH}/lib:${PV_LIB_DIR} )
-SET(TESTS_PYTHON_PATH  ${CMAKE_CURRENT_BINARY_DIR}/Models/src:${CMAKE_CURRENT_BINARY_DIR}/swig:${CDMATH_DIR}/lib:${CDMATH_DIR}/lib/cdmath:${CDMATH_DIR}/bin/cdmath:${CDMATH_DIR}/bin/cdmath/postprocessing:${MEDCOUPLING_LIBRARIES}:${MEDFILE_C_LIBRARIES}:${PETSC_DIR}/${PETSC_ARCH}/lib:${PV_PYTHON_DIR} )
+SET(TESTS_LIBRARY_PATH ${CMAKE_BINARY_DIR}/Models/src:${CDMATH_DIR}/lib:${MEDCOUPLING_LIBRARIES}:${MEDFILE_C_LIBRARIES}:${PETSC_DIR}/${PETSC_ARCH}/lib:${PV_LIB_DIR} )
+SET(TESTS_PYTHON_PATH  ${CMAKE_BINARY_DIR}/Models/src:${CMAKE_BINARY_DIR}/swig:${CDMATH_DIR}/lib:${CDMATH_DIR}/lib/cdmath:${CDMATH_DIR}/bin/cdmath:${CDMATH_DIR}/bin/cdmath/postprocessing:${MEDCOUPLING_LIBRARIES}:${MEDFILE_C_LIBRARIES}:${PETSC_DIR}/${PETSC_ARCH}/lib:${PV_PYTHON_DIR} )
 
 ############# python example tests
 
