@@ -33,8 +33,6 @@ public :
 	/** \fn StationaryDiffusionEquation
 			 * \brief Constructor for the temperature diffusion in a solid
 			 * \param [in] int : space dimension
-			 * \param [in] double : solid density
-			 * \param [in] double : solid specific heat at constant pressure
 			 * \param [in] double : solid conductivity
 			 *  */
 
