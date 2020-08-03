@@ -1,4 +1,5 @@
 #include "StationaryDiffusionEquation.hxx"
+#include "Node.hxx"
 #include "SparseMatrixPetsc.hxx"
 #include "math.h"
 #include <algorithm> 

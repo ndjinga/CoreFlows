@@ -6,6 +6,7 @@
  * \date June 2019
  * \brief Stationary heat diffusion equation solved with either finite elements or finite volume method. 
  * -\lambda\Delta T=\Phi + \lambda_{sf} (T_{fluid}-T)
+ * Dirichlet (imposed temperature) or Neumann (imposed flux) boundary conditions
  * */
 //============================================================================
 
@@ -18,8 +19,8 @@
 #define StationaryDiffusionEquation_HXX_
 
 #include "ProblemCoreFlows.hxx"
-#include "Node.hxx"
 
+/* for the laplacian spectrum */
 #include <slepceps.h>
 #include <slepcsvd.h>
 
