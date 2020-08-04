@@ -44,7 +44,7 @@ int StationaryDiffusionEquation::globalNodeIndex(int unknownNodeIndex, std::vect
 
     if(j+1==boundarySize)
         return unknownNodeIndex+boundarySize;
-    else //unknownNodeMax>=unknownNodeIndex) hence our node global number is between dirichletNodes[j-1] and dirichletNodes[j]
+    else //unknownNodeMax>=unknownNodeIndex, hence our node global number is between dirichletNodes[j-1] and dirichletNodes[j]
         return unknownNodeIndex - unknownNodeMax + dirichletNodes[j]-1;
 }
 
@@ -56,12 +56,12 @@ StationaryDiffusionEquation::StationaryDiffusionEquation(int dim, bool FECalcula
 
     if(lambda < 0.)
     {
-        std::cout<<"conductivity="<<lambda<<endl;
+        std::cout<<"Conductivity="<<lambda<<endl;
         throw CdmathException("Error : conductivity parameter lambda cannot  be negative");
     }
     if(dim<=0)
     {
-        std::cout<<"space dimension="<<dim<<endl;
+        std::cout<<"Space dimension="<<dim<<endl;
         throw CdmathException("Error : parameter dim cannot  be negative");
     }
 
@@ -179,19 +179,6 @@ void StationaryDiffusionEquation::initialize()
     /* Détection des noeuds frontière avec une condition limite de Dirichlet */
     if(_FECalculation)
     {
-        /*
-        vector<int> _boundaryFaceIds = _mesh.getBoundaryFaceIds();
-
-        cout <<"Total number of faces " <<_mesh.getNumberOfFaces()<<", Number of boundary faces " << _boundaryFaceIds.size()<<endl;
-        for(int i=0; i<_boundaryFaceIds.size(); i++)
-            cout<<", "<<_boundaryFaceIds[i];
-        cout<<endl;
-
-        cout <<"Total number of nodes " <<_mesh.getNumberOfNodes()<<", Number of boundary nodes " << _NboundaryNodes<<endl;
-        for(int i=0; i<_NboundaryNodes; i++)
-            cout<<", "<<_boundaryNodeIds[i];
-        cout<<endl;
-        */
         if(_NboundaryNodes==_Nnodes)
             cout<<"!!!!! Warning : all nodes are boundary nodes !!!!!"<<endl<<endl;
 
@@ -554,10 +541,10 @@ double StationaryDiffusionEquation::computeRHS(bool & stop)//Contribution of the
                 Ci=_mesh.getCell(i);
                 nodesId=Ci.getNodesId();
                 for (int j=0; j<nodesId.size();j++)
-                    if(!_mesh.isBorderNode(nodesId[j])) //or for better performance nodeIds[idim]>dirichletNodes.upper_bound()
+                    if(!_mesh.isBorderNode(nodesId[j])) 
                     {
                         double coeff = _heatTransfertCoeff*_fluidTemperatureField(nodesId[j]) + _heatPowerField(nodesId[j]);
-                        VecSetValue(_b,unknownNodeIndex(nodesId[j], _dirichletNodeIds), coeff*Ci.getMeasure()/(_Ndim+1),ADD_VALUES);//assumes node numbering starts with unknown nodes. otherwise unknownNodes.index(j)
+                        VecSetValue(_b,unknownNodeIndex(nodesId[j], _dirichletNodeIds), coeff*Ci.getMeasure()/(_Ndim+1),ADD_VALUES);
                     }
             }
         }
@@ -826,7 +813,7 @@ bool StationaryDiffusionEquation::solveStationaryProblem()
     }
     */
     
-    *_runLogFile<< "!!!!!! Computation successful"<< endl;
+    *_runLogFile<< "!!!!!! Computation successful !!!!!!"<< endl;
 	_runLogFile->close();
 
 	return !stop;
@@ -862,12 +849,12 @@ void StationaryDiffusionEquation::save(){
         {
             VecGetValues(_Tk, 1, &i, &Ti);
             globalIndex = globalNodeIndex(i, _dirichletNodeIds);
-            _VV(globalIndex)=Ti;//Assumes node numbering starts with border nodes
+            _VV(globalIndex)=Ti;
         }
 
         Node Ni;
         string nameOfGroup;
-        for(int i=0; i<_NdirichletNodes; i++)//Assumes node numbering starts with border nodes
+        for(int i=0; i<_NdirichletNodes; i++)
         {
             Ni=_mesh.getNode(_dirichletNodeIds[i]);
             nameOfGroup = Ni.getGroupName();
