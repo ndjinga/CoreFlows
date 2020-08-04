@@ -61,7 +61,7 @@ public :
 	void initialize();
 	void terminate();//vide la mémoire et enregistre le résultat final
 	double computeStiffnessMatrix(bool & stop);
-	bool iterateNewtonStep(bool &ok);
+	bool solveLinearSystem();//return true if resolution successfull
 	void save();
 
     /* Boundary conditions */
@@ -129,8 +129,8 @@ protected :
 	map<string, LimitField> _limitField;
     bool _onlyNeumannBC;//if true then the linear system is singular and should be solved up to a constant vector
     
-	bool _stiffnessMatrixSet;
 	Vector _normale;
+    Vec _displacements;//unknown of the linear system
     
 	//Physical parameterss
 	double _lambda, _mu;//Lamé coefficients

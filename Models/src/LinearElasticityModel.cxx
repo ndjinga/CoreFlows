@@ -75,7 +75,6 @@ LinearElasticityModel::LinearElasticityModel(int dim, bool FECalculation,  doubl
     
 	_Ndim=dim;
 	_nVar=dim;
-	_stiffnessMatrixSet=false;
 	_initializedMemory=false;
 
     //Mesh data
@@ -116,9 +115,9 @@ LinearElasticityModel::LinearElasticityModel(int dim, bool FECalculation,  doubl
     _computationCompletedSuccessfully=false;
     
     //heat transfer parameters
-	_lambda=lambda;
-	_mu    =mu;
-	_rho=rho;
+	_lambda= lambda;
+	_mu    = mu;
+	_rho   = rho;
 	_densityFieldSet=false;
 }
 
@@ -162,19 +161,6 @@ void LinearElasticityModel::initialize()
     /* Détection des noeuds frontière avec une condition limite de Dirichlet */
     if(_FECalculation)
     {
-        /*
-        vector<int> _boundaryFaceIds = _mesh.getBoundaryFaceIds();
-
-        cout <<"Total number of faces " <<_mesh.getNumberOfFaces()<<", Number of boundary faces " << _boundaryFaceIds.size()<<endl;
-        for(int i=0; i<_boundaryFaceIds.size(); i++)
-            cout<<", "<<_boundaryFaceIds[i];
-        cout<<endl;
-
-        cout <<"Total number of nodes " <<_mesh.getNumberOfNodes()<<", Number of boundary nodes " << _NboundaryNodes<<endl;
-        for(int i=0; i<_NboundaryNodes; i++)
-            cout<<", "<<_boundaryNodeIds[i];
-        cout<<endl;
-        */
         if(_NboundaryNodes==_Nnodes)
             cout<<"!!!!! Warning : all nodes are boundary nodes !!!!!"<<endl<<endl;
 
@@ -221,9 +207,9 @@ void LinearElasticityModel::initialize()
     else
         MatCreateSeqAIJ(PETSC_COMM_SELF, _NunknownNodes*_nVar, _NunknownNodes*_nVar, (1+_neibMaxNbNodes), PETSC_NULL, &_A);
 
-	VecCreate(PETSC_COMM_SELF, &_Tk);
+	VecCreate(PETSC_COMM_SELF, &_displacments);
 
-	VecDuplicate(_Tk, &_b);//RHS of the linear system
+	VecDuplicate(_displacements, &_b);//RHS of the linear system
 
 	//Linear solver
 	KSPCreate(PETSC_COMM_SELF, &_ksp);
@@ -292,11 +278,6 @@ double LinearElasticityModel::computeDiffusionMatrix(bool & stop)
     else
         result=computeDiffusionMatrixFV(stop);
 
-    //Contribution from the solid/fluid heat exchange with assumption of constant heat transfer coefficient
-    //update value here if variable  heat transfer coefficient
-    if(_heatTransfertCoeff>_precision)
-        MatShift(_A,_heatTransfertCoeff);//Contribution from the liquit/solid heat transfer
-        
     if(_verbose or _system)
         MatView(_A,PETSC_VIEWER_STDOUT_SELF);
 
@@ -322,7 +303,7 @@ double LinearElasticityModel::computeDiffusionMatrixFE(bool & stop){
         values[idim][idim]=1;
 
     /* parameters for boundary treatment */
-    vector< double > valuesBorder(_Ndim+1);
+    vector< Vector > valuesBorder(_Ndim+1);
     Vector GradShapeFuncBorder(_Ndim+1);
     
 	for (int j=0; j<_Nmailles;j++)
@@ -361,13 +342,13 @@ double LinearElasticityModel::computeDiffusionMatrixFE(bool & stop){
 							std::map<int,double>::iterator it=_dirichletBoundaryValues.find(nodeIds[kdim]);
 							if( it != _dirichletBoundaryValues.end() )
                             {
-                                if( _dirichletValuesSet )
+                                if( _dirichletValuesSet )//New way of storing BC
                                     valuesBorder[kdim]=_dirichletBoundaryValues[it->second];
-                                else    
-                                    valuesBorder[kdim]=_limitField[_mesh.getNode(nodeIds[kdim]).getGroupName()].T;
+                                else    //old way of storing BC
+                                    valuesBorder[kdim]=_limitField[_mesh.getNode(nodeIds[kdim]).getGroupName()].Displacements;
                             }
                             else
-                                valuesBorder[kdim]=0;                            
+                                valuesBorder[kdim]=Vector(_Ndim);                            
                         }
                         GradShapeFuncBorder=gradientNodal(M,valuesBorder)/fact(_Ndim);
                         double coeff =-_conductivity*(_DiffusionTensor*GradShapeFuncBorder)*GradShapeFuncs[idim]/Cj.getMeasure();
@@ -383,7 +364,6 @@ double LinearElasticityModel::computeDiffusionMatrixFE(bool & stop){
 	VecAssemblyBegin(_b);
 	VecAssemblyEnd(_b);
 
-	_diffusionMatrixSet=true;
     stop=false ;
 
 	return INFINITY;
@@ -498,19 +478,19 @@ double LinearElasticityModel::computeDiffusionMatrixFV(bool & stop){
 	VecAssemblyBegin(_b);
 	VecAssemblyEnd(_b);
     
-	_diffusionMatrixSet=true;
     stop=false ;
 	
     return INFINITY;
 }
 
-double LinearElasticityModel::computeRHS(bool & stop)//Contribution of the PDE RHS to the linear systemm RHS (boundary conditions do contribute to the system RHS)
+double LinearElasticityModel::computeRHS(bool & stop)//Contribution of the PDE RHS to the linear systemm RHS (boundary conditions do contribute to the system RHS via the function computeStiffnessMatrix)
 {
 	VecAssemblyBegin(_b);
 
     if(!_FECalculation)
         for (int i=0; i<_Nmailles;i++)
-            VecSetValue(_b,i,_heatTransfertCoeff*_fluidTemperatureField(i) + _heatPowerField(i),ADD_VALUES);
+			for (int j=0; j<_Ndim;j++)
+				VecSetValue(_b,i*nVar+j,_gravity(j)*_densityField(i),ADD_VALUES);
     else
         {
             Cell Ci;
@@ -520,11 +500,9 @@ double LinearElasticityModel::computeRHS(bool & stop)//Contribution of the PDE R
                 Ci=_mesh.getCell(i);
                 nodesId=Ci.getNodesId();
                 for (int j=0; j<nodesId.size();j++)
-                    if(!_mesh.isBorderNode(nodesId[j])) //or for better performance nodeIds[idim]>dirichletNodes.upper_bound()
-                    {
-                        double coeff = _heatTransfertCoeff*_fluidTemperatureField(nodesId[j]) + _heatPowerField(nodesId[j]);
-                        VecSetValue(_b,unknownNodeIndex(nodesId[j], _dirichletNodeIds), coeff*Ci.getMeasure()/(_Ndim+1),ADD_VALUES);//assumes node numbering starts with unknown nodes. otherwise unknownNodes.index(j)
-                    }
+                    if(!_mesh.isBorderNode(nodesId[j]))
+						for (int k=0; k<_Ndim; k++)
+							VecSetValue(_b,unknownNodeIndex(nodesId[j], _dirichletNodeIds)*nVar+k, _gravity(k)*_densityField(j)*Ci.getMeasure()/(_Ndim+1),ADD_VALUES);
             }
         }
     
@@ -537,9 +515,9 @@ double LinearElasticityModel::computeRHS(bool & stop)//Contribution of the PDE R
 	return INFINITY;
 }
 
-bool LinearElasticityModel::iterateNewtonStep(bool &converged)
+bool LinearElasticityModel::solveLinearSystem()
 {
-	bool stop;
+	bool resolutionOK;
 
     //Only implicit scheme considered
     MatAssemblyBegin(_A, MAT_FINAL_ASSEMBLY);
@@ -553,7 +531,7 @@ bool LinearElasticityModel::iterateNewtonStep(bool &converged)
 
     if(_conditionNumber)
         KSPSetComputeEigenvalues(_ksp,PETSC_TRUE);
-    KSPSolve(_ksp, _b, _Tk);
+    KSPSolve(_ksp, _b, displacements);
 
 	KSPConvergedReason reason;
 	KSPGetConvergedReason(_ksp,&reason);
@@ -569,48 +547,19 @@ bool LinearElasticityModel::iterateNewtonStep(bool &converged)
         *_runLogFile<<"!!!!!!!!!!!!! Itérations maximales "<<_maxPetscIts<<" atteintes, résidu="<<residu<<", précision demandée= "<<_precision<<endl;
         *_runLogFile<<"Solver used "<<  _ksptype<<", preconditioner "<<_pctype<<", Final number of iteration= "<<_PetscIts<<endl;
 		_runLogFile->close();
-        converged = false;
-        stop = true;
+		
+		resolutionOK = false;
     }
     else{
         if( _MaxIterLinearSolver < _PetscIts)
             _MaxIterLinearSolver = _PetscIts;
         cout<<"## Système linéaire résolu en "<<_PetscIts<<" itérations par le solveur "<<  _ksptype<<" et le preconditioneur "<<_pctype<<", précision demandée= "<<_precision<<endl<<endl;
 		*_runLogFile<<"## Système linéaire résolu en "<<_PetscIts<<" itérations par le solveur "<<  _ksptype<<" et le preconditioneur "<<_pctype<<", précision demandée= "<<_precision<<endl<<endl;
-        VecCopy(_Tk, _deltaT);//ici on a deltaT=Tk
-        VecAXPY(_deltaT,  -1, _Tkm1);//On obtient deltaT=Tk-Tkm1
-
-        _erreur_rel= 0;
-        double Ti, dTi;
-
-        VecAssemblyBegin(_Tk);
-        VecAssemblyEnd(  _Tk);
-        VecAssemblyBegin(_deltaT);
-        VecAssemblyEnd(  _deltaT);
-
-        if(!_FECalculation)
-            for(int i=0; i<_Nmailles; i++)
-            {
-                VecGetValues(_deltaT, 1, &i, &dTi);
-                VecGetValues(_Tk, 1, &i, &Ti);
-                if(_erreur_rel < fabs(dTi/Ti))
-                    _erreur_rel = fabs(dTi/Ti);
-            }
-        else
-            for(int i=0; i<_NunknownNodes; i++)
-            {
-                VecGetValues(_deltaT, 1, &i, &dTi);
-                VecGetValues(_Tk, 1, &i, &Ti);
-                if(_erreur_rel < fabs(dTi/Ti))
-                    _erreur_rel = fabs(dTi/Ti);
-            }
-        stop=false;
-        converged = (_erreur_rel <= _precision) ;//converged=convergence des iterations de Newton
+        
+        resolutionOK = true;
     }
 
-	VecCopy(_Tk, _Tkm1);
-
-	return stop;
+	return resolutionOK;
 }
 
 void LinearElasticityModel::setMesh(const Mesh &M)
@@ -634,7 +583,7 @@ void LinearElasticityModel::setMesh(const Mesh &M)
 	// find  maximum nb of neibourghs
     if(!_FECalculation)
     {
-    	_VV=Field ("Temperature", CELLS, _mesh, 1);
+    	_VV=Field ("Displacements", CELLS, _mesh, _Ndim);
         _neibMaxNbCells=_mesh.getMaxNbNeighbours(CELLS);
     }
     else
@@ -672,7 +621,7 @@ void LinearElasticityModel::setMesh(const Mesh &M)
 			}
         }
 
-		_VV=Field ("Temperature", NODES, _mesh, 1);
+		_VV=Field ("Temperature", NODES, _mesh, _Ndim);
 
         _neibMaxNbNodes=_mesh.getMaxNbNeighbours(NODES);
         _boundaryNodeIds = _mesh.getBoundaryNodeIds();
@@ -726,7 +675,6 @@ bool LinearElasticityModel::solveStationaryProblem()
 		throw CdmathException("ProblemCoreFlows::run() call initialize() first");
 	}
 	bool stop=false; // Does the Problem want to stop (error) ?
-	bool converged=false; // has the newton scheme converged (end) ?
 
 	cout<< "!!! Running test case "<< _fileName << " using ";
 	*_runLogFile<< "!!! Running test case "<< _fileName<< " using ";
@@ -742,20 +690,20 @@ bool LinearElasticityModel::solveStationaryProblem()
 		*_runLogFile<< "Finite elements method"<< endl<<endl;
 	}
 
-    computeDiffusionMatrix( stop);//For the moment the conductivity does not depend on the temperature (linear LHS)
+    computeDiffusionMatrix( stop);
     if (stop){
         cout << "Error : failed computing diffusion matrix, stopping calculation"<< endl;
         *_runLogFile << "Error : failed computing diffusion matrix, stopping calculation"<< endl;
  		_runLogFile->close();
        throw CdmathException("Failed computing diffusion matrix");
     }
-    computeRHS(stop);//For the moment the heat power does not depend on the unknown temperature (linear RHS)
+    computeRHS(stop);
     if (stop){
         cout << "Error : failed computing right hand side, stopping calculation"<< endl;
         *_runLogFile << "Error : failed computing right hand side, stopping calculation"<< endl;
         throw CdmathException("Failed computing right hand side");
     }
-    stop = iterateNewtonStep(converged);
+    stop = !solveLinearSystem();
     if (stop){
         cout << "Error : failed solving linear system, stopping calculation"<< endl;
         *_runLogFile << "Error : failed linear system, stopping calculation"<< endl;
@@ -765,32 +713,6 @@ bool LinearElasticityModel::solveStationaryProblem()
     
     _computationCompletedSuccessfully=true;
     save();
-
-	// Newton iteration loop for non linear problems
-    /*
-	while(!stop and !converged and _NEWTON_its<_maxNewtonIts)
-	{
-        computeDiffusionMatrix( stop);//case when the conductivity depends on the temperature (nonlinear LHS)
-        computeRHS(stop);//case the heat power depends on the unknown temperature (nonlinear RHS)
-        stop = iterateNewtonStep(converged);
-        _NEWTON_its++;
-	}
-    if (stop){
-        cout << "Error : failed solving Newton iteration "<<_NEWTON_its<<", stopping calculation"<< endl;
-        *_runLogFile << "Error : failed solving Newton iteration "<<_NEWTON_its<<", stopping calculation"<< endl;
-        throw CdmathException("Failed solving a Newton iteration");
-    }
-    else if(_NEWTON_its==_maxNewtonIts){
-        cout << "Error : no convergence of Newton scheme. Maximum Newton iterations "<<_maxNewtonIts<<" reached, stopping calculation"<< endl;
-        *_runLogFile << "Error : no convergence of Newton scheme. Maximum Newton iterations "<<_maxNewtonIts<<" reached, stopping calculation"<< endl;
-        throw CdmathException("No convergence of Newton scheme");
-    }
-    else{
-        cout << "Convergence of Newton scheme at iteration "<<_NEWTON_its<<", end of calculation"<< endl;
-        *_runLogFile << "Convergence of Newton scheme at iteration "<<_NEWTON_its<<", end of calculation"<< endl;
-        save();
-    }
-    */
     
     *_runLogFile<< "!!!!!! Computation successful"<< endl;
 	_runLogFile->close();
@@ -812,36 +734,44 @@ void LinearElasticityModel::save(){
     system(suppress.c_str());//Nettoyage des précédents calculs identiques
     
     if(_verbose or _system)
-        VecView(_Tk,PETSC_VIEWER_STDOUT_SELF);
+        VecView(_displacements,PETSC_VIEWER_STDOUT_SELF);
 
-    double Ti; 
+    double uk; 
     if(!_FECalculation)
         for(int i=0; i<_Nmailles; i++)
             {
-                VecGetValues(_Tk, 1, &i, &Ti);
-                _VV(i)=Ti;
+				for(int j=0; j<_nVar; j++)
+				{
+					int k=i*_nVar+j;
+					VecGetValues(_displacements, 1, &k, &uk);
+					_VV(i,j)=uk;
+				}
             }
     else
     {
         int globalIndex;
         for(int i=0; i<_NunknownNodes; i++)
         {
-            VecGetValues(_Tk, 1, &i, &Ti);
-            globalIndex = globalNodeIndex(i, _dirichletNodeIds);
-            _VV(globalIndex)=Ti;//Assumes node numbering starts with border nodes
+			globalIndex = globalNodeIndex(i, _dirichletNodeIds);
+			for(int j=0; j<_nVar; j++)
+			{
+				int k=i*_nVar+j;
+				VecGetValues(_displacements, 1, &k, &uk);
+				_VV(globalIndex,j)=uk;
+			}
         }
 
         Node Ni;
         string nameOfGroup;
-        for(int i=0; i<_NdirichletNodes; i++)//Assumes node numbering starts with border nodes
+        for(int i=0; i<_NdirichletNodes; i++)
         {
             Ni=_mesh.getNode(_dirichletNodeIds[i]);
             nameOfGroup = Ni.getGroupName();
-            _VV(_dirichletNodeIds[i])=_limitField[nameOfGroup].T;
+			for(int j=0; j<_nVar; j++)
+				_VV(_dirichletNodeIds[i])=_limitField[nameOfGroup].displacement[i];
         }
     }
 
-    _VV.setInfoOnComponent(0,"Temperature_(K)");
     switch(_saveFormat)
     {
         case VTK :
@@ -856,19 +786,17 @@ void LinearElasticityModel::save(){
     }
 }
 Field 
-LinearElasticityModel::getOutputTemperatureField()
+LinearElasticityModel::getOutputDisplacementField()
 {
     if(!_computationCompletedSuccessfully)
-        throw("Computation not performed yet or failed. No temperature field available");
+        throw("Computation not performed yet or failed. No displacement field available");
     else
         return _VV;
 }
 
 void LinearElasticityModel::terminate()
 {
-	VecDestroy(&_Tk);
-	VecDestroy(&_Tkm1);
-	VecDestroy(&_deltaT);
+	VecDestroy(&_displacements);
 	VecDestroy(&_b);
 	MatDestroy(&_A);
 }
@@ -884,32 +812,4 @@ LinearElasticityModel::getConditionNumber(bool isSingular, double tol) const
 {
   SparseMatrixPetsc A = SparseMatrixPetsc(_A);
   return A.getConditionNumber( isSingular, tol);
-}
-std::vector< double > 
-LinearElasticityModel::getEigenvalues(int nev, EPSWhich which, double tol) const
-{
-  SparseMatrixPetsc A = SparseMatrixPetsc(_A);
-  return A.getEigenvalues( nev, which, tol);
-}
-std::vector< Vector > 
-LinearElasticityModel::getEigenvectors(int nev, EPSWhich which, double tol) const
-{
-  SparseMatrixPetsc A = SparseMatrixPetsc(_A);
-  return A.getEigenvectors( nev, which, tol);
-}
-Field 
-LinearElasticityModel::getEigenvectorsField(int nev, EPSWhich which, double tol) const
-{
-  SparseMatrixPetsc A = SparseMatrixPetsc(_A);
-  MEDCoupling::DataArrayDouble * d = A.getEigenvectorsDataArrayDouble( nev, which, tol);
-  Field my_eigenfield;
-  
-  if(_FECalculation)
-    my_eigenfield = Field("Eigenvectors field", NODES, _mesh, nev);
-  else
-    my_eigenfield = Field("Eigenvectors field", CELLS, _mesh, nev);
-
-  my_eigenfield.setFieldByDataArrayDouble(d);
-  
-  return my_eigenfield;
 }
