@@ -525,7 +525,7 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFV(bool & stop){
     return INFINITY;
 }
 
-double StationaryDiffusionEquation::computeRHS(bool & stop)//Contribution of the PDE RHS to the linear systemm RHS (boundary conditions do contribute to the system RHS)
+double StationaryDiffusionEquation::computeRHS(bool & stop)//Contribution of the PDE RHS to the linear systemm RHS (boundary conditions do contribute to the system RHS via the function computeDiffusionMatrix)
 {
 	VecAssemblyBegin(_b);
 
