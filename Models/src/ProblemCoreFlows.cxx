@@ -43,7 +43,6 @@ ProblemCoreFlows::ProblemCoreFlows()
 	_initializedMemory=false;
 	_restartWithNewTimeScheme=false;
 	_restartWithNewFileName=false;
-	_spaceScheme=upwind;
 	_timeScheme=Explicit;
 	_wellBalancedCorrection=false;
     _FECalculation=false;
@@ -69,6 +68,18 @@ ProblemCoreFlows::ProblemCoreFlows()
 	getcwd(result, PATH_MAX );
 	_path=string( result );
 	_saveFormat=VTK;
+}
+
+TimeScheme ProblemCoreFlows::getTimeScheme()
+{
+	return _timeScheme;
+}
+
+void ProblemCoreFlows::setTimeScheme(TimeScheme timeScheme)
+{
+	if( _nbTimeStep>0 && timeScheme!=_timeScheme)//This is a change of time scheme during a simulation
+		_restartWithNewTimeScheme=true;
+	_timeScheme = timeScheme;
 }
 
 bool ProblemCoreFlows::isStationary() const
@@ -98,13 +109,6 @@ void ProblemCoreFlows::setPrecision(double precision)
 {
 	_precision=precision;
 }
-void ProblemCoreFlows::setNumericalScheme(SpaceScheme spaceScheme, TimeScheme timeScheme){
-	if( _nbTimeStep>0 && timeScheme!=_timeScheme)//This is a change of time scheme during a simulation
-		_restartWithNewTimeScheme=true;
-	_timeScheme = timeScheme;
-	_spaceScheme = spaceScheme;
-}
-
 void ProblemCoreFlows::setInitialField(const Field &VV)
 {
 
@@ -357,14 +361,6 @@ double ProblemCoreFlows::getCFL()
 double ProblemCoreFlows::getPrecision()
 {
 	return _precision;
-}
-SpaceScheme ProblemCoreFlows::getSpaceScheme()
-{
-	return _spaceScheme;
-}
-TimeScheme ProblemCoreFlows::getTimeScheme()
-{
-	return _timeScheme;
 }
 Mesh ProblemCoreFlows::getMesh()
 {

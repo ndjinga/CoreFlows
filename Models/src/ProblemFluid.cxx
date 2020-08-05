@@ -26,6 +26,19 @@ ProblemFluid::ProblemFluid(void){
 	_pressureCorrectionOrder=2;
 	_nonLinearFormulation=Roe;
 	_maxvploc=0.;
+	_spaceScheme=upwind;
+}
+
+SpaceScheme ProblemFluid::getSpaceScheme()
+{
+	return _spaceScheme;
+}
+void ProblemFluid::setNumericalScheme(SpaceScheme spaceScheme, TimeScheme timeScheme)
+{
+	if( _nbTimeStep>0 && timeScheme!=_timeScheme)//This is a change of time scheme during a simulation
+		_restartWithNewTimeScheme=true;
+	_timeScheme = timeScheme;
+	_spaceScheme = spaceScheme;
 }
 
 void ProblemFluid::initialize()

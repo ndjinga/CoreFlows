@@ -19,6 +19,31 @@
 
 using namespace std;
 
+//! enumeration SpaceScheme
+/*! Several numerical schemes are available */
+enum SpaceScheme
+{
+	upwind,/**<  classical full upwinding scheme (first order in space) */
+	centered,/**<  centered scheme (second order in space) */
+	pressureCorrection,/**<  include a pressure correction in the upwind scheme to increase precision at low Mach numbers */
+	lowMach,/**<  include an upwinding proportional to the Mach numer scheme to increase precision at low Mach numbers */
+	staggered,/**<  scheme inspired by staggered discretisations */
+};
+
+//! enumeration pressureEstimate
+/*! the pressure estimate needed to fit physical parameters  */
+enum pressureEstimate
+{
+	around1bar300K,/**< pressure is around 1 bar and temperature around 300K (for TransportEquation, SinglePhase and IsothermalTwoFluid) or 373 K (saturation for DriftModel and FiveEqsTwoFluid) */
+	around155bars600K/**< pressure is around 155 bars  and temperature around 618 K (saturation) */
+};
+
+enum phaseType
+{
+	Liquid,/**< Fluid considered is water */
+	Gas/**< Fluid considered is Gas */
+};
+
 //! enumeration NonLinearFormulation
 /*! the formulation used to compute the non viscous fluxes */
 enum NonLinearFormulation
@@ -386,6 +411,22 @@ public :
 		_usePrimitiveVarsInNewton=usePrimitiveVarsInNewton;
 	}
 
+	/** \fn getSpaceScheme
+	 * \brief returns the  space scheme name
+	 * \param [in] void
+	 * \param [out] enum SpaceScheme(upwind, centred, pressureCorrection, pressureCorrection, staggered)
+	 *  */
+	SpaceScheme getSpaceScheme();
+
+	/** \fn setNumericalScheme
+	 * \brief sets the numerical method (upwind vs centered and explicit vs implicit)
+	 * \details
+	 * \param [in] SpaceScheme
+	 * \param [in] TimeScheme
+	 * \param [out] void
+	 *  */
+	void setNumericalScheme(SpaceScheme scheme, TimeScheme method=Explicit);
+
 	//données initiales
 	/*
 	virtual vector<string> getInputFieldsNames()=0 ;//Renvoie les noms des champs dont le problème a besoin (données initiales)
@@ -402,6 +443,8 @@ protected :
 	Field  _UU;
 	/** Field of interfacial states of the VFRoe scheme **/
 	Field _UUstar, _VVstar;
+
+	SpaceScheme _spaceScheme;
 	/** the formulation used to compute the non viscous fluxes **/
 	NonLinearFormulation _nonLinearFormulation;
 

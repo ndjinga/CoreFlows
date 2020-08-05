@@ -3,7 +3,7 @@
 // Author      : M. Ndjinga
 // Version     :
 // Copyright   : CEA Saclay 2014
-// Description : Generic class for thermal hydraulics problems
+// Description : Generic class for PDEs problems
 //============================================================================
 /* A ProblemCoreFlows class */
 
@@ -34,43 +34,11 @@
 
 using namespace std;
 
-//! enumeration TimeScheme
-/*! The numerical method can be Explicit or Implicit  */
-enum TimeScheme
-{
-	Explicit,/**<  Explicit numerical scheme */
-	Implicit/**< Implicit numerical scheme */
-};
-//! enumeration SpaceScheme
-/*! Several numerical schemes are available */
-enum SpaceScheme
-{
-	upwind,/**<  classical full upwinding scheme (first order in space) */
-	centered,/**<  centered scheme (second order in space) */
-	pressureCorrection,/**<  include a pressure correction in the upwind scheme to increase precision at low Mach numbers */
-	lowMach,/**<  include an upwinding proportional to the Mach numer scheme to increase precision at low Mach numbers */
-	staggered,/**<  scheme inspired by staggered discretisations */
-};
-
-//! enumeration pressureEstimate
-/*! the pressure estimate needed to fit physical parameters  */
-enum pressureEstimate
-{
-	around1bar300K,/**< pressure is around 1 bar and temperature around 300K (for TransportEquation, SinglePhase and IsothermalTwoFluid) or 373 K (saturation for DriftModel and FiveEqsTwoFluid) */
-	around155bars600K/**< pressure is around 155 bars  and temperature around 618 K (saturation) */
-};
-
 //! enumeration BoundaryType
 /*! Boundary condition type  */
 enum BoundaryType	{Wall, InnerWall, Inlet, InletPressure, InletRotationVelocity, InletEnthalpy, Outlet, Neumann, Dirichlet, NoTypeSpecified};
 //! enumeration Fluid
 /*! The fluid type can be Gas or water  */
-enum phaseType
-{
-	Liquid,/**< Fluid considered is water */
-	Gas/**< Fluid considered is Gas */
-};
-
 //! enumeration linearSolver
 /*! the linearSolver can be GMRES or BiCGStab (see Petsc documentation) */
 enum linearSolver
@@ -116,6 +84,14 @@ struct LimitField{
 	double h; //for inlet (TransportEquation)
 	double alpha; //For inlet (IsothermalTwoFluid and FiveEqsTwoFluid)
 	double conc;//For inlet (DriftModel)
+};
+
+//! enumeration TimeScheme
+/*! The numerical method can be Explicit or Implicit  */
+enum TimeScheme
+{
+	Explicit,/**<  Explicit numerical scheme */
+	Implicit/**< Implicit numerical scheme */
 };
 
 class ProblemCoreFlows
@@ -440,20 +416,6 @@ public :
 	 *  */
 	double getPrecision();
 
-	/** \fn getSpaceScheme
-	 * \brief returns the  space scheme name
-	 * \param [in] void
-	 * \param [out] enum SpaceScheme(upwind, centred, pressureCorrection, pressureCorrection, staggered)
-	 *  */
-	SpaceScheme getSpaceScheme();
-
-	/** \fn getTimeScheme
-	 * \brief returns the  time scheme name
-	 * \param [in] void
-	 * \param [out] enum TimeScheme (explicit or implicit)
-	 *  */
-	TimeScheme getTimeScheme();
-
 	/** \fn getMesh
 	 * \brief renvoie _Mesh (le maillage du problème)
 	 * \details
@@ -505,15 +467,6 @@ public :
 	int getNumberOfVariables(){
 		return _nVar;
 	};
-
-	/** \fn setNumericalScheme
-	 * \brief sets the numerical method (upwind vs centered and explicit vs implicit
-	 * \details
-	 * \param [in] SpaceScheme
-	 * \param [in] TimeScheme
-	 * \param [out] void
-	 *  */
-	void setNumericalScheme(SpaceScheme scheme, TimeScheme method=Explicit);
 
 	/** \fn setWellBalancedCorrection
 	 * \brief include a well balanced correction to treat stiff source terms
@@ -685,6 +638,22 @@ public :
 	 *  */
 	void displayVector(double *vector, int size, string name);
 
+	/** \fn getTimeScheme
+	 * \brief returns the  time scheme name
+	 * \param [in] void
+	 * \param [out] enum TimeScheme (explicit or implicit)
+	 *  */
+	TimeScheme getTimeScheme();
+
+	/** \fn setNumericalScheme
+	 * \brief sets the numerical method ( explicit vs implicit )
+	 * \details
+	 * \param [in] TimeScheme
+	 * \param [out] void
+	 *  */
+	void setTimeScheme( TimeScheme method);
+
+
 protected :
 
 	int _Ndim;//space dimension
@@ -707,10 +676,9 @@ protected :
 	double _minl;//minimum cell diameter
     bool _FECalculation;
 	map<string, LimitField> _limitField;
-	TimeScheme _timeScheme;
-	SpaceScheme _spaceScheme;
 	/** boolean used to specify that a well balanced correction should be used */
 	bool _wellBalancedCorrection;
+	TimeScheme _timeScheme;
 
 	//Linear solver and petsc
 	KSP _ksp;

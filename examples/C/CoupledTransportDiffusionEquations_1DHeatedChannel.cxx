@@ -58,7 +58,7 @@ int main(int argc, char** argv)
 	double rho_ur=10000;//Uranium density
 	double lambda_ur=5;
 
-	TransportEquation  myTransportEquation(Liquid, around155bars600K,transportVelocity);
+	TransportEquation  myTransportEquation(LiquidPhase, around155bars600KTransport,transportVelocity);
 	Field fluidEnthalpy("Enthalpie", CELLS, transportMesh, 1);
 	bool FECalculation=false;
     DiffusionEquation  myDiffusionEquation(spaceDim,FECalculation,rho_ur, cp_ur, lambda_ur);
@@ -93,8 +93,8 @@ int main(int argc, char** argv)
 	myDiffusionEquation.setBoundaryFields(boundaryFields);//Only Neumann BC will be used
 
 	// set the numerical method
-	myDiffusionEquation.setNumericalScheme(upwind, Explicit);
-	myTransportEquation.setNumericalScheme(upwind, Explicit);
+	myDiffusionEquation.setTimeScheme( Explicit);
+	myTransportEquation.setTimeScheme( Explicit);
 
 	// name result file
 	string fluidFileName = "1DFluidEnthalpy";

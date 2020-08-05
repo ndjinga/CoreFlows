@@ -19,17 +19,32 @@
 
 using namespace std;
 
+
+enum phase
+{
+	LiquidPhase,/**< Fluid considered is water */
+	GasPhase/**< Fluid considered is Gas */
+};
+
+//! enumeration pressureEstimate
+/*! the pressure estimate needed to fit physical parameters  */
+enum pressureMagnitude
+{
+	around1bar300KTransport,/**< pressure is around 1 bar and temperature around 300K (for TransportEquation, SinglePhase and IsothermalTwoFluid) or 373 K (saturation for DriftModel and FiveEqsTwoFluid) */
+	around155bars600KTransport/**< pressure is around 155 bars  and temperature around 618 K (saturation) */
+};
+
 class TransportEquation: public ProblemCoreFlows
 {
 
 public :
 	/** \fn TransportEquation
 			 * \brief Constructor for the enthalpy transport in a fluid
-			 * \param [in] phaseType : \ref Liquid or \ref Gas
-			 * \param [in] pressureEstimate : \ref around1bar or \ref around155bars
+			 * \param [in] phase : \ref Liquid or \ref Gas
+			 * \param [in] pressureMagnitude : \ref around1bar or \ref around155bars
 			 * \param [in] vector<double> : fluid velocity (assumed constant)
 			 *  */
-	TransportEquation(phaseType fluid, pressureEstimate pEstimate,vector<double> vitesseTransport);
+	TransportEquation(phase fluid, pressureMagnitude pEstimate,vector<double> vitesseTransport);
 
 	//Gestion du calcul
 	virtual void initialize();
@@ -81,6 +96,13 @@ public :
 		return _VV;
 	}
 
+	/** \fn getTimeScheme
+	 * \brief returns the  time scheme name
+	 * \param [in] void
+	 * \param [out] enum TimeScheme (explicit or implicit)
+	 *  */
+	TimeScheme getTimeScheme();
+
 protected :
 	double computeTransportMatrix();
 	double computeRHS();
@@ -107,6 +129,7 @@ protected :
 	bool _transportMatrixSet;
 	Vec _Hn, _deltaH, _Hk, _Hkm1, _b0;
 	double _dt_transport, _dt_src;
+
 };
 
 #endif /* TransportEquation_HXX_ */

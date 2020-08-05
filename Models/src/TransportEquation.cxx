@@ -5,10 +5,10 @@
 
 using namespace std;
 
-TransportEquation::TransportEquation(phaseType fluid, pressureEstimate pEstimate,vector<double> vitesseTransport){
-	if(pEstimate==around1bar300K){
+TransportEquation::TransportEquation(phase fluid, pressureMagnitude pEstimate,vector<double> vitesseTransport){
+	if(pEstimate==around1bar300KTransport){
 		_Tref=300;
-		if(fluid==Gas){//Nitrogen pressure 1 bar and temperature 27°C
+		if(fluid==GasPhase){//Nitrogen pressure 1 bar and temperature 27°C
 			_href=3.11e5; //nitrogen enthalpy at 1 bar and 300K
 			_cpref=1041;//nitrogen specific heat at constant pressure 1 bar and 300K
 			//saturation data for nitrogen at 1 bar and 77K
@@ -30,7 +30,7 @@ TransportEquation::TransportEquation(phaseType fluid, pressureEstimate pEstimate
 	}
 	else{//around155bars600K
 		_Tref=618;//=Tsat
-		if(fluid==Gas){
+		if(fluid==GasPhase){
 			_href=2.675e6; //Gas enthalpy at 155 bars and 618K
 			_cpref=14001;//Gas specific heat at 155 bar and 618K
 		}

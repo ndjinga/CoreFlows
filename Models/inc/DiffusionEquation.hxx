@@ -20,6 +20,7 @@
 
 using namespace std;
 
+
 class DiffusionEquation: public ProblemCoreFlows
 {
 
@@ -129,6 +130,7 @@ protected :
     int unknownNodeIndex(int globalIndex, std::vector< int > dirichletNodes);
     int globalNodeIndex(int unknownIndex, std::vector< int > dirichletNodes);
 
+	TimeScheme _timeScheme;
 };
 
 #endif /* DiffusionEquation_HXX_ */

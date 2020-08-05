@@ -41,7 +41,7 @@ def DiffusionEquation_1DHeatedRod():
 	myProblem.setNeumannBoundaryCondition("Neumann");
 
     # set the numerical method
-	myProblem.setNumericalScheme(cf.upwind, cf.Explicit);
+	myProblem.setTimeScheme( cf.Explicit);
 	# myProblem.setLinearSolver(GMRES,ILU,True);
 
     # name of result file

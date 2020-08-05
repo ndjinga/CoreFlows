@@ -62,7 +62,7 @@ int main(int argc, char** argv)
 	myProblem.setNeumannBoundaryCondition("Neumann");
 
 	// set the numerical method
-	myProblem.setNumericalScheme(upwind, Explicit);
+	myProblem.setTimeScheme( Explicit);
 
 	// name result file
 	string fileName = "1DRodTemperature_FE";
