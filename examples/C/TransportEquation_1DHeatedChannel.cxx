@@ -17,14 +17,14 @@ int main(int argc, char** argv)
 	int spaceDim = M.getSpaceDimension();
 
 	// Boundary conditions
-	map<string, LimitField> boundaryFields;
+	map<string, LimitFieldTransport> boundaryFields;
 
-	LimitField limitNeumann;
-	limitNeumann.bcType=Neumann;
+	LimitFieldTransport limitNeumann;
+	limitNeumann.bcType=NeumannTransport;
 	boundaryFields["Neumann"] = limitNeumann;
 
-	LimitField limitInlet;
-	limitInlet.bcType=Inlet;
+	LimitFieldTransport limitInlet;
+	limitInlet.bcType=InletTransport;
 	limitInlet.h =1.3e6;//Inlet water enthalpy
 	boundaryFields["Inlet"] = limitInlet;
 

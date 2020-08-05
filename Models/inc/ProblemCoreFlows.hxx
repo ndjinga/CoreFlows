@@ -34,11 +34,6 @@
 
 using namespace std;
 
-//! enumeration BoundaryType
-/*! Boundary condition type  */
-enum BoundaryType	{Wall, InnerWall, Inlet, InletPressure, InletRotationVelocity, InletEnthalpy, Outlet, Neumann, Dirichlet, NoTypeSpecified};
-//! enumeration Fluid
-/*! The fluid type can be Gas or water  */
 //! enumeration linearSolver
 /*! the linearSolver can be GMRES or BiCGStab (see Petsc documentation) */
 enum linearSolver
@@ -66,24 +61,6 @@ enum saveFormat
 	MED,/**< MED format is used  */
 	VTK,/**< VTK format is used */
 	CSV/**< CSV format is used */
-};
-
-/** \struct LimitField
- * \brief value of some fields on the boundary  */
-struct LimitField{
-	LimitField(){bcType=NoTypeSpecified; p=0; v_x=vector<double> (0,0); v_y=vector<double> (0,0); v_z=vector<double> (0,0); T=0; h=0; alpha=0;	conc=0;}
-	LimitField(BoundaryType _bcType,	double _p,	vector<double> _v_x, vector<double> _v_y, vector<double> _v_z,
-			double _T,	double _h,	double _alpha,	double _conc){
-		bcType=_bcType; p=_p; v_x=_v_x; v_y=_v_y; v_z=_v_z;	T=_T; h=_h; alpha=_alpha;	conc=_conc;
-	}
-
-	BoundaryType bcType;
-	double p;//For outlet (fluid models)
-	vector<double> v_x; vector<double> v_y; vector<double> v_z;//For wall and inlet (fluid models)
-	double T; //for wall and inlet (DriftModel and FiveEqsTwoFluid) and for Dirichlet (DiffusionEquation)
-	double h; //for inlet (TransportEquation)
-	double alpha; //For inlet (IsothermalTwoFluid and FiveEqsTwoFluid)
-	double conc;//For inlet (DriftModel)
 };
 
 //! enumeration TimeScheme
@@ -204,25 +181,6 @@ public :
 	virtual vector<string> getOutputFieldsNames()=0 ;//liste tous les champs que peut fournir le code pour le postraitement
 	virtual Field& getOutputField(const string& nameField )=0;//Renvoie un champs pour le postraitement
 	 */
-
-	/** \fn setBoundaryFields
-	 * \brief met à jour  _limitField  ( le type de condition limite )
-	 * \details
-	 * \param [in] string
-	 * \param [out] void
-	 *  */
-	void setBoundaryFields(map<string, LimitField> boundaryFields){
-		_limitField = boundaryFields;
-	};
-	/** \fn setNeumannBoundaryCondition
-	 * \brief adds a new boundary condition of type Neumann
-	 * \details
-	 * \param [in] string the name of the boundary
-	 * \param [out] void
-	 *  */
-	void setNeumannBoundaryCondition(string groupName){
-		_limitField[groupName]=LimitField(Neumann,-1,vector<double>(_Ndim,0),vector<double>(_Ndim,0),vector<double>(_Ndim,0),-1,-1,-1,-1);
-	};
 
 	//paramètres du calcul -*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*-*
 
@@ -675,7 +633,6 @@ protected :
 	double _maxvp;//valeur propre max pour calcul cfl
 	double _minl;//minimum cell diameter
     bool _FECalculation;
-	map<string, LimitField> _limitField;
 	/** boolean used to specify that a well balanced correction should be used */
 	bool _wellBalancedCorrection;
 	TimeScheme _timeScheme;

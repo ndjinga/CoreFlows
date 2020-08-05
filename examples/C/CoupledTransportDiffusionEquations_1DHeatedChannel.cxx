@@ -37,18 +37,19 @@ int main(int argc, char** argv)
 	int spaceDim = 1;
 
 	// Boundary conditions 
-	map<string, LimitField> boundaryFields;
+	map<string, LimitFieldDiffusion> boundaryFieldsDiffusion;
+	map<string, LimitFieldTransport> boundaryFieldsTransport;
 
 	// Boundary conditions for the solid
-	LimitField limitNeumann;
-	limitNeumann.bcType=Neumann;
-	boundaryFields["Neumann"] = limitNeumann;
+	LimitFieldDiffusion limitNeumann;
+	limitNeumann.bcType=NeumannDiffusion;
+	boundaryFieldsDiffusion["Neumann"] = limitNeumann;
 
 	// Boundary conditions for the fluid
-	LimitField limitInlet;
-	limitInlet.bcType=Inlet;
+	LimitFieldTransport limitInlet;
+	limitInlet.bcType=InletTransport;
 	limitInlet.h =1.3e6;//Inlet water enthalpy
-	boundaryFields["Inlet"] = limitInlet;
+	boundaryFieldsTransport["Inlet"] = limitInlet;
 
 	//Set the fluid transport velocity
 	vector<double> transportVelocity(1,5);//Vitesse du fluide
@@ -89,8 +90,8 @@ int main(int argc, char** argv)
 	myTransportEquation.setInitialFieldConstant(transportMesh,VV_Constant);
 
 	//set the boundary conditions
-	myTransportEquation.setBoundaryFields(boundaryFields);//Neumann and Inlet BC will be used
-	myDiffusionEquation.setBoundaryFields(boundaryFields);//Only Neumann BC will be used
+	myTransportEquation.setBoundaryFields(boundaryFieldsTransport);//Neumann and Inlet BC will be used
+	myDiffusionEquation.setBoundaryFields(boundaryFieldsDiffusion);//Only Neumann BC will be used
 
 	// set the numerical method
 	myDiffusionEquation.setTimeScheme( Explicit);

@@ -26,6 +26,23 @@
 
 using namespace std;
 
+//! enumeration BoundaryType
+/*! Boundary condition type  */
+enum BoundaryTypeStationaryDiffusion	{ NeumannStationaryDiffusion, DirichletStationaryDiffusion, NoneBCStationaryDiffusion};
+
+/** \struct LimitField
+ * \brief value of some fields on the boundary  */
+struct LimitFieldStationaryDiffusion{
+	LimitFieldStationaryDiffusion(){bcType=NoneBCStationaryDiffusion; T=0; flux=0;}
+	LimitFieldStationaryDiffusion(BoundaryTypeStationaryDiffusion _bcType, double _T,	double _flux){
+		bcType=_bcType; T=_T; flux=_flux;
+	}
+
+	BoundaryTypeStationaryDiffusion bcType;
+	double T; //for Dirichlet
+	double flux; //for Neumann
+};
+
 class StationaryDiffusionEquation
 {
 
@@ -61,7 +78,7 @@ public :
 	void save();
 
     /* Boundary conditions */
-	void setBoundaryFields(map<string, LimitField> boundaryFields){
+	void setBoundaryFields(map<string, LimitFieldStationaryDiffusion> boundaryFields){
 		_limitField = boundaryFields;
     };
 	/** \fn setDirichletBoundaryCondition
@@ -72,8 +89,7 @@ public :
 			 * \param [out] void
 			 *  */
 	void setDirichletBoundaryCondition(string groupName,double Temperature){
-		_limitField[groupName]=LimitField(Dirichlet,-1, vector<double>(_Ndim,0),vector<double>(_Ndim,0),
-                                                        vector<double>(_Ndim,0),Temperature,-1,-1,-1);
+		_limitField[groupName]=LimitFieldStationaryDiffusion(DirichletStationaryDiffusion,Temperature,-1);
 	};
 
 	/** \fn setNeumannBoundaryCondition
@@ -82,9 +98,8 @@ public :
 			 * \param [in] string : the name of the boundary
 			 * \param [out] void
 			 *  */
-	void setNeumannBoundaryCondition(string groupName){
-		_limitField[groupName]=LimitField(Neumann,-1, vector<double>(0),vector<double>(0),
-                                                      vector<double>(0),-1,-1,-1,-1);
+	void setNeumannBoundaryCondition(string groupName, double flux=0){
+		_limitField[groupName]=LimitFieldStationaryDiffusion(NeumannStationaryDiffusion,-1, flux);
 	};
 
 	void setDirichletValues(map< int, double> dirichletBoundaryValues);
@@ -166,7 +181,7 @@ protected :
 	double _MaxIterLinearSolver;//nombre maximum d'iteration gmres obtenu au cours par les resolution de systemes lineaires au cours d'un pas de tmeps
 	bool _conditionNumber;//computes an estimate of the condition number
 
-	map<string, LimitField> _limitField;
+	map<string, LimitFieldStationaryDiffusion> _limitField;
     bool _onlyNeumannBC;//if true then the linear system is singular and should be solved up to a constant vector
     
 	bool _diffusionMatrixSet;

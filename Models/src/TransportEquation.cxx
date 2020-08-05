@@ -179,10 +179,10 @@ double TransportEquation::computeTransportMatrix(){
 			}
 			nameOfGroup = Fj.getGroupName();
 
-			if (_limitField[nameOfGroup].bcType==Neumann){
+			if (_limitField[nameOfGroup].bcType==NeumannTransport){
 				MatSetValue(_A,idm,idm,inv_dxi*un, ADD_VALUES);
 			}
-			else if(_limitField[nameOfGroup].bcType==Inlet){
+			else if(_limitField[nameOfGroup].bcType==InletTransport){
 				if(un>0){
 					MatSetValue(_A,idm,idm,inv_dxi*un, ADD_VALUES);
 				}
@@ -194,7 +194,7 @@ double TransportEquation::computeTransportMatrix(){
 			else {
 				cout<<"!!!!!!!!!!!!!!! Error TransportEquation::computeTransportMatrix() !!!!!!!!!!"<<endl;
 				cout<<"!!!!!!!!! Boundary condition not treated for boundary named "<<nameOfGroup<< ", _limitField[nameOfGroup].bcType= "<<_limitField[nameOfGroup].bcType<<" !!!!!!!!!!!!!! "<<endl;
-				cout<<"Accepted boundary conditions are Neumann "<<Neumann<< " and Inlet "<< Inlet <<endl;
+				cout<<"Accepted boundary conditions are NeumannTransport "<<NeumannTransport<< " and InletTransport "<< InletTransport <<endl;
 				throw CdmathException("Boundary condition not accepted");
 			}
 			// if Fj is inside the domain

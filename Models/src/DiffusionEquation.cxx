@@ -224,7 +224,7 @@ void DiffusionEquation::initialize()
             cout<<"!!!!! Warning : all nodes are boundary nodes !!!!!"<<endl;
 
         for(int i=0; i<_NboundaryNodes; i++)
-            if(_limitField[(_mesh.getNode(_boundaryNodeIds[i])).getGroupName()].bcType==Dirichlet)
+            if(_limitField[(_mesh.getNode(_boundaryNodeIds[i])).getGroupName()].bcType==DirichletDiffusion)
                 _dirichletNodeIds.push_back(_boundaryNodeIds[i]);
         _NdirichletNodes=_dirichletNodeIds.size();
         _NunknownNodes=_Nnodes - _NdirichletNodes;
@@ -439,9 +439,9 @@ double DiffusionEquation::computeDiffusionMatrixFV(bool & stop){
 			}
 			nameOfGroup = Fj.getGroupName();
 
-			if (_limitField[nameOfGroup].bcType==Neumann){//Nothing to do
+			if (_limitField[nameOfGroup].bcType==NeumannDiffusion){//Nothing to do
 			}
-			else if(_limitField[nameOfGroup].bcType==Dirichlet){
+			else if(_limitField[nameOfGroup].bcType==DirichletDiffusion){
 				barycenterDistance=Cell1.getBarryCenter().distance(Fj.getBarryCenter());
 				MatSetValue(_A,idm,idm,dn*inv_dxi/barycenterDistance                           , ADD_VALUES);
 				VecSetValue(_b,idm,    dn*inv_dxi/barycenterDistance*_limitField[nameOfGroup].T, ADD_VALUES);
@@ -450,7 +450,7 @@ double DiffusionEquation::computeDiffusionMatrixFV(bool & stop){
                 stop=true ;
 				cout<<"!!!!!!!!!!!!!!!!! Error DiffusionEquation::computeDiffusionMatrixFV !!!!!!!!!!"<<endl;
                 cout<<"Boundary condition not accepted for boundary named "<<nameOfGroup<< ", _limitField[nameOfGroup].bcType= "<<_limitField[nameOfGroup].bcType<<endl;
-				cout<<"Accepted boundary conditions are Neumann "<<Neumann<< " and Dirichlet "<<Dirichlet<<endl;
+				cout<<"Accepted boundary conditions are NeumannDiffusion "<<NeumannDiffusion<< " and DirichletDiffusion "<<DirichletDiffusion<<endl;
                 *_runLogFile<<"Boundary condition not accepted for boundary named "<<nameOfGroup<< ", _limitField[nameOfGroup].bcType= "<<_limitField[nameOfGroup].bcType<<endl;
 				throw CdmathException("Boundary condition not accepted");
 			}
