@@ -253,10 +253,12 @@ void StationaryDiffusionEquation::initialize()
     //If only Neumann BC, then matrix is singular and solution should be sought in space of mean zero vectors
     if(_onlyNeumannBC)
     {
-        std::cout<<"## Warning all boundary conditions are Neumann. System matrix is not invertible since constant vectors are in the kernel."<<std::endl;
-        std::cout<<"## As a consequence we seek a zero sum solution, and exact (LU and CHOLESKY) and incomplete factorisations (ILU and ICC) may fail."<<std::endl<<endl;
-        *_runLogFile<<"## Warning all boundary condition are Neumann. System matrix is not invertible since constant vectors are in the kernel."<<std::endl;
-        *_runLogFile<<"## As a consequence we seek a zero sum solution, and exact (LU and CHOLESKY) and incomplete factorisations (ILU and ICC) may fail."<<std::endl<<endl;
+        std::cout<<"### Warning : all boundary conditions are Neumann. System matrix is not invertible since constant vectors are in the kernel."<<std::endl;
+        std::cout<<"### Check the compatibility condition between the right hand side and the boundary data. For homogeneous Neumann BCs, the right hand side must have integral equal to zero."<<std::endl;
+        std::cout<<"### The system matrix being singular, we seek a zero sum solution, and exact (LU and CHOLESKY) and incomplete factorisations (ILU and ICC) may fail."<<std::endl<<endl;
+        *_runLogFile<<"### Warning : all boundary condition are Neumann. System matrix is not invertible since constant vectors are in the kernel."<<std::endl;
+        *_runLogFile<<"### The system matrix being singular, we seek a zero sum solution, and exact (LU and CHOLESKY) and incomplete factorisations (ILU and ICC) may fail."<<std::endl<<endl;
+        *_runLogFile<<"### Check the compatibility condition between the right hand side and the boundary data. For homogeneous Neumann BCs, the right hand side must have integral equal to zero."<<std::endl;
 
 		//Check that the matrix is symmetric
 		PetscBool isSymetric;
