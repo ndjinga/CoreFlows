@@ -27,14 +27,14 @@ enum BoundaryTypeDiffusion	{ NeumannDiffusion, DirichletDiffusion, NoneBCDiffusi
 /** \struct LimitField
  * \brief value of some fields on the boundary  */
 struct LimitFieldDiffusion{
-	LimitFieldDiffusion(){bcType=NoneBCDiffusion; T=0; flux=0;}
-	LimitFieldDiffusion(BoundaryTypeDiffusion _bcType, double _T,	double _flux){
-		bcType=_bcType; T=_T; flux=_flux;
+	LimitFieldDiffusion(){bcType=NoneBCDiffusion; T=0; normalFlux=0;}
+	LimitFieldDiffusion(BoundaryTypeDiffusion _bcType, double _T,	double _normalFlux){
+		bcType=_bcType; T=_T; normalFlux=_normalFlux;
 	}
 
 	BoundaryTypeDiffusion bcType;
 	double T; //for Dirichlet
-	double flux; //for Neumann
+	double normalFlux; //for Neumann
 };
 
 class DiffusionEquation: public ProblemCoreFlows
@@ -81,8 +81,8 @@ public :
 			 * \param [in] string : the name of the boundary
 			 * \param [out] void
 			 *  */
-	void setNeumannBoundaryCondition(string groupName, double flux=0){
-		_limitField[groupName]=LimitFieldDiffusion(NeumannDiffusion,-1, flux);
+	void setNeumannBoundaryCondition(string groupName, double normalFlux=0){
+		_limitField[groupName]=LimitFieldDiffusion(NeumannDiffusion,-1, normalFlux);
 	};
 
 	void setRodDensity(double rho){

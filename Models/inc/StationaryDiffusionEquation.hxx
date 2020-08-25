@@ -6,7 +6,7 @@
  * \date June 2019
  * \brief Stationary heat diffusion equation solved with either finite elements or finite volume method. 
  * -\lambda\Delta T=\Phi + \lambda_{sf} (T_{fluid}-T)
- * Dirichlet (imposed temperature) or Neumann (imposed flux) boundary conditions
+ * Dirichlet (imposed temperature) or Neumann (imposed normal flux) boundary conditions
  * */
 //============================================================================
 
@@ -33,14 +33,14 @@ enum BoundaryTypeStationaryDiffusion	{ NeumannStationaryDiffusion, DirichletStat
 /** \struct LimitField
  * \brief value of some fields on the boundary  */
 struct LimitFieldStationaryDiffusion{
-	LimitFieldStationaryDiffusion(){bcType=NoneBCStationaryDiffusion; T=0; flux=0;}
-	LimitFieldStationaryDiffusion(BoundaryTypeStationaryDiffusion _bcType, double _T,	double _flux){
-		bcType=_bcType; T=_T; flux=_flux;
+	LimitFieldStationaryDiffusion(){bcType=NoneBCStationaryDiffusion; T=0; normalFlux=0;}
+	LimitFieldStationaryDiffusion(BoundaryTypeStationaryDiffusion _bcType, double _T,	double _normalFlux){
+		bcType=_bcType; T=_T; normalFlux=_normalFlux;
 	}
 
 	BoundaryTypeStationaryDiffusion bcType;
 	double T; //for Dirichlet
-	double flux; //for Neumann
+	double normalFlux; //for Neumann
 };
 
 class StationaryDiffusionEquation
@@ -98,8 +98,8 @@ public :
 			 * \param [in] string : the name of the boundary
 			 * \param [out] void
 			 *  */
-	void setNeumannBoundaryCondition(string groupName, double flux=0){
-		_limitField[groupName]=LimitFieldStationaryDiffusion(NeumannStationaryDiffusion,-1, flux);
+	void setNeumannBoundaryCondition(string groupName, double normalFlux=0){
+		_limitField[groupName]=LimitFieldStationaryDiffusion(NeumannStationaryDiffusion,-1, normalFlux);
 	};
 
 	void setDirichletValues(map< int, double> dirichletBoundaryValues);

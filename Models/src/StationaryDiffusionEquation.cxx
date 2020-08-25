@@ -189,15 +189,17 @@ void StationaryDiffusionEquation::initialize()
                 _dirichletNodeIds.push_back(_boundaryNodeIds[i]);
             else if( _mesh.getNode(_boundaryNodeIds[i]).getGroupNames().size()==0 )
             {
-                cout<<"!!! No boundary value set for boundary node" << _boundaryNodeIds[i]<< endl;
-                *_runLogFile<< "!!! No boundary value set for boundary node" << _boundaryNodeIds[i]<<endl;
+                cout<<"!!! No boundary group set for boundary node" << _boundaryNodeIds[i]<< endl;
+                *_runLogFile<< "!!! No boundary group set for boundary node" << _boundaryNodeIds[i]<<endl;
                 _runLogFile->close();
-                throw CdmathException("Missing boundary value");
+                throw CdmathException("Missing boundary group");
             }
             else if(_limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType==NoneBCStationaryDiffusion)
             {
                 cout<<"!!! No boundary condition set for boundary node " << _boundaryNodeIds[i]<< endl;
-                *_runLogFile<< "!!!No boundary condition set for boundary node " << _boundaryNodeIds[i]<<endl;
+                cout<<"!!! Accepted boundary conditions are DirichletStationaryDiffusion "<< DirichletStationaryDiffusion <<" and NeumannStationaryDiffusion "<< NeumannStationaryDiffusion << endl;
+                *_runLogFile<< "!!! No boundary condition set for boundary node " << _boundaryNodeIds[i]<<endl;
+                *_runLogFile<< "!!! Accepted boundary conditions are DirichletStationaryDiffusion "<< DirichletStationaryDiffusion <<" and NeumannStationaryDiffusion "<< NeumannStationaryDiffusion <<endl;
                 _runLogFile->close();
                 throw CdmathException("Missing boundary condition");
             }
@@ -207,8 +209,8 @@ void StationaryDiffusionEquation::initialize()
             {
                 cout<<"!!! Wrong boundary condition "<< _limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType<< " set for boundary node " << _boundaryNodeIds[i]<< endl;
                 cout<<"!!! Accepted boundary conditions are DirichletStationaryDiffusion "<< DirichletStationaryDiffusion <<" and NeumannStationaryDiffusion "<< NeumannStationaryDiffusion << endl;
-                *_runLogFile<< "Wrong boundary condition "<< _limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType<< " set for boundary node " << _boundaryNodeIds[i]<<endl;
-                *_runLogFile<< "Accepted boundary conditions are DirichletStationaryDiffusion "<< DirichletStationaryDiffusion <<" and NeumannStationaryDiffusion "<< NeumannStationaryDiffusion <<endl;
+                *_runLogFile<< "!!! Wrong boundary condition "<< _limitField[_mesh.getNode(_boundaryNodeIds[i]).getGroupName()].bcType<< " set for boundary node " << _boundaryNodeIds[i]<<endl;
+                *_runLogFile<< "!!! Accepted boundary conditions are DirichletStationaryDiffusion "<< DirichletStationaryDiffusion <<" and NeumannStationaryDiffusion "<< NeumannStationaryDiffusion <<endl;
                 _runLogFile->close();
                 throw CdmathException("Wrong boundary condition");
             }
@@ -468,7 +470,8 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFV(bool & stop){
             {
                 nameOfGroup = Fj.getGroupName();
     
-                if (_limitField[nameOfGroup].bcType==NeumannStationaryDiffusion){//Nothing to do
+                if (_limitField[nameOfGroup].bcType==NeumannStationaryDiffusion){
+                    VecSetValue(_b,idm,    -dn*inv_dxi*_limitField[nameOfGroup].normalFlux, ADD_VALUES);
                 }
                 else if(_limitField[nameOfGroup].bcType==DirichletStationaryDiffusion){
                     barycenterDistance=Cell1.getBarryCenter().distance(Fj.getBarryCenter());

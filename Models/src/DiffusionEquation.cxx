@@ -439,7 +439,8 @@ double DiffusionEquation::computeDiffusionMatrixFV(bool & stop){
 			}
 			nameOfGroup = Fj.getGroupName();
 
-			if (_limitField[nameOfGroup].bcType==NeumannDiffusion){//Nothing to do
+			if (_limitField[nameOfGroup].bcType==NeumannDiffusion){
+                VecSetValue(_b,idm,   -dn*inv_dxi*_limitField[nameOfGroup].normalFlux, ADD_VALUES);
 			}
 			else if(_limitField[nameOfGroup].bcType==DirichletDiffusion){
 				barycenterDistance=Cell1.getBarryCenter().distance(Fj.getBarryCenter());
