@@ -86,6 +86,7 @@ StationaryDiffusionEquation::StationaryDiffusionEquation(int dim, bool FECalcula
     _NdirichletNodes=0;
     _NunknownNodes=0;
     _dirichletValuesSet=false;   
+    _neumannValuesSet=false;   
     
     //Linear solver data
 	_precision=1.e-6;
@@ -903,6 +904,13 @@ StationaryDiffusionEquation::setDirichletValues(map< int, double> dirichletBound
 {
     _dirichletValuesSet=true;
     _dirichletBoundaryValues=dirichletBoundaryValues;
+}
+
+void 
+StationaryDiffusionEquation::setNeumannValues(map< int, double> neumannBoundaryValues)
+{
+    _neumannValuesSet=true;
+    _neumannBoundaryValues=neumannBoundaryValues;
 }
 
 double 

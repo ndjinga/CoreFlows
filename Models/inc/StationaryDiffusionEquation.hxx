@@ -103,6 +103,7 @@ public :
 	};
 
 	void setDirichletValues(map< int, double> dirichletBoundaryValues);
+	void setNeumannValues  (map< int, double>   neumannBoundaryValues);
 	
 	void setConductivity(double conductivite){
 		_conductivity=conductivite;
@@ -224,9 +225,11 @@ protected :
     int unknownNodeIndex(int globalIndex, std::vector< int > dirichletNodes);
     int globalNodeIndex(int unknownIndex, std::vector< int > dirichletNodes);
 
-    /********* Possibility to set a boundary field as Dirichlet boundary condition *********/
+    /********* Possibility to set a boundary field as DirichletNeumann boundary condition *********/
     bool _dirichletValuesSet;
+    bool _neumannValuesSet;
     std::map< int, double> _dirichletBoundaryValues;
+    std::map< int, double> _neumannBoundaryValues;
 };
 
 #endif /* StationaryDiffusionEquation_HXX_ */
