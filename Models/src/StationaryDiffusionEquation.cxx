@@ -12,7 +12,7 @@ int StationaryDiffusionEquation::fact(int n)
 {
   return (n == 1 || n == 0) ? 1 : fact(n - 1) * n;
 }
-int StationaryDiffusionEquation::unknownNodeIndex(int globalIndex, std::vector< int > dirichletNodes)
+int StationaryDiffusionEquation::unknownNodeIndex(int globalIndex, std::vector< int > dirichletNodes) const
 {//assumes Dirichlet node numbering is strictly increasing
     int j=0;//indice de parcours des noeuds frontière avec CL Dirichlet
     int boundarySize=dirichletNodes.size();
@@ -26,7 +26,7 @@ int StationaryDiffusionEquation::unknownNodeIndex(int globalIndex, std::vector< 
         throw CdmathException("StationaryDiffusionEquation::unknownNodeIndex : Error : node is a Dirichlet boundary node");
 }
 
-int StationaryDiffusionEquation::globalNodeIndex(int unknownNodeIndex, std::vector< int > dirichletNodes)
+int StationaryDiffusionEquation::globalNodeIndex(int unknownNodeIndex, std::vector< int > dirichletNodes) const
 {//assumes Dirichlet boundary node numbering is strictly increasing
     int boundarySize=dirichletNodes.size();
     /* trivial case where all boundary nodes are Neumann BC */
@@ -923,6 +923,28 @@ std::vector< double >
 StationaryDiffusionEquation::getEigenvalues(int nev, EPSWhich which, double tol) const
 {
   SparseMatrixPetsc A = SparseMatrixPetsc(_A);
+  
+  if(_FECalculation)//We need to scale the FE matrix, otherwise the eigenvalues go to zero as the mesh is refined
+  {
+      Vector nodal_volumes(_NunknownNodes);
+      int j_int;
+      for(int i = 0; i< _Nmailles ; i++)//On parcourt les cellules du maillage
+      {
+        Cell Ci = _mesh.getCell(i);
+        for(int j = 0 ; j<_Ndim+1 ; j++)//On parcourt les noeuds de la cellule
+        {
+            if(find(_dirichletNodeIds.begin(),_dirichletNodeIds.end(),Ci.getNodeId(j))==_dirichletNodeIds.end())//node j is an unknown node (not a Dirichlet node)
+			{
+                j_int=unknownNodeIndex(j, _dirichletNodeIds);//indice du noeud j en tant que noeud inconnu
+                nodal_volumes[j_int]+=Ci.getMeasure()/(_Ndim+1);
+            }
+        }
+       }
+      for( j_int = 0; j_int< _NunknownNodes ; j_int++)
+        nodal_volumes[j_int]=1/nodal_volumes[j_int];
+      A.leftDiagonalScale(nodal_volumes);
+  }
+
   return A.getEigenvalues( nev, which, tol);
 }
 std::vector< Vector > 
