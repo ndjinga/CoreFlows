@@ -248,11 +248,21 @@ void StationaryDiffusionEquation::initialize()
 	KSPGetPC(_ksp, &_pc);
 	PCSetType(_pc, _pctype);
 
-    //Checking whether all boundaries are Neumann boundaries
-    map<string, LimitFieldStationaryDiffusion>::iterator it = _limitField.begin();
-    while(it != _limitField.end() and (it->second).bcType == NeumannStationaryDiffusion)
-        it++;
-    _onlyNeumannBC = (it == _limitField.end() && _limitField.size()>0);
+    //Checking whether all boundary conditions are Neumann boundary condition
+    //if(_FECalculation) _onlyNeumannBC = _NdirichletNodes==0;
+    if(!_neumannValuesSet)//Boundary conditions set via LimitField structure
+    {
+        map<string, LimitFieldStationaryDiffusion>::iterator it = _limitField.begin();
+        while(it != _limitField.end() and (it->second).bcType == NeumannStationaryDiffusion)
+            it++;
+        _onlyNeumannBC = (it == _limitField.end() && _limitField.size()>0);//what if _limitField.size()==0 ???
+    }
+    else
+        if(_FECalculation)
+            _onlyNeumannBC = _neumannBoundaryValues.size()==_NboundaryNodes;
+        else
+            _onlyNeumannBC = _neumannBoundaryValues.size()==_mesh.getBoundaryFaceIds().size();
+
     //If only Neumann BC, then matrix is singular and solution should be sought in space of mean zero vectors
     if(_onlyNeumannBC)
     {
@@ -332,7 +342,7 @@ double StationaryDiffusionEquation::computeDiffusionMatrix(bool & stop)
 double StationaryDiffusionEquation::computeDiffusionMatrixFE(bool & stop){
 	Cell Cj;
 	string nameOfGroup;
-	double dn;
+	double dn, coeff;
 	MatZeroEntries(_A);
 	VecZeroEntries(_b);
     
@@ -396,7 +406,7 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFE(bool & stop){
                                 valuesBorder[kdim]=0;                            
                         }
                         GradShapeFuncBorder=gradientNodal(M,valuesBorder)/fact(_Ndim);
-                        double coeff =-_conductivity*(_DiffusionTensor*GradShapeFuncBorder)*GradShapeFuncs[idim]/Cj.getMeasure();
+                        coeff =-_conductivity*(_DiffusionTensor*GradShapeFuncBorder)*GradShapeFuncs[idim]/Cj.getMeasure();
                         VecSetValue(_b,i_int,coeff, ADD_VALUES);                        
                     }
                 }
@@ -404,6 +414,28 @@ double StationaryDiffusionEquation::computeDiffusionMatrixFE(bool & stop){
         }            
 	}
     
+    //Calcul de la contribution de la condition limite de Neumann au second membre
+    if( _NdirichletNodes !=_NboundaryNodes)
+    {
+        vector< int > boundaryFaces = _mesh.getBoundaryFaceIds();
+        int NboundaryFaces=boundaryFaces.size();
+        for(int i = 0; i< NboundaryFaces ; i++)//On parcourt les faces du bord
+        {
+            Face Fi = _mesh.getFace(i);
+            for(int j = 0 ; j<_Ndim ; j++)//On parcourt les noeuds de la face
+            {
+                if(find(_dirichletNodeIds.begin(),_dirichletNodeIds.end(),Fi.getNodeId(j))==_dirichletNodeIds.end())//node j is an Neumann BC node (not a Dirichlet BC node)
+                {
+                    j_int=unknownNodeIndex(Fi.getNodeId(j), _dirichletNodeIds);//indice du noeud j en tant que noeud inconnu
+                    if( _neumannValuesSet )
+                        coeff =Fi.getMeasure()/_Ndim*_neumannBoundaryValues[Fi.getNodeId(j)];
+                    else    
+                        coeff =Fi.getMeasure()/_Ndim*_limitField[_mesh.getNode(Fi.getNodeId(j)).getGroupName()].normalFlux;
+                    VecSetValue(_b, j_int, coeff, ADD_VALUES);
+                }
+            }
+        }
+    }
     MatAssemblyBegin(_A, MAT_FINAL_ASSEMBLY);
 	MatAssemblyEnd(_A, MAT_FINAL_ASSEMBLY);
 	VecAssemblyBegin(_b);
@@ -935,7 +967,7 @@ StationaryDiffusionEquation::getEigenvalues(int nev, EPSWhich which, double tol)
         {
             if(find(_dirichletNodeIds.begin(),_dirichletNodeIds.end(),Ci.getNodeId(j))==_dirichletNodeIds.end())//node j is an unknown node (not a Dirichlet node)
 			{
-                j_int=unknownNodeIndex(j, _dirichletNodeIds);//indice du noeud j en tant que noeud inconnu
+                j_int=unknownNodeIndex(Ci.getNodeId(j), _dirichletNodeIds);//indice du noeud j en tant que noeud inconnu
                 nodal_volumes[j_int]+=Ci.getMeasure()/(_Ndim+1);
             }
         }
