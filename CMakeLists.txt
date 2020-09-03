@@ -7,10 +7,9 @@ project (CoreFlows C CXX)
 set (COREFLOWS_VERSION_MAJOR 0)
 set (COREFLOWS_VERSION_MINOR 1)
 
-option (CMAKE_BUILD_TYPE "Debug or Release compilation" Release)
-option (COREFLOWS_WITH_DOCUMENTATION "Generate documentation for CoreFlows use." OFF)
-option (COREFLOWS_WITH_PYTHON "Compile Python interface for COREFLOWS." OFF)
-option (COREFLOWS_WITH_GUI "Compile Graphic user Interface for COREFLOWS." OFF)
+option (COREFLOWS_WITH_DOCUMENTATION "Generate documentation for CoreFlows use." ON)
+option (COREFLOWS_WITH_PYTHON "Compile Python interface for COREFLOWS." ON)
+option (COREFLOWS_WITH_GUI "Compile Graphic user Interface for COREFLOWS." ON)
 option (COREFLOWS_WITH_PACKAGE "Generate RPM, Debian and tarball packages." OFF)
 
 #Path to installed libraries
