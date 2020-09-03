@@ -206,6 +206,7 @@ if   (COREFLOWS_WITH_PYTHON)
     ENDIF(${CMAKE_VERSION} VERSION_GREATER "3.12.0")
 
   message(STATUS "Python version is ${Python_VERSION}")
+  message(STATUS "Python include dir ${Python_INCLUDE_DIRS}")
 
   find_package (SWIG 3.0 REQUIRED)
   set (CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, python-dev, python-numpy, swig")
