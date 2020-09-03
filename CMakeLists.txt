@@ -136,8 +136,6 @@ set (CoreFlows_EXAMPLES ${CoreFlows_SOURCE_DIR}/examples)
 
 set( CoreFlows_INCLUDES 
   ${CDMATH_INCLUDES}											    #
-  ${MED_INCLUDES}											    #
-  ${MEDCOUPLING_INCLUDES}										    #
   ${PETSC_INCLUDES}											    #
   ${CoreFlows_SRC}/inc											    #    
   )													    #

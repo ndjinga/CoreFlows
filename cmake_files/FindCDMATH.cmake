@@ -49,11 +49,6 @@ find_path (CDMATH_DIR include/CdmathException.hxx
 message (STATUS "Found CDMATH: ${CDMATH_DIR}")
 
 # Include directories
-# This sets the variable ${CDMATH_INCLUDES}.
-set(CDMATH_INCLUDES ${CDMATH_DIR}/include)
-if (NOT (IS_DIRECTORY  ${CDMATH_INCLUDES}) )
-  message (SEND_ERROR "CDMATH_INCLUDES can not be used, ${CDMATH_INCLUDES} does not exist.")
-endif () 
 set(MED_INCLUDES $ENV{MEDFILE_INCLUDE_DIRS})
 if (NOT (IS_DIRECTORY  ${MED_INCLUDES}) )
   message (SEND_ERROR "MED_INCLUDES can not be used, ${MED_INCLUDES} does not exist.")
@@ -61,6 +56,11 @@ endif ()
 set(MEDCOUPLING_INCLUDES $ENV{MEDCOUPLING_INCLUDE_DIR})
 if (NOT (IS_DIRECTORY  ${MEDCOUPLING_INCLUDES}) )
   message (SEND_ERROR "MEDCOUPLING_INCLUDES can not be used, ${MEDCOUPLING_INCLUDES} does not exist.")
+endif () 
+# This sets the variable ${CDMATH_INCLUDES}.
+set(CDMATH_INCLUDES ${CDMATH_DIR}/include ${MED_INCLUDES} ${MEDCOUPLING_INCLUDES} )
+if (NOT (IS_DIRECTORY  ${CDMATH_DIR}/include) )
+  message (SEND_ERROR "CDMATH_INCLUDES can not be used, ${CDMATH_DIR}/include does not exist.")
 endif () 
 
 # CDMATH libraries against which to link
@@ -71,10 +71,10 @@ if ( NOT (IS_DIRECTORY  ${CDMATH_LIBDIR}) )
 endif () 
 find_library (CDMATHBASE_LIB NAMES base PATHS ${CDMATH_LIBDIR})
 find_library (CDMATHMESH_LIB NAMES mesh PATHS ${CDMATH_LIBDIR})
+find_library (CDMATHLINEARSOLVER_LIB NAMES linearsolver PATHS ${CDMATH_LIBDIR})
 find_library (MEDC_LIB NAMES medC PATHS $ENV{MEDFILE_LIBRARIES})
 find_library (MEDLOADER_LIB NAMES medloader PATHS $ENV{MEDCOUPLING_LIBRARIES})
 find_library (MEDCOUPLING_LIB NAMES medcoupling PATHS $ENV{MEDCOUPLING_LIBRARIES})
-find_library (CDMATHLINEARSOLVER_LIB NAMES linearsolver PATHS ${CDMATH_LIBDIR})
 set (CDMATH_LIBRARIES
 	${MEDC_LIB} 
 	${MEDLOADER_LIB} 
