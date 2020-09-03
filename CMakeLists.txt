@@ -113,23 +113,6 @@ endif ()
 
 #-----------------------------------------------------------------------------------------------------------#
 
-
-
-# Swig interface -------------------------------------------------------------------------------------------#
-                                                                                                            #
-if (COREFLOWS_WITH_PYTHON)                                                                                  #
-   find_package (PYTHON REQUIRED)                                                                           #
-   find_package (SWIG 3.0 REQUIRED)        
-
-   set (PV_LIB_DIR /usr/lib/python2.7/dist-packages/:/usr/lib/python3.7/dist-packages/:/usr/lib64/paraview/)
-   set (PV_PYTHON_DIR /usr/lib/python2.7/dist-packages:/usr/lib64/paraview/site-packages/:/usr/lib64/paraview/site-packages/paraview/:/usr/lib64/paraview/site-packages/vtk/:/usr/lib64/paraview/python2.7/site-packages/:/usr/lib64/paraview/python2.7/site-packages/paraview/:/usr/lib64/paraview/python2.7/site-packages/vtkmodules:/usr/lib64/paraview/python3.7/site-packages/:/usr/lib64/paraview/python3.7/site-packages/paraview/:/usr/lib64/paraview/python3.7/site-packages/vtkmodules)
-   set (CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, python-dev, python-numpy, swig")     #
-   set (CPACK_RPM_PACKAGE_REQUIRES "${CPACK_RPM_PACKAGE_REQUIRES}, python-devel, numpy, swig")              #
-   set (CoreFlows_SWIG_DIR ${CoreFlows_SOURCE_DIR}/swig)                                                    #
-endif ()                                                                                                    #
-                                                                                                            #
-#-----------------------------------------------------------------------------------------------------------#
-
 # Base directories
 set (CoreFlows_SRC ${CoreFlows_SOURCE_DIR}/Models ) 
 set (CoreFlows_EXAMPLES ${CoreFlows_SOURCE_DIR}/examples)
@@ -142,9 +125,6 @@ set( CoreFlows_INCLUDES
 
 add_subdirectory (${CoreFlows_SRC})
 add_subdirectory (${CoreFlows_EXAMPLES})
-if (COREFLOWS_WITH_PYTHON)                                                                                  #
-   add_subdirectory (${CoreFlows_SWIG_DIR})                                                                 #
-endif ()                                                                                                    #
 
 # Documentation --------------------------------------------------------------------------------------------#
                                                                                                             #
@@ -168,6 +148,71 @@ if (COREFLOWS_WITH_DOCUMENTATION)                                               
 endif ()                                                                                                    #
                                                                                                             #
 # ------------- --------------------------------------------------------------------------------------------#
+
+
+# detect Paraview version before chosing python2 or python3
+if   (COREFLOWS_WITH_PYTHON AND COREFLOWS_WITH_POSTPRO)
+  
+  if( NOT DEFINED PARAVIEW_VERSION )
+    if( DEFINED PARAVIEW_ROOT_DIR)
+      set( PARAVIEW_INCLUDE_DIR   ${PARAVIEW_ROOT_DIR}/include)
+      set( PARAVIEW_LIBRARIES_DIR ${PARAVIEW_ROOT_DIR}/lib)
+    else( DEFINED PARAVIEW_ROOT_DIR)
+      set( PARAVIEW_INCLUDE_DIR /usr/include/paraview/)
+      set( PARAVIEW_LIBRARIES_DIR /usr/lib/paraview/:/usr/lib64/paraview/)
+    endif( DEFINED PARAVIEW_ROOT_DIR)
+
+    #extraction of the paraview version"
+    IF   ( EXISTS ${PARAVIEW_INCLUDE_DIR}/vtkPVConfig.h )
+      file(STRINGS ${PARAVIEW_INCLUDE_DIR}/vtkPVConfig.h vtkConfig)
+    ELSE ( EXISTS ${PARAVIEW_INCLUDE_DIR}/vtkPVConfig.h )
+      message(WARNING "Could not find ParaView configuration file vtkPVConfig.h in folder ${PARAVIEW_INCLUDE_DIR}. Postprocessing may not work")
+    ENDIF( EXISTS ${PARAVIEW_INCLUDE_DIR}/vtkPVConfig.h )
+
+    FOREACH(line ${vtkConfig})
+      string(FIND "${line}" "#define PARAVIEW_VERSION_FULL " pos)
+      IF(NOT ${pos} EQUAL -1)
+        string(LENGTH ${line} line_length)#length of the tarball
+        MATH(EXPR start_pv_version "${line_length}-6")#line ends with "x.y.z", that counts for 7 characters
+        string(SUBSTRING ${line} ${start_pv_version} 5 PARAVIEW_VERSION)
+        break()
+      ENDIF(NOT ${pos} EQUAL -1)
+    ENDFOREACH(line vtkConfig)
+  endif(NOT DEFINED PARAVIEW_VERSION)
+  
+  message(STATUS "ParaView version is ${PARAVIEW_VERSION}" )
+  IF   ( ${PARAVIEW_VERSION} STRGREATER "5.6" OR ${PARAVIEW_VERSION} STREQUAL "5.6" )#Use python 3, use VERSION_GREATER_EQUAL if cmake >=3.7
+    SET(PYTHON2OR3 "3")
+  ELSE ( ${PARAVIEW_VERSION} STRGREATER "5.6" OR ${PARAVIEW_VERSION} STREQUAL "5.6" )#Use python 2
+    SET(PYTHON2OR3 "2")
+  ENDIF( ${PARAVIEW_VERSION} STRGREATER "5.6" OR ${PARAVIEW_VERSION} STREQUAL "5.6" )
+
+  set (PV_LIB_DIR    /usr/lib/python${PYTHON2OR3}.7/dist-packages/paraview/:/usr/lib64/paraview/:/usr/lib/paraview/)
+  set (PV_PYTHON_DIR /usr/lib/python${PYTHON2OR3}.7/dist-packages/paraview/:/usr/lib64/paraview/site-packages/:/usr/lib64/paraview/site-packages/paraview/:/usr/lib64/paraview/site-packages/vtk/:/usr/lib64/paraview/python${PYTHON2OR3}.7/site-packages/:/usr/lib64/paraview/python${PYTHON2OR3}.7/site-packages/paraview/:/usr/lib64/paraview/python${PYTHON2OR3}.7/site-packages/vtkmodules:/usr/lib/paraview/site-packages/paraview:/usr/lib/paraview/site-packages/paraview/vtk)
+
+endif(COREFLOWS_WITH_PYTHON AND COREFLOWS_WITH_POSTPRO)
+
+# Swig interface
+if   (COREFLOWS_WITH_PYTHON)
+    IF   (${CMAKE_VERSION} VERSION_GREATER "3.12.0")
+      find_package(Python ${PYTHON2OR3} REQUIRED COMPONENTS Interpreter Development )
+      SET(PYTHON_EXECUTABLE ${Python_EXECUTABLE})
+    ELSE (${CMAKE_VERSION} VERSION_GREATER "3.12.0")
+      find_package(PythonInterp ${PYTHON2OR3} REQUIRED )
+      find_package(PythonLibs   ${PYTHON2OR3} REQUIRED )
+      set(Python_LIBRARIES    ${PYTHON_LIBRARIES})
+      set(Python_INCLUDE_DIRS ${PYTHON_INCLUDE_DIRS})
+      set(Python_VERSION      ${PYTHON_VERSION_STRING})
+    ENDIF(${CMAKE_VERSION} VERSION_GREATER "3.12.0")
+
+  message(STATUS "Python version is ${Python_VERSION}")
+
+  find_package (SWIG 3.0 REQUIRED)
+  set (CPACK_DEBIAN_PACKAGE_DEPENDS "${CPACK_DEBIAN_PACKAGE_DEPENDS}, python-dev, python-numpy, swig")
+  set (CPACK_RPM_PACKAGE_REQUIRES   "${CPACK_RPM_PACKAGE_REQUIRES},   python-devel,      numpy, swig")
+  set (CoreFlows_SWIG_DIR ${CoreFlows_SOURCE_DIR}/swig)                                                    #
+  add_subdirectory (${CoreFlows_SWIG_DIR})                                                                 #
+endif(COREFLOWS_WITH_PYTHON)
 
 # Graphic interface-----------------------------------------------------------------------------------------#
      													    #
