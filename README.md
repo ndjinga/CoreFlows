@@ -2,7 +2,7 @@ CoreFlows
 ================
 
 CoreFlows is an open source C++/Python library intended at solving PDE systems
-arising from the modeling of nuclear reactor cores which involves fluid dynamics, heat and neutron diffusion as well as soli elasticity. It
+arising from the modeling of nuclear reactor cores which involves fluid dynamics, heat and neutron diffusion as well as solid elasticity. It
 is a simple environment meant at students and researchers to test new numerical
 methods on general geometries with unstructured meshes. It is developped by
 CEA Saclay since 2014 and proposes a few basic models as well as some basic finite volume and finite element numerical methods. 
