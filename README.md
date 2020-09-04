@@ -1,24 +1,24 @@
-CDMATH-CoreFlows
+CoreFlows
 ================
 
-CDMATH-CoreFlows is an open source C++/Python library intended at solving PDE systems
-arising from the thermalhydraulics of two phase flows in power plant boilers. It
+CoreFlows is an open source C++/Python library intended at solving PDE systems
+arising from the modeling of nuclear reactor cores which involves fluid dynamics, heat and neutron diffusion as well as soli elasticity. It
 is a simple environment meant at students and researchers to test new numerical
 methods on general geometries with unstructured meshes. It is developped by
-CEA Saclay since 2014 and proposes a few
-basic models and finite volume numerical methods. Some of the main objectives
-are the study of
+CEA Saclay since 2014 and proposes a few basic models as well as some basic finite volume and finite element numerical methods. 
+The main objectives of CoreFlows are the study of
 
-- Numerical schemes for compressible flows at low Mach numbers
+- Numerical schemes for compressible flows at low Mach numbers on general meshes
 - Well balanced schemes for stiff source terms (heat source, phase change, pressure losses)
-- Flow inversion and counter-current two phase flows
+- Numerical handling of flow inversion, phase disappearance and counter-currents in two phase flows
+- Numerical handling of stiff porosity or cross section functions
 - Schemes that preserve the phasic volume fraction α ∈ [0, 1]
 - Convergence of finite volume methods
 - New preconditioners for implicit methods for two phase flows
 - The coupling of fluid models or multiphysics coupling (eg thermal hydraulics and neutronics or thermal hydraulics and solid thermics)
 
-CDMATH-CoreFlows relies on the numerical toolbox [CDMATH-Toolbox](https://github.com/ndjinga/CDMATH) of the project [CDMATH](http://cdmath.jimdo.com) for the handling of meshes and fields, and on the library [PETSC](https://www.mcs.anl.gov/petsc/) for the handling of large sparse matrices.
-You will need the packages 'doxygen' if you want to generate de documentation and 'swig' if you want to use python scripts.  The software is currently developed for linux distributions and is maintained on Ubuntu 14.04 LTS, 16.04 LTS and 18.04 LTS, as well as on Fedora 24, 26 and 29.
+CoreFlows relies on the numerical toolbox [CDMATH-Toolbox](https://github.com/ndjinga/CDMATH) of the project [CDMATH](http://cdmath.jimdo.com) for the handling of meshes and fields, and on the library [PETSC](https://www.mcs.anl.gov/petsc/) for the handling of large sparse matrices.
+You will need the packages 'doxygen' if you want to generate de documentation and 'swig' if you want to use python scripts.  The software is currently developed for linux distributions and is maintained on Ubuntu 16.04 LTS and 18.04 LTS, as well as on Fedora 24, 26, 29 and 30.
 
 User guide
 ----------
@@ -35,7 +35,7 @@ The user guide is organized as follows :
 - [Software structure](Documentation/software.md)
 - [The numerical methods](Documentation/numericalPage.ipynb)
 - [Summary of  available functionalities](Documentation/functionalities.ipynb)
-- [CDMATH-CoreFlows example scripts](Documentation/examples.md)
+- [CoreFlows example scripts](Documentation/examples.md)
 
 Download and compilation of CDMATH and PETSc
 --------------------------------------------
@@ -71,20 +71,20 @@ By default, [CDMATH-Toolbox](https://github.com/ndjinga/CDMATH) will compile a n
 Download and compilation of CoreFlows
 ---------------------------------------------
 First create and access a working directory :
-- `mkdir -p ~/workspace/CDMATH-CoreFlows `
-- `cd ~/workspace/CDMATH-CoreFlows `
+- `mkdir -p ~/workspace/CoreFlows `
+- `cd ~/workspace/CoreFlows `
 Now create build and install repositories:
-- `mkdir CDMATH-CoreFlows_build CDMATH-CoreFlows_install `
+- `mkdir CoreFlows_build CoreFlows_install `
 
-In order to download CDMATH-CoreFlows either unzip the following file to a directory CDMATH-CoreFlows-master
-- `https://github.com/ndjinga/CDMATH-CoreFlows/archive/master.zip`
-or clone the git repository to a folder CDMATH-CoreFlows-master
-- `git clone https://github.com/ndjinga/CDMATH-CoreFlows.git CDMATH-CoreFlows-master`
-Either of these latter commands results in the creation of a directory `~/workspace/CDMATH-CoreFlows/CDMATH-CoreFlows-master`  containing the source files.
+In order to download CoreFlows either unzip the following file to a directory CoreFlows-master
+- `https://github.com/ndjinga/CoreFlows/archive/master.zip`
+or clone the git repository to a folder CoreFlows-master
+- `git clone https://github.com/ndjinga/CoreFlows.git CoreFlows-master`
+Either of these latter commands results in the creation of a directory `~/workspace/CoreFlows/CoreFlows-master`  containing the source files.
 
 In the following steps we assume that [PETSC](https://www.mcs.anl.gov/petsc/) (version 3.4 or more recent) has been installed with CDMATH with the process described above.
 You need to set the following variables 
-- `CDMATH_INSTALL`, the path to your CDMATH installation, for example  `~/workspace/cdmath/cdmath_install//share/petsc-3.8.3 `
+- `CDMATH_INSTALL`, the path to your CDMATH installation, for example  `~/workspace/cdmath/cdmath_install/share/petsc-3.13.5 `
 - `PETSC_DIR`, the path to your PETSc installation. If [PETSC](https://www.mcs.anl.gov/petsc/) was installed by CDMATH then [CDMATH-Toolbox](https://github.com/ndjinga/CDMATH) can be defined as `~/workspace/cdmath/cdmath_install`
 - `PETSC_ARCH`, the type of installation used (usually arch-linux2-c-opt or linux-gnu-c-opt)
 
@@ -98,26 +98,26 @@ Go to the build directory
 - `cd CoreFlows_build `
 
 Then run the command
-- `../CDMATH-CoreFlows-master/configure  --prefix=../CDMATH-CoreFlows_install/ --with-petsc-dir=$PETSC_DIR --with-petsc-arch=$PETSC_ARCH --with-cdmath-dir=$CDMATH_INSTALL --with-python --with-doc`
+- `../CoreFlows-master/configure  --prefix=../CoreFlows_install/ --with-petsc-dir=$PETSC_DIR --with-petsc-arch=$PETSC_ARCH --with-cdmath-dir=$CDMATH_INSTALL --with-python --with-doc`
 - `make doc install`
 
 You can add the following optional commands
-- `--with-gui`, if you want to use CDMATH-CoreFlows as a Salomé module (you will need to use a Salomé shell)
-- `--with-debug`, if you want to use CDMATH-CoreFlows in debug mode instead of the default optimised mode
+- `--with-gui`, if you want to use CoreFlows as a Salomé module (you will need to use a Salomé shell)
+- `--with-debug`, if you want to use CoreFlows in debug mode instead of the default optimised mode
 
-Use of CDMATH-CoreFlows
+Use of CoreFlows
 -----------------------
-First load CDMATH-CoreFlows environment from the CoreFlows-master directory
-- `source ~/workspace/CDMATH-CoreFlows/CDMATH-CoreFlows_install/env_CoreFlows.sh `
+First load CoreFlows environment from the CoreFlows-master directory
+- `source ~/workspace/CoreFlows/CoreFlows_install/env_CoreFlows.sh `
 
 If you use C language: edit the file CoreFlows-master/CoreFlows_src/main.cxx then in a terminal type
-- `cd ~/workspace/CDMATH-CoreFlows/CDMATH-CoreFlows_build  `
+- `cd ~/workspace/CoreFlows/CoreFlows_build  `
 - `make`
 - `make install`
 Then you can run the simulation in any directory with the command line
 - `$CoreFlows `
 
-If you use python language: edit your own python file `my_file.py` following for example the pattern of the file `CDMATH-CoreFlows-master/main.py`. Then in a terminal type
+If you use python language: edit your own python file `my_file.py` following for example the pattern of the file `CoreFlows-master/main.py`. Then in a terminal type
 - `python my_file.py `
 
 If you use the graphic interface, you need to run a [SALOME](https://www.salome-platform.org/) Unix shell 
@@ -126,4 +126,4 @@ and type the command line
 - `runSalome -mCOREFLOWS`
 then click on new study to open CoreFlows interface
 
-The complete documentation is available in the directory `~/workspace/CDMATH-CoreFlows/CDMATH-CoreFlows_install/share/doc/`
+The complete documentation is available in the directory `~/workspace/CoreFlows/CoreFlows_install/share/doc/`
