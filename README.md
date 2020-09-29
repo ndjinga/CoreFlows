@@ -79,14 +79,14 @@ Now create build and install repositories:
 In order to download CoreFlows either unzip the following file to a directory CoreFlows-master
 - `https://github.com/ndjinga/CoreFlows/archive/master.zip`
 or clone the git repository to a folder CoreFlows-master
-- `git clone https://github.com/ndjinga/CoreFlows.git CoreFlows-master`
+- `git clone https://github.com/ndjinga/CDMATH-CoreFlows.git CoreFlows-master`
 Either of these latter commands results in the creation of a directory `~/workspace/CoreFlows/CoreFlows-master`  containing the source files.
 
 In the following steps we assume that [PETSC](https://www.mcs.anl.gov/petsc/) (version 3.4 or more recent) has been installed with CDMATH with the process described above.
 You need to set the following variables 
 - `CDMATH_INSTALL`, the path to your CDMATH installation, for example  `~/workspace/cdmath/cdmath_install/share/petsc-3.13.5 `
 - `PETSC_DIR`, the path to your PETSc installation. If [PETSC](https://www.mcs.anl.gov/petsc/) was installed by CDMATH then [CDMATH-Toolbox](https://github.com/ndjinga/CDMATH) can be defined as `~/workspace/cdmath/cdmath_install`
-- `PETSC_ARCH`, the type of installation used (usually arch-linux2-c-opt or linux-gnu-c-opt)
+- `PETSC_ARCH`, the type of installation used (usually arch-linux-c-opt or arch-linux-c-debug)
 
 In order to do so, it is sufficient to source the 'CDMATH' environment file. Type in you linux terminal
 - `source ~/workspace/cdmath/cdmath_install/env_CDMATH.sh`
