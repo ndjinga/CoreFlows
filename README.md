@@ -1,4 +1,4 @@
-CoreFlows (Deprecated, replaced by SOLVERLAB)
+CoreFlows (Deprecated, replaced by SOLVERLAB/CoreFlows)
 ================
 
 CoreFlows is an open source C++/Python library intended at solving PDE systems
